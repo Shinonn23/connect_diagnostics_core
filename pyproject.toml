@@ -1,8 +1,6 @@
 [project]
 name = "connect_diagnostics_core"
-authors = [
-    { name = "Siwat Sroisuwan", email = "siwat61719@gmail.com"}
-]
+authors = [{ name = "Siwat Sroisuwan", email = "siwat61719@gmail.com" }]
 description = "Custom app for Connect Diagnostics to manage and implement company-specific business logic, workflows, and processes on ERPNext."
 requires-python = ">=3.10"
 readme = "README.md"
@@ -22,17 +20,11 @@ build-backend = "flit_core.buildapi"
 [tool.ruff]
 line-length = 110
 target-version = "py310"
+exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**"]
+
 
 [tool.ruff.lint]
-select = [
-    "F",
-    "E",
-    "W",
-    "I",
-    "UP",
-    "B",
-    "RUF",
-]
+select = ["F", "E", "W", "I", "UP", "B", "RUF"]
 ignore = [
     "B017", # assertRaises(Exception) - should be more specific
     "B018", # useless expression, not assigned to anything
@@ -54,3 +46,6 @@ typing-modules = ["frappe.types.DF"]
 quote-style = "double"
 indent-style = "tab"
 docstring-code-format = true
+
+[tool.pyright]
+typeCheckingMode = "strict"

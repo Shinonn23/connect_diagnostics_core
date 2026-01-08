@@ -236,7 +236,7 @@ app_license = "bsl-1.0"
 # ]
 
 # Automatically update python controller files with type annotations for this app.
-# export_python_type_annotations = True
+export_python_type_annotations = True
 
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
@@ -247,3 +247,8 @@ app_license = "bsl-1.0"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+
+# Fixture Files
+fixtures = [
+	"Prefix Name",
+]
