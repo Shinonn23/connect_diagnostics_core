@@ -137,13 +137,13 @@ app_license = "bsl-1.0"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+
+doc_events = {
+	"Employee": {
+		"validate": "connect_diagnostics_core.api.erpnext.set_thai_employee_name",
+		"autoname": "connect_diagnostics_core.api.erpnext.generate_thai_year_autoname",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -247,5 +247,4 @@ export_python_type_annotations = True
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
-# fixtures = []
-
+# fixtures = [{"dt": "Property Setter", "filters": [["doc_type", "=", "Employee"]]}]
