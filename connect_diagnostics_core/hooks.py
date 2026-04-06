@@ -140,9 +140,12 @@ app_license = "bsl-1.0"
 
 doc_events = {
 	"Employee": {
-		"validate": "connect_diagnostics_core.api.erpnext.set_thai_employee_name",
-		"autoname": "connect_diagnostics_core.api.erpnext.generate_thai_year_autoname",
-	}
+		"validate": "connect_diagnostics_core.api.erpnext.employee.set_thai_employee_name",
+		"autoname": "connect_diagnostics_core.api.erpnext.employee.generate_thai_year_autoname",
+	},
+	"Employment Type": {
+		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate_employment_type_format",
+	},
 }
 
 # Scheduled Tasks
@@ -247,4 +250,4 @@ export_python_type_annotations = True
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
-# fixtures = [{"dt": "Property Setter", "filters": [["doc_type", "=", "Employee"]]}]
+fixtures = [{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]}]

@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Employee",
+  "enabled": 1,
+  "modified": "2026-04-06 10:46:49.414968",
+  "module": "Connect Diagnostics Core",
+  "name": "Hidden Series Field",
+  "script": "frappe.ui.form.on('Employee', {\r\n\trefresh(frm) {ทำงานเสร็จแล้ว\r\n\t\tsetTimeout(() => {\r\n\t\t\tfrm.toggle_display('naming_series', false);\r\n\t\t}, 10);\r\n\t}\r\n});",
+  "view": "Form"
+ }
+]
