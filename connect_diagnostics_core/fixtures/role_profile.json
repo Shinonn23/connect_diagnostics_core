@@ -1,0 +1,130 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:37:59.459686",
+  "name": "Super Administrator",
+  "role_profile": "Super Administrator",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:04.195819",
+  "name": "Administrator",
+  "role_profile": "Administrator",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:08.490829",
+  "name": "Management",
+  "role_profile": "Management",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:13.009114",
+  "name": "Accounting",
+  "role_profile": "Accounting",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:17.196490",
+  "name": "Warehouse/Inventory",
+  "role_profile": "Warehouse/Inventory",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:20.320691",
+  "name": "Procurement",
+  "role_profile": "Procurement",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:24.141839",
+  "name": "Regulatory Affairs",
+  "role_profile": "Regulatory Affairs",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:28.639010",
+  "name": "Marketing & ECom",
+  "role_profile": "Marketing & ECom",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:31.738273",
+  "name": "Sales & CRM",
+  "role_profile": "Sales & CRM",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:34.400238",
+  "name": "Specialist",
+  "role_profile": "Specialist",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:37.378135",
+  "name": "Service & Projects",
+  "role_profile": "Service & Projects",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:40.272959",
+  "name": "IT",
+  "role_profile": "IT",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:42.871206",
+  "name": "HR & Payroll",
+  "role_profile": "HR & Payroll",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:45.592750",
+  "name": "Lab",
+  "role_profile": "Lab",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:38:57.149567",
+  "name": "CGM",
+  "role_profile": "CGM",
+  "roles": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2026-04-06 14:39:00.121688",
+  "name": "Sales Lab",
+  "role_profile": "Sales Lab",
+  "roles": []
+ }
+]

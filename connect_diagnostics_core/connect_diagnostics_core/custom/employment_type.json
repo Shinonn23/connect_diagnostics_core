@@ -14,7 +14,7 @@
             "creation": "2026-04-06 11:28:42.782703",
             "default": null,
             "depends_on": null,
-            "description": "Defines the Employee ID autoname format for this Employment Type (for example: Full-time).\\n\\nSupported tokens:\\n- YYYY = 4-digit Buddhist year (calculated from Date of Joining)\\n- YY = last 2 digits of Buddhist year (calculated from Date of Joining)\\n- MM = 2-digit month (calculated from Date of Joining)\\n- DD = 2-digit day (calculated from Date of Joining)\\n- ### = 3-digit running sequence (auto-increment)\\n\\nRecommended format: YYMM.###\\nAlternative examples: YYYYMMDD.###, FT-YYMMDD.###\\nExample output: 6904.001, 25690406.001, FT-690406.001\\n\\nNote: If this field is empty, the system falls back to the legacy format YYMM.###",
+            "description": "Employee ID format. Use {YYYY}, {YY}, {MM}, {DD} for dates and {###} for sequence. Example: FT-{YY}{MM}.{###}",
             "docstatus": 0,
             "dt": "Employment Type",
             "fetch_from": null,
