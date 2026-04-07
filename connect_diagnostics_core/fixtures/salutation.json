@@ -1,121 +1,121 @@
 [
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:33.826446",
-  "name": "คุณ",
-  "salutation": "คุณ"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:37.865048",
-  "name": "นาย",
-  "salutation": "นาย"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:41.737920",
-  "name": "นาง",
-  "salutation": "นาง"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:45.037410",
-  "name": "นางสาว",
-  "salutation": "นางสาว"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:47.775904",
-  "name": "Mr.",
-  "salutation": "Mr."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:50.370864",
-  "name": "Mrs.",
-  "salutation": "Mrs."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:52.989703",
-  "name": "Miss.",
-  "salutation": "Miss."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:56.254475",
-  "name": "ทพญ.",
-  "salutation": "ทพญ."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:44:58.982425",
-  "name": "ทนพ.",
-  "salutation": "ทนพ."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:01.965400",
-  "name": "พ.ญ.",
-  "salutation": "พ.ญ."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:04.574424",
-  "name": "นายแพทย์",
-  "salutation": "นายแพทย์"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:07.448154",
-  "name": "ผศ.นพ.",
-  "salutation": "ผศ.นพ."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:10.138041",
-  "name": "ดร.",
-  "salutation": "ดร."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:12.667497",
-  "name": "Dr.",
-  "salutation": "Dr."
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:15.249614",
-  "name": "นาวาโท",
-  "salutation": "นาวาโท"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:17.992206",
-  "name": "พลอากาศเอก",
-  "salutation": "พลอากาศเอก"
- },
- {
-  "docstatus": 0,
-  "doctype": "Salutation",
-  "modified": "2026-04-06 14:45:20.703044",
-  "name": "พ.จ.อ.",
-  "salutation": "พ.จ.อ."
- }
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:33.826446",
+		"name": "คุณ",
+		"salutation": "คุณ"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:37.865048",
+		"name": "นาย",
+		"salutation": "นาย"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:41.737920",
+		"name": "นาง",
+		"salutation": "นาง"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:45.037410",
+		"name": "นางสาว",
+		"salutation": "นางสาว"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:47.775904",
+		"name": "Mr.",
+		"salutation": "Mr."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:50.370864",
+		"name": "Mrs.",
+		"salutation": "Mrs."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:52.989703",
+		"name": "Miss.",
+		"salutation": "Miss."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:56.254475",
+		"name": "ทพญ.",
+		"salutation": "ทพญ."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:44:58.982425",
+		"name": "ทนพ.",
+		"salutation": "ทนพ."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:01.965400",
+		"name": "พ.ญ.",
+		"salutation": "พ.ญ."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:04.574424",
+		"name": "นายแพทย์",
+		"salutation": "นายแพทย์"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:07.448154",
+		"name": "ผศ.นพ.",
+		"salutation": "ผศ.นพ."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:10.138041",
+		"name": "ดร.",
+		"salutation": "ดร."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:12.667497",
+		"name": "Dr.",
+		"salutation": "Dr."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:15.249614",
+		"name": "นาวาโท",
+		"salutation": "นาวาโท"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:17.992206",
+		"name": "พลอากาศเอก",
+		"salutation": "พลอากาศเอก"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-06 14:45:20.703044",
+		"name": "พ.จ.อ.",
+		"salutation": "พ.จ.อ."
+	}
 ]

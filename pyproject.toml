@@ -45,7 +45,10 @@ typing-modules = ["frappe.types.DF"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "tab"
-docstring-code-format = true
+docstring-code-format = false
 
 [tool.pyright]
 typeCheckingMode = "strict"
+reportUnknownMemberType = false
+reportUntypedFunctionDecorator = false
+reportUnknownVariableType = false

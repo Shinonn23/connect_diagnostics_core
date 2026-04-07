@@ -9,7 +9,10 @@
     },
     "extends": "eslint:recommended",
     "rules": {
-        "indent": "on",
+        "indent": [
+            "error",
+            "tab"
+        ],
         "brace-style": "off",
         "no-mixed-spaces-and-tabs": "off",
         "no-useless-escape": "off",
