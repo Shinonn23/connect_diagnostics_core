@@ -177,9 +177,10 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "connect_diagnostics_core.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.utilities.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
+	"frappe.core.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -252,5 +253,7 @@ export_python_type_annotations = True
 
 fixtures = [
 	{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]},
+	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Role Profile"},
+	{"doctype": "Salutation"},
 ]
