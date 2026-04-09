@@ -117,5 +117,19 @@
 		"modified": "2026-04-06 14:45:20.703044",
 		"name": "พ.จ.อ.",
 		"salutation": "พ.จ.อ."
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-07 09:34:02.098863",
+		"name": "Mr",
+		"salutation": "Mr"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Salutation",
+		"modified": "2026-04-07 09:34:02.107197",
+		"name": "Mrs",
+		"salutation": "Mrs"
 	}
 ]

@@ -7,7 +7,7 @@
 		"doctype_or_field": "DocField",
 		"field_name": "customer_type",
 		"is_system_generated": 0,
-		"modified": "2026-04-06 20:52:32.049623",
+		"modified": "2026-04-06 20:54:07.943081",
 		"module": "Connect Diagnostics Core",
 		"name": "Customer-customer_type-options",
 		"property": "options",

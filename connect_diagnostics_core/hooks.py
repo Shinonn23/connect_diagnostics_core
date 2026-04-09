@@ -8,7 +8,7 @@ app_license = "bsl-1.0"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
