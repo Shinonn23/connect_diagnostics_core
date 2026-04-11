@@ -21,7 +21,6 @@ def _apply_autoname_tokens(
 		"YY": thai_year_2,
 		"MM": thai_month,
 		"DD": thai_day,
-		"###": "###",
 	}
 
 	resolved = format_pattern
@@ -31,6 +30,10 @@ def _apply_autoname_tokens(
 	# Keep backward compatibility with legacy non-brace token format.
 	for token, value in token_values.items():
 		resolved = re.sub(token, value, resolved)
+
+	# Handle hash sequences of any length, e.g. {##} -> ##, {###} -> ###, etc.
+	# and we just leave legacy ## or ### without braces as they are.
+	resolved = re.sub(r"\{(#+)\}", r"\1", resolved)
 
 	return resolved
 

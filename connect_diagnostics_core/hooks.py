@@ -146,9 +146,9 @@ doc_events = {
 	"Employment Type": {
 		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
 	},
-	# "Contact": {
-	# 	"validate": "connect_diagnostics_core.api.frappe.contact.autoname",
-	# },
+	"Customer": {
+		"autoname": "connect_diagnostics_core.api.erpnext.customer.autoname",
+	},
 }
 
 # Scheduled Tasks
@@ -258,4 +258,5 @@ fixtures = [
 	{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Role Profile"},
+	{"doctype": "Salutation"},
 ]

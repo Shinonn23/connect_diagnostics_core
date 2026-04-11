@@ -4,7 +4,7 @@ from typing import cast
 from frappe import throw
 from frappe.model.document import Document
 
-TOKEN_PATTERN = re.compile(r"\{(?:YYYY|YY|MM|DD|###)\}|YYYY|YY|MM|DD|###")
+TOKEN_PATTERN = re.compile(r"\{(?:YYYY|YY|MM|DD|#+)\}|YYYY|YY|MM|DD|#+")
 
 
 def validate_employment_type_format(doc: Document, method: str) -> None:
@@ -23,24 +23,26 @@ def validate_employment_type_format(doc: Document, method: str) -> None:
 	if not format_pattern:
 		throw("Format is required. Example: YYMM.###")
 
-	if not re.search(r"\{###\}|###", format_pattern):
-		throw("Format must include ### or {###} for running sequence. Example: C{YY}{MM}.{###}")
+	if not re.search(r"\{#+\}|#+", format_pattern):
+		throw(
+			"Format must include # (for example #, ##, ###, or {###}) for running sequence. Example: C{YY}{MM}.{###}"
+		)
 
 	remaining = TOKEN_PATTERN.sub("", format_pattern)
 
 	if "{" in remaining or "}" in remaining:
 		throw(
-			"Unsupported token found. Supported tokens are {YYYY}, {YY}, {MM}, {DD}, {###}, and legacy YYYY, YY, MM, DD, ###."
+			"Unsupported token found. Supported tokens are {YYYY}, {YY}, {MM}, {DD}, {#...}, and legacy YYYY, YY, MM, DD, #..."
 		)
 
 	if re.search(r"[YMD#]", remaining):
 		throw(
-			"Unsupported token found. Supported tokens are {YYYY}, {YY}, {MM}, {DD}, {###}, and legacy YYYY, YY, MM, DD, ###."
+			"Unsupported token found. Supported tokens are {YYYY}, {YY}, {MM}, {DD}, {#...}, and legacy YYYY, YY, MM, DD, #..."
 		)
 
 	if not re.fullmatch(r"[A-Za-z0-9._/\\-]*", remaining):
 		throw(
-			"Format contains unsupported characters. Use letters, numbers, dot (.), dash (-), underscore (_), slash (/), and tokens {YYYY}, {YY}, {MM}, {DD}, {###} only."
+			"Format contains unsupported characters. Use letters, numbers, dot (.), dash (-), underscore (_), slash (/), and tokens {YYYY}, {YY}, {MM}, {DD}, {#...} only."
 		)
 
 
