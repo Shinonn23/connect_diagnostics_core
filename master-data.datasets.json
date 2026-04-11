@@ -1,0 +1,171 @@
+[
+	{
+		"file": "Brand.xlsx",
+		"doctype": "Brand",
+		"identityHeaders": ["Brand Name"]
+	},
+	{
+		"file": "Chart Of Accounts 2.xlsx",
+		"doctype": "Account",
+		"identityHeaders": ["Account Number"],
+		"ignoreHeaders": ["Parent Account", "Parent Account Number"],
+		"liveFilters": {
+			"company": "Connect Diagnostics"
+		}
+	},
+	{
+		"file": "Currency Exchange.xlsx",
+		"doctype": "Currency Exchange",
+		"identityHeaders": ["Date", "From Currency", "To Currency"]
+	},
+	{
+		"file": "Currency.xlsx",
+		"doctype": "Currency",
+		"identityHeaders": ["Currency Name"]
+	},
+	{
+		"file": "Customer Address.xlsx",
+		"doctype": "Address",
+		"identityHeaders": ["Address Title", "Address Line 1", "Postal Code"]
+	},
+	{
+		"file": "Customer Address - Update.xlsx",
+		"doctype": "Address",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Customer Group.xlsx",
+		"doctype": "Customer Group",
+		"identityHeaders": ["Customer Group Name"]
+	},
+	{
+		"file": "Customer.xlsx",
+		"doctype": "Customer",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Department.xlsx",
+		"doctype": "Department",
+		"identityHeaders": ["Department"]
+	},
+	{
+		"file": "Employee.xlsx",
+		"doctype": "Employee",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Item Group.xlsx",
+		"doctype": "Item Group",
+		"identityHeaders": ["Item Group Name"]
+	},
+	{
+		"file": "Item Price.xlsx",
+		"doctype": "Item Price",
+		"identityHeaders": ["Item Code", "Price List", "Supplier"],
+		"comparison": "multiset",
+		"headerFieldOverrides": {
+			"Price List": "price_list",
+			"Currency": "currency",
+			"Rate": "price_list_rate"
+		}
+	},
+	{
+		"file": "Item.xlsx",
+		"doctype": "Item",
+		"identityHeaders": ["Item Code"]
+	},
+	{
+		"file": "Manufacturer.xlsx",
+		"doctype": "Manufacturer",
+		"identityHeaders": ["Short Name"]
+	},
+	{
+		"file": "Pallets.xlsx",
+		"doctype": "Warehouse",
+		"identityHeaders": ["Warehouse Name"]
+	},
+	{
+		"file": "Product Bundle.xlsx",
+		"doctype": "Product Bundle",
+		"identityHeaders": ["Parent Item"],
+		"headerFieldOverrides": {
+			"Parent Item": "new_item_code",
+			"Item (Items)": "items.item_code"
+		}
+	},
+	{
+		"file": "Product Registration Type.xlsx",
+		"doctype": "Product Registration Type",
+		"identityHeaders": ["Product Registration Type"]
+	},
+	{
+		"file": "Product Registration.xlsx",
+		"doctype": "Product Registration",
+		"identityHeaders": ["Registration Number"]
+	},
+	{
+		"file": "Regulation Class.xlsx",
+		"doctype": "Regulation Class",
+		"identityHeaders": ["Regulation Class"]
+	},
+	{
+		"file": "Sales Person.xlsx",
+		"doctype": "Sales Person",
+		"identityHeaders": ["Sales Person Name"]
+	},
+	{
+		"file": "Shipping Condition.xlsx",
+		"doctype": "Shipping Condition",
+		"identityHeaders": ["Shipping Condition"]
+	},
+	{
+		"file": "Storage Condition.xlsx",
+		"doctype": "Storage Condition",
+		"identityHeaders": ["Storage Condition"]
+	},
+	{
+		"file": "Supplier Address.xlsx",
+		"doctype": "Address",
+		"identityHeaders": ["Address Title", "Address Line 1", "Postal Code"]
+	},
+	{
+		"file": "Supplier Address - Update.xlsx",
+		"doctype": "Address",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Supplier Contact.xlsx",
+		"doctype": "Contact",
+		"identityHeaders": ["Company Name", "Address", "Link Name (Links)"]
+	},
+	{
+		"file": "Supplier.xlsx",
+		"doctype": "Supplier",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Tax Withholding Category.xlsx",
+		"doctype": "Tax Withholding Category",
+		"identityHeaders": ["ID"]
+	},
+	{
+		"file": "Territory.xlsx",
+		"doctype": "Territory",
+		"identityHeaders": ["Territory Name"]
+	},
+	{
+		"file": "Uom.xlsx",
+		"doctype": "UOM",
+		"identityHeaders": ["new name"],
+		"caseInsensitiveIdentity": true,
+		"ignoreHeaders": ["old name"],
+		"headerFieldOverrides": {
+			"new name": "uom_name"
+		}
+	},
+	{
+		"file": "Warehouse.xlsx",
+		"doctype": "Warehouse",
+		"identityHeaders": ["Warehouse Name"]
+	}
+]

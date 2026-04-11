@@ -1,0 +1,88 @@
+[
+	{
+		"file": "Item_Groups",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Item_Groups",
+		"doctype": "Item Group",
+		"identityHeaders": ["Item Group Name"],
+		"ignoreHeaders": ["ID"]
+	},
+	{
+		"file": "UOMs",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "UOMs",
+		"doctype": "UOM",
+		"identityHeaders": ["new name"],
+		"caseInsensitiveIdentity": true,
+		"ignoreHeaders": ["old name"],
+		"headerFieldOverrides": {
+			"new name": "uom_name"
+		}
+	},
+	{
+		"file": "Brands",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Brands",
+		"doctype": "Manufacturer",
+		"identityHeaders": ["Short Name"],
+		"ignoreHeaders": ["ID", "Brand"],
+		"headerFieldOverrides": {
+			"Manufacturer": "full_name"
+		},
+		"valueTransforms": {
+			"Country": "country_alias"
+		}
+	},
+	{
+		"file": "Warehouses",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Warehouses",
+		"doctype": "Warehouse",
+		"identityHeaders": ["Warehouse Name"],
+		"ignoreHeaders": ["ID", "_source"],
+		"valueTransforms": {
+			"DKSH SLOC Code": "strip_leading_zeros",
+			"Parent Warehouse": "trim_company_suffix"
+		}
+	},
+	{
+		"file": "Items",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Items",
+		"doctype": "Item",
+		"identityHeaders": ["ID"],
+		"ignoreHeaders": [
+			"Pallet Location",
+			"Barcode",
+			"custom_country_of_manufacture",
+			"custom_generic_name",
+			"custom_qi_type",
+			"custom_pcm_code",
+			"custom_category",
+			"custom_product_group",
+			"custom_client_item_code",
+			"custom_plant_salesorg",
+			"custom_original_status",
+			"_source"
+		],
+		"headerFieldOverrides": {
+			"ID": "item_code",
+			"Description": "description",
+			"Item Name (40 Char)": "item_name",
+			"Model": "custom_model",
+			"Item Name (TH)": "custom_item_name_th",
+			"Default Unit of Measure": "stock_uom",
+			"Maintain Stock": "is_stock_item",
+			"Width": "custom_width",
+			"Height": "custom_height",
+			"Lenght": "custom_lenght",
+			"Weight": "weight_per_unit",
+			"Register Number": "custom_register_number"
+		}
+	}
+]

@@ -1,0 +1,39 @@
+{
+	"name": "connect-diagnostics-e2e",
+	"version": "1.0.0",
+	"description": "Playwright E2E tests for Connect Diagnostics ERPNext",
+	"scripts": {
+		"test": "npx playwright test --project=chromium",
+		"test:headed": "npx playwright test --project=chromium --headed",
+		"test:ui": "npx playwright test --project=chromium --ui",
+		"test:report": "npx playwright show-report",
+		"test:login": "npx playwright test e2e/01-login.spec.ts",
+		"test:master": "npx playwright test e2e/02-master-data.spec.ts",
+		"test:accounting": "npx playwright test e2e/03-accounting-stock.spec.ts",
+		"test:hr": "npx playwright test e2e/04-hr-payroll.spec.ts",
+		"test:custom": "npx playwright test e2e/05-custom-apps.spec.ts",
+		"test:validate": "npx playwright test --project=validate",
+		"test:validate:headed": "npx playwright test --project=validate --headed",
+		"test:excel": "npx playwright test e2e/master-validation.spec.ts --project=validate",
+		"test:stock-validate": "npx playwright test e2e/stock-validation.spec.ts --project=validate",
+		"test:compare": "npx playwright test --project=data-compare",
+		"test:compare:headed": "npx playwright test --project=data-compare --headed",
+		"test:master:v3": "node scripts/run-master-test.js master-data.datasets.v3.json",
+		"test:master:v3:headed": "node scripts/run-master-test.js master-data.datasets.v3.json --headed",
+		"test:stock": "node scripts/run-master-test.js master-data.datasets.stock.json",
+		"test:stock:headed": "node scripts/run-master-test.js master-data.datasets.stock.json --headed"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs",
+	"dependencies": {
+		"dotenv": "^17.2.3",
+		"xlsx": "^0.18.5"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.59.1",
+		"@types/node": "^25.6.0",
+		"typescript": "^6.0.2"
+	}
+}

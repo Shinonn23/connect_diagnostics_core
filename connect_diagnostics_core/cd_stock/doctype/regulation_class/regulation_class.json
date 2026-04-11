@@ -1,5 +1,6 @@
 {
 	"actions": [],
+	"allow_import": 1,
 	"allow_rename": 1,
 	"autoname": "field:regulation_class",
 	"creation": "2026-04-10 11:12:34.142572",
@@ -17,7 +18,7 @@
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-04-10 11:12:54.158562",
+	"modified": "2026-04-12 00:59:47.163946",
 	"modified_by": "Administrator",
 	"module": "CD Stock",
 	"name": "Regulation Class",

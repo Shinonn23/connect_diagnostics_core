@@ -1,5 +1,6 @@
 {
 	"actions": [],
+	"allow_import": 1,
 	"allow_rename": 1,
 	"autoname": "field:storage_condition",
 	"creation": "2026-04-10 10:33:15.151614",
@@ -19,7 +20,7 @@
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-04-10 10:39:19.516323",
+	"modified": "2026-04-12 00:57:31.826219",
 	"modified_by": "Administrator",
 	"module": "CD Stock",
 	"name": "Storage Condition",

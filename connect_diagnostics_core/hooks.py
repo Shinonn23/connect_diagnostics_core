@@ -8,7 +8,8 @@ app_license = "bsl-1.0"
 # Apps
 # ------------------
 
-required_apps = ["erpnext", "erpnext_thailand", "hrms"]
+# TODO: เพิ่ม erpnext_thailand กลับเมื่อได้ repo URL ที่ถูกต้อง
+required_apps = ["erpnext", "hrms"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [

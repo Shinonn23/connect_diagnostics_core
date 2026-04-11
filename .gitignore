@@ -5,3 +5,9 @@
 tags
 node_modules
 __pycache__
+auth.json
+.env
+*.xlsx
+playwright-report/
+test-results/
+data/
