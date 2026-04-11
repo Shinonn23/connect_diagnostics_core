@@ -1,5 +1,6 @@
 {
 	"actions": [],
+	"allow_import": 1,
 	"allow_rename": 1,
 	"autoname": "field:shipping_condition",
 	"creation": "2026-04-10 10:38:41.132295",
@@ -17,7 +18,7 @@
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-04-10 10:39:10.684437",
+	"modified": "2026-04-12 00:58:39.436203",
 	"modified_by": "Administrator",
 	"module": "CD Stock",
 	"name": "Shipping Condition",
