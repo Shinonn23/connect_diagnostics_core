@@ -42,3 +42,7 @@ def validate_employment_type_format(doc: Document, method: str) -> None:
 		throw(
 			"Format contains unsupported characters. Use letters, numbers, dot (.), dash (-), underscore (_), slash (/), and tokens {YYYY}, {YY}, {MM}, {DD}, {###} only."
 		)
+
+
+def validate(doc: Document, method: str):
+	validate_employment_type_format(doc, method)

@@ -140,12 +140,15 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 doc_events = {
 	"Employee": {
-		"validate": "connect_diagnostics_core.api.erpnext.employee.set_thai_employee_name",
-		"autoname": "connect_diagnostics_core.api.erpnext.employee.generate_thai_year_autoname",
+		"validate": "connect_diagnostics_core.api.erpnext.employee.validate",
+		"autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
 	},
 	"Employment Type": {
-		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate_employment_type_format",
+		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
 	},
+	# "Contact": {
+	# 	"validate": "connect_diagnostics_core.api.frappe.contact.autoname",
+	# },
 }
 
 # Scheduled Tasks
@@ -181,7 +184,7 @@ override_whitelisted_methods = {
 	"erpnext.utilities.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
 	"frappe.core.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
 }
-#
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
@@ -255,5 +258,4 @@ fixtures = [
 	{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Role Profile"},
-	{"doctype": "Salutation"},
 ]

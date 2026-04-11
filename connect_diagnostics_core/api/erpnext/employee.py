@@ -74,10 +74,10 @@ def _resolve_employee_autoname_pattern(
 	return f"{thai_year_2}{thai_month}.###"
 
 
-def generate_thai_year_autoname(doc: Employee, _method: str) -> None:
-	joining_date = getdate(doc.date_of_joining) if doc.date_of_joining else None  # pyright: ignore[reportUnknownMemberType,  reportAttributeAccessIssue, reportUnknownArgumentType]
+def autoname(doc: Employee, _method: str) -> None:
+	joining_date = getdate(doc.date_of_joining) if doc.date_of_joining else None
 	if not joining_date:
-		current_line = inspect.currentframe().f_lineno or 0  # pyright: ignore[reportOptionalMemberAccess]
+		current_line = inspect.currentframe().f_lineno or 0
 
 		throw(
 			f"Cannot generate autoname: joining date is not available. File: {__file__}, Line: {current_line}"
@@ -95,3 +95,7 @@ def generate_thai_year_autoname(doc: Employee, _method: str) -> None:
 		thai_day,
 	)
 	doc.name = make_autoname(autoname_pattern)
+
+
+def validate(doc: Employee, _method: str):
+	set_thai_employee_name(doc, _method)
