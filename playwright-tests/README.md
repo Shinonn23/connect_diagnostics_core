@@ -19,7 +19,22 @@ npm install
 npx playwright install chromium
 cp .env.example .env
 # Edit .env — set ERP_PASSWORD
+```
+
+### เตรียม Excel Master Data (สำหรับ Excel Validation เท่านั้น)
+
+```bash
+mkdir data
+# วางไฟล์ CD-ERPNext Master Data v.3*.xlsx ใน data/ folder
+```
+
+ถ้าไม่มี `data/` ระบบจะหา Excel ที่ Desktop อัตโนมัติ
+
+### รัน Tests
+
+```bash
 npm test                    # Run all functional tests (82 tests, ~1 min)
+npm run test:validate       # Excel validation (22 tests)
 ```
 
 ## NPM Scripts
@@ -102,14 +117,12 @@ EXCEL_DIR=             # Optional: override Excel search path
 │   ├── export-api-vs-excel.js # Export Dev API vs Excel → .xlsx
 │   ├── check-final.js          # COA + Item Prices deep check
 │   └── ...                     # Debug/SQL comparison scripts
-├── data/                       # Excel Master Data files (gitignored)
+├── data/                       # Excel Master Data files (gitignored) — วาง CD-ERPNext Master Data v.3*.xlsx ที่นี่
 ├── src/                        # Data Compare Engine
 └── docs/
-    ├── PROJECT-FLOW.md         # Full project flow & architecture
-    └── TEST-FLOW.md            # Detailed test flow
+    └── DOCUMENTATION.md        # Complete project documentation
 ```
 
 ## Documentation
 
-- **[docs/PROJECT-FLOW.md](docs/PROJECT-FLOW.md)** — Full architecture, flow, and analysis
-- **[docs/TEST-FLOW.md](docs/TEST-FLOW.md)** — Detailed flow of all tests
+- **[docs/DOCUMENTATION.md](docs/DOCUMENTATION.md)** — Complete project documentation (architecture, code, flows, all details)
