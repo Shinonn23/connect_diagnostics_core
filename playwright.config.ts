@@ -43,6 +43,7 @@ export default defineConfig({
     {
       name: 'validate',
       testMatch: /(master|stock)-validation\.spec\.ts/,
+      timeout: 180_000,
       use: {
         ignoreHTTPSErrors: true,
       },

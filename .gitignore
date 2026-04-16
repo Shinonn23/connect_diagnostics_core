@@ -11,3 +11,5 @@ auth.json
 playwright-report/
 test-results/
 data/
+application_default_credentials.json
+*-service-account*.json
