@@ -5,7 +5,7 @@ from typing import cast
 import frappe
 from erpnext.setup.doctype.employee.employee import Employee
 from frappe import throw
-from frappe.model.naming import make_autoname  # pyright: ignore[reportUnknownVariableType]
+from frappe.model.naming import make_autoname
 from frappe.utils import getdate
 
 
@@ -42,11 +42,11 @@ def set_thai_employee_name(doc: Employee, method: str) -> None:
 	if method != "validate":
 		return
 
-	first_name: str = cast(str, doc.get("custom_first_name_th") or "").strip()  # pyright: ignore[reportUnknownMemberType]
-	last_name: str = cast(str, doc.get("custom_last_name_th") or "").strip()  # pyright: ignore[reportUnknownMemberType]
+	first_name: str = cast(str, doc.get("custom_first_name_th") or "").strip()
+	last_name: str = cast(str, doc.get("custom_last_name_th") or "").strip()
 
 	if first_name and last_name:
-		doc.custom_full_name_th = f"{first_name} {last_name}"  # pyright: ignore[reportAttributeAccessIssue]
+		doc.custom_full_name_th = f"{first_name} {last_name}"
 
 
 def _resolve_employee_autoname_pattern(
@@ -56,12 +56,12 @@ def _resolve_employee_autoname_pattern(
 	thai_month: str,
 	thai_day: str,
 ) -> str:
-	employment_type = cast(str, doc.get("employment_type") or "").strip()  # pyright: ignore[reportUnknownMemberType]
+	employment_type = cast(str, doc.get("employment_type") or "").strip()
 
 	if employment_type:
 		custom_format = cast(
 			str,
-			frappe.db.get_value("Employment Type", employment_type, "custom_format") or "",  # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType]
+			frappe.db.get_value("Employment Type", employment_type, "custom_format") or "",
 		).strip()
 
 		if custom_format:
