@@ -11,12 +11,12 @@ def validate_employment_type_format(doc: Document, method: str) -> None:
 	if method != "validate":
 		return
 
-	format_pattern = cast(str, doc.get("custom_format") or "").strip()  # pyright: ignore[reportUnknownMemberType]
+	format_pattern = cast(str, doc.get("custom_format") or "").strip()
 
 	if not doc.is_new():
 		previous_doc = doc.get_doc_before_save()
 		if previous_doc:
-			previous_format = cast(str, previous_doc.get("custom_format") or "").strip()  # pyright: ignore[reportUnknownMemberType]
+			previous_format = cast(str, previous_doc.get("custom_format") or "").strip()
 			if previous_format != format_pattern:
 				throw("Format cannot be changed after this Employment Type is created.")
 
