@@ -35,6 +35,35 @@ This app can use GitHub Actions for CI. The following workflows are configured:
 - CI: Installs this app and runs unit tests on every push to `develop` branch.
 - Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
 
+### Data Validation
+
+เปรียบเทียบ Master Data จาก Google Sheets กับ ERPNext API แบบ field-by-field
+
+**Setup:**
+```bash
+# ติดตั้ง dependencies
+bench pip install google-api-python-client google-auth
+
+# ล็อกอิน Google (ADC)
+gcloud auth application-default login
+
+# สร้าง config Google Sheet (รันครั้งเดียว)
+python connect_diagnostics_core/tests/validation/setup_config_sheet.py
+# → จะได้ CONFIG_SHEET_ID ใส่ใน .env
+
+# ตั้งค่า .env
+GOOGLE_SHEET_ID=1P40NXIF72wm4YVLfqN0l3-W3GXLt2GVraVLY9bKZXFQ
+CONFIG_SHEET_ID=<from setup script>
+```
+
+**รัน validation:**
+```bash
+bench validate-master    # เทียบทุก sheet (17 sheets)
+bench validate-stock     # เฉพาะ stock-related (5 sheets)
+```
+
+**แก้ mapping config:** แก้ที่ Google Sheet "CD-ERPNext Validation Config" ได้เลย ไม่ต้องแก้โค้ด
+
 ### License
 
 bsl-1.0
