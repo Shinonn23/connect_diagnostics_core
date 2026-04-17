@@ -1,4 +1,4 @@
-import { COUNTRY_ALIASES, FieldMapping, SheetConfig } from './column-map';
+import { COUNTRY_ALIASES, ACCOUNT_TYPE_ALIASES, FieldMapping, SheetConfig } from './column-map';
 
 /** อธิบายความไม่ตรงกันระดับ field เดียวระหว่างค่า Excel และ API */
 export interface FieldDiff {
@@ -80,7 +80,7 @@ function compareValues(
   const normAp = normalize(apiVal);
 
   if (normEx === '' && normAp === '') return true;
-  if (normEx === '' || normAp === '') return normEx === normAp;
+  if (!mapping.accountTypeAlias && (normEx === '' || normAp === '')) return normEx === normAp;
 
   if (mapping.booleanField) {
     const exBool = toBool(excelVal);
@@ -93,6 +93,21 @@ function compareValues(
     if (aliases) {
       return aliases.includes(normEx) && aliases.includes(normAp);
     }
+  }
+
+  if (mapping.accountTypeAlias) {
+    const aliases = ACCOUNT_TYPE_ALIASES[normEx] || ACCOUNT_TYPE_ALIASES[normAp];
+    if (aliases) {
+      return aliases.includes(normEx) && aliases.includes(normAp);
+    }
+  }
+
+  if (mapping.fuzzyMatch === 'account-type') {
+    const aliases = ACCOUNT_TYPE_ALIASES[normEx] || ACCOUNT_TYPE_ALIASES[normAp];
+    if (aliases) {
+      return aliases.includes(normEx) && aliases.includes(normAp);
+    }
+    return normEx === normAp;
   }
 
   if (mapping.fuzzyMatch === 'strip-cd') {

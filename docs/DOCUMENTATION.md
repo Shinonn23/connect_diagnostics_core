@@ -30,15 +30,11 @@ connect_diagnostics_core/                    ← repo (Python Frappe app + E2E t
 │   ├── frappe-client.ts                     ← Standalone API client
 │   ├── validator.ts                         ← Sheet vs API field-by-field validation engine
 │   ├── column-map.ts                        ← Sheet → field mapping (17 sheets)
-│   ├── excel-reader.ts                      ← อ่าน Google Sheets API (Service Account / ADC)
+│   ├── sheets-reader.ts                      ← อ่าน Google Sheets API (Service Account / ADC)
 │   └── comparator.ts                        ← Server vs Server comparison
 │
 ├── scripts/                                 ← Standalone scripts
 │   ├── gsheets-reader.js                    ← Google Sheets reader (standalone, ใช้ googleapis + ADC)
-│   ├── export-api-vs-excel.js               ← Export API vs data → .xlsx
-│   ├── export-detailed-report.js            ← Export detailed validation report → .xlsx
-│   ├── export-results.js                    ← Export validation results
-│   ├── check-final.js                       ← COA + Item Prices deep check
 │   ├── run-master-test.js                   ← Data comparison runner
 │   ├── compare.ts                           ← Core comparison engine
 │   ├── datasets.ts                          ← Dataset config loader
@@ -85,7 +81,7 @@ See `README.md` for full command list.
 | `lib/frappe-client.ts` | Standalone API client (login, fetch docs) |
 | `lib/validator.ts` | Sheet vs API field-by-field validation engine |
 | `lib/column-map.ts` | Sheet-to-field mapping configs (17 sheets) |
-| `lib/excel-reader.ts` | อ่าน Google Sheets API (Service Account / ADC) |
+| `lib/sheets-reader.ts` | อ่าน Google Sheets API (Service Account / ADC) |
 | `lib/comparator.ts` | Server vs server comparison |
 | `scripts/gsheets-reader.js` | Standalone Google Sheets reader |
 
@@ -141,7 +137,7 @@ See `README.md` for full command list.
 - ดึง Master Data จาก **Google Sheets** ผ่าน Google Sheets API
 - ใช้ **Application Default Credentials (ADC)** ผ่าน `gcloud auth application-default login`
 - รองรับ **Service Account key** ผ่าน `GOOGLE_APPLICATION_CREDENTIALS` env var
-- `lib/excel-reader.ts` อ่านจาก Google Sheets โดยตรง (ไม่ต้องใช้ไฟล์ Excel ในเครื่อง)
+- `lib/sheets-reader.ts` อ่านจาก Google Sheets โดยตรง (ไม่ต้องใช้ไฟล์ Excel ในเครื่อง)
 
 ### Auth Methods
 
@@ -153,7 +149,7 @@ See `README.md` for full command list.
 ### Flow ปัจจุบัน
 
 ```
-Google Sheet → lib/excel-reader.ts (loadGoogleSheets) → SheetData
+Google Sheet → lib/sheets-reader.ts (loadGoogleSheets) → SheetData
   → validate.fixture.ts → test specs → validator.ts → compare with ERPNext API
 ```
 

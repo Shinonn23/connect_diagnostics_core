@@ -1,6 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import { FrappeClient } from '../lib/frappe-client';
-import { loadGoogleSheets, SheetData } from '../lib/excel-reader';
+import { loadGoogleSheets, SheetData } from '../lib/sheets-reader';
 
 const BASE_URL = process.env.BASE_URL || 'https://dev.connectdiagnostics.nomeaparadigm.com';
 const ADMIN_USER = process.env.ERP_USERNAME || 'Administrator';

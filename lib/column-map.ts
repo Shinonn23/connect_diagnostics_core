@@ -3,9 +3,10 @@
   excel: string | string[];
   api: string;
   ignoreCase?: boolean;
-  fuzzyMatch?: 'strip-cd' | 'strip-parent' | 'strip-company-suffix' | 'strip-tax-suffix';
+  fuzzyMatch?: 'strip-cd' | 'strip-parent' | 'strip-company-suffix' | 'strip-tax-suffix' | 'account-type';
   booleanField?: boolean;
   countryAlias?: boolean;
+  accountTypeAlias?: boolean;
   isFullName?: boolean;
   firstNameOnly?: boolean;
   skipWhen?: (apiRec: Record<string, any>) => boolean;
@@ -209,7 +210,7 @@ export const SHEET_CONFIGS: SheetConfig[] = [
       { excel: 'Account Name', api: 'account_name' },
       { excel: 'Root Type', api: 'root_type' },
       { excel: 'Is Group', api: 'is_group', booleanField: true },
-      { excel: 'Account Type', api: 'account_type' },
+      { excel: 'Account Type', api: 'account_type', fuzzyMatch: 'account-type', accountTypeAlias: true },
       { excel: 'Company', api: 'company' },
     ],
   },
@@ -256,4 +257,31 @@ export const SHEET_CONFIGS: SheetConfig[] = [
 export const COUNTRY_ALIASES: Record<string, string[]> = {
   'South Korea': ['South Korea', 'Korea, Republic of', 'Republic of Korea'],
   'Korea, Republic of': ['South Korea', 'Korea, Republic of', 'Republic of Korea'],
+};
+
+/** การแมปชื่อ Account Type จาก Google Sheet (ชื่อสั้น) ไปยัง ERPNext API enum values (ชื่อเต็ม) สำหรับ fuzzy matching */
+export const ACCOUNT_TYPE_ALIASES: Record<string, string[]> = {
+  'Expense': ['Expense', 'Expense Account', 'Indirect Expense', 'Depreciation'],
+  'Expense Account': ['Expense', 'Expense Account', 'Indirect Expense', 'Depreciation'],
+  'Indirect Expense': ['Expense', 'Expense Account', 'Indirect Expense', 'Depreciation'],
+  'Current Asset': ['Current Asset', 'Bank', 'Cash', 'Receivable', 'Stock Asset', ''],
+  'Accrued Expenses': ['Accrued Expenses', 'Payable'],
+  'Payable': ['Accrued Expenses', 'Payable'],
+  'Depreciation': ['Depreciation', 'Expense', 'Expense Account'],
+  'Income Account': ['Income Account', 'Income', 'Direct Income', 'Indirect Income'],
+  'Income': ['Income Account', 'Income', 'Direct Income', 'Indirect Income'],
+  'Direct Income': ['Income Account', 'Income', 'Direct Income', 'Indirect Income'],
+  'Indirect Income': ['Income Account', 'Income', 'Direct Income', 'Indirect Income'],
+  'Fixed Asset': ['Fixed Asset', 'Capital Stock', ''],
+  'Cost of Goods Sold': ['Cost of Goods Sold', 'COGS'],
+  'COGS': ['Cost of Goods Sold', 'COGS'],
+  'Receivable': ['Receivable', 'Current Asset', ''],
+  'Stock Asset': ['Stock Asset', 'Current Asset', ''],
+  'Cash': ['Cash', 'Current Asset', ''],
+  'Bank': ['Bank', 'Current Asset', ''],
+  'Equity': ['Equity', ''],
+  'Chargeable': ['Chargeable', ''],
+  'Tax': ['Tax', ''],
+  'Round Off': ['Round Off', ''],
+  'Write Off': ['Write Off', ''],
 };

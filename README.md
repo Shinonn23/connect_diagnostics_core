@@ -37,7 +37,7 @@ This app can use GitHub Actions for CI. The following workflows are configured:
 
 ### E2E Testing (Playwright)
 
-Automated E2E test suite for Connect Diagnostics ERPNext — functional testing, Excel data validation, and export scripts.
+Automated E2E test suite for Connect Diagnostics ERPNext — functional testing, Google Sheets data validation, and export scripts.
 
 **Target:** `https://dev.connectdiagnostics.nomeaparadigm.com`
 
@@ -50,18 +50,16 @@ cp .env.example .env
 # Edit .env — set ERP_PASSWORD
 ```
 
-#### เตรียม Excel Master Data (สำหรับ Excel Validation เท่านั้น)
+#### Google Sheets Auth (ต้องทำครั้งเดียว)
 
 ```bash
-mkdir data
-# วางไฟล์ CD-ERPNext Master Data v.3*.xlsx ใน data/ folder
+# ติดตั้ง gcloud CLI แล้วรัน
+gcloud auth application-default login --scopes="https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/spreadsheets.readonly" --client-id-file=<path-to-desktop-oauth-client.json>
 ```
-
-ถ้าไม่มี `data/` ระบบจะหา Excel ที่ Desktop อัตโนมัติ
 
 #### NPM Scripts
 
-**Functional Tests (82 tests) — ไม่ต้องมีไฟล์ Excel**
+**Functional Tests (52 tests) — ไม่ต้องมี Google Auth**
 
 ```bash
 npm test                  # Run all functional tests
@@ -73,19 +71,20 @@ npm run test:hr           # 04 - HR & Payroll only
 npm run test:custom       # 05 - Custom Apps + Data Integrity only
 ```
 
-**Excel Validation (22 tests) — ต้องมี Excel file ใน data/ หรือ Desktop**
+**Google Sheets Validation (22 tests) — ต้องมี Google Auth**
 
 ```bash
-npm run test:validate         # All validation tests (15 + 5)
-npm run test:excel            # 15 master sheets only
+npm run test:validate         # All validation tests (17 + 5)
+npm run test:excel            # 17 master sheets only
 npm run test:stock-validate   # 5 stock sheets only
 ```
 
-**Export Scripts — ส่งออกผลเป็น Excel**
+**Standalone Scripts**
 
 ```bash
-node scripts/export-api-vs-excel.js    # Export Dev API vs Excel → .xlsx
-node scripts/check-final.js            # COA + Item Prices deep analysis
+node scripts/gsheets-reader.js         # Test Google Sheets connection
+node scripts/export-detailed-report.js  # Export detailed validation → .xlsx
+node scripts/export-api-vs-excel.js     # Export Dev API vs Sheet → .xlsx
 ```
 
 #### Project Structure
@@ -95,24 +94,23 @@ node scripts/check-final.js            # COA + Item Prices deep analysis
 │   ├── auth.setup.ts
 │   ├── 01-login.spec.ts          # 8 tests
 │   ├── 02-master-data.spec.ts    # 20 tests
-│   ├── 03-accounting-stock.spec.ts # 16 tests
-│   ├── 04-hr-payroll.spec.ts     # 14 tests
+│   ├── 03-accounting-stock.spec.ts # 6 tests
+│   ├── 04-hr-payroll.spec.ts     # 6 tests
 │   ├── 05-custom-apps.spec.ts    # 12 tests
-│   ├── master-validation.spec.ts # 15 tests
-│   ├── stock-validation.spec.ts  # 5 tests
+│   ├── master-validation.spec.ts # 17 tests (Google Sheets vs API)
+│   ├── stock-validation.spec.ts  # 5 tests (Google Sheets vs API)
 │   └── validate.fixture.ts
 ├── lib/                          # Data processing modules
+│   ├── sheets-reader.ts          # Google Sheets API reader (ADC / Service Account)
 │   ├── frappe-api.ts             # API helper (for functional tests)
 │   ├── frappe-client.ts          # Standalone API client
-│   ├── validator.ts              # Excel vs API validation engine
-│   ├── column-map.ts             # Sheet field mappings
-│   ├── excel-reader.ts           # Read Excel from data/ or Desktop
+│   ├── validator.ts              # Sheet vs API validation engine
+│   ├── column-map.ts             # Sheet field mappings + aliases
 │   └── comparator.ts             # Server vs Server comparison
 ├── scripts/                      # Standalone scripts
-│   ├── export-api-vs-excel.js    # Export Dev API vs Excel → .xlsx
-│   ├── check-final.js            # COA + Item Prices deep check
+│   ├── gsheets-reader.js         # Google Sheets reader (standalone)
+│   ├── export-detailed-report.js # Export validation → .xlsx
 │   └── ...
-├── data/                         # Excel Master Data files (gitignored)
 ├── docs/
 │   └── DOCUMENTATION.md          # Complete project documentation
 ├── playwright.config.ts

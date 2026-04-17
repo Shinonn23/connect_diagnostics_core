@@ -1,5 +1,5 @@
 import { test, expect } from './validate.fixture';
-import { getSheet } from '../lib/excel-reader';
+import { getSheet } from '../lib/sheets-reader';
 import { SHEET_CONFIGS, SheetConfig } from '../lib/column-map';
 import { validateSheet, printResult, printSummary, ValidationResult } from '../lib/validator';
 
