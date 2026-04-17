@@ -1,0 +1,628 @@
+[
+	{
+		"file": "Countries",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Countries",
+		"doctype": "Country",
+		"identityHeaders": ["Country Name"],
+		"ignoreHeaders": ["Country Code"],
+		"valueTransforms": {
+			"Country Name": "country_alias"
+		}
+	},
+	{
+		"file": "Currencies",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Currencies",
+		"doctype": "Currency",
+		"identityHeaders": ["currency_code"],
+		"ignoreHeaders": ["currency_name", "Currency Name", "Enabled"],
+		"headerFieldOverrides": {
+			"currency_code": "currency_name",
+			"currency_symbol": "symbol",
+			"fraction_name": "fraction"
+		}
+	},
+	{
+		"file": "Exchange_Rates",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Exchange_Rates",
+		"doctype": "Currency Exchange",
+		"identityHeaders": ["Date", "From Currency", "To Currency"],
+		"ignoreHeaders": [
+			"rate_date",
+			"from_currency",
+			"to_currency",
+			"exchange_rate",
+			"for_buying",
+			"for_selling",
+			"remarks"
+		],
+		"headerFieldOverrides": {
+			"Remark": "custom_remark"
+		}
+	},
+	{
+		"file": "Companies",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Companies",
+		"doctype": "Company",
+		"identityHeaders": ["Company"],
+		"ignoreHeaders": [
+			"CompanyId",
+			"Default Bank Account",
+			"Address Type",
+			"Address Line 1",
+			"Postal Code",
+			"provinceName",
+			"districtName",
+			"subDistrictName",
+			"City/Town",
+			"State/Province",
+			"Preferred Billing Address",
+			"Preferred Shipping Address",
+			"Default Income Account",
+			"Default Cost of Goods Sold Account",
+			"Default Cash Account",
+			"Default Receivable Account",
+			"Default Payable Account",
+			"Round Off Account",
+			"Write Off Account",
+			"Default Inventory Account",
+			"Stock Adjustment Account"
+		],
+		"headerFieldOverrides": {
+			"Default Currency": "default_currency",
+			"Default Income Account (Standard)": "default_income_account",
+			"Default Cost of Goods Sold Account (Standard)": "default_expense_account",
+			"Default Receivable Account (Standard)": "default_receivable_account",
+			"Default Payable Account (Standard)": "default_payable_account",
+			"Round Off Account (Standard)": "round_off_account"
+		}
+	},
+	{
+		"file": "Companies Address",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Companies",
+		"doctype": "Address",
+		"identityHeaders": ["Company", "Address Line 1", "Postal Code"],
+		"ignoreHeaders": [
+			"CompanyId",
+			"Tax ID",
+			"Abbr",
+			"Default Currency",
+			"Default Bank Account",
+			"Phone No",
+			"Email",
+			"Domain",
+			"Is Group",
+			"Parent Company",
+			"City/Town",
+			"State/Province",
+			"Default Income Account",
+			"Default Income Account (Standard)",
+			"Default Cost of Goods Sold Account",
+			"Default Cost of Goods Sold Account (Standard)",
+			"Default Cash Account",
+			"Default Receivable Account",
+			"Default Receivable Account (Standard)",
+			"Default Payable Account",
+			"Default Payable Account (Standard)",
+			"Round Off Account",
+			"Round Off Account (Standard)",
+			"Write Off Account",
+			"Enable Perpetual Inventory",
+			"Default Inventory Account",
+			"Stock Adjustment Account"
+		],
+		"headerFieldOverrides": {
+			"Company": "address_title",
+			"provinceName": "state",
+			"districtName": "county",
+			"subDistrictName": "city"
+		}
+	},
+	{
+		"file": "Role_Profiles",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Role_Profiles",
+		"doctype": "Role Profile",
+		"identityHeaders": ["Role Name"],
+		"ignoreHeaders": ["Role ID"]
+	},
+	{
+		"file": "Departments",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Departments",
+		"doctype": "Department",
+		"identityHeaders": ["Department Name"],
+		"ignoreHeaders": [
+			"Department ID",
+			"Parent Department",
+			"Owner",
+			"2nd Approval",
+			"Staff"
+		],
+		"headerFieldOverrides": {
+			"Department Name": "department_name"
+		}
+	},
+	{
+		"file": "Salutations",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Salutations",
+		"doctype": "Salutation",
+		"identityHeaders": ["Salutation"],
+		"ignoreHeaders": ["ID", "Salutation EN"]
+	},
+	{
+		"file": "Territories",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Territories",
+		"doctype": "Territory",
+		"identityHeaders": ["Territory Name"],
+		"ignoreHeaders": [
+			"ID",
+			"Territory",
+			"Enabled",
+			"Staff",
+			"Employee ID",
+			"Sales Person Name"
+		],
+		"headerFieldOverrides": {
+			"Territory Name": "territory_name",
+			"Staff No Salu.": "territory_manager"
+		}
+	},
+	{
+		"file": "Sales Persons",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Territories",
+		"doctype": "Sales Person",
+		"identityHeaders": ["Staff No Salu."],
+		"ignoreHeaders": [
+			"ID",
+			"Territory",
+			"Is Group",
+			"Enabled",
+			"Staff",
+			"Territory Name",
+			"Sales Person Name",
+			"Employee ID"
+		],
+		"headerFieldOverrides": {
+			"Staff No Salu.": "sales_person_name"
+		}
+	},
+	{
+		"file": "Employees",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Employees",
+		"doctype": "Employee",
+		"identityHeaders": ["EmployeeID"],
+		"ignoreHeaders": ["DepartmentID", "DepartmentName", "Picture"],
+		"headerFieldOverrides": {
+			"EmployeeID": "name",
+			"EmployeeSalutationEN": "salutation",
+			"EmployeeNameEN": "first_name",
+			"EmployeeSurnameEN": "last_name",
+			"EmployeeSalutationTH": "custom_salutation_th",
+			"EmployeeNameTH": "custom_first_name_th",
+			"EmployeeSurnameTH": "custom_last_name_th",
+			"SecondaryEmail": "personal_email",
+			"Sub Department": "custom_sub_department_assignment.sub_department"
+		},
+		"valueTransforms": {
+			"Department": "trim_company_suffix",
+			"Sub Department": "trim_company_suffix"
+		}
+	},
+	{
+		"file": "Employment Type",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Employment Type",
+		"doctype": "Employment Type",
+		"identityHeaders": ["Employment Type"]
+	},
+	{
+		"file": "Customer_Groups",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Customer_Groups",
+		"doctype": "Customer Group",
+		"identityHeaders": ["Customer Group Name"],
+		"ignoreHeaders": ["ID"]
+	},
+	{
+		"file": "Supplier_Groups",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Supplier_Groups",
+		"doctype": "Supplier Group",
+		"identityHeaders": ["Supplier Group"],
+		"ignoreHeaders": ["ID"],
+		"headerFieldOverrides": {
+			"Supplier Group": "supplier_group_name"
+		}
+	},
+	{
+		"file": "Brands",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Brands",
+		"doctype": "Manufacturer",
+		"identityHeaders": ["Short Name"],
+		"ignoreHeaders": ["ID", "Brand"],
+		"headerFieldOverrides": {
+			"Manufacturer": "full_name"
+		},
+		"valueTransforms": {
+			"Country": "country_alias"
+		}
+	},
+	{
+		"file": "Item_Groups",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Item_Groups",
+		"doctype": "Item Group",
+		"identityHeaders": ["Item Group Name"],
+		"ignoreHeaders": ["ID"]
+	},
+	{
+		"file": "UOMs",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "UOMs",
+		"doctype": "UOM",
+		"identityHeaders": ["new name"],
+		"caseInsensitiveIdentity": true,
+		"ignoreHeaders": ["old name"],
+		"headerFieldOverrides": {
+			"new name": "uom_name"
+		}
+	},
+	{
+		"file": "Warehouses",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Warehouses",
+		"doctype": "Warehouse",
+		"identityHeaders": ["Warehouse Name"],
+		"ignoreHeaders": ["ID", "_source"],
+		"valueTransforms": {
+			"DKSH SLOC Code": "strip_leading_zeros",
+			"Parent Warehouse": "trim_company_suffix"
+		}
+	},
+	{
+		"file": "Pallets",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Pallets",
+		"doctype": "Warehouse",
+		"identityHeaders": ["Pallet Location"],
+		"headerFieldOverrides": {
+			"Pallet Location": "warehouse_name",
+			"Warehouse": "parent_warehouse"
+		},
+		"valueTransforms": {
+			"Warehouse": "trim_company_suffix"
+		}
+	},
+	{
+		"file": "Customers",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Customers",
+		"doctype": "Customer",
+		"identityHeaders": ["ID"],
+		"ignoreHeaders": [
+			"Address Type",
+			"Shipto Code",
+			"Shipto Name (TH)",
+			"Address Line 1",
+			"Postal Code",
+			"Province_EN",
+			"Province",
+			"District",
+			"Sub District",
+			"_source",
+			"Region",
+			"Mobile No",
+			"Tax ID",
+			"Branch Code",
+			"Customer Type"
+		],
+		"headerFieldOverrides": {
+			"ID": "name",
+			"CD ID": "custom_cd_customer_code",
+			"Customer Name (TH)": "custom_customer_name_th"
+		},
+		"valueTransforms": {
+			"Customer Name": "collapse_whitespace",
+			"Customer Name (TH)": "collapse_whitespace"
+		}
+	},
+	{
+		"file": "Customer Addresses",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Customers",
+		"doctype": "Address",
+		"identityHeaders": ["Customer Name", "Address Line 1", "Postal Code"],
+		"requiredHeaders": ["Address Line 1"],
+		"ignoreHeaders": [
+			"ID",
+			"CD ID",
+			"DKSH Customer Code",
+			"Customer Name (TH)",
+			"Customer Type",
+			"Customer Group",
+			"Branch Code",
+			"Tax ID",
+			"Mobile No",
+			"Region",
+			"Territory",
+			"Shipto Code",
+			"Shipto Name (TH)",
+			"Province_EN",
+			"_source"
+		],
+		"headerFieldOverrides": {
+			"Customer Name": "address_title",
+			"Province": "state",
+			"District": "county",
+			"Sub District": "city"
+		},
+		"valueTransforms": {
+			"Customer Name": "collapse_whitespace",
+			"Province": "dash_to_null",
+			"District": "dash_to_null",
+			"Sub District": "dash_to_null"
+		}
+	},
+	{
+		"file": "Suppliers",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Suppliers",
+		"doctype": "Supplier",
+		"identityHeaders": ["CD ID"],
+		"ignoreHeaders": [
+			"Address",
+			"Address Type",
+			"Address Line 1",
+			"Postal Code",
+			"Province_EN",
+			"Province",
+			"District",
+			"Sub District",
+			"_source",
+			"Tax ID",
+			"Branch Code",
+			"custom_dksh_principal_code"
+		],
+		"headerFieldOverrides": {
+			"CD ID": "name",
+			"Supplier Name (TH)": "custom_supplier_name_th"
+		}
+	},
+	{
+		"file": "Supplier Addresses",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Suppliers",
+		"doctype": "Address",
+		"identityHeaders": ["Supplier Name", "Address Line 1", "Postal Code"],
+		"requiredHeaders": ["Address Line 1"],
+		"ignoreHeaders": [
+			"CD ID",
+			"DKSH Supplier Code",
+			"Supplier Name (TH)",
+			"Supplier Type",
+			"Supplier Group",
+			"Tax ID",
+			"Branch Code",
+			"custom_dksh_principal_code",
+			"Address",
+			"Province_EN",
+			"_source"
+		],
+		"headerFieldOverrides": {
+			"Supplier Name": "address_title",
+			"Province": "state",
+			"District": "county",
+			"Sub District": "city"
+		},
+		"valueTransforms": {
+			"Province": "dash_to_null",
+			"District": "dash_to_null",
+			"Sub District": "dash_to_null"
+		}
+	},
+	{
+		"file": "Supplier_Contacts",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Supplier_Contacts",
+		"doctype": "Contact",
+		"identityHeaders": ["CD ID", "Contact Name"],
+		"ignoreHeaders": [
+			"Supplier Name",
+			"Supplier Name (TH)",
+			"Supplier Type",
+			"Supplier Group",
+			"Country",
+			"Tax ID",
+			"Address",
+			"Address Line 1",
+			"Postal Code",
+			"Province_EN",
+			"Province",
+			"District",
+			"Sub District",
+			"_source"
+		],
+		"headerFieldOverrides": {
+			"CD ID": "links.link_name",
+			"Link Document Type (Links)": "links.link_doctype",
+			"Contact Name": "full_name",
+			"Contact Email": "email_ids.email_id",
+			"Contact Phone": "phone_nos.phone",
+			"Other Contacts": "custom_other_contacts"
+		},
+		"splitHeaders": {
+			"Contact Email": ";",
+			"Contact Phone": ";"
+		},
+		"valueTransforms": {
+			"Contact Phone": "phone_digits"
+		}
+	},
+	{
+		"file": "Items",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Items",
+		"doctype": "Item",
+		"identityHeaders": ["ID"],
+		"ignoreHeaders": [
+			"Pallet Location",
+			"Barcode",
+			"custom_country_of_manufacture",
+			"custom_generic_name",
+			"custom_qi_type",
+			"custom_pcm_code",
+			"custom_category",
+			"custom_product_group",
+			"custom_client_item_code",
+			"custom_plant_salesorg",
+			"custom_original_status",
+			"_source"
+		],
+		"headerFieldOverrides": {
+			"ID": "item_code",
+			"Description": "description",
+			"Item Name (40 Char)": "item_name",
+			"Model": "custom_model",
+			"Item Name (TH)": "custom_item_name_th",
+			"Default Unit of Measure": "stock_uom",
+			"Maintain Stock": "is_stock_item",
+			"Width": "custom_width",
+			"Height": "custom_height",
+			"Lenght": "custom_lenght",
+			"Weight": "weight_per_unit",
+			"Register Number": "custom_register_number"
+		}
+	},
+	{
+		"file": "Product Bundle",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Product Bundle",
+		"doctype": "Product Bundle",
+		"identityHeaders": ["Parent Item Code"],
+		"ignoreHeaders": [
+			"CD ID",
+			"Parent Item",
+			"Item ID",
+			"ไม่ต้องนำเข้า Column นี้",
+			"has in item"
+		],
+		"headerFieldOverrides": {
+			"Parent Item Code": "new_item_code",
+			"ID": "items.item_code",
+			"Item": "items.description",
+			"Qty": "items.qty"
+		}
+	},
+	{
+		"file": "Item_Prices",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Item_Prices",
+		"doctype": "Item Price",
+		"identityHeaders": [
+			"Item Code",
+			"Price List",
+			"Supplier",
+			"UOM",
+			"Valid From",
+			"Valid Upto"
+		],
+		"comparison": "multiset",
+		"headerFieldOverrides": {
+			"Price List": "price_list",
+			"Price List Rate": "price_list_rate",
+			"custom_tax_note": "note"
+		}
+	},
+	{
+		"file": "Accounts New",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Accounts New",
+		"doctype": "Account",
+		"identityHeaders": ["Account Number"],
+		"liveFilters": {
+			"company": "Connect Diagnostics"
+		},
+		"ignoreHeaders": [
+			"Company",
+			"Parent Account",
+			"Account Type OLD",
+			"Currency"
+		],
+		"headerFieldOverrides": {
+			"Account Name TH": "custom_account_name_th",
+			"Sub Account Type": "custom_sub_account_type",
+			"Account Type TH": "custom_account_type_th"
+		},
+		"valueTransforms": {
+			"Report Type": "report_type_alias"
+		}
+	},
+	{
+		"file": "Item_Tax_Templates",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Item_Tax_Templates",
+		"doctype": "Item Tax Template",
+		"identityHeaders": ["Company", "Tax Rate (Tax Rates)"],
+		"ignoreHeaders": ["ID", "ID (Tax Rates)"],
+		"headerFieldOverrides": {
+			"Tax (Tax Rates)": "taxes.tax_type",
+			"Tax Rate (Tax Rates)": "taxes.tax_rate"
+		}
+	},
+	{
+		"file": "Tax_Withholding_Categories",
+		"source": "master-data-v3.xlsx",
+		"format": "xlsx",
+		"worksheet": "Tax_Withholding_Categories",
+		"doctype": "Tax Withholding Category",
+		"identityHeaders": ["Category Name"],
+		"ignoreHeaders": ["ID", "ID (Rates)", "ID (Accounts)"],
+		"headerFieldOverrides": {
+			"From Date (Rates)": "rates.from_date",
+			"Tax Withholding Rate (Rates)": "rates.tax_withholding_rate",
+			"To Date (Rates)": "rates.to_date",
+			"Single Transaction Threshold (Rates)": "rates.single_threshold",
+			"Company (Accounts)": "accounts.company",
+			"Dummy Account": "accounts.account"
+		}
+	}
+]

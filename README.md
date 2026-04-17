@@ -35,6 +35,20 @@ This app can use GitHub Actions for CI. The following workflows are configured:
 - CI: Installs this app and runs unit tests on every push to `develop` branch.
 - Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
 
+### E2E Testing (Playwright)
+
+Automated E2E test suite — functional testing and Google Sheets master data validation.
+
+```bash
+cd e2e-tests
+npm install
+npx playwright install chromium
+cp .env.example .env   # set ERP_PASSWORD
+npx playwright test --project=validate --reporter=list
+```
+
+See **[e2e-tests/README.md](e2e-tests/)** for full documentation.
+
 ### License
 
 bsl-1.0
