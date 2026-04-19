@@ -78,8 +78,10 @@ def _resolve_employee_autoname_pattern(
 
 def autoname(doc: Employee, _method: str) -> None:
 	joining_date = (
-		getdate(doc.date_of_joining) if doc.date_of_joining else None
-	)  # ty:ignore[unresolved-attribute]
+		getdate(doc.date_of_joining)  # ty:ignore[unresolved-attribute] - runtime-injected attribute (hrms)
+		if doc.date_of_joining  # ty:ignore[unresolved-attribute] - runtime-injected attribute (hrms)
+		else None
+	)
 	if not joining_date:
 		throw("Cannot generate autoname: joining date is not available.")
 		return
