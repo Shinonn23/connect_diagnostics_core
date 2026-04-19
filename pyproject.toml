@@ -45,10 +45,9 @@ typing-modules = ["frappe.types.DF"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "tab"
-docstring-code-format = false
+docstring-code-format = true
 
-[tool.pyright]
-typeCheckingMode = "strict"
-reportUnknownMemberType = false
-reportUntypedFunctionDecorator = false
-reportUnknownVariableType = false
+
+[tool.ty]
+environment.python = "../../env/bin/python"
+src.exclude = ["typings"]

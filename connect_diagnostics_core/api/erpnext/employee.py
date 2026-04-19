@@ -1,4 +1,3 @@
-import inspect
 import re
 from typing import cast
 
@@ -46,7 +45,7 @@ def set_thai_employee_name(doc: Employee, method: str) -> None:
 	last_name: str = cast(str, doc.get("custom_last_name_th") or "").strip()
 
 	if first_name and last_name:
-		doc.custom_full_name_th = f"{first_name} {last_name}"
+		doc.custom_full_name_th = f"{first_name} {last_name}"  # ty: ignore[unresolved-attribute] - runtime-injected attribute (employee.json)
 
 
 def _resolve_employee_autoname_pattern(
@@ -78,13 +77,11 @@ def _resolve_employee_autoname_pattern(
 
 
 def autoname(doc: Employee, _method: str) -> None:
-	joining_date = getdate(doc.date_of_joining) if doc.date_of_joining else None
+	joining_date = (
+		getdate(doc.date_of_joining) if doc.date_of_joining else None
+	)  # ty:ignore[unresolved-attribute]
 	if not joining_date:
-		current_line = inspect.currentframe().f_lineno or 0
-
-		throw(
-			f"Cannot generate autoname: joining date is not available. File: {__file__}, Line: {current_line}"
-		)
+		throw("Cannot generate autoname: joining date is not available.")
 		return
 	thai_year_4: str = str(joining_date.year + 543)
 	thai_year_2: str = thai_year_4[-2:]
