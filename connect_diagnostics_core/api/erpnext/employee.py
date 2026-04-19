@@ -3,7 +3,7 @@ from typing import cast
 
 import frappe
 from erpnext.setup.doctype.employee.employee import Employee
-from frappe import throw
+from frappe import _, throw
 from frappe.model.naming import make_autoname
 from frappe.utils import getdate
 
@@ -83,7 +83,7 @@ def autoname(doc: Employee, _method: str) -> None:
 		else None
 	)
 	if not joining_date:
-		throw("Cannot generate autoname: joining date is not available.")
+		throw(_("Cannot generate autoname: joining date is not available."))
 		return
 	thai_year_4: str = str(joining_date.year + 543)
 	thai_year_2: str = thai_year_4[-2:]
