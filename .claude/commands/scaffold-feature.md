@@ -1,0 +1,162 @@
+Scaffold a complete new feature for the project. Ask the user for these details before generating:
+
+1. **Feature description** — what does this feature do? (e.g., "Product registration with Thai FDA tracking")
+2. **DocType name** — if a new doctype is needed (e.g., "Product Registration"). Say "none" if working with existing doctypes.
+3. **Hook types** — which hooks to implement? Choose one or more:
+    - `autoname` — Custom naming logic
+    - `validate` — Validation before save
+    - `before_insert` — Logic before insert
+    - `on_update` — After insert or update
+    - `on_submit` — After submission
+    - `on_cancel` — After cancellation
+    - `on_trash` — After deletion
+4. **Whitelisted API methods** — any API endpoints needed? (e.g., "get_registration_details", "bulk_update_status"). Say "none" if not needed.
+
+## Step 1: DocType (if needed)
+
+**IMPORTANT**: Do NOT create or modify DocType JSON files. Instead:
+
+- Tell the user to create the DocType via Frappe desk
+- Provide the exact field list they should configure:
+
+```
+DocType: <Name>
+Module: <CD Stock or Connect Diagnostics Core>
+Naming Series: <suggest appropriate series>
+Fields:
+  1. <field_name> (<fieldtype>) — <label> [required/read_only/etc]
+  2. ...
+Permissions:
+  - <role>: Create, Read, Update, Delete, Submit (as appropriate)
+```
+
+Wait for the user to confirm the DocType exists before proceeding.
+
+## Step 2: Create API file
+
+Create at `connect_diagnostics_core/api/<system>/<doctype_name>.py`:
+
+```python
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from __future__ import annotations
+
+import re
+from typing import TYPE_CHECKING, Any, cast
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+
+if TYPE_CHECKING:
+    from frappe.types import DF
+
+
+def <hook_type>(doc: Document, method: str) -> None:
+    if method != "<hook_type>":
+        return
+    # implementation
+
+
+@frappe.whitelist()
+def <api_method>(<param>: str) -> dict:
+    if not frappe.has_permission("<DocType>", "read"):
+        frappe.throw("No permission", frappe.PermissionError)
+    # implementation
+    return {"data": <payload>, "message": "<status>"}
+```
+
+Rules:
+
+- `<system>` = `erpnext` for ERPNext doctypes, `frappe` for Frappe core doctypes
+- `<doctype_name>` = lowercase, spaces → underscores
+- If the file already exists, append new functions — do NOT overwrite
+- All hook functions use `(doc: Document, method: str) -> None`
+- All API methods use `@frappe.whitelist()` with permission checks
+- Use `cast()` for all `doc.get()` and `frappe.get_doc()` calls:
+  `value: str = cast(str, doc.get("field") or "")`
+  `doc = cast(ProductRegistration, frappe.get_doc("Product Registration", name))`
+- For direct attribute access to custom fields, add:
+  `doc.custom_field = value  # ty: ignore[unresolved-attribute] - runtime-injected attribute (<source>.json)`
+- Custom field definitions: `connect_diagnostics_core/cd_stock/custom/*`
+- Use `frappe.throw()` for errors
+
+## Step 3: Register hooks
+
+Add to `connect_diagnostics_core/hooks.py` in `doc_events`:
+
+```python
+doc_events = {
+    # ... existing entries ...
+    "<DocType Name>": {
+        "<hook_type>": "connect_diagnostics_core.api.<system>.<doctype_name>.<hook_type>",
+    },
+}
+```
+
+- Do NOT remove or reorder existing entries
+- Add in alphabetical order by doctype name
+
+## Step 4: Create test file
+
+Create at `connect_diagnostics_core/tests/test_<feature_name>.py`:
+
+```python
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from frappe.tests.utils import FrappeTestCase
+
+
+class Test<FeatureName>(FrappeTestCase):
+
+    def test_<hook_type>_<scenario>(self):
+        # Arrange: create test document
+        doc = frappe.get_doc({
+            "doctype": "<DocType>",
+            ...
+        })
+        # Act
+        doc.insert()
+        # Assert
+        self.assertEqual(...)
+
+    def test_<hook_type>_edge_case(self):
+        # Test boundary/edge case
+        pass
+```
+
+- Include at minimum one test per hook type and one per API method
+- Use descriptive names: `test_<hook>_<scenario>`
+- Clean up created documents in `tearDown()`
+
+## Step 5: Run formatters
+
+```bash
+ruff check --fix <files>
+ruff format <files>
+```
+
+## Step 6: Summary
+
+Report what was created:
+
+- `api/<system>/<doctype_name>.py` — N hook functions, N API methods
+- `hooks.py` — updated with new doc_events entry
+- `tests/test_<feature>.py` — N test methods
+- DocType fields guide (if applicable)
+- How to run the tests: `bench --site test_site run-tests --app connect_diagnostics_core --test test_<feature_name>`
+
+## Do NOT
+
+- Create or modify `.json` files (DocType definitions)
+- Create or modify `__init__.py` files
+- Add dependencies that don't exist in the project
+- Overwrite existing functions in API files
+- Create doctype controller files (those are generated by Frappe desk)
+
+## Next step
+
+1. Manual test on bench first
+2. If passing → `/ship` to quality check + commit + PR

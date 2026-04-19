@@ -2,7 +2,7 @@
 name = "connect_diagnostics_core"
 authors = [{ name = "Siwat Sroisuwan", email = "siwat61719@gmail.com" }]
 description = "Custom app for Connect Diagnostics to manage and implement company-specific business logic, workflows, and processes on ERPNext."
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
@@ -19,7 +19,7 @@ build-backend = "flit_core.buildapi"
 
 [tool.ruff]
 line-length = 110
-target-version = "py310"
+target-version = "py313"
 exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**"]
 
 
