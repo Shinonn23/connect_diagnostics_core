@@ -6,7 +6,7 @@ from frappe.exceptions import ValidationError
 from frappe.model.document import Document
 from frappe.tests.utils import FrappeTestCase
 
-from connect_diagnostics_core.api.erpnext.employee import generate_thai_year_autoname
+from connect_diagnostics_core.api.erpnext.employee import autoname
 from connect_diagnostics_core.api.erpnext.employment_type import validate_employment_type_format
 
 
@@ -85,7 +85,7 @@ class TestEmployeeAutonamePattern(FrappeTestCase):
 		mock_make_autoname.return_value = "C6904.001"
 		doc = cast(Employee, _FakeEmployeeDoc(date_of_joining="2026-04-06", employment_type="Full-time"))
 
-		generate_thai_year_autoname(doc, "autoname")
+		autoname(doc, "autoname")
 
 		mock_make_autoname.assert_called_once_with("C6904.###")
 		self.assertEqual(doc.name, "C6904.001")
@@ -99,7 +99,7 @@ class TestEmployeeAutonamePattern(FrappeTestCase):
 		mock_make_autoname.return_value = "6904.001"
 		doc = cast(Employee, _FakeEmployeeDoc(date_of_joining="2026-04-06", employment_type="Full-time"))
 
-		generate_thai_year_autoname(doc, "autoname")
+		autoname(doc, "autoname")
 
 		mock_make_autoname.assert_called_once_with("6904.###")
 		self.assertEqual(doc.name, "6904.001")
