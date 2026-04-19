@@ -11,39 +11,40 @@ jobs:
             - name: Notify PR to Discord
               env:
                   WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_PR }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+                  PR_URL: ${{ github.event.pull_request.html_url }}
+                  PR_BODY: ${{ github.event.pull_request.body }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  PR_ACTOR: ${{ github.actor }}
+                  PR_AVATAR: ${{ github.event.sender.avatar_url }}
+                  PR_ACTION: ${{ github.event.action }}
+                  PR_CREATED: ${{ github.event.pull_request.created_at }}
+                  PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+                  PR_REPO: ${{ github.repository }}
               run: |
-                  # Determine action color
-                  case "${{ github.event.action }}" in
-                    opened)
-                      COLOR=16705372  # Yellow
-                      ;;
-                    closed)
-                      COLOR=5763719  # Green
-                      ;;
-                    reopened)
-                      COLOR=15548997  # Red
-                      ;;
+                  case "$PR_ACTION" in
+                    opened)   COLOR=16705372 ;;
+                    closed)   COLOR=5763719  ;;
+                    reopened) COLOR=15548997 ;;
                   esac
 
-                  # Prepare description
-                  DESCRIPTION="${{ github.event.pull_request.body }}"
+                  DESCRIPTION="$PR_BODY"
                   if [ ${#DESCRIPTION} -gt 300 ]; then
                     DESCRIPTION="${DESCRIPTION:0:300}..."
                   fi
 
-                  # Build Discord embed
                   PAYLOAD=$(jq -n \
-                    --arg title "${{ github.event.pull_request.title }}" \
-                    --arg url "${{ github.event.pull_request.html_url }}" \
-                    --arg repo "${{ github.repository }}" \
-                    --arg number "${{ github.event.pull_request.number }}" \
-                    --arg actor "${{ github.actor }}" \
-                    --arg avatar "${{ github.event.sender.avatar_url }}" \
-                    --arg action "${{ github.event.action }}" \
+                    --arg title "$PR_TITLE" \
+                    --arg url "$PR_URL" \
+                    --arg repo "$PR_REPO" \
+                    --arg number "$PR_NUMBER" \
+                    --arg actor "$PR_ACTOR" \
+                    --arg avatar "$PR_AVATAR" \
+                    --arg action "$PR_ACTION" \
                     --arg description "$DESCRIPTION" \
                     --arg color "$COLOR" \
-                    --arg created "${{ github.event.pull_request.created_at }}" \
-                    --arg branch "${{ github.event.pull_request.head.ref }}" \
+                    --arg created "$PR_CREATED" \
+                    --arg branch "$PR_BRANCH" \
                     '{
                       username: "GitHub Pull Requests",
                       avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
@@ -58,21 +59,9 @@ jobs:
                           url: ("https://github.com/" + $actor)
                         },
                         fields: [
-                          {
-                            name: "Repository",
-                            value: $repo,
-                            inline: true
-                          },
-                          {
-                            name: "Status",
-                            value: ($action | ascii_upcase),
-                            inline: true
-                          },
-                          {
-                            name: "Branch",
-                            value: $branch,
-                            inline: false
-                          }
+                          { name: "Repository", value: $repo,   inline: true  },
+                          { name: "Status",     value: ($action | ascii_upcase), inline: true },
+                          { name: "Branch",     value: $branch, inline: false }
                         ],
                         footer: {
                           text: ("Created • " + ($created | split("T")[0]))
@@ -80,7 +69,6 @@ jobs:
                       }]
                     }')
 
-                  # Send to Discord
                   curl -X POST -H "Content-Type: application/json" \
                     -d "$PAYLOAD" \
                     "$WEBHOOK"
