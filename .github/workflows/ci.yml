@@ -1,9 +1,10 @@
 name: CI
 on:
-    push:
-        branches:
-            - develop
     pull_request:
+        branches:
+            - production
+            - user-acceptance-testing
+            - developments
 concurrency:
     group: develop-connect_diagnostics_core-${{ github.event.number }}
     cancel-in-progress: true
