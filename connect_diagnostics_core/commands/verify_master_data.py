@@ -28,8 +28,16 @@ MAPPING_TAB = "Mapping"
 	default=None,
 	help="Verify a single entity (e.g., 'uom'). All entities if omitted.",
 )
+@click.option(
+	"--ignore-missing-in-sheet",
+	is_flag=True,
+	default=False,
+	help="Skip reporting records that exist in DB but not in sheet.",
+)
 @pass_context
-def verify_master_data(context: object, spreadsheet_id: str | None, entity: str | None) -> None:
+def verify_master_data(
+	context: object, spreadsheet_id: str | None, entity: str | None, ignore_missing_in_sheet: bool
+) -> None:
 	"""Verify master data in ERPNext against Google Sheets."""
 
 	site = get_site(context)
@@ -41,11 +49,11 @@ def verify_master_data(context: object, spreadsheet_id: str | None, entity: str 
 				"spreadsheet-id is required. Pass --spreadsheet-id or set google_sheet_id in site config."
 			)
 			raise SystemExit(1)
-		_run_verify(resolved_id, entity)
+		_run_verify(resolved_id, entity, ignore_missing_in_sheet)
 		frappe.destroy()
 
 
-def _run_verify(spreadsheet_id: str, entity: str | None) -> None:
+def _run_verify(spreadsheet_id: str, entity: str | None, ignore_missing_in_sheet: bool) -> None:
 	all_mappings = parse_mappings(spreadsheet_id, MAPPING_TAB)
 	entities = _filter_entities(all_mappings, entity)
 	results = []
@@ -66,6 +74,8 @@ def _run_verify(spreadsheet_id: str, entity: str | None) -> None:
 			try:
 				expected_rows = map_rows(raw_data, mapping.column_map, mapping.key_field)
 				result = compare_entity(entity_key, mapping, expected_rows)
+				if ignore_missing_in_sheet:
+					result.missing_in_sheet = []
 				results.append(result)
 			except Exception:
 				frappe.log_error(f"Master Data Verify Error: {entity_key}")
