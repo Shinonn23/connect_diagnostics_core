@@ -17,9 +17,9 @@ CACHE_TTL = 300  # 5 minutes
 
 
 def _get_credentials() -> Credentials:
-	creds_path: str = cast(str, frappe.conf.cd_google_credentials_path or "")
+	creds_path: str = cast(str, frappe.conf.get("google_credentials_path") or "")
 	if not creds_path:
-		msg = "Google credentials path not configured. Set via: bench --site <site> set-config cd_google_credentials_path '/path/to/service-account.json'"
+		msg = "Google credentials path not configured. Set via: bench --site <site> set-config google_credentials_path '/path/to/service-account.json'"
 		raise frappe.ValidationError(msg)
 
 	return Credentials.from_service_account_file(
