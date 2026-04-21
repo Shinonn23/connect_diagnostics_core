@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 import frappe
@@ -12,14 +13,19 @@ from connect_diagnostics_core.master_data.client import write_results
 if TYPE_CHECKING:
 	from connect_diagnostics_core.master_data.comparator import ComparisonResult
 
-RESULTS_SHEET = "Verify Results"
+BANGKOK_TZ = timezone(timedelta(hours=7))
 RESULTS_HEADER = ["Entity", "Key", "Field", "Expected", "Actual", "Issue Type"]
+
+
+def _report_tab_name() -> str:
+	ts = datetime.now(BANGKOK_TZ).strftime("%Y-%m-%d %H:%M UTC+7")
+	return f"Verify Results {ts}"
 
 
 def report_results(
 	spreadsheet_id: str,
 	results: list[ComparisonResult],
-) -> int:
+) -> tuple[int, str]:
 	total_issues = 0
 	rows: list[list[str]] = [RESULTS_HEADER]
 
@@ -36,10 +42,20 @@ def report_results(
 			rows.append([result.entity_key, key_val, "", "", "", "Missing in Sheet"])
 			total_issues += 1
 
+	report_id = _get_report_spreadsheet_id()
 	if total_issues > 0:
-		write_results(spreadsheet_id, f"{RESULTS_SHEET}!A1", rows)
+		tab_name = _report_tab_name()
+		write_results(report_id, f"'{tab_name}'!A1", rows, tab_title=tab_name)
 
-	return total_issues
+	return total_issues, report_id
+
+
+def _get_report_spreadsheet_id() -> str:
+	report_id: str = frappe.conf.get("google_report_sheet_id") or ""
+	if not report_id:
+		msg = "google_report_sheet_id is not configured. Set via: bench --site <site> set-config google_report_sheet_id '<spreadsheet_id>'"
+		raise frappe.ValidationError(msg)
+	return report_id
 
 
 def print_summary(results: list[ComparisonResult]) -> None:

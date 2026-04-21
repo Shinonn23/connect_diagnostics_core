@@ -42,6 +42,7 @@ class ComparisonResult:
 	mismatches: list[Mismatch] = field(default_factory=list)
 	missing_in_db: list[str] = field(default_factory=list)
 	missing_in_sheet: list[str] = field(default_factory=list)
+	sheet_keys: set[str] = field(default_factory=set)
 
 
 def compare_entity(
@@ -94,10 +95,7 @@ def _compare_flat_entity(
 		if row_matched:
 			result.matched += 1
 
-	sheet_keys = {row.get(mapping.key_field, "") for row in expected_rows}
-	for db_key in actual_data:
-		if db_key not in sheet_keys:
-			result.missing_in_sheet.append(db_key)
+	result.sheet_keys = {row.get(mapping.key_field, "") for row in expected_rows}
 
 	return result
 
@@ -165,10 +163,7 @@ def _compare_child_entity(
 				assert match_idx is not None
 				unmatched_actual.pop(match_idx)
 
-	sheet_keys = set(expected_groups.keys())
-	for parent_key in actual_groups:
-		if parent_key not in sheet_keys:
-			result.missing_in_sheet.append(parent_key)
+	result.sheet_keys = set(expected_groups.keys())
 
 	return result
 
@@ -179,7 +174,14 @@ def _get_comparison_fields(
 ) -> list[str]:
 	if not expected_rows:
 		return [mapping.key_field]
-	return list(expected_rows[0].keys())
+	seen: set[str] = set()
+	fields: list[str] = []
+	for row in expected_rows:
+		for key in row:
+			if key not in seen:
+				seen.add(key)
+				fields.append(key)
+	return fields
 
 
 def _fetch_actual_data(

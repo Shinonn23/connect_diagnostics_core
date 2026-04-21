@@ -8,12 +8,15 @@ from typing import cast
 import frappe
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 SHEETS_API = "sheets"
 SHEETS_VERSION = "v4"
 
 CACHE_PREFIX = "master_data_sheet"
-CACHE_TTL = 300  # 5 minutes
+CACHE_TTL = 5  # 5 seconds
+
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
 def _get_credentials() -> Credentials:
@@ -22,10 +25,7 @@ def _get_credentials() -> Credentials:
 		msg = "Google credentials path not configured. Set via: bench --site <site> set-config google_credentials_path '/path/to/service-account.json'"
 		raise frappe.ValidationError(msg)
 
-	return Credentials.from_service_account_file(
-		creds_path,
-		scopes=["https://www.googleapis.com/auth/spreadsheets"],
-	)
+	return Credentials.from_service_account_file(creds_path, scopes=SCOPES)
 
 
 def _get_sheets_service():
@@ -47,11 +47,24 @@ def get_sheet_data(spreadsheet_id: str, range_name: str) -> list[list[str]]:
 	return values
 
 
+def ensure_sheet_tab(spreadsheet_id: str, title: str) -> None:
+	service = _get_sheets_service()
+	body = {"requests": [{"addSheet": {"properties": {"title": title}}}]}
+	try:
+		service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body).execute()
+	except HttpError as e:
+		if "already exists" not in str(e).lower():
+			raise
+
+
 def write_results(
 	spreadsheet_id: str,
 	range_name: str,
 	rows: list[list[str]],
+	tab_title: str = "",
 ) -> None:
+	if tab_title:
+		ensure_sheet_tab(spreadsheet_id, tab_title)
 	service = _get_sheets_service()
 	body = {"values": rows}
 	service.spreadsheets().values().update(
