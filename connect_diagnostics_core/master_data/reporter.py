@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 
 BANGKOK_TZ = timezone(timedelta(hours=7))
 RESULTS_HEADER = ["Entity", "Key", "Field", "Expected", "Actual", "Issue Type"]
+SUMMARY_WIDTH = 72
+MAX_VALUE_DISPLAY_LENGTH = 96
 
 
 def _report_tab_name() -> str:
@@ -63,33 +65,74 @@ def print_summary(results: list[ComparisonResult]) -> None:
 		print("No entities verified.")
 		return
 
-	total_entities = len(results)
-	total_matched = sum(r.matched for r in results)
-	total_mismatches = sum(len(r.mismatches) for r in results)
-	total_missing_db = sum(len(r.missing_in_db) for r in results)
-	total_missing_sheet = sum(len(r.missing_in_sheet) for r in results)
+	ordered_results = sorted(results, key=lambda result: result.entity_key.lower())
 
-	print(f"\n{'=' * 60}")
+	total_entities = len(ordered_results)
+	total_expected_rows = sum(r.total for r in ordered_results)
+	total_matched = sum(r.matched for r in ordered_results)
+	total_mismatches = sum(len(r.mismatches) for r in ordered_results)
+	total_missing_db = sum(len(r.missing_in_db) for r in ordered_results)
+	total_missing_sheet = sum(len(r.missing_in_sheet) for r in ordered_results)
+	total_issues = total_mismatches + total_missing_db + total_missing_sheet
+	match_rate = (
+		f"{(total_matched / total_expected_rows) * 100:.1f}%"
+		if total_expected_rows
+		else "n/a (no expected rows)"
+	)
+
+	print(f"\n{'=' * SUMMARY_WIDTH}")
 	print("Master Data Verification Summary")
-	print(f"{'=' * 60}")
-	print(f"Entities checked: {total_entities}")
-	print(f"Records matched:  {total_matched}")
-	print(f"Mismatches:       {total_mismatches}")
-	print(f"Missing in DB:    {total_missing_db}")
-	print(f"Missing in Sheet: {total_missing_sheet}")
-	print(f"{'=' * 60}")
+	print(f"{'=' * SUMMARY_WIDTH}")
+	print(f"{'Entities checked':<18}: {total_entities}")
+	print(f"{'Rows expected':<18}: {total_expected_rows}")
+	print(f"{'Rows matched':<18}: {total_matched}")
+	print(f"{'Mismatches':<18}: {total_mismatches}")
+	print(f"{'Missing in ERPNext':<18}: {total_missing_db}")
+	print(f"{'Missing in Sheet':<18}: {total_missing_sheet}")
+	print(f"{'Total issues':<18}: {total_issues}")
+	print(f"{'Match rate':<18}: {match_rate}")
+	print(f"{'-' * SUMMARY_WIDTH}")
 
-	if total_mismatches == 0 and total_missing_db == 0 and total_missing_sheet == 0:
-		print("All entities verified successfully.")
-	else:
-		for result in results:
-			if result.mismatches or result.missing_in_db or result.missing_in_sheet:
-				print(f"\n  [{result.entity_key}] {result.matched}/{result.total} matched")
-				for m in result.mismatches:
-					print(
-						f"    MISMATCH: {m.key_value}.{m.field_name}: expected='{m.expected}', actual='{m.actual}'"
-					)
-				for key_val in result.missing_in_db:
-					print(f"    MISSING IN DB: {key_val}")
-				for key_val in result.missing_in_sheet:
-					print(f"    MISSING IN SHEET: {key_val}")
+	if total_issues == 0:
+		print("Status: PASS - all entities verified successfully.")
+		print(f"{'=' * SUMMARY_WIDTH}")
+		return
+
+	print("Status: FAIL - issues found.")
+	print("Entity details (issues only):")
+
+	issue_results = [
+		result
+		for result in ordered_results
+		if result.mismatches or result.missing_in_db or result.missing_in_sheet
+	]
+	for idx, result in enumerate(issue_results, start=1):
+		print(
+			f"{idx:>2}. {result.entity_key} | matched {result.matched}/{result.total}"
+			f" | mismatch {len(result.mismatches)}"
+			f" | missing in ERPNext {len(result.missing_in_db)}"
+			f" | missing in sheet {len(result.missing_in_sheet)}"
+		)
+
+		for mismatch in sorted(
+			result.mismatches,
+			key=lambda item: (item.key_value, item.field_name, item.expected, item.actual),
+		):
+			print(f"    MISMATCH: {mismatch.key_value}.{mismatch.field_name}")
+			print(f"      expected: '{_format_value(mismatch.expected)}'")
+			print(f"      actual  : '{_format_value(mismatch.actual)}'")
+
+		for key_val in sorted(result.missing_in_db):
+			print(f"    MISSING IN ERPNext: {_format_value(key_val)}")
+
+		for key_val in sorted(result.missing_in_sheet):
+			print(f"    MISSING IN SHEET: {_format_value(key_val)}")
+
+	print(f"{'=' * SUMMARY_WIDTH}")
+
+
+def _format_value(value: str) -> str:
+	normalized = value.replace("\r", "\\r").replace("\n", "\\n")
+	if len(normalized) <= MAX_VALUE_DISPLAY_LENGTH:
+		return normalized
+	return f"{normalized[: MAX_VALUE_DISPLAY_LENGTH - 3]}..."

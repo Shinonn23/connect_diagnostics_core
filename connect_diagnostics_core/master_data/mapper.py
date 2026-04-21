@@ -93,7 +93,8 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 	has_parent_doctype = parent_doctype_col is not None
 
 	last_doctype_per_sheet: dict[str, str] = {}
-	entities_raw: dict[tuple[str, str], _RawEntity] = {}
+	last_child_doctype_per_parent: dict[tuple[str, str], str] = {}
+	entities_raw: dict[tuple[str, str, str], _RawEntity] = {}
 
 	for row in raw[1:]:
 		col_indices = [sheet_name_col, sheet_col, erpnext_col, doctype_col, is_key_col]
@@ -102,8 +103,8 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 		if len(row) <= max(col_indices):
 			continue
 
-		entity_key = row[sheet_name_col].strip()
-		if not entity_key:
+		sheet_name = row[sheet_name_col].strip()
+		if not sheet_name:
 			continue
 
 		sheet_column = row[sheet_col].strip()
@@ -118,32 +119,38 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 
 		if parent_doctype_val:
 			group_doctype = parent_doctype_val
+			parent_key = (sheet_name, group_doctype)
+			if not doctype_val:
+				doctype_val = last_child_doctype_per_parent.get(parent_key, "")
+			if not doctype_val:
+				frappe.throw(
+					f"Entity '{sheet_name}' has a child mapping row for parent doctype"
+					f" '{group_doctype}' without child doctype."
+				)
+			last_child_doctype_per_parent[parent_key] = doctype_val
+			group_child_doctype = doctype_val
 		else:
 			if not doctype_val:
-				doctype_val = last_doctype_per_sheet.get(entity_key, "")
+				doctype_val = last_doctype_per_sheet.get(sheet_name, "")
 			if not doctype_val:
 				continue
 			group_doctype = doctype_val
-			last_doctype_per_sheet[entity_key] = doctype_val
+			last_doctype_per_sheet[sheet_name] = doctype_val
+			group_child_doctype = ""
 
-		raw_key = (entity_key, group_doctype)
+		raw_key = (sheet_name, group_doctype, group_child_doctype)
 
 		if raw_key not in entities_raw:
-			entities_raw[raw_key] = _RawEntity(sheet_name=entity_key)
-			entities_raw[raw_key].doctype = group_doctype
+			entities_raw[raw_key] = _RawEntity(
+				sheet_name=sheet_name,
+				doctype=group_doctype,
+				child_doctype=group_child_doctype,
+			)
 
 		ent = entities_raw[raw_key]
 
 		if parent_doctype_val:
 			ent.child_columns.add(sheet_column)
-			if doctype_val:
-				if not ent.child_doctype:
-					ent.child_doctype = doctype_val
-				elif ent.child_doctype != doctype_val:
-					frappe.throw(
-						f"Entity '{entity_key}' has conflicting child doctypes:"
-						f" '{ent.child_doctype}' and '{doctype_val}'"
-					)
 
 		if is_key and sheet_column:
 			ent.key_field = "parent" if parent_doctype_val else "name"
@@ -153,17 +160,46 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 		if sheet_column and erpnext_field and not is_key:
 			ent.column_map_raw[sheet_column] = erpnext_field
 
-	sheet_doctypes: dict[str, set[str]] = {}
-	for sheet_name, _doctype in entities_raw:
-		sheet_doctypes.setdefault(sheet_name, set()).add(_doctype)
+	for (sheet_name, doctype, _child_doctype), raw_ent in entities_raw.items():
+		if raw_ent.key_field:
+			continue
+		parent_ent = entities_raw.get((sheet_name, doctype, ""))
+		if parent_ent and parent_ent.key_field:
+			raw_ent.key_field = parent_ent.key_field
+			raw_ent.key_sheet_column = parent_ent.key_sheet_column
+			raw_ent.key_is_child = parent_ent.key_is_child
+
+	included_entities: list[_RawEntity] = []
+	sheet_name_counts: dict[str, int] = {}
+	parent_groups = {(sheet_name, doctype) for sheet_name, doctype, _ in entities_raw}
+	for sheet_name, doctype in sorted(parent_groups, key=lambda item: (item[0].lower(), item[1].lower())):
+		parent_ent = entities_raw.get((sheet_name, doctype, ""))
+		child_ents = sorted(
+			[
+				raw_ent
+				for (entity_sheet_name, entity_doctype, child_doctype), raw_ent in entities_raw.items()
+				if entity_sheet_name == sheet_name and entity_doctype == doctype and child_doctype
+			],
+			key=lambda item: item.child_doctype.lower(),
+		)
+
+		if parent_ent and (parent_ent.column_map_raw or not child_ents):
+			included_entities.append(parent_ent)
+			sheet_name_counts[sheet_name] = sheet_name_counts.get(sheet_name, 0) + 1
+
+		for child_ent in child_ents:
+			included_entities.append(child_ent)
+			sheet_name_counts[sheet_name] = sheet_name_counts.get(sheet_name, 0) + 1
 
 	entities: dict[str, EntityMapping] = {}
-	for (sheet_name, doctype), raw_ent in entities_raw.items():
+	for raw_ent in included_entities:
+		sheet_name = raw_ent.sheet_name
+		doctype = raw_ent.doctype
 		if not raw_ent.doctype:
 			frappe.throw(f"Entity '{sheet_name}' is missing doctype in mapping")
 		if not raw_ent.key_field:
 			frappe.throw(
-				f"Entity '{sheet_name}' (DocType: {doctype})" f" has no field marked as is_key in mapping"
+				f"Entity '{sheet_name}' (DocType: {doctype}) has no field marked as is_key in mapping"
 			)
 
 		parent_label_map = _build_label_map(raw_ent.doctype)
@@ -191,10 +227,7 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 			if col in raw_ent.child_columns:
 				child_fields.add(resolved)
 
-		if len(sheet_doctypes[sheet_name]) > 1:
-			entity_key = f"{sheet_name}:{doctype}"
-		else:
-			entity_key = sheet_name
+		entity_key = _build_entity_key(raw_ent, sheet_name_counts.get(sheet_name, 1))
 
 		entities[entity_key] = EntityMapping(
 			entity_key=entity_key,
@@ -207,6 +240,14 @@ def parse_mappings(spreadsheet_id: str, mapping_sheet: str) -> dict[str, EntityM
 		)
 
 	return entities
+
+
+def _build_entity_key(raw_ent: _RawEntity, mappings_in_sheet: int) -> str:
+	if mappings_in_sheet <= 1:
+		return raw_ent.sheet_name
+	if raw_ent.child_doctype:
+		return f"{raw_ent.sheet_name}:{raw_ent.doctype}:{raw_ent.child_doctype}"
+	return f"{raw_ent.sheet_name}:{raw_ent.doctype}"
 
 
 def map_rows(

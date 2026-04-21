@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from contextlib import redirect_stdout
+from io import StringIO
 from unittest.mock import MagicMock, patch
 
 from frappe.exceptions import ValidationError
@@ -104,6 +106,29 @@ def _fake_label_map(doctype: str) -> dict[str, str]:
 			"Address Title": "address_title",
 			"address_line1": "address_line1",
 			"Address Line 1": "address_line1",
+		},
+		"Tax Withholding Category": {
+			"id": "name",
+			"name": "name",
+			"parent": "parent",
+			"category_name": "category_name",
+			"Category": "category_name",
+		},
+		"Tax Withholding Rate": {
+			"id": "name",
+			"name": "name",
+			"parent": "parent",
+			"rate_type": "rate_type",
+			"Rate Type": "rate_type",
+			"rate": "rate",
+			"Rate %": "rate",
+		},
+		"Tax Withholding Account": {
+			"id": "name",
+			"name": "name",
+			"parent": "parent",
+			"account": "account",
+			"Account Head": "account",
 		},
 	}
 	return maps.get(doctype, {})
@@ -226,6 +251,70 @@ class TestParseMappings(FrappeTestCase):
 		self.assertEqual(address.column_map["Address ID"], "name")
 		self.assertEqual(address.column_map["Address Line 1"], "address_line1")
 
+	@patch("connect_diagnostics_core.master_data.mapper._build_label_map", side_effect=_fake_label_map)
+	@patch("connect_diagnostics_core.master_data.mapper.get_sheet_data")
+	def test_parse_mappings_supports_multiple_child_doctypes(
+		self, mock_get_sheet: MagicMock, mock_label_map: MagicMock
+	) -> None:
+		mock_get_sheet.return_value = [
+			["sheet_name", "sheet_column", "erpnext_field", "doctype", "is_key", "parent_doctype"],
+			["Tax_Withholding_Categories", "Category", "ignored", "Tax Withholding Category", "1", ""],
+			[
+				"Tax_Withholding_Categories",
+				"Rate Type",
+				"Rate Type",
+				"Tax Withholding Rate",
+				"",
+				"Tax Withholding Category",
+			],
+			[
+				"Tax_Withholding_Categories",
+				"Rate %",
+				"Rate %",
+				"Tax Withholding Rate",
+				"",
+				"Tax Withholding Category",
+			],
+			[
+				"Tax_Withholding_Categories",
+				"Account Head",
+				"Account Head",
+				"Tax Withholding Account",
+				"",
+				"Tax Withholding Category",
+			],
+		]
+
+		result = parse_mappings("fake-id", "Mapping")
+
+		self.assertEqual(len(result), 2)
+		rate_entity = result["Tax_Withholding_Categories:Tax Withholding Category:Tax Withholding Rate"]
+		self.assertEqual(rate_entity.doctype, "Tax Withholding Category")
+		self.assertEqual(rate_entity.key_field, "name")
+		self.assertEqual(rate_entity.child_doctype, "Tax Withholding Rate")
+		self.assertEqual(rate_entity.child_fields, {"rate_type", "rate"})
+		self.assertEqual(
+			rate_entity.column_map,
+			{
+				"Category": "name",
+				"Rate Type": "rate_type",
+				"Rate %": "rate",
+			},
+		)
+
+		account_entity = result["Tax_Withholding_Categories:Tax Withholding Category:Tax Withholding Account"]
+		self.assertEqual(account_entity.doctype, "Tax Withholding Category")
+		self.assertEqual(account_entity.key_field, "name")
+		self.assertEqual(account_entity.child_doctype, "Tax Withholding Account")
+		self.assertEqual(account_entity.child_fields, {"account"})
+		self.assertEqual(
+			account_entity.column_map,
+			{
+				"Category": "name",
+				"Account Head": "account",
+			},
+		)
+
 
 class TestMapper(FrappeTestCase):
 	def test_map_rows_produces_correct_dicts(self) -> None:
@@ -293,7 +382,7 @@ class TestComparator(FrappeTestCase):
 		self.assertEqual(result.missing_in_db, ["Kilogram"])
 
 	@patch("connect_diagnostics_core.master_data.comparator._fetch_actual_data")
-	def test_compare_detects_missing_in_sheet(self, mock_fetch: MagicMock) -> None:
+	def test_compare_does_not_track_missing_in_sheet(self, mock_fetch: MagicMock) -> None:
 		mock_fetch.return_value = {
 			"Kilogram": {"name": "Kilogram"},
 			"Gram": {"name": "Gram"},
@@ -302,7 +391,7 @@ class TestComparator(FrappeTestCase):
 
 		result = compare_entity("Uom", _make_uom_mapping(), expected)
 
-		self.assertEqual(result.missing_in_sheet, ["Gram"])
+		self.assertEqual(result.missing_in_sheet, [])
 
 
 class TestChildComparator(FrappeTestCase):
@@ -355,7 +444,7 @@ class TestChildComparator(FrappeTestCase):
 		self.assertEqual(result.missing_in_db, ["BUNDLE-001"])
 
 	@patch("connect_diagnostics_core.master_data.comparator._fetch_child_data")
-	def test_compare_child_detects_missing_in_sheet(self, mock_fetch: MagicMock) -> None:
+	def test_compare_child_does_not_track_missing_in_sheet(self, mock_fetch: MagicMock) -> None:
 		mock_fetch.return_value = {
 			"BUNDLE-001": [{"parent": "BUNDLE-001", "item_code": "ITEM-A", "qty": "1"}],
 			"BUNDLE-002": [{"parent": "BUNDLE-002", "item_code": "ITEM-B", "qty": "2"}],
@@ -366,12 +455,17 @@ class TestChildComparator(FrappeTestCase):
 
 		result = compare_entity("Product Bundle", _make_bundle_mapping(), expected)
 
-		self.assertEqual(result.missing_in_sheet, ["BUNDLE-002"])
+		self.assertEqual(result.missing_in_sheet, [])
 
 
 class TestReporter(FrappeTestCase):
+	@patch(
+		"connect_diagnostics_core.master_data.reporter._get_report_spreadsheet_id", return_value="report-id"
+	)
 	@patch("connect_diagnostics_core.master_data.reporter.write_results")
-	def test_report_results_writes_when_mismatches(self, mock_write: MagicMock) -> None:
+	def test_report_results_writes_when_mismatches(
+		self, mock_write: MagicMock, _mock_report_id: MagicMock
+	) -> None:
 		results = [
 			ComparisonResult(
 				entity_key="Uom",
@@ -391,18 +485,79 @@ class TestReporter(FrappeTestCase):
 			)
 		]
 
-		total_issues = report_results("fake-id", results)
+		total_issues, report_spreadsheet_id = report_results("fake-id", results)
 
 		self.assertEqual(total_issues, 1)
+		self.assertEqual(report_spreadsheet_id, "report-id")
 		mock_write.assert_called_once()
 
+	@patch(
+		"connect_diagnostics_core.master_data.reporter._get_report_spreadsheet_id", return_value="report-id"
+	)
 	@patch("connect_diagnostics_core.master_data.reporter.write_results")
-	def test_report_results_no_write_when_all_match(self, mock_write: MagicMock) -> None:
+	def test_report_results_no_write_when_all_match(
+		self, mock_write: MagicMock, _mock_report_id: MagicMock
+	) -> None:
 		results = [
 			ComparisonResult(entity_key="Uom", total=3, matched=3),
 		]
 
-		total_issues = report_results("fake-id", results)
+		total_issues, report_spreadsheet_id = report_results("fake-id", results)
 
 		self.assertEqual(total_issues, 0)
+		self.assertEqual(report_spreadsheet_id, "report-id")
 		mock_write.assert_not_called()
+
+	def test_print_summary_pass_output(self) -> None:
+		results = [ComparisonResult(entity_key="Uom", total=3, matched=3)]
+
+		with StringIO() as stdout, redirect_stdout(stdout):
+			print_summary(results)
+			output = stdout.getvalue()
+
+		self.assertIn("Master Data Verification Summary", output)
+		self.assertIn("Status: PASS - all entities verified successfully.", output)
+		self.assertIn("Total issues", output)
+		self.assertIn(": 0", output)
+
+	def test_print_summary_fail_output_is_detailed_and_sorted(self) -> None:
+		results = [
+			ComparisonResult(
+				entity_key="Zeta",
+				total=1,
+				matched=0,
+				missing_in_db=["Z-001"],
+			),
+			ComparisonResult(
+				entity_key="Alpha",
+				total=1,
+				matched=0,
+				mismatches=[
+					Mismatch(
+						entity_key="Alpha",
+						key_value="A-001",
+						field_name="field_a",
+						expected="line1\nline2",
+						actual="actual-value",
+					)
+				],
+				missing_in_sheet=["A-999"],
+			),
+		]
+
+		with StringIO() as stdout, redirect_stdout(stdout):
+			print_summary(results)
+			output = stdout.getvalue()
+
+		self.assertIn("Status: FAIL - issues found.", output)
+		self.assertIn("Entity details (issues only):", output)
+		self.assertIn("MISMATCH: A-001.field_a", output)
+		self.assertIn("expected: 'line1\\nline2'", output)
+		self.assertIn("MISSING IN ERPNext: Z-001", output)
+		self.assertIn("MISSING IN SHEET: A-999", output)
+
+		alpha_pos = output.find(" 1. Alpha")
+		zeta_pos = output.find(" 2. Zeta")
+		self.assertGreaterEqual(alpha_pos, 0)
+		self.assertGreaterEqual(zeta_pos, 0)
+		self.assertLess(alpha_pos, zeta_pos)
