@@ -10,9 +10,9 @@ import frappe
 from frappe.commands import get_site, pass_context
 
 from connect_diagnostics_core.master_data.client import get_sheet_data
-from connect_diagnostics_core.master_data.comparator import compare_entity
+from connect_diagnostics_core.master_data.comparator import ComparisonResult, compare_entity
 from connect_diagnostics_core.master_data.mapper import EntityMapping, map_rows, parse_mappings
-from connect_diagnostics_core.master_data.reporter import RESULTS_SHEET, print_summary, report_results
+from connect_diagnostics_core.master_data.reporter import print_summary, report_results
 
 MAPPING_TAB = "Mapping"
 
@@ -56,7 +56,10 @@ def verify_master_data(
 def _run_verify(spreadsheet_id: str, entity: str | None, ignore_missing_in_sheet: bool) -> None:
 	all_mappings = parse_mappings(spreadsheet_id, MAPPING_TAB)
 	entities = _filter_entities(all_mappings, entity)
-	results = []
+	results: list[ComparisonResult] = []
+
+	doctype_sheet_keys: dict[str, set[str]] = {}
+	doctype_key_field: dict[str, str] = {}
 
 	sheet_groups: dict[str, list[tuple[str, EntityMapping]]] = {}
 	for entity_key, mapping in entities.items():
@@ -74,17 +77,22 @@ def _run_verify(spreadsheet_id: str, entity: str | None, ignore_missing_in_sheet
 			try:
 				expected_rows = map_rows(raw_data, mapping.column_map, mapping.key_field)
 				result = compare_entity(entity_key, mapping, expected_rows)
-				if ignore_missing_in_sheet:
-					result.missing_in_sheet = []
 				results.append(result)
+
+				doctype_sheet_keys.setdefault(mapping.doctype, set()).update(result.sheet_keys)
+				doctype_key_field[mapping.doctype] = mapping.key_field
 			except Exception:
 				frappe.log_error(f"Master Data Verify Error: {entity_key}")
 
+	if not ignore_missing_in_sheet:
+		results.extend(_compute_missing_in_sheet(doctype_sheet_keys, doctype_key_field))
+
 	print_summary(results)
-	total_issues = report_results(spreadsheet_id, results)
+	total_issues, report_spreadsheet_id = report_results(spreadsheet_id, results)
 
 	if total_issues > 0:
-		click.echo(f"\n{total_issues} issues written to '{RESULTS_SHEET}' sheet.")
+		url = f"https://docs.google.com/spreadsheets/d/{report_spreadsheet_id}"
+		click.echo(f"\n{total_issues} issues written to 'report tab: {url}")
 	else:
 		click.echo("\nNo issues found.")
 
@@ -102,3 +110,25 @@ def _filter_entities(
 		return matching
 
 	return dict(all_mappings)
+
+
+def _compute_missing_in_sheet(
+	doctype_sheet_keys: dict[str, set[str]],
+	doctype_key_field: dict[str, str],
+) -> list[ComparisonResult]:
+	results: list[ComparisonResult] = []
+	for doctype, sheet_keys in doctype_sheet_keys.items():
+		key_field = doctype_key_field[doctype]
+		db_rows = frappe.get_all(doctype, fields=[key_field], as_list=False)
+		db_keys = {str(r[key_field]) for r in db_rows if r.get(key_field)}
+		missing = db_keys - sheet_keys
+		if missing:
+			results.append(
+				ComparisonResult(
+					entity_key=doctype,
+					total=0,
+					matched=0,
+					missing_in_sheet=sorted(missing),
+				)
+			)
+	return results
