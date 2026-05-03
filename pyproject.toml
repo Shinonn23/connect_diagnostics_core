@@ -20,7 +20,7 @@ build-backend = "flit_core.buildapi"
 [tool.ruff]
 line-length = 110
 target-version = "py313"
-exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**"]
+exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**", "**/typings/**"]
 
 
 [tool.ruff.lint]

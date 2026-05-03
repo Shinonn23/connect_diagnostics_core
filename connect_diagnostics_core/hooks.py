@@ -43,7 +43,7 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Customer": "public/js/custom/customer/dksh_control_form.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -140,11 +140,11 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 doc_events = {
 	"Employee": {
-		"validate": "connect_diagnostics_core.api.erpnext.employee.validate",
-		"autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
+		# "validate": "connect_diagnostics_core.api.erpnext.employee.validate",
+		# "autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
 	},
 	"Employment Type": {
-		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
+		# "validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
 	},
 	"Customer": {
 		"autoname": "connect_diagnostics_core.api.erpnext.customer.autoname",
