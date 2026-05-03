@@ -43,7 +43,7 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Customer": "public/js/custom/customer/dksh_control_form.js"}
+doctype_js = {"Customer": "public/js/custom/customer/naming_series_control_form.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -255,8 +255,5 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
-	{"doctype": "Role Profile"},
-	{"doctype": "Salutation"},
 ]

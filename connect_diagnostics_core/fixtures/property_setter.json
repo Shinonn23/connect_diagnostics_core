@@ -7,7 +7,7 @@
 		"doctype_or_field": "DocField",
 		"field_name": "customer_type",
 		"is_system_generated": 0,
-		"modified": "2026-04-11 21:57:17.149391",
+		"modified": "2026-05-03 14:59:15.855442",
 		"module": "Connect Diagnostics Core",
 		"name": "Customer-customer_type-options",
 		"property": "options",
@@ -23,12 +23,28 @@
 		"doctype_or_field": "DocField",
 		"field_name": "supplier_type",
 		"is_system_generated": 0,
-		"modified": "2026-04-06 20:49:35.063143",
+		"modified": "2026-05-03 14:59:16.435319",
 		"module": "Connect Diagnostics Core",
 		"name": "Supplier-supplier_type-options",
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
 		"value": "Company\nIndividual\nPartnership\nPublic Company Limited"
+	},
+	{
+		"default_value": "DKSH-.{custom_dksh_code}",
+		"doc_type": "Customer",
+		"docstatus": 0,
+		"doctype": "Property Setter",
+		"doctype_or_field": "DocField",
+		"field_name": "naming_series",
+		"is_system_generated": 0,
+		"modified": "2026-05-03 15:12:24.981689",
+		"module": "Connect Diagnostics Core",
+		"name": "Customer-naming_series-options",
+		"property": "options",
+		"property_type": "Text",
+		"row_name": null,
+		"value": "DKSH-.{custom_dksh_code}\nPTN-.###\nCORP-.###\nHOSP-.###\nEDU-.###\nIND-.###\nPHAR-.###\nCLN-.###\nCASH-.###\nLAZA-.###\nLINE-.###\nSHOP-.###"
 	}
 ]
