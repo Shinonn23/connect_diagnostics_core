@@ -43,8 +43,11 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Customer": "public/js/custom/customer/naming_series_control_form.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_js = {
+	"Customer": "public/js/custom/customer/naming_series_control_form.js",
+	"Material Request": "public/js/custom/material_request/doctype.js",
+}
+doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
