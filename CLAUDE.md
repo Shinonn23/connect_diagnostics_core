@@ -1,7 +1,7 @@
 # AI Agent Rules — connect_diagnostics_core
 
 > Behavioral rules enforced on every turn. For procedural guides, use slash commands:
-> `/scaffold-hook` `/scaffold-command` `/scaffold-test` `/scaffold-feature` `/commit` `/pr` `/fix-style` `/check`
+> `/scaffold-hook` `/scaffold-command` `/scaffold-test` `/scaffold-feature` `/commit` `/pr` `/fix-style` `/check` `/save-knowledge`
 
 ---
 
@@ -124,6 +124,15 @@ Before writing any code, search in this order:
 5. **Cross-reference usage** — grep for the function/class name across all apps to find indirect callers (JS form scripts, Jinja templates, background jobs, scheduled tasks)
 
 If not found after all five steps: **stop and ask**. Do not assume it doesn't exist.
+
+### Codebase Knowledge Cache
+
+- **Before starting any non-trivial task**, check `.claude/knowledge/` for existing notes on the relevant topic; read them before re-exploring the codebase
+- **After completing any non-trivial task**, save exploration findings by running `/save-knowledge`
+    - Knowledge files: `.claude/knowledge/<topic>.md` — lowercase, hyphen-separated names (e.g., `employee-autoname.md`, `customer-hooks.md`)
+    - Contents: key files, functions/hooks used, patterns, non-obvious constraints
+- Update the file if new findings extend or contradict prior notes
+- `.claude/knowledge/` is an internal AI working directory — do not commit it (add to `.gitignore`)
 
 ### Hidden Dependency Detection
 
