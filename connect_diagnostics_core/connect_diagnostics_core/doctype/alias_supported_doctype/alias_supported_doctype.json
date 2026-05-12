@@ -1,38 +1,46 @@
 {
 	"actions": [],
 	"allow_rename": 1,
-	"creation": "2026-04-06 21:33:19.950994",
+	"creation": "2026-05-07 10:32:27.762085",
 	"doctype": "DocType",
 	"engine": "InnoDB",
-	"field_order": ["select_doctype", "file_to_rename", "rename_log"],
+	"field_order": [
+		"reference_doctype",
+		"alias_field",
+		"is_enabled",
+		"descriptions"
+	],
 	"fields": [
 		{
-			"description": "Type of document to rename.",
-			"fieldname": "select_doctype",
+			"fieldname": "reference_doctype",
 			"fieldtype": "Link",
-			"label": "Select DocType",
-			"link_filters": "[[\"DocType\",\"allow_rename\",\"=\",1],[\"DocType\",\"module\",\"!=\",\"Core\"]]",
+			"label": "Reference Doctype",
 			"options": "DocType"
 		},
 		{
-			"description": "Attach .csv file with two columns, one for the old name and one for the new name",
-			"fieldname": "file_to_rename",
-			"fieldtype": "Attach",
-			"label": "File to Rename"
+			"fieldname": "alias_field",
+			"fieldtype": "Select",
+			"label": "Alias Field"
 		},
 		{
-			"fieldname": "rename_log",
-			"fieldtype": "HTML",
-			"label": "Rename Log"
+			"default": "0",
+			"fieldname": "is_enabled",
+			"fieldtype": "Check",
+			"label": "Is Enabled"
+		},
+		{
+			"fieldname": "descriptions",
+			"fieldtype": "Small Text",
+			"label": "Descriptions"
 		}
 	],
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-04-06 21:35:41.107779",
+	"modified": "2026-05-07 10:41:45.760679",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Core",
-	"name": "Rename Tool V2",
+	"name": "Alias Supported DocType",
 	"owner": "Administrator",
 	"permissions": [
 		{

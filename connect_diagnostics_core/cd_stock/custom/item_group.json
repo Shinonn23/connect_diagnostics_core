@@ -60,7 +60,7 @@
 			"search_index": 0,
 			"show_dashboard": 0,
 			"sort_options": 0,
-			"translatable": 1,
+			"translatable": 0,
 			"unique": 0,
 			"width": null
 		},
@@ -89,7 +89,7 @@
 			"hide_border": 0,
 			"hide_days": 0,
 			"hide_seconds": 0,
-			"idx": 8,
+			"idx": 9,
 			"ignore_user_permissions": 0,
 			"ignore_xss_filter": 0,
 			"in_global_search": 0,
@@ -124,7 +124,7 @@
 			"search_index": 0,
 			"show_dashboard": 0,
 			"sort_options": 0,
-			"translatable": 1,
+			"translatable": 0,
 			"unique": 0,
 			"width": null
 		},
@@ -188,7 +188,7 @@
 			"search_index": 0,
 			"show_dashboard": 0,
 			"sort_options": 0,
-			"translatable": 1,
+			"translatable": 0,
 			"unique": 0,
 			"width": null
 		}
@@ -202,7 +202,7 @@
 			"_comments": null,
 			"_liked_by": null,
 			"_user_tags": null,
-			"creation": "2026-03-27 22:58:20.358680",
+			"creation": "2026-05-05 21:58:39.258452",
 			"default_value": null,
 			"doc_type": "Item Group",
 			"docstatus": 0,
@@ -210,7 +210,7 @@
 			"field_name": null,
 			"idx": 0,
 			"is_system_generated": 0,
-			"modified": "2026-03-27 22:58:20.358680",
+			"modified": "2026-05-05 21:58:39.258452",
 			"modified_by": "Administrator",
 			"module": null,
 			"name": "Item Group-main-field_order",
@@ -218,7 +218,7 @@
 			"property": "field_order",
 			"property_type": "Data",
 			"row_name": null,
-			"value": "[\"gs\", \"item_group_name\", \"parent_item_group\", \"is_group\", \"image\", \"column_break_5\", \"custom_mat_group_code\", \"custom_mat_group4_code\", \"mat_group_desc\", \"defaults\", \"item_group_defaults\", \"sec_break_taxes\", \"taxes\", \"lft\", \"old_parent\", \"rgt\"]"
+			"value": "[\"gs\", \"item_group_name\", \"parent_item_group\", \"is_group\", \"image\", \"column_break_5\", \"custom_mat_group_code\", \"custom_mat_group4_code\", \"custom_mat_group_desc\", \"defaults\", \"item_group_defaults\", \"sec_break_taxes\", \"taxes\", \"lft\", \"old_parent\", \"rgt\"]"
 		}
 	],
 	"sync_on_migrate": 1

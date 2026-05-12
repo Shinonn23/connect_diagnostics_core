@@ -43,8 +43,11 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_js = {
+	"Customer": "public/js/custom/customer/naming_series_control_form.js",
+	"Material Request": "public/js/custom/material_request/doctype.js",
+}
+doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -140,11 +143,11 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 doc_events = {
 	"Employee": {
-		"validate": "connect_diagnostics_core.api.erpnext.employee.validate",
-		"autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
+		# "validate": "connect_diagnostics_core.api.erpnext.employee.validate",
+		# "autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
 	},
 	"Employment Type": {
-		"validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
+		# "validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
 	},
 	"Customer": {
 		"autoname": "connect_diagnostics_core.api.erpnext.customer.autoname",
@@ -255,8 +258,5 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{"doctype": "Client Script", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
-	{"doctype": "Role Profile"},
-	{"doctype": "Salutation"},
 ]
