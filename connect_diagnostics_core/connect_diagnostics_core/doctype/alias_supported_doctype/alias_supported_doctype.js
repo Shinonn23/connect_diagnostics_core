@@ -21,7 +21,12 @@ frappe.ui.form.on("Alias Supported DocType", {
 		frappe.model.with_doctype(frm.doc.reference_doctype, function () {
 			const meta = frappe.get_meta(frm.doc.reference_doctype);
 			const fields = meta.fields
-				.filter((f) => ALIAS_FIELD_TYPES.includes(f.fieldtype) && !f.hidden && f.label)
+				.filter(
+					(f) =>
+						ALIAS_FIELD_TYPES.includes(f.fieldtype) &&
+						!f.hidden &&
+						f.label
+				)
 				.map((f) => f.fieldname);
 
 			frm.set_df_property("alias_field", "options", ["", ...fields]);

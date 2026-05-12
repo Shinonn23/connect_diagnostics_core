@@ -147,7 +147,10 @@ frappe.listview_settings["Sales Order"] = {
 		// We swap it: name becomes Subject (columns[0], the clickable link), customer_name
 		// becomes a Field inserted after the Tag column (index 2).
 		const customerNameCol = { ...listview.columns[0], type: "Field" };
-		listview.columns[0] = { type: "Subject", df: { label: __("ID"), fieldname: "name" } };
+		listview.columns[0] = {
+			type: "Subject",
+			df: { label: __("ID"), fieldname: "name" },
+		};
 		listview.columns.splice(2, 0, customerNameCol);
 		listview.render_header(true);
 	},

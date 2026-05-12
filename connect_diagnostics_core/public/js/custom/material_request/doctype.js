@@ -22,6 +22,8 @@ function validate_schedule_date(frm) {
 		frappe.throw("Schedule date cannot be in the past.");
 	}
 	if (diffDays > 180) {
-		frappe.throw("Schedule date cannot be more than 6 months in the future.");
+		frappe.throw(
+			"Schedule date cannot be more than 6 months in the future."
+		);
 	}
 }

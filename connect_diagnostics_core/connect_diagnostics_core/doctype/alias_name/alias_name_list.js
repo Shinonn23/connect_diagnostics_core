@@ -3,7 +3,7 @@ frappe.listview_settings["Alias Name"] = {
 	add_fields: ["documents", "original_display_name"],
 	formatters: {
 		original_display_name(val) {
-			return `<span style="min-width:300px; display:inline-block;">${val || ""}</span>`;
+			return `<span style="display:inline-block;">${val || ""}</span>`;
 		},
 	},
 	onload(listview) {
@@ -13,7 +13,7 @@ frappe.listview_settings["Alias Name"] = {
 		};
 
 		const alias_col_idx = listview.columns.findIndex(
-			(c) => c.type === "Field" && c.df?.fieldname === "alias_name",
+			(c) => c.type === "Field" && c.df?.fieldname === "alias_name"
 		);
 		if (alias_col_idx !== -1) {
 			listview.columns.splice(alias_col_idx, 1);

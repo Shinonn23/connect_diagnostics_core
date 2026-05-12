@@ -3,23 +3,33 @@ frappe.listview_settings["Alias Supported DocType"] = {
 	add_fields: ["reference_doctype", "alias_field", "is_enabled"],
 	formatters: {
 		is_enabled(val) {
-			return val
-				? `<span class="indicator-pill green ellipsis">${__("Enabled")}</span>`
-				: `<span class="indicator-pill gray ellipsis">${__("Disabled")}</span>`;
+			const label = val ? __("Enabled") : __("Disabled");
+			const color = val ? "green" : "gray";
+
+			return `<span class="indicator-pill ${color} ellipsis">${label}</span>`;
 		},
 	},
 	onload(listview) {
 		listview.columns[0] = {
 			type: "Subject",
-			df: frappe.meta.get_docfield("Alias Supported DocType", "reference_doctype"),
+			df: frappe.meta.get_docfield(
+				"Alias Supported DocType",
+				"reference_doctype"
+			),
 		};
 		listview.columns.push({
 			type: "Field",
-			df: frappe.meta.get_docfield("Alias Supported DocType", "alias_field"),
+			df: frappe.meta.get_docfield(
+				"Alias Supported DocType",
+				"alias_field"
+			),
 		});
 		listview.columns.push({
 			type: "Field",
-			df: frappe.meta.get_docfield("Alias Supported DocType", "is_enabled"),
+			df: frappe.meta.get_docfield(
+				"Alias Supported DocType",
+				"is_enabled"
+			),
 		});
 		listview.render_header(true);
 	},
