@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.utils import flt, getdate
 
 
@@ -17,14 +18,14 @@ def execute(filters: dict | None = None) -> tuple[list, list]:
 
 def _validate_filters(filters: frappe._dict) -> None:
 	if not filters.company:
-		frappe.throw("Company is required")
+		frappe.throw(_("Company is required"))
 	if not filters.from_date or not filters.to_date:
-		frappe.throw("From Date and To Date are required")
+		frappe.throw(_("From Date and To Date are required"))
 
 	from_date_obj = getdate(filters.from_date)
 	to_date_obj = getdate(filters.to_date)
 	if from_date_obj and to_date_obj and from_date_obj > to_date_obj:
-		frappe.throw("From Date cannot be greater than To Date")
+		frappe.throw(_("From Date cannot be greater than To Date"))
 
 	if not filters.get("from_account"):
 		filters.from_account = "1000-00"
@@ -34,25 +35,39 @@ def _validate_filters(filters: frappe._dict) -> None:
 
 def _get_columns() -> list[dict]:
 	return [
-		{"fieldname": "account_number", "label": "เลขที่บัญชี", "fieldtype": "Data", "width": 110},
+		{"fieldname": "account_number", "label": _("Account Number"), "fieldtype": "Data", "width": 110},
 		{
 			"fieldname": "cost_center",
-			"label": "แผนก",
+			"label": _("Cost Center"),
 			"fieldtype": "Link",
 			"options": "Cost Center",
 			"width": 130,
 		},
-		{"fieldname": "account_name", "label": "ชื่อบัญชี", "fieldtype": "Data", "width": 260},
-		{"fieldname": "debit", "label": "เดบิท", "fieldtype": "Currency", "width": 160},
-		{"fieldname": "credit", "label": "เครดิต", "fieldtype": "Currency", "width": 160},
+		{"fieldname": "account_name", "label": _("Account Name"), "fieldtype": "Data", "width": 260},
+		{"fieldname": "debit", "label": _("Debit"), "fieldtype": "Currency", "width": 160},
+		{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 160},
 	]
 
 
 def _get_data(filters: frappe._dict) -> list[dict]:
-	cost_center_condition, params = _build_params(filters)
+	conditions = []
+	params = {
+		"company": filters.company,
+		"to_date": filters.to_date,
+		"from_account": filters.from_account,
+		"to_account": filters.to_account,
+	}
+
+	if filters.get("cost_center"):
+		conditions.append("gle.cost_center = %(cost_center)s")
+		params["cost_center"] = filters.cost_center
+
+	where_clause = ""
+	if conditions:
+		where_clause = " AND " + " AND ".join(conditions)
 
 	rows = frappe.db.sql(
-		f"""
+		"""
 		SELECT
 			a.account_number,
 			a.account_name,
@@ -66,7 +81,9 @@ def _get_data(filters: frappe._dict) -> list[dict]:
 			AND gle.is_cancelled = 0
 			AND a.account_number >= %(from_account)s
 			AND a.account_number <= %(to_account)s
-			{cost_center_condition}
+		"""
+		+ where_clause
+		+ """
 		GROUP BY a.account_number, a.account_name, gle.cost_center
 		ORDER BY a.account_number, gle.cost_center
 		""",
@@ -75,6 +92,7 @@ def _get_data(filters: frappe._dict) -> list[dict]:
 	)
 
 	data = []
+
 	for row in rows:
 		net = flt(row.net_balance)
 		debit = net if net > 0 else 0.0
