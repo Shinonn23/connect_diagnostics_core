@@ -34,13 +34,19 @@ def get_supported_doctypes(
 		return []
 
 	return frappe.db.sql(
-		f"""
-		SELECT name FROM tabDocType
-		WHERE name IN %(supported)s AND name LIKE %(txt)s
-		ORDER BY name
-		LIMIT {start}, {page_len}
-		""",
-		{"supported": tuple(supported), "txt": f"%{txt}%"},
+		"""
+    SELECT name FROM tabDocType
+    WHERE name IN %(supported)s
+      AND name LIKE %(txt)s
+    ORDER BY name
+    LIMIT %(start)s, %(page_len)s
+    """,
+		{
+			"supported": tuple(supported),
+			"txt": f"%{txt}%",
+			"start": start,
+			"page_len": page_len,
+		},
 	)
 
 

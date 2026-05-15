@@ -19,11 +19,13 @@ function validate_schedule_date(frm) {
 	const diffDays = (scheduleDate - today) / (1000 * 60 * 60 * 24);
 
 	if (diffDays < 0) {
-		frappe.throw("Schedule date cannot be in the past.");
+		frappe.throw(frappe._("Schedule date cannot be in the past."));
 	}
 	if (diffDays > 180) {
 		frappe.throw(
-			"Schedule date cannot be more than 6 months in the future."
+			frappe._(
+				"Schedule date cannot be more than 6 months in the future."
+			)
 		);
 	}
 }

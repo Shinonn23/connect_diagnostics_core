@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.contacts.doctype.contact.contact import Contact
 from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import cstr
@@ -19,7 +20,9 @@ def autoname(doc: Contact, method: str):
 
 	if not doc.name:
 		frappe.throw(
-			"Please provide a First Name, Last Name, Company Name, or a Linked Document to create a Contact."
+			_(
+				"Please provide a First Name, Last Name, Company Name, or a Linked Document to create a Contact."
+			)
 		)
 
 	if frappe.db.exists("Contact", doc.name):
