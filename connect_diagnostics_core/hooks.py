@@ -142,13 +142,6 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 
 
 doc_events = {
-	"Employee": {
-		# "validate": "connect_diagnostics_core.api.erpnext.employee.validate",
-		# "autoname": "connect_diagnostics_core.api.erpnext.employee.autoname",
-	},
-	"Employment Type": {
-		# "validate": "connect_diagnostics_core.api.erpnext.employment_type.validate",
-	},
 	"Customer": {
 		"autoname": "connect_diagnostics_core.api.erpnext.customer.autoname",
 	},

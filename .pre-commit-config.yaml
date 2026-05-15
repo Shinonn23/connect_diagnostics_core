@@ -8,6 +8,15 @@ default_stages: [pre-commit]
 fail_fast: false
 
 repos:
+    - repo: local
+      hooks:
+          - id: semgrep-frappe
+            name: "Run Semgrep (Frappe rules)"
+            language: python
+            additional_dependencies: [semgrep]
+            entry: bash -c "git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules || true; semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness"
+            pass_filenames: false
+
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0
       hooks:
