@@ -44,8 +44,13 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 # include js in doctype views
 doctype_js = {
-	"Customer": "public/js/custom/customer/naming_series_control_form.js",
+	"Customer": "public/js/custom/customer/doctype.js",
+	"Delivery Note": "public/js/custom/delivery_note/doctype.js",
 	"Material Request": "public/js/custom/material_request/doctype.js",
+	"Purchase Order": "public/js/custom/purchase_order/doctype.js",
+	"Quotation": "public/js/custom/quotation/doctype.js",
+	"Sales Order": "public/js/custom/sales_order/doctype.js",
+	"Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -143,7 +148,15 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 
 doc_events = {
 	"Customer": {
-		"autoname": "connect_diagnostics_core.api.erpnext.customer.autoname",
+		"before_naming": "connect_diagnostics_core.api.erpnext.customer.before_naming",
+		"validate": "connect_diagnostics_core.api.erpnext.customer.validate",
+	},
+	"Supplier": {
+		"before_naming": "connect_diagnostics_core.api.erpnext.supplier.before_naming",
+		"validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+	},
+	"Employee": {
+		"before_naming": "connect_diagnostics_core.api.erpnext.employee.before_naming",
 	},
 }
 
@@ -176,10 +189,8 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-override_whitelisted_methods = {
-	"erpnext.utilities.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
-	"frappe.core.doctype.rename_tool.rename_tool.upload": "connect_diagnostics_core.api.erpnext.rename_tool.upload",
-}
+# override_whitelisted_methods = {
+# }
 
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

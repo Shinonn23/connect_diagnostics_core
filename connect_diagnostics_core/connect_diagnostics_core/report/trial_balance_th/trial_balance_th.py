@@ -92,6 +92,8 @@ def _get_data(filters: frappe._dict) -> list[dict]:
 	)
 
 	data = []
+	total_debit = 0.0
+	total_credit = 0.0
 
 	for row in rows:
 		net = flt(row.net_balance)
@@ -100,6 +102,9 @@ def _get_data(filters: frappe._dict) -> list[dict]:
 
 		if not filters.get("show_zero_values") and not net:
 			continue
+
+		total_debit += debit
+		total_credit += credit
 
 		data.append(
 			{
@@ -110,6 +115,17 @@ def _get_data(filters: frappe._dict) -> list[dict]:
 				"credit": credit,
 			}
 		)
+
+	data.append(
+		{
+			"account_number": "",
+			"cost_center": "",
+			"account_name": _("Total"),
+			"debit": total_debit,
+			"credit": total_credit,
+			"bold": 1,
+		}
+	)
 
 	return data
 
