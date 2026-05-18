@@ -1,0 +1,66 @@
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from __future__ import annotations
+
+from typing import Any
+
+import frappe
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_item_with_stock(
+	doctype: str,
+	txt: str,
+	searchfield: str,
+	start: int,
+	page_len: int,
+	filters: dict[str, Any] | None = None,
+) -> list[tuple]:
+	frappe.has_permission("Item", throw=True)
+
+	search_string = f"%{txt}%"
+	warehouse: str = (filters or {}).get("warehouse", "")
+
+	if warehouse:
+		return frappe.db.sql(
+			"""
+			SELECT
+				i.name,
+				i.item_name,
+				IFNULL(SUM(b.actual_qty), 0) AS qty
+			FROM `tabItem` i
+			LEFT JOIN `tabBin` b ON i.name = b.item_code AND b.warehouse = %(warehouse)s
+			WHERE (i.name LIKE %(txt)s OR i.item_name LIKE %(txt)s)
+				AND i.disabled = 0
+			GROUP BY i.name
+			LIMIT %(start)s, %(page_len)s
+			""",
+			{
+				"txt": search_string,
+				"warehouse": warehouse,
+				"start": start,
+				"page_len": page_len,
+			},
+		)
+
+	return frappe.db.sql(
+		"""
+		SELECT
+			i.name,
+			i.item_name,
+			IFNULL(SUM(b.actual_qty), 0) AS qty
+		FROM `tabItem` i
+		LEFT JOIN `tabBin` b ON i.name = b.item_code
+		WHERE (i.name LIKE %(txt)s OR i.item_name LIKE %(txt)s)
+			AND i.disabled = 0
+		GROUP BY i.name
+		LIMIT %(start)s, %(page_len)s
+		""",
+		{
+			"txt": search_string,
+			"start": start,
+			"page_len": page_len,
+		},
+	)
