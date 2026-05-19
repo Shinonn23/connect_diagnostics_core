@@ -44,13 +44,12 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 # include js in doctype views
 doctype_js = {
-	"Customer": "public/js/custom/customer/doctype.js",
-	"Delivery Note": "public/js/custom/delivery_note/doctype.js",
-	"Material Request": "public/js/custom/material_request/doctype.js",
-	"Purchase Order": "public/js/custom/purchase_order/doctype.js",
-	"Quotation": "public/js/custom/quotation/doctype.js",
-	"Sales Order": "public/js/custom/sales_order/doctype.js",
-	"Stock Entry": "public/js/custom/stock_entry/doctype.js",
+    "Delivery Note": "public/js/custom/delivery_note/doctype.js",
+    "Material Request": "public/js/custom/material_request/doctype.js",
+    "Purchase Order": "public/js/custom/purchase_order/doctype.js",
+    "Quotation": "public/js/custom/quotation/doctype.js",
+    "Sales Order": "public/js/custom/sales_order/doctype.js",
+    "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -137,9 +136,9 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+    "Customer": "connect_diagnostics_core.api.erpnext.customer.CustomCustomer",
+}
 
 # Document Events
 # ---------------
@@ -147,17 +146,16 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 
 
 doc_events = {
-	"Customer": {
-		"before_naming": "connect_diagnostics_core.api.erpnext.customer.before_naming",
-		"validate": "connect_diagnostics_core.api.erpnext.customer.validate",
-	},
-	"Supplier": {
-		"before_naming": "connect_diagnostics_core.api.erpnext.supplier.before_naming",
-		"validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
-	},
-	"Employee": {
-		"before_naming": "connect_diagnostics_core.api.erpnext.employee.before_naming",
-	},
+    "Customer": {
+        "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
+    },
+    "Supplier": {
+        "before_naming": "connect_diagnostics_core.api.erpnext.supplier.before_naming",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+    },
+    "Employee": {
+        "before_naming": "connect_diagnostics_core.api.erpnext.employee.before_naming",
+    },
 }
 
 # Scheduled Tasks
@@ -262,5 +260,5 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
-	{"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
+    {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
 ]

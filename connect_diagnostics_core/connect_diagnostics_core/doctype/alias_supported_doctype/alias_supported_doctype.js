@@ -25,7 +25,7 @@ frappe.ui.form.on("Alias Supported DocType", {
 					(f) =>
 						ALIAS_FIELD_TYPES.includes(f.fieldtype) &&
 						!f.hidden &&
-						f.label
+						f.label,
 				)
 				.map((f) => f.fieldname);
 

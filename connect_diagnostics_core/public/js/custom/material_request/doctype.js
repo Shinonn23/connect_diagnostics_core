@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Material Request", {
-	setup(frm) {
+	refresh(frm) {
 		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 			const row = frappe.get_doc(cdt, cdn);
 			return {
@@ -33,8 +33,8 @@ function validate_schedule_date(frm) {
 	if (diffDays > 180) {
 		frappe.throw(
 			frappe._(
-				"Schedule date cannot be more than 6 months in the future."
-			)
+				"Schedule date cannot be more than 6 months in the future.",
+			),
 		);
 	}
 }

@@ -1,2 +1,2 @@
 Connect Diagnostics Core
-CD Stock
+Connect Diagnostics Stock

@@ -6,16 +6,16 @@ from frappe.model.document import Document
 
 
 class AliasName(Document):
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
+    # begin: auto-generated types
+    # This code is auto-generated. Do not modify anything in this block.
 
-	from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING
 
-	if TYPE_CHECKING:
-		from frappe.types import DF
+    if TYPE_CHECKING:
+        from frappe.types import DF
 
-		alias_name: DF.Data
-		documents: DF.Link | None
-		original_display_name: DF.Data | None
-		primary_name: DF.DynamicLink
-	# end: auto-generated types
+        alias_name: DF.Data
+        documents: DF.Link | None
+        original_display_name: DF.Data | None
+        primary_name: DF.DynamicLink
+    # end: auto-generated types

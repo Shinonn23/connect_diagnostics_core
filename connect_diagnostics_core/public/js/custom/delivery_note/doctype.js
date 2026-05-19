@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Delivery Note", {
-	setup(frm) {
+	refresh(frm) {
 		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 			const row = frappe.get_doc(cdt, cdn);
 			return {

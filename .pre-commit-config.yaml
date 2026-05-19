@@ -1,91 +1,145 @@
 exclude: |
     (?x)^(
+        \.git/.*|
         \.zed/.*|
+        \.vscode/.*|
         node_modules/.*|
-        \.git/.*
+        .*/dist/.*|
+        .*/coverage/.*|
+        .*/__pycache__/.*|
+        typings/.*
     )$
+
 default_stages: [pre-commit]
 fail_fast: false
 
-repos:
-    - repo: local
-      hooks:
-          - id: semgrep-frappe
-            name: "Run Semgrep (Frappe rules)"
-            language: python
-            additional_dependencies: [semgrep]
-            entry: bash -c "git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules || true; semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness"
-            pass_filenames: false
+default_language_version:
+    python: python3.12
 
+repos:
+    # =========================================================
+    # Basic sanity checks
+    # =========================================================
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0
       hooks:
           - id: trailing-whitespace
-            files: "connect_diagnostics_core.*"
-            exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
+            exclude: ".*(json|txt|csv|md|svg)$"
+
+          - id: end-of-file-fixer
+
           - id: check-merge-conflict
+
           - id: check-ast
-          - id: check-json
-          - id: check-toml
-          - id: check-yaml
+
           - id: debug-statements
 
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.8.1
-      hooks:
-          - id: ruff
-            name: "Run ruff import sorter"
-            args: ["--select=I", "--fix"]
-            exclude: "typings/"
+          - id: check-json
 
-          - id: ruff
-            name: "Run ruff linter"
+          - id: check-toml
+
+          - id: check-yaml
+            args: [--unsafe]
+
+    # =========================================================
+    # Ruff (lint + import sort + autofix)
+    # =========================================================
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.14.1
+      hooks:
+          - id: ruff-check
+            name: ruff-check
+            args:
+                - --fix
+                - --exit-non-zero-on-fix
             exclude: "typings/"
 
           - id: ruff-format
-            name: "Run ruff formatter"
+            name: ruff-format
             exclude: "typings/"
 
-    - repo: https://github.com/pre-commit/mirrors-prettier
-      rev: v2.7.1
+    # =========================================================
+    # Pyrefly (type checking)
+    # =========================================================
+    - repo: local
       hooks:
-          - id: prettier
-            name: "Format JS/Vue/SCSS"
-            types_or: [javascript, vue, scss]
-            args: ["--write"]
+          - id: pyrefly
+            name: pyrefly
+            language: system
+            entry: pyrefly check
+            types: [python]
+
+            # ค่อย ๆ เปิด scope ก่อนสำหรับ frappe
+            files: "^connect_diagnostics_core/"
+
+    # =========================================================
+    # Semgrep
+    # =========================================================
+    - repo: https://github.com/semgrep/pre-commit
+      rev: v1.163.0
+      hooks:
+          - id: semgrep
+            name: semgrep-frappe
+            args:
+                - --config=https://github.com/frappe/semgrep-rules
+                - --config=r/python.lang.correctness
             exclude: |
                 (?x)^(
-                    connect_diagnostics_core/public/dist/.*|
-                    .*node_modules.*|
+                    typings/.*|
+                    node_modules/.*|
+                    .*/dist/.*
+                )$
+
+    # =========================================================
+    # Prettier
+    # ใช้ local เพราะ sync กับ package.json จริง
+    # =========================================================
+    - repo: local
+      hooks:
+          - id: prettier
+            name: prettier
+            language: system
+            entry: npx prettier --write
+            types_or:
+                [javascript, jsx, ts, tsx, vue, scss, css, json, yaml, markdown]
+
+            exclude: |
+                (?x)^(
+                    node_modules/.*|
+                    .*/dist/.*|
                     .*boilerplate.*|
-                    connect_diagnostics_core/templates/includes/.*|
                     connect_diagnostics_core/public/js/lib/.*
                 )$
 
-          - id: prettier
-            name: "Format JSON"
-            types_or: [json]
-            args: ["--write", "--tab-width", "4"]
-            exclude: |
-                (?x)^(connect_diagnostics_core/public/dist/.*|.*node_modules.*|.*boilerplate.*|.*zed.*|.*vscode.*)$
-
-    - repo: https://github.com/pre-commit/mirrors-eslint
-      rev: v8.44.0
+    # =========================================================
+    # ESLint
+    # ใช้ local เพื่อใช้ dependency จริงของ project
+    # =========================================================
+    - repo: local
       hooks:
           - id: eslint
-            types_or: [javascript]
-            args: ["--quiet"]
+            name: eslint
+            language: system
+            entry: npx eslint --quiet
+            types_or: [javascript, jsx, ts, tsx, vue]
+
             exclude: |
                 (?x)^(
-                    connect_diagnostics_core/public/dist/.*|
+                    node_modules/.*|
                     cypress/.*|
-                    .*node_modules.*|
+                    .*/dist/.*|
                     .*boilerplate.*|
-                    connect_diagnostics_core/templates/includes/.*|
                     connect_diagnostics_core/public/js/lib/.*
                 )$
 
+# =============================================================
+# pre-commit.ci
+# =============================================================
 ci:
     autoupdate_schedule: weekly
-    skip: []
     submodules: false
+
+    # semgrep + pyrefly มักหนักสำหรับ auto-fix bot
+    skip:
+        - semgrep-frappe
+        - pyrefly

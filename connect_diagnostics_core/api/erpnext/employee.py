@@ -4,37 +4,25 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Protocol, cast
+from typing import cast
 
 import frappe
 from erpnext.setup.doctype.employee.employee import Employee
 from frappe import _
-from frappe.utils import getdate
 
 
-class _EmployeeNamingSeries(Protocol):
-	naming_series: str
+class CustomEmployee(Employee):
+    naming_series: str
+    date_of_joining: date
 
+    def autoname(self) -> None:
+        if not self.date_of_joining:
+            frappe.throw(_("Date of joining is required to generate the employee ID"))
 
-def before_naming(doc: Employee, _method: Any) -> None:
-	naming_series: str = cast(str, doc.get("naming_series") or "")
-	if not naming_series:
-		return
-
-	date_of_joining: str | None = cast(str | None, doc.get("date_of_joining"))
-	if not date_of_joining:
-		frappe.throw(_("Date of joining is required to generate the employee ID"))
-
-	joining_date = getdate(date_of_joining)
-	if not joining_date:
-		frappe.throw(_("Date of joining is required to generate the employee ID"))
-	joining_date = cast(date, joining_date)
-
-	# Replace date tokens with values from date_of_joining.
-	# YYYY must be substituted before YY to avoid partial double-replacement.
-	date_tokens = (
-		naming_series.replace("YYYY", joining_date.strftime("%Y"))
-		.replace("YY", joining_date.strftime("%y"))
-		.replace("MM", joining_date.strftime("%m"))
-	)
-	cast(_EmployeeNamingSeries, doc).naming_series = date_tokens
+        # Replace date tokens with values from date_of_joining.
+        # YYYY must be substituted before YY to avoid partial double-replacement.
+        self.naming_series = (
+            self.naming_series.replace("YYYY", self.date_of_joining.strftime("%Y"))
+            .replace("YY", self.date_of_joining.strftime("%y"))
+            .replace("MM", self.date_of_joining.strftime("%m"))
+        )

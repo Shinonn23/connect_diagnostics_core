@@ -11,21 +11,25 @@ import frappe
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_item_with_stock(
-	doctype: str,
-	txt: str,
-	searchfield: str,
-	start: int,
-	page_len: int,
-	filters: dict[str, Any] | None = None,
+    doctype: str,
+    txt: str,
+    searchfield: str,
+    start: int,
+    page_len: int,
+    filters: dict[str, Any] | None = None,
 ) -> list[tuple]:
-	frappe.has_permission("Item", throw=True)
+    frappe.has_permission("Item", throw=True)
 
-	search_string = f"%{txt}%"
-	warehouse: str = (filters or {}).get("warehouse", "")
+    search_string = f"%{txt}%"
+    warehouse: str = (filters or {}).get("warehouse", "")
 
-	if warehouse:
-		return frappe.db.sql(
-			"""
+    def _format(rows: list[tuple]) -> list[tuple]:
+        return [(r[0], r[1], f"{r[2]:g} QTY.") for r in rows]
+
+    if warehouse:
+        return _format(
+            frappe.db.sql(
+                """
 			SELECT
 				i.name,
 				i.item_name,
@@ -37,16 +41,18 @@ def get_item_with_stock(
 			GROUP BY i.name
 			LIMIT %(start)s, %(page_len)s
 			""",
-			{
-				"txt": search_string,
-				"warehouse": warehouse,
-				"start": start,
-				"page_len": page_len,
-			},
-		)
+                {
+                    "txt": search_string,
+                    "warehouse": warehouse,
+                    "start": start,
+                    "page_len": page_len,
+                },
+            )
+        )
 
-	return frappe.db.sql(
-		"""
+    return _format(
+        frappe.db.sql(
+            """
 		SELECT
 			i.name,
 			i.item_name,
@@ -58,9 +64,10 @@ def get_item_with_stock(
 		GROUP BY i.name
 		LIMIT %(start)s, %(page_len)s
 		""",
-		{
-			"txt": search_string,
-			"start": start,
-			"page_len": page_len,
-		},
-	)
+            {
+                "txt": search_string,
+                "start": start,
+                "page_len": page_len,
+            },
+        )
+    )
