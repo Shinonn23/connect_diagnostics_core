@@ -1,0 +1,8 @@
+{
+	"recommendations": [
+		"charliermarsh.ruff",
+		"meta.pyrefly",
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint"
+	]
+}

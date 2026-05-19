@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestRegulationClass(FrappeTestCase):
-	pass
+class TestStorageCondition(FrappeTestCase):
+    pass

@@ -14,21 +14,21 @@ frappe.listview_settings["Alias Supported DocType"] = {
 			type: "Subject",
 			df: frappe.meta.get_docfield(
 				"Alias Supported DocType",
-				"reference_doctype"
+				"reference_doctype",
 			),
 		};
 		listview.columns.push({
 			type: "Field",
 			df: frappe.meta.get_docfield(
 				"Alias Supported DocType",
-				"alias_field"
+				"alias_field",
 			),
 		});
 		listview.columns.push({
 			type: "Field",
 			df: frappe.meta.get_docfield(
 				"Alias Supported DocType",
-				"is_enabled"
+				"is_enabled",
 			),
 		});
 		listview.render_header(true);

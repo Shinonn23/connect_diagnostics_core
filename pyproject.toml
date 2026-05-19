@@ -44,10 +44,12 @@ typing-modules = ["frappe.types.DF"]
 
 [tool.ruff.format]
 quote-style = "double"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
 
-
-[tool.ty]
-environment.python = "../../env/bin/python"
-src.exclude = ["typings"]
+[tool.pyrefly]
+python-interpreter-path = "../../env/bin/python"
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]
