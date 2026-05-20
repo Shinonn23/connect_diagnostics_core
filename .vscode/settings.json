@@ -1,7 +1,7 @@
 {
     "workbench.colorTheme": "Dark 2026",
     "python.languageServer": "None",
-    "editor.insertSpaces": false,
+    "editor.insertSpaces": true,
     "editor.tabSize": 4,
     "editor.detectIndentation": false,
     "editor.trimAutoWhitespace": true,
@@ -16,5 +16,6 @@
     "python.pyrefly.diagnosticMode": "workspace",
     "python.pyrefly.disableTypeErrors": false,
     "pyrefly.trace.server": "verbose",
-    "pyrefly.commentFoldingRanges": true
+    "pyrefly.commentFoldingRanges": true,
+    "makefile.configureOnOpen": false
 }
