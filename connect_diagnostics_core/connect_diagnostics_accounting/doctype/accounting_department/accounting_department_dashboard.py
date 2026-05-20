@@ -6,6 +6,6 @@ from frappe import _
 
 def get_data() -> dict:
     return {
-        "fieldname": "accounting_department",
+        "fieldname": "department",
         "reports": [{"label": _("Reports"), "items": ["General Ledger"]}],
     }

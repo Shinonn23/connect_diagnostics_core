@@ -62,34 +62,24 @@ class AccountingDepartment(NestedSet):
     def convert_group_to_ledger(self) -> int:
         if self.check_if_child_exists():
             frappe.throw(_("Cannot convert Accounting Department to ledger as it has child nodes"))
-            raise frappe.ValidationError(
-                _("Cannot convert Accounting Department to ledger as it has child nodes")
-            )
-        elif self.check_gle_exists():
+        if self.check_gle_exists():
             frappe.throw(_("Accounting Department with existing transactions can not be converted to ledger"))
-            raise frappe.ValidationError(
-                _("Accounting Department with existing transactions can not be converted to ledger")
-            )
-        else:
-            self.is_group = 0
-            self.save()
-            return 1
+        self.is_group = 0
+        self.save()
+        return 1
 
     @frappe.whitelist()
     def convert_ledger_to_group(self) -> int:
         if self.check_gle_exists():
             frappe.throw(_("Accounting Department with existing transactions can not be converted to group"))
-            raise frappe.ValidationError(
-                _("Accounting Department with existing transactions can not be converted to group")
-            )
         self.is_group = 1
         self.save()
         return 1
 
     def check_gle_exists(self) -> str | None:
-        if not frappe.db.has_column("GL Entry", "accounting_department"):
+        if not frappe.db.has_column("GL Entry", "department"):
             return None
-        return cast(str, frappe.db.get_value("GL Entry", {"accounting_department": self.name}))
+        return cast(str, frappe.db.get_value("GL Entry", {"department": self.name}))
 
     def check_if_child_exists(self) -> list:
         return frappe.db.sql(
@@ -173,13 +163,12 @@ def add_node() -> str:
     if not dept.parent_accounting_department:
         dept.parent_accounting_department = args.get("parent")
 
-    if not dept.name:
-        raise frappe.ValidationError(_("Accounting Department name is mandatory"))
+    if not dept.department_name:
         frappe.throw(_("Accounting Department name is mandatory"))
 
     dept.old_parent = ""
     dept.insert()
-    return dept.name
+    return cast(str, dept.name)
 
 
 @frappe.whitelist()

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import frappe
 from frappe import _
@@ -15,10 +15,10 @@ def create_default_accounting_department(doc: Document, _method: Any) -> None:
         return
 
     if not doc.name:
-        raise ValueError(_("Company name is required to create default accounting department"))
         frappe.throw(_("Company name is required to create default accounting department"))
 
-    company_abbr: str = frappe.get_cached_value("Company", doc.name, "abbr")
+    company_name = cast(str, doc.name)
+    company_abbr: str = frappe.get_cached_value("Company", company_name, "abbr")
     root_name: str = f"{doc.name} - {company_abbr}"
 
     dept_list = [
