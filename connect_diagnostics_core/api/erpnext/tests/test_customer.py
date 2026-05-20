@@ -117,12 +117,33 @@ _KNOWN_TEST_NAMES: list[tuple[str, str]] = [
 ]
 
 
+def _ensure_non_group_customer_group() -> str:
+    existing: str | None = frappe.db.get_value("Customer Group", {"is_group": 0}, "name")
+    if existing:
+        return existing
+    group = frappe.get_doc(
+        {
+            "doctype": "Customer Group",
+            "customer_group_name": "_Test Non-Group Customer Group",
+            "is_group": 0,
+            "parent_customer_group": "All Customer Groups",
+        }
+    )
+    group.insert(ignore_permissions=True)
+    return cast(str, group.name)
+
+
 class TestCustomCustomerNamingE2E(FrappeTestCase):
     """
     Verifies the complete naming flow:
       INSERT → CustomCustomer.autoname() fires via override_doctype_class
       SAVE   → validate() hook fires via doc_events, may call frappe.rename_doc
     """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.customer_group = _ensure_non_group_customer_group()
 
     def setUp(self):
         self._to_delete: list[tuple[str, str]] = list(_KNOWN_TEST_NAMES)
@@ -141,6 +162,7 @@ class TestCustomCustomerNamingE2E(FrappeTestCase):
                 "doctype": "Customer",
                 "customer_name": "_Test Naming Customer",
                 "customer_type": "Company",
+                "customer_group": self.customer_group,
                 **kwargs,
             }
         )
@@ -175,8 +197,9 @@ class TestCustomCustomerNamingE2E(FrappeTestCase):
         # Name must come from the series, not from any constant code value
         # pyrefly: ignore [missing-attribute]
         self.assertFalse(doc.name.startswith("_Test"))
+        # Frappe collapses the `.` separators in naming_series → "PTN" prefix
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc.name.startswith("PTN."))
+        self.assertTrue(doc.name.startswith("PTN"))
 
     # --- validate hook (via doc_events) ---
 

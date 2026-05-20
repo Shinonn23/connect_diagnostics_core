@@ -54,9 +54,10 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
     """
     Verifies that Employee IDs reflect date_of_joining, not the current date.
     Series format (from property setter): "YY.MM.###" and "C.YY.MM.###".
-    After token replacement for date(2025, 3, 7):
-      "YY.MM.###"   → "25.03.###"   → Frappe generates  "25.03.001" …
-      "C.YY.MM.###" → "C.25.03.###" → Frappe generates  "C.25.03.001" …
+    After token replacement for date(2025, 3, 7), Frappe collapses the
+    `.` separators when generating the final name:
+      "YY.MM.###"   → "25.03.###"   → Frappe generates  "2503001" …
+      "C.YY.MM.###" → "C.25.03.###" → Frappe generates  "C2503001" …
     """
 
     def setUp(self):
@@ -84,12 +85,12 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
         return doc
 
     def test_employee_id_reflects_joining_year_and_month(self):
-        # date_of_joining = 2025-03 → name must start with "25.03."
+        # date_of_joining = 2025-03 → name must start with "2503" (dots collapsed)
         doc = self._insert_employee(date_of_joining=date(2025, 3, 7))
         self.assertTrue(
             # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("25.03."),
-            f"Expected name to start with '25.03.' but got '{doc.name}'",
+            doc.name.startswith("2503"),
+            f"Expected name to start with '2503' but got '{doc.name}'",
         )
 
     def test_contract_series_prefix_included_in_name(self):
@@ -99,20 +100,20 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
         )
         self.assertTrue(
             # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("C.25.03."),
-            f"Expected name to start with 'C.25.03.' but got '{doc.name}'",
+            doc.name.startswith("C2503"),
+            f"Expected name to start with 'C2503' but got '{doc.name}'",
         )
 
     def test_different_joining_date_produces_different_prefix(self):
         doc_mar = self._insert_employee(date_of_joining=date(2025, 3, 1))
         doc_sep = self._insert_employee(date_of_joining=date(2025, 9, 1))
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_mar.name.startswith("25.03."))
+        self.assertTrue(doc_mar.name.startswith("2503"))
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_sep.name.startswith("25.09."))
+        self.assertTrue(doc_sep.name.startswith("2509"))
         # The joining-date prefix distinguishes IDs even within the same year
         # pyrefly: ignore [unsupported-operation]
-        self.assertNotEqual(doc_mar.name[:5], doc_sep.name[:5])
+        self.assertNotEqual(doc_mar.name[:4], doc_sep.name[:4])
 
     def test_missing_date_of_joining_raises_validation_error(self):
         # Our autoname calls frappe.throw when date_of_joining is absent
