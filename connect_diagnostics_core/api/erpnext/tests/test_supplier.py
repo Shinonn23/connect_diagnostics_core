@@ -174,8 +174,9 @@ class TestCustomSupplierNamingE2E(FrappeTestCase):
         self._to_delete.append(("Supplier", doc.name))
         # pyrefly: ignore [missing-attribute]
         self.assertFalse(doc.name.startswith("_Test"))
+        # Frappe collapses the `.` separators in naming_series → "PTN" prefix
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc.name.startswith("PTN."))
+        self.assertTrue(doc.name.startswith("PTN"))
 
     def test_validate_hook_renames_supplier_when_dksh_code_set_after_creation(self):
         # Step 1: create with CD code — autoname uses it as the name
