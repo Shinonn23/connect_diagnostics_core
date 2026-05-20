@@ -37,10 +37,10 @@ def _get_columns() -> list[dict]:
     return [
         {"fieldname": "account_number", "label": _("Account Number"), "fieldtype": "Data", "width": 110},
         {
-            "fieldname": "cost_center",
-            "label": _("Cost Center"),
+            "fieldname": "department",
+            "label": _("Accounting Department"),
             "fieldtype": "Link",
-            "options": "Cost Center",
+            "options": "Accounting Department",
             "width": 130,
         },
         {"fieldname": "account_name", "label": _("Account Name"), "fieldtype": "Data", "width": 260},
@@ -51,42 +51,44 @@ def _get_columns() -> list[dict]:
 
 def _get_data(filters: frappe._dict) -> list[dict]:
     conditions = []
-    params = {
+    params: dict = {
         "company": filters.company,
         "to_date": filters.to_date,
         "from_account": filters.from_account,
         "to_account": filters.to_account,
     }
 
-    if filters.get("cost_center"):
-        conditions.append("gle.cost_center = %(cost_center)s")
-        params["cost_center"] = filters.cost_center
+    departments = filters.get("department") or []
+    if isinstance(departments, str):
+        departments = [d.strip() for d in departments.split(",") if d.strip()]
 
-    where_clause = ""
-    if conditions:
-        where_clause = " AND " + " AND ".join(conditions)
+    if departments:
+        conditions.append("gle.department IN %(accounting_departments)s")
+        params["accounting_departments"] = tuple(departments)
+
+    where_clause = (" AND " + " AND ".join(conditions)) if conditions else ""
 
     rows = frappe.db.sql(
         """
-		SELECT
-			a.account_number,
-			a.account_name,
-			gle.cost_center,
-			SUM(gle.debit) - SUM(gle.credit) AS net_balance
-		FROM `tabGL Entry` gle
-		INNER JOIN `tabAccount` a ON a.name = gle.account
-		WHERE gle.company = %(company)s
-			AND gle.posting_date <= %(to_date)s
-			AND gle.docstatus = 1
-			AND gle.is_cancelled = 0
-			AND a.account_number >= %(from_account)s
-			AND a.account_number <= %(to_account)s
-		"""
+        SELECT
+            a.account_number,
+            a.account_name,
+            gle.department,
+            SUM(gle.debit) - SUM(gle.credit) AS net_balance
+        FROM `tabGL Entry` gle
+        INNER JOIN `tabAccount` a ON a.name = gle.account
+        WHERE gle.company = %(company)s
+            AND gle.posting_date <= %(to_date)s
+            AND gle.docstatus = 1
+            AND gle.is_cancelled = 0
+            AND a.account_number >= %(from_account)s
+            AND a.account_number <= %(to_account)s
+        """
         + where_clause
         + """
-		GROUP BY a.account_number, a.account_name, gle.cost_center
-		ORDER BY a.account_number, gle.cost_center
-		""",
+        GROUP BY a.account_number, a.account_name, gle.department
+        ORDER BY a.account_number, gle.department
+        """,
         params,
         as_dict=True,
     )
@@ -109,7 +111,7 @@ def _get_data(filters: frappe._dict) -> list[dict]:
         data.append(
             {
                 "account_number": row.account_number,
-                "cost_center": row.cost_center,
+                "department": row.department,
                 "account_name": row.account_name,
                 "debit": debit,
                 "credit": credit,
@@ -119,7 +121,7 @@ def _get_data(filters: frappe._dict) -> list[dict]:
     data.append(
         {
             "account_number": "",
-            "cost_center": "",
+            "department": "",
             "account_name": _("Total"),
             "debit": total_debit,
             "credit": total_credit,
@@ -128,23 +130,3 @@ def _get_data(filters: frappe._dict) -> list[dict]:
     )
 
     return data
-
-
-def _build_params(filters: frappe._dict) -> tuple[str, dict]:
-    params: dict = {
-        "company": filters.company,
-        "from_date": filters.from_date,
-        "to_date": filters.to_date,
-        "from_account": filters.from_account,
-        "to_account": filters.to_account,
-    }
-
-    cost_centers = filters.get("cost_center") or []
-    if isinstance(cost_centers, str):
-        cost_centers = [c.strip() for c in cost_centers.split(",") if c.strip()]
-
-    if not cost_centers:
-        return "", params
-
-    params["cost_centers"] = tuple(cost_centers)
-    return "AND gle.cost_center IN %(cost_centers)s", params

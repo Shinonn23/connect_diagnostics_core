@@ -138,6 +138,8 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 
 override_doctype_class = {
     "Customer": "connect_diagnostics_core.api.erpnext.customer.CustomCustomer",
+    "Supplier": "connect_diagnostics_core.api.erpnext.supplier.CustomSupplier",
+    "Employee": "connect_diagnostics_core.api.erpnext.employee.CustomEmployee",
 }
 
 # Document Events
@@ -149,14 +151,16 @@ doc_events = {
     "Customer": {
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
     },
+    "Company": {
+        "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
+    },
     "Supplier": {
-        "before_naming": "connect_diagnostics_core.api.erpnext.supplier.before_naming",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
     },
-    "Employee": {
-        "before_naming": "connect_diagnostics_core.api.erpnext.employee.before_naming",
-    },
 }
+
+# Exclude master doctypes from ERPNext's Transaction Deletion tool
+company_data_to_be_ignored = ["Accounting Department"]
 
 # Scheduled Tasks
 # ---------------

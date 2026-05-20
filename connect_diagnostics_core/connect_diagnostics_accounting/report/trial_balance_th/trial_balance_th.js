@@ -38,15 +38,20 @@ frappe.query_reports["Trial Balance TH"] = {
 			default: "9999-99",
 		},
 		{
-			fieldname: "cost_center",
-			label: __("Department"),
+			fieldname: "accounting_department",
+			label: __("Accounting Department"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
-					company: frappe.query_report.get_filter_value("company"),
-				});
+				return frappe.db.get_link_options(
+					"Accounting Department",
+					txt,
+					{
+						company:
+							frappe.query_report.get_filter_value("company"),
+					},
+				);
 			},
-			options: "Cost Center",
+			options: "Accounting Department",
 		},
 		{
 			fieldname: "show_zero_values",

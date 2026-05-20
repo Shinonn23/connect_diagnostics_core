@@ -1,0 +1,16 @@
+[
+	{
+		"company": "_Test Company",
+		"department_name": "_Test Accounting Department",
+		"doctype": "Accounting Department",
+		"is_group": 0,
+		"parent_accounting_department": "_Test Company - _TC"
+	},
+	{
+		"company": "_Test Company",
+		"department_name": "_Test Accounting Department 2",
+		"doctype": "Accounting Department",
+		"is_group": 0,
+		"parent_accounting_department": "_Test Company - _TC"
+	}
+]

@@ -1,13 +1,21 @@
 {
-	"add_total_row": 1,
+	"add_total_row": 0,
+	"add_translate_data": 0,
+	"columns": [],
+	"creation": "2026-05-20 19:59:27.378109",
 	"disabled": 0,
 	"docstatus": 0,
 	"doctype": "Report",
+	"filters": [],
+	"idx": 0,
 	"is_standard": "Yes",
+	"letter_head": null,
+	"modified": "2026-05-20 19:59:53.133790",
 	"modified_by": "Administrator",
-	"module": "Connect Diagnostics Core",
+	"module": "Connect Diagnostics Accounting",
 	"name": "Trial Balance TH",
 	"owner": "Administrator",
+	"prepared_report": 0,
 	"ref_doctype": "GL Entry",
 	"report_name": "Trial Balance TH",
 	"report_type": "Script Report",
@@ -21,5 +29,6 @@
 		{
 			"role": "Auditor"
 		}
-	]
+	],
+	"timeout": 0
 }
