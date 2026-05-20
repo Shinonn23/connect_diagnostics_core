@@ -186,7 +186,7 @@ company_data_to_be_ignored = ["Accounting Department"]
 # Testing
 # -------
 
-# before_tests = "connect_diagnostics_core.install.before_tests"
+before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 
 # Overriding Methods
 # ------------------------------
