@@ -1,0 +1,50 @@
+# <type>(<scope>): <subject>   ← 50 chars max, imperative mood, no period
+#
+# <body>                        ← wrap at 72 chars; explain *why*, not *what*
+#
+# <footer>                      ← BREAKING CHANGE / issue refs / co-authors
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# Conventional Commits — https://www.conventionalcommits.org
+#
+# Type (required):
+#   feat      — new user-facing feature
+#   fix       — bug fix
+#   refactor  — code change that neither fixes a bug nor adds a feature
+#   perf      — performance improvement
+#   test      — adding or correcting tests
+#   docs      — documentation only
+#   style     — formatting, whitespace, semicolons (no code logic)
+#   chore     — maintenance, deps, tooling (no src or test change)
+#   ci        — CI/CD pipeline, GitHub Actions, workflows
+#   build     — build system, packaging
+#   revert    — revert a previous commit
+#
+# Scope (optional, lowercase, project-specific). Examples seen in this repo:
+#   accounting, stock, hooks, api, patches, json, tests, ci, changelog,
+#   merge, deps, customer, employee, item, sales-order, warehouse, uom
+#
+# Subject rules:
+#   • imperative mood: "add", "fix", "rename" — not "added"/"adds"
+#   • no trailing period
+#   • lowercase first word (except proper nouns / DocType names)
+#
+# Body (optional, but encouraged for non-trivial changes):
+#   • explain motivation and contrast with prior behavior
+#   • reference affected DocTypes, hooks, or modules
+#   • note any side effects or migration steps
+#
+# Footer (optional):
+#   BREAKING CHANGE: <description of the break and migration path>
+#   Refs: #123
+#   Closes: #456
+#   Co-Authored-By: Name <email@example.com>
+#
+# Examples:
+#   feat(accounting): add Accounting Department module
+#   fix(tests): wire before_tests hook and align naming_series defaults
+#   refactor: rename cd_stock to connect_diagnostics_stock
+#   chore(deps): bump frappe to v15.42
+#
+# One-time setup (per clone):
+#   git config --local commit.template .gitmessage

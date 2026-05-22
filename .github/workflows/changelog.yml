@@ -1,0 +1,64 @@
+name: Changelog
+
+# Auto-generate CHANGELOG.md from git history using git-cliff.
+#
+# Branch-aware output (driven by cliff.toml + GIT_BRANCH env var):
+#   • production              → ## [prod-YYYY.MM.DD] release block
+#   • user-acceptance-testing → ## [uat-YYYY.MM.DD]  release block
+#   • developments            → ## [unreleased]
+#
+# The workflow ignores changes to CHANGELOG.md itself, so its own
+# commit-back step does not re-trigger the workflow.
+#
+# Mode: --unreleased (full overwrite). Once the project starts tagging
+# releases, swap to `--unreleased --prepend CHANGELOG.md` to accumulate
+# history instead of overwriting.
+
+on:
+    push:
+        branches:
+            - developments
+            - user-acceptance-testing
+            - production
+        paths-ignore:
+            - CHANGELOG.md
+            - .github/workflows/changelog.yml
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+concurrency:
+    group: changelog-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    generate:
+        name: Regenerate CHANGELOG.md
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Checkout (full history)
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Generate changelog
+              uses: orhun/git-cliff-action@v4
+              env:
+                  GIT_BRANCH: ${{ github.ref_name }}
+              with:
+                  config: cliff.toml
+                  args: --unreleased --output CHANGELOG.md
+
+            - name: Commit and push if changed
+              run: |
+                  if git diff --quiet -- CHANGELOG.md; then
+                      echo "No changelog changes to commit."
+                      exit 0
+                  fi
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add CHANGELOG.md
+                  git commit -m "chore(changelog): regenerate for ${GITHUB_REF_NAME}"
+                  git push origin "HEAD:${GITHUB_REF_NAME}"
