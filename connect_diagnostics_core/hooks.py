@@ -81,10 +81,10 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 # ----------
 
 # add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "connect_diagnostics_core.utils.jinja_methods",
-# 	"filters": "connect_diagnostics_core.utils.jinja_filters"
-# }
+jinja = {
+    "methods": ["connect_diagnostics_core.utils.thai_words.number_to_thai_currency"]
+    # "filters": "connect_diagnostics_core.utils.jinja_filters"
+}
 
 # Installation
 # ------------
@@ -154,6 +154,9 @@ doc_events = {
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
+    # "Sales Invoice": {
+    #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
+    # },
     "Supplier": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
     },
