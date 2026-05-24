@@ -118,7 +118,7 @@ _KNOWN_TEST_NAMES: list[tuple[str, str]] = [
 
 
 def _ensure_non_group_customer_group() -> str:
-    existing: str | None = frappe.db.get_value("Customer Group", {"is_group": 0}, "name")
+    existing: str | None = cast(str | None, frappe.db.get_value("Customer Group", {"is_group": 0}, "name"))
     if existing:
         return existing
     group = frappe.get_doc(
