@@ -973,7 +973,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JV.YY.MM.####"
+		"value": "JE.YY.MM.####"
 	},
 	{
 		"default_value": "JE.YY.MM.####",
@@ -1357,7 +1357,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PV.YY.MM.####"
+		"value": "PE.YY.MM.####"
 	},
 	{
 		"default_value": "PE.YY.MM.####",
