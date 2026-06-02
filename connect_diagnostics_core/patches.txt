@@ -4,3 +4,4 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
+connect_diagnostics_core.patches.v1_0.refresh_address_display

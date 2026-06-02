@@ -1,0 +1,11 @@
+[
+	{
+		"country": "Thailand",
+		"docstatus": 0,
+		"doctype": "Address Template",
+		"is_default": 1,
+		"modified": "2026-06-01 18:47:53.566966",
+		"name": "Thailand",
+		"template": "{{ address_line1 }}<br>\r\n{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}\r\n{% set is_bangkok = state in [\"กรุงเทพมหานคร\", \"กรุงเทพ\", \"Bangkok\", \"Bangkok Metropolis\"] %}\r\n{% if city %}{{ \"แขวง\" if is_bangkok else \"ต.\" }}{{ city }}{% endif -%}\r\n{% if county %} {{ \"เขต\" if is_bangkok else \"อ.\" }}{{ county }}{% endif -%}\r\n{% if state %} {{ \"\" if is_bangkok else \"จ.\" }}{{ state }}{% endif -%}\r\n{% if pincode %} {{ pincode }}{% endif -%}\r\n<br>\r\n{% if country and country not in [\"Thailand\", \"ไทย\", \"ประเทศไทย\"] %}{{ country }}<br>{% endif -%}\r\n<br>\r\n{% if tax_id %}เลขประจำตัวผู้เสียภาษี: {{ tax_id }}<br>{% endif -%}\r\n{% if branch %}สาขา: {{ branch }}<br>{% endif -%}\r\n{% if phone %}โทร: {{ phone }}<br>{% endif -%}\r\n{% if fax %}แฟกซ์: {{ fax }}<br>{% endif -%}\r\n{% if email_id %}อีเมล: {{ email_id }}<br>{% endif -%}"
+	}
+]
