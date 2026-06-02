@@ -268,4 +268,5 @@ export_python_type_annotations = True
 
 fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
+    {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
 ]
