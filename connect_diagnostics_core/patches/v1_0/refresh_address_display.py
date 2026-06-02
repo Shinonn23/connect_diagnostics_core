@@ -39,6 +39,7 @@ def refresh_address_display_values():
         order_by=None,
     ):
         meta = frappe.get_meta(doctype)
+        # pyrefly: ignore [missing-attribute]
         if meta.is_virtual:
             continue
 
