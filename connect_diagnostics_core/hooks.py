@@ -82,7 +82,10 @@ doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
 
 # add methods and filters to jinja environment
 jinja = {
-    "methods": ["connect_diagnostics_core.utils.thai_words.number_to_thai_currency"]
+    "methods": [
+        "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
+        "connect_diagnostics_core.utils.currency.print_currency",
+    ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
 
@@ -269,4 +272,5 @@ export_python_type_annotations = True
 fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
+    {"doctype": "Terms and Conditions"},
 ]
