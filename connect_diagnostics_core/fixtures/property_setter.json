@@ -109,7 +109,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AC.YY.MM.####"
+		"value": "AC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -125,7 +125,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AC.YY.MM.####"
+		"value": "AC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -301,7 +301,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BT.YY.MM.####"
+		"value": "BT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -317,7 +317,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BT.YY.MM.####"
+		"value": "BT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -557,7 +557,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DN.YY.MM.####"
+		"value": "DN.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -573,7 +573,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DN.YY.MM.####"
+		"value": "DN.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -685,7 +685,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DNN.YY.MM.####"
+		"value": "DNN.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -701,7 +701,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DNN.YY.MM.####"
+		"value": "DNN.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -749,7 +749,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EA.YY.MM.####"
+		"value": "EA.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -765,7 +765,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EA.YY.MM.####"
+		"value": "EA.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -813,7 +813,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EC.YY.MM.####"
+		"value": "EC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -829,7 +829,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EC.YY.MM.####"
+		"value": "EC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -909,7 +909,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JC.YY.MM.####"
+		"value": "JC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -925,7 +925,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JC.YY.MM.####"
+		"value": "JC.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -941,7 +941,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JR.YY.MM.####"
+		"value": "JR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -957,7 +957,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JR.YY.MM.####"
+		"value": "JR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -973,7 +973,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JE.YY.MM.####"
+		"value": "JE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": "JE.YY.MM.####",
@@ -989,7 +989,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JE.YY.MM.####\nICJE.YY.MM.####\nBK.YY.MM.####\nCE.YY.MM.####\nCC.YY.MM.####\nDN.YY.MM.####\nCN.YY.MM.####\nCT.YY.MM.####\nEX.YY.MM.####\nWO.YY.MM.####\nOP.YY.MM.####\nDP.YY.MM.####\nERR.YY.MM.####\nEGL.YY.MM.####\nDR.YY.MM.####\nDE.YY.MM.####"
+		"value": "JE.YY-DATE.MM-DATE.####\nICJE.YY-DATE.MM-DATE.####\nBK.YY-DATE.MM-DATE.####\nCE.YY-DATE.MM-DATE.####\nCC.YY-DATE.MM-DATE.####\nDN.YY-DATE.MM-DATE.####\nCN.YY-DATE.MM-DATE.####\nCT.YY-DATE.MM-DATE.####\nEX.YY-DATE.MM-DATE.####\nWO.YY-DATE.MM-DATE.####\nOP.YY-DATE.MM-DATE.####\nDP.YY-DATE.MM-DATE.####\nERR.YY-DATE.MM-DATE.####\nEGL.YY-DATE.MM-DATE.####\nDR.YY-DATE.MM-DATE.####\nDE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1037,7 +1037,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LCV.YY.MM.####"
+		"value": "LCV.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1053,7 +1053,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LCV.YY.MM.####"
+		"value": "LCV.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1133,7 +1133,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LAP.YY.MM.####"
+		"value": "LAP.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1149,7 +1149,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LAP.YY.MM.####"
+		"value": "LAP.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1229,7 +1229,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MR.YY.MM.####"
+		"value": "MR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1245,7 +1245,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MR.YY.MM.####"
+		"value": "MR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1293,7 +1293,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "POSI.YY.MM.####"
+		"value": "POSI.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1309,7 +1309,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "POSI.YY.MM.####"
+		"value": "POSI.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1357,7 +1357,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PE.YY.MM.####"
+		"value": "PE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": "PE.YY.MM.####",
@@ -1373,7 +1373,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PE.YY.MM.####"
+		"value": "PE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1389,7 +1389,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PAO.YY.MM.####"
+		"value": "PAO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1405,7 +1405,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PAO.YY.MM.####"
+		"value": "PAO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1453,7 +1453,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PARQ.YY.MM.####"
+		"value": "PARQ.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1469,7 +1469,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PARQ.YY.MM.####"
+		"value": "PARQ.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1581,7 +1581,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PDP.YY.MM.####"
+		"value": "PDP.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1597,7 +1597,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PDP.YY.MM.####"
+		"value": "PDP.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1709,7 +1709,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PI.YY.MM.####"
+		"value": "PI.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1725,7 +1725,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PI.YY.MM.####"
+		"value": "PI.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1741,7 +1741,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PO.YY.MM.####"
+		"value": "PO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1757,7 +1757,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PO.YY.MM.####"
+		"value": "PO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1773,7 +1773,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PR.YY.MM.####"
+		"value": "PR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1789,7 +1789,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PR.YY.MM.####"
+		"value": "PR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1869,7 +1869,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QT.YY.MM.####"
+		"value": "QT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1885,7 +1885,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QT.YY.MM.####"
+		"value": "QT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1901,7 +1901,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RQT.YY.MM.####"
+		"value": "RQT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1917,7 +1917,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RQT.YY.MM.####"
+		"value": "RQT.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1981,7 +1981,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SI.YY.MM.####"
+		"value": "SI.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1997,7 +1997,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SI.YY.MM.####\nCN.YY.MM.####"
+		"value": "SI.YY-DATE.MM-DATE.####\nCN.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2013,7 +2013,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SO.YY.MM.####"
+		"value": "SO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2029,7 +2029,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SO.YY.MM.####"
+		"value": "SO.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2141,7 +2141,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SE.YY.MM.####"
+		"value": "SE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2157,7 +2157,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SE.YY.MM.####"
+		"value": "SE.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2173,7 +2173,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SR.YY.MM.####"
+		"value": "SR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2189,7 +2189,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SR.YY.MM.####"
+		"value": "SR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2237,7 +2237,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCR.YY.MM.####"
+		"value": "SCR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2253,7 +2253,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCR.YY.MM.####"
+		"value": "SCR.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": "Company",
@@ -2285,7 +2285,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SQ.YY.MM.####"
+		"value": "SQ.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2301,7 +2301,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SQ.YY.MM.####"
+		"value": "SQ.YY-DATE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
