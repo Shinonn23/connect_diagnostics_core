@@ -44,6 +44,7 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 # include js in doctype views
 doctype_js = {
+    "Address": "public/js/custom/address/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
