@@ -59,14 +59,15 @@ repos:
             exclude: "typings/"
 
     # =========================================================
-    # Pyrefly (type checking)
+    # ty (type checking)
+    # เปลี่ยนมาใช้แทน pyrefly
     # =========================================================
     - repo: local
       hooks:
-          - id: pyrefly
-            name: pyrefly
+          - id: ty
+            name: ty
             language: system
-            entry: pyrefly check
+            entry: ty check
             types: [python]
 
             # ค่อย ๆ เปิด scope ก่อนสำหรับ frappe
@@ -91,36 +92,14 @@ repos:
                 )$
 
     # =========================================================
-    # Prettier
-    # ใช้ local เพราะ sync กับ package.json จริง
-    # =========================================================
-    - repo: local
-      hooks:
-          - id: prettier
-            name: prettier
-            language: system
-            entry: npx prettier --write
-            types_or:
-                [javascript, jsx, ts, tsx, vue, scss, css, json, yaml, markdown]
-
-            exclude: |
-                (?x)^(
-                    node_modules/.*|
-                    .*/dist/.*|
-                    .*boilerplate.*|
-                    connect_diagnostics_core/public/js/lib/.*
-                )$
-
-    # =========================================================
-    # ESLint
-    # ใช้ local เพื่อใช้ dependency จริงของ project
+    # ESLint (with Prettier integrated)
     # =========================================================
     - repo: local
       hooks:
           - id: eslint
             name: eslint
             language: system
-            entry: npx eslint --quiet
+            entry: npx eslint --fix --quiet
             types_or: [javascript, jsx, ts, tsx, vue]
 
             exclude: |
@@ -139,7 +118,7 @@ ci:
     autoupdate_schedule: weekly
     submodules: false
 
-    # semgrep + pyrefly มักหนักสำหรับ auto-fix bot
+    # อัปเดตชื่อใน skip จาก pyrefly เป็น ty
     skip:
         - semgrep-frappe
-        - pyrefly
+        - ty

@@ -178,7 +178,9 @@ class TestSyncAddressPartyTax(TestCase):
 
     @patch("connect_diagnostics_core.utils.address.frappe")
     @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
-    def test_apply_writes_party_tax_without_touching_modified(self, get_candidates: Mock, frappe: Mock) -> None:
+    def test_apply_writes_party_tax_without_touching_modified(
+        self, get_candidates: Mock, frappe: Mock
+    ) -> None:
         get_candidates.return_value = [
             AddressPartyTaxCandidate(
                 party_type="Supplier",
@@ -263,9 +265,7 @@ class TestSyncAddressPartyTax(TestCase):
 
     @patch("connect_diagnostics_core.utils.address.frappe")
     @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
-    def test_different_linked_party_tax_values_are_conflict(
-        self, get_candidates: Mock, frappe: Mock
-    ) -> None:
+    def test_different_linked_party_tax_values_are_conflict(self, get_candidates: Mock, frappe: Mock) -> None:
         get_candidates.return_value = [
             AddressPartyTaxCandidate(
                 party_type="Customer",
@@ -334,7 +334,9 @@ class TestLinkedPartyTaxCandidatesEndpoint(TestCase):
 class TestPartyTaxMismatchForLinks(TestCase):
     @patch("connect_diagnostics_core.utils.address._get_party_tax_values")
     @patch("connect_diagnostics_core.utils.address.frappe")
-    def test_returns_mismatch_for_unsaved_customer_link(self, frappe: Mock, get_party_tax_values: Mock) -> None:
+    def test_returns_mismatch_for_unsaved_customer_link(
+        self, frappe: Mock, get_party_tax_values: Mock
+    ) -> None:
         get_party_tax_values.return_value = _dict(
             tax_id="PARTY-TAX",
             branch_code="00001",

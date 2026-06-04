@@ -192,14 +192,11 @@ class TestCustomCustomerNamingE2E(FrappeTestCase):
             customer_name="_Test No Code Customer",
             naming_series="PTN.YY.MM.####",
         )
-        # pyrefly: ignore [bad-argument-type]
-        self._to_delete.append(("Customer", doc.name))
+        self._to_delete.append(("Customer", doc.name))  # ty:ignore[invalid-argument-type]
         # Name must come from the series, not from any constant code value
-        # pyrefly: ignore [missing-attribute]
-        self.assertFalse(doc.name.startswith("_Test"))
+        self.assertFalse(doc.name.startswith("_Test"))  # ty:ignore[unresolved-attribute]
         # Frappe collapses the `.` separators in naming_series → "PTN" prefix
-        # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc.name.startswith("PTN"))
+        self.assertTrue(doc.name.startswith("PTN"))  # ty:ignore[unresolved-attribute]
 
     # --- validate hook (via doc_events) ---
 
@@ -209,8 +206,7 @@ class TestCustomCustomerNamingE2E(FrappeTestCase):
         self.assertEqual(doc.name, _RENAME_CD)
 
         # Step 2: add DKSH code and save — validate hook fires and calls rename_doc
-        # pyrefly: ignore [missing-attribute]
-        doc.custom_dksh_customer_code = _RENAME_DKSH
+        doc.custom_dksh_customer_code = _RENAME_DKSH  # ty:ignore[unresolved-attribute]
         doc.save(ignore_permissions=True)
 
         self.assertEqual(doc.name, _RENAME_DKSH)
@@ -222,8 +218,7 @@ class TestCustomCustomerNamingE2E(FrappeTestCase):
         doc = self._insert_customer(custom_dksh_customer_code=_DKSH_CODE)
         self.assertEqual(doc.name, _DKSH_CODE)
 
-        # pyrefly: ignore [missing-attribute]
-        doc.customer_name = "_Test Updated Display Name"
+        doc.customer_name = "_Test Updated Display Name"  # ty:ignore[unresolved-attribute]
         doc.save(ignore_permissions=True)
 
         self.assertEqual(doc.name, _DKSH_CODE)

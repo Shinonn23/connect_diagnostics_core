@@ -24,13 +24,13 @@ frappe.ui.form.on("Address", {
 		frm.add_custom_button(
 			__("Get Tax From Linked Party"),
 			() => frm.events.get_tax_from_linked_party(frm),
-			__("Get Address")
+			__("Get Address"),
 		);
 	},
 
 	should_check_party_tax_mismatch(frm) {
 		const party_links = (frm.doc.links || []).filter((link) =>
-			["Customer", "Supplier"].includes(link.link_doctype)
+			["Customer", "Supplier"].includes(link.link_doctype),
 		);
 		return party_links.length && (frm.doc.tax_id || frm.doc.branch_code);
 	},
@@ -84,9 +84,10 @@ frappe.ui.form.on("Address", {
 				{
 					fieldtype: "HTML",
 					fieldname: "message",
-					options: __(
-						"The Address tax details do not match one or more linked Customer/Supplier records."
-					) + `<ul>${rows.join("")}</ul>`,
+					options:
+						__(
+							"The Address tax details do not match one or more linked Customer/Supplier records.",
+						) + `<ul>${rows.join("")}</ul>`,
 				},
 			],
 			primary_action_label: __("Save Anyway"),
@@ -113,7 +114,11 @@ frappe.ui.form.on("Address", {
 			callback(r) {
 				const candidates = r.message || [];
 				if (!candidates.length) {
-					frappe.msgprint(__("No linked Customer or Supplier with tax details was found."));
+					frappe.msgprint(
+						__(
+							"No linked Customer or Supplier with tax details was found.",
+						),
+					);
 					return;
 				}
 
@@ -132,7 +137,9 @@ frappe.ui.form.on("Address", {
 			label: [
 				candidate.label,
 				candidate.tax_id ? __("Tax ID: {0}", [candidate.tax_id]) : null,
-				candidate.branch_code ? __("Branch: {0}", [candidate.branch_code]) : null,
+				candidate.branch_code
+					? __("Branch: {0}", [candidate.branch_code])
+					: null,
 			]
 				.filter(Boolean)
 				.join(" | "),
@@ -150,10 +157,13 @@ frappe.ui.form.on("Address", {
 				},
 			],
 			(values) => {
-				frm.events.set_party_tax_values(frm, candidates[Number(values.source)]);
+				frm.events.set_party_tax_values(
+					frm,
+					candidates[Number(values.source)],
+				);
 			},
 			__("Select Tax Source"),
-			__("Use")
+			__("Use"),
 		);
 	},
 
@@ -163,9 +173,10 @@ frappe.ui.form.on("Address", {
 		frm.refresh_field("tax_id");
 		frm.refresh_field("branch_code");
 		frappe.show_alert({
-			message: __("Tax details copied from {0}. Save the Address to keep the changes.", [
-				candidate.label,
-			]),
+			message: __(
+				"Tax details copied from {0}. Save the Address to keep the changes.",
+				[candidate.label],
+			),
 			indicator: "green",
 		});
 	},

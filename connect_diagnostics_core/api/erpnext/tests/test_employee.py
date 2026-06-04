@@ -80,16 +80,14 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
             }
         )
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
-        # pyrefly: ignore [bad-argument-type]
-        self._to_delete.append(("Employee", doc.name))
+        self._to_delete.append(("Employee", doc.name))  # ty:ignore[invalid-argument-type]
         return doc
 
     def test_employee_id_reflects_joining_year_and_month(self):
         # date_of_joining = 2025-03 → name must start with "2503" (dots collapsed)
         doc = self._insert_employee(date_of_joining=date(2025, 3, 7))
         self.assertTrue(
-            # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("2503"),
+            doc.name.startswith("2503"),  # ty:ignore[unresolved-attribute]
             f"Expected name to start with '2503' but got '{doc.name}'",
         )
 
@@ -99,21 +97,17 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
             date_of_joining=date(2025, 3, 7),
         )
         self.assertTrue(
-            # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("C2503"),
+            doc.name.startswith("C2503"),  # ty:ignore[unresolved-attribute]
             f"Expected name to start with 'C2503' but got '{doc.name}'",
         )
 
     def test_different_joining_date_produces_different_prefix(self):
         doc_mar = self._insert_employee(date_of_joining=date(2025, 3, 1))
         doc_sep = self._insert_employee(date_of_joining=date(2025, 9, 1))
-        # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_mar.name.startswith("2503"))
-        # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_sep.name.startswith("2509"))
+        self.assertTrue(doc_mar.name.startswith("2503"))  # ty:ignore[unresolved-attribute]
+        self.assertTrue(doc_sep.name.startswith("2509"))  # ty:ignore[unresolved-attribute]
         # The joining-date prefix distinguishes IDs even within the same year
-        # pyrefly: ignore [unsupported-operation]
-        self.assertNotEqual(doc_mar.name[:4], doc_sep.name[:4])
+        self.assertNotEqual(doc_mar.name[:4], doc_sep.name[:4])  # ty:ignore[not-subscriptable]
 
     def test_missing_date_of_joining_raises_validation_error(self):
         # Our autoname calls frappe.throw when date_of_joining is absent

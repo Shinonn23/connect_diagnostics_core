@@ -199,7 +199,7 @@ def validate_sync_address_party_tax_selectors(
 
 
 def get_address_party_tax_candidates(
-    address_name: str,
+    address_name: str | None,
     *,
     party_type: str | None = None,
     party: str | None = None,
@@ -299,9 +299,7 @@ def get_party_tax_mismatches_for_links_list(
         party_tax_id = party_tax.get("tax_id")
         party_branch_code = party_tax.get("branch_code")
         tax_id_mismatch = bool(tax_id and party_tax_id and tax_id != party_tax_id)
-        branch_code_mismatch = bool(
-            branch_code and party_branch_code and branch_code != party_branch_code
-        )
+        branch_code_mismatch = bool(branch_code and party_branch_code and branch_code != party_branch_code)
         if not (tax_id_mismatch or branch_code_mismatch):
             continue
 
