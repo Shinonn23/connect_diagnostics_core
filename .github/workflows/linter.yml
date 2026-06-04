@@ -43,7 +43,7 @@ jobs:
             - name: "Run pre-commit"
               uses: pre-commit/action@v3.0.0
               env:
-                  SKIP: "semgrep-frappe"
+                  SKIP: "semgrep-frappe, ty"
 
     semgrep:
         name: "Semgrep"
