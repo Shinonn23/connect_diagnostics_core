@@ -135,13 +135,11 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
             return "0001"
 
         self.assertEqual(
-            # pyrefly: ignore [bad-argument-type]
-            parse_naming_series("SI.YY-DATE.MM-DATE.####", doc=doc, number_generator=generate_number),
+            parse_naming_series("SI.YY-DATE.MM-DATE.####", doc=doc, number_generator=generate_number),  # ty:ignore[invalid-argument-type]
             "SI25030001",
         )
         self.assertEqual(
-            # pyrefly: ignore [bad-argument-type]
-            parse_naming_series("ICJE.YY-DATE.MM-DATE.####", doc=doc, number_generator=generate_number),
+            parse_naming_series("ICJE.YY-DATE.MM-DATE.####", doc=doc, number_generator=generate_number),  # ty:ignore[invalid-argument-type]
             "ICJE25030001",
         )
 
@@ -155,6 +153,5 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
                 series = self.default_rows[doc_type]["value"]
                 self.assertIn(
                     "2503",
-                    # pyrefly: ignore [bad-argument-type]
-                    parse_naming_series(series, doc=doc, number_generator=generate_number),
+                    parse_naming_series(series, doc=doc, number_generator=generate_number),  # ty:ignore[invalid-argument-type]
                 )
