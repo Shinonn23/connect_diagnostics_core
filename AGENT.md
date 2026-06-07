@@ -362,3 +362,8 @@ If a change is truly needed, document the exact reason and get explicit approval
     - THB currency rounding (2 decimal places, banker's rounding)
     - Thai tax ID (13-digit) format and checksum validation
     - Buddhist year (BE) vs Gregorian year (CE) conversion
+
+# Agent Instructions
+
+- Do not create branches with the `codex/` prefix.
+- When creating a branch, use a name that reflects the actual issue scope, such as `fix/...`, `feature/...`, or `chore/...`, unless the user specifies a branch name.
