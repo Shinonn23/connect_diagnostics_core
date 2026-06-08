@@ -47,6 +47,7 @@ doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
+    "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
@@ -157,6 +158,9 @@ doc_events = {
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
+    },
+    "Payment Entry": {
+        "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",

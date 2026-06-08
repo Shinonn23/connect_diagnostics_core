@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
@@ -7,13 +9,13 @@ COLLAPSIBLE_PROPERTIES = {
 }
 
 
-def execute():
+def execute() -> None:
     standard_fields = _get_collapsible_fields("DocField", "parent")
     custom_fields = _get_collapsible_fields("Custom Field", "dt")
     property_setter_fields = _get_collapsible_property_setter_fields()
     doctypes_to_clear = set()
 
-    for doctype, fieldname in custom_fields:
+    for doctype, fieldname in sorted(custom_fields):
         frappe.db.set_value(
             "Custom Field",
             {"dt": doctype, "fieldname": fieldname},
@@ -22,18 +24,18 @@ def execute():
         )
         doctypes_to_clear.add(doctype)
 
-    for doctype, fieldname in standard_fields | property_setter_fields:
+    for doctype, fieldname in sorted(standard_fields | property_setter_fields):
         for property_name, (value, property_type) in COLLAPSIBLE_PROPERTIES.items():
             _set_property_setter(doctype, fieldname, property_name, value, property_type)
         doctypes_to_clear.add(doctype)
 
-    for doctype in doctypes_to_clear:
+    for doctype in sorted(doctypes_to_clear):
         frappe.clear_cache(doctype=doctype)
 
 
-def _get_collapsible_fields(doctype, parent_field):
+def _get_collapsible_fields(doctype: str, parent_field: str) -> set[tuple[str, str]]:
     return {
-        (row[parent_field], row.fieldname)
+        (row.get(parent_field), row.get("fieldname"))
         for row in frappe.get_all(
             doctype,
             filters={"fieldtype": "Section Break"},
@@ -44,26 +46,30 @@ def _get_collapsible_fields(doctype, parent_field):
             fields=[parent_field, "fieldname"],
             order_by=None,
         )
+        if row.get(parent_field) and row.get("fieldname")
     }
 
 
-def _get_collapsible_property_setter_fields():
+def _get_collapsible_property_setter_fields() -> set[tuple[str, str]]:
     return {
-        (row.doc_type, row.field_name)
+        (row.get("doc_type"), row.get("field_name"))
         for row in frappe.get_all(
             "Property Setter",
             filters={
                 "doctype_or_field": "DocField",
-                "property": ("in", COLLAPSIBLE_PROPERTIES),
+                "property": ("in", tuple(COLLAPSIBLE_PROPERTIES)),
                 "field_name": ("is", "set"),
             },
             fields=["doc_type", "field_name"],
             order_by=None,
         )
+        if row.get("doc_type") and row.get("field_name")
     }
 
 
-def _set_property_setter(doctype, fieldname, property_name, value, property_type):
+def _set_property_setter(
+    doctype: str, fieldname: str, property_name: str, value: str, property_type: str
+) -> None:
     property_setter = frappe.db.exists(
         "Property Setter",
         {
