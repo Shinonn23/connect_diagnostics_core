@@ -5,59 +5,33 @@ from __future__ import annotations
 
 from datetime import date
 from types import SimpleNamespace
-from typing import cast
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe import _dict
+from frappe.model.naming import parse_naming_series
+from frappe.tests.utils import FrappeTestCase, patch_hooks
 
-from ..employee import CustomEmployee
+from ..employee import parse_buddhist_era_naming_series_variable
 
 
-class TestCustomEmployeeAutonameUnit(FrappeTestCase):
-    def _doc(self, series: str, joining: date | None) -> CustomEmployee:
-        return cast(CustomEmployee, SimpleNamespace(naming_series=series, date_of_joining=joining))
+class TestEmployeeBuddhistEraNamingSeriesUnit(FrappeTestCase):
+    def test_replaces_YY_BE_with_two_digit_buddhist_year(self):
+        doc = _dict(date_of_joining=date(2025, 3, 7))
+        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YY-BE"), "68")
 
-    def test_throws_when_date_of_joining_is_missing(self):
-        doc = self._doc("YY.MM.###", None)
-        with self.assertRaises(frappe.ValidationError):
-            CustomEmployee.autoname(doc)
+    def test_replaces_YYYY_BE_with_four_digit_buddhist_year(self):
+        doc = _dict(date_of_joining=date(2025, 3, 7))
+        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YYYY-BE"), "2568")
 
-    def test_replaces_YY_with_two_digit_year(self):
-        doc = self._doc("YY.MM.###", date(2025, 3, 7))
-        CustomEmployee.autoname(doc)
-        self.assertIn("25", doc.naming_series)
-
-    def test_replaces_MM_with_zero_padded_month(self):
-        doc = self._doc("YY.MM.###", date(2025, 3, 7))
-        CustomEmployee.autoname(doc)
-        self.assertIn("03", doc.naming_series)
-
-    def test_replaces_all_tokens_in_one_pass(self):
-        doc = self._doc("YY.MM.###", date(2025, 3, 7))
-        CustomEmployee.autoname(doc)
-        self.assertEqual(doc.naming_series, "25.03.###")
-
-    def test_replaces_YYYY_with_four_digit_year(self):
-        doc = self._doc("YYYY.MM.###", date(2025, 3, 7))
-        CustomEmployee.autoname(doc)
-        self.assertTrue(doc.naming_series.startswith("2025."))
-
-    def test_YYYY_replaced_before_YY_prevents_double_substitution(self):
-        # If YY were replaced first, "YYYY" → "2525"; correct order gives "2025"
-        doc = self._doc("YYYY.MM.###", date(2025, 3, 7))
-        CustomEmployee.autoname(doc)
-        self.assertIn("2025", doc.naming_series)
-        self.assertNotIn("2525", doc.naming_series)
+    def test_accepts_date_string_from_form_payloads(self):
+        doc = SimpleNamespace(date_of_joining="2026-05-04")
+        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YY-BE"), "69")
 
 
 class TestCustomEmployeeNamingE2E(FrappeTestCase):
     """
-    Verifies that Employee IDs reflect date_of_joining, not the current date.
-    Series format (from property setter): "YY.MM.###" and "C.YY.MM.###".
-    After token replacement for date(2025, 3, 7), Frappe collapses the
-    `.` separators when generating the final name:
-      "YY.MM.###"   → "25.03.###"   → Frappe generates  "2503001" …
-      "C.YY.MM.###" → "C.25.03.###" → Frappe generates  "C2503001" …
+    Verifies that Employee IDs use the standard naming_series engine with
+    Buddhist Era year variables instead of a custom Employee.autoname override.
     """
 
     def setUp(self):
@@ -74,7 +48,7 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
                 "doctype": "Employee",
                 "first_name": "_Test Naming",
                 "status": "Active",
-                "naming_series": "YY.MM.###",
+                "naming_series": "YY-BE.MM.###",
                 "date_of_joining": date(2025, 3, 7),
                 **kwargs,
             }
@@ -84,46 +58,52 @@ class TestCustomEmployeeNamingE2E(FrappeTestCase):
         self._to_delete.append(("Employee", doc.name))
         return doc
 
-    def test_employee_id_reflects_joining_year_and_month(self):
-        # date_of_joining = 2025-03 → name must start with "2503" (dots collapsed)
+    def test_employee_id_reflects_joining_buddhist_year(self):
         doc = self._insert_employee(date_of_joining=date(2025, 3, 7))
         self.assertTrue(
             # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("2503"),
-            f"Expected name to start with '2503' but got '{doc.name}'",
+            doc.name.startswith("68"),
+            f"Expected name to start with '68' but got '{doc.name}'",
         )
 
     def test_contract_series_prefix_included_in_name(self):
         doc = self._insert_employee(
-            naming_series="C.YY.MM.###",
+            naming_series="C.YY-BE.MM.###",
             date_of_joining=date(2025, 3, 7),
         )
         self.assertTrue(
             # pyrefly: ignore [missing-attribute]
-            doc.name.startswith("C2503"),
-            f"Expected name to start with 'C2503' but got '{doc.name}'",
+            doc.name.startswith("C68"),
+            f"Expected name to start with 'C68' but got '{doc.name}'",
         )
 
-    def test_different_joining_date_produces_different_prefix(self):
-        doc_mar = self._insert_employee(date_of_joining=date(2025, 3, 1))
-        doc_sep = self._insert_employee(date_of_joining=date(2025, 9, 1))
+    def test_different_joining_year_produces_different_prefix(self):
+        doc_2025 = self._insert_employee(date_of_joining=date(2025, 3, 1))
+        doc_2026 = self._insert_employee(date_of_joining=date(2026, 9, 1))
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_mar.name.startswith("2503"))
+        self.assertTrue(doc_2025.name.startswith("68"))
         # pyrefly: ignore [missing-attribute]
-        self.assertTrue(doc_sep.name.startswith("2509"))
-        # The joining-date prefix distinguishes IDs even within the same year
+        self.assertTrue(doc_2026.name.startswith("69"))
         # pyrefly: ignore [unsupported-operation]
-        self.assertNotEqual(doc_mar.name[:4], doc_sep.name[:4])
+        self.assertNotEqual(doc_2025.name[:2], doc_2026.name[:2])
 
-    def test_missing_date_of_joining_raises_validation_error(self):
-        # Our autoname calls frappe.throw when date_of_joining is absent
-        doc = frappe.get_doc(
+    def test_standard_naming_series_parser_uses_be_variables(self):
+        doc = _dict(date_of_joining=date(2025, 3, 7))
+
+        def generate_number(_prefix, _digits):
+            return "001"
+
+        with patch_hooks(
             {
-                "doctype": "Employee",
-                "first_name": "_Test Naming No Date",
-                "status": "Active",
-                "naming_series": "YY.MM.###",
+                "naming_series_variables": {
+                    "YY-BE": [
+                        "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable"
+                    ],
+                },
             }
-        )
-        with self.assertRaises(frappe.ValidationError):
-            doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        ):
+            self.assertEqual(
+                # pyrefly: ignore [bad-argument-type]
+                parse_naming_series("YY-BE.###", doc=doc, number_generator=generate_number),
+                "68001",
+            )
