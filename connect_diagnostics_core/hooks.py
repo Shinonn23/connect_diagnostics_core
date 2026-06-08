@@ -153,6 +153,9 @@ naming_series_variables = {
 
 
 doc_events = {
+    "*": {
+        "before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"
+    },
     "Customer": {
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
     },
