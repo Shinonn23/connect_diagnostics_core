@@ -80,7 +80,7 @@
 		"value": "PTN.YY.MM.####"
 	},
 	{
-		"default_value": "YY.MM.###",
+		"default_value": "YY-BE.MM.###",
 		"doc_type": "Employee",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -93,7 +93,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "YY.MM.###\nC.YY.MM.###"
+		"value": "YY-BE.MM.###\nC.YY-BE.MM.###"
 	},
 	{
 		"default_value": null,
@@ -813,7 +813,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "YY.MM.###"
+		"value": "YY-BE.MM.###"
 	},
 	{
 		"default_value": null,

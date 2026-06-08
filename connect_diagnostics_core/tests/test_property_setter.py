@@ -103,7 +103,7 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
                 self.assertTrue(all(".YY-DATE.MM-DATE." in option for option in options))
 
     def test_customization_exports_match_fixture_naming_series(self) -> None:
-        for doc_type in ("Purchase Invoice", "Sales Invoice"):
+        for doc_type in ("Employee", "Purchase Invoice", "Sales Invoice"):
             with self.subTest(doc_type=doc_type):
                 customization = json.loads(
                     (CUSTOMIZATION_PATH / f"{doc_type.lower().replace(' ', '_')}.json").read_text()
