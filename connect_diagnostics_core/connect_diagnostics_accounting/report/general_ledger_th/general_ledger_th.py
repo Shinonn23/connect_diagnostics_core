@@ -131,9 +131,7 @@ def _get_accounts_in_range(filters: frappe._dict) -> list[dict]:
     return rows
 
 
-def _get_opening_balance(
-    filters: frappe._dict, account_number: str
-) -> float:
+def _get_opening_balance(filters: frappe._dict, account_number: str) -> float:
     """Get opening balance (sum of debit - credit) for an account before from_date."""
     params: dict = {
         "company": filters.company,
@@ -161,9 +159,7 @@ def _get_opening_balance(
     return flt(result[0].opening_balance) if result else 0.0
 
 
-def _get_gl_entries(
-    filters: frappe._dict, account_number: str
-) -> list[dict]:
+def _get_gl_entries(filters: frappe._dict, account_number: str) -> list[dict]:
     """Get GL entries for a specific account within the date range."""
     params: dict = {
         "company": filters.company,

@@ -60,7 +60,12 @@ def _get_columns() -> list[dict]:
         {"fieldname": "opening_debit", "label": _("Opening Debit"), "fieldtype": "Currency", "width": 150},
         {"fieldname": "opening_credit", "label": _("Opening Credit"), "fieldtype": "Currency", "width": 150},
         {"fieldname": "movement_debit", "label": _("Movement Debit"), "fieldtype": "Currency", "width": 150},
-        {"fieldname": "movement_credit", "label": _("Movement Credit"), "fieldtype": "Currency", "width": 150},
+        {
+            "fieldname": "movement_credit",
+            "label": _("Movement Credit"),
+            "fieldtype": "Currency",
+            "width": 150,
+        },
         {"fieldname": "closing_debit", "label": _("Closing Debit"), "fieldtype": "Currency", "width": 150},
         {"fieldname": "closing_credit", "label": _("Closing Credit"), "fieldtype": "Currency", "width": 150},
     ]
