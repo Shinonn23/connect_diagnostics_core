@@ -418,7 +418,7 @@
 			"property": "default",
 			"property_type": "Text",
 			"row_name": null,
-			"value": "PTN.YY.MM.####"
+			"value": "PTN.YY-BE.MM.####"
 		},
 		{
 			"_assign": null,
@@ -472,7 +472,7 @@
 			"_liked_by": null,
 			"_user_tags": null,
 			"creation": "2026-05-03 15:25:33.797766",
-			"default_value": "CORP.YY.MM.####",
+			"default_value": "CORP.YY-BE.MM.####",
 			"doc_type": "Customer",
 			"docstatus": 0,
 			"doctype_or_field": "DocField",
@@ -487,7 +487,7 @@
 			"property": "options",
 			"property_type": "Text",
 			"row_name": null,
-			"value": "PTN.YY.MM.####\nCORP.YY.MM.####\nHOSP.YY.MM.####\nEDU.YY.MM.####\nIND.YY.MM.####\nPHAR.YY.MM.####\nCLN.YY.MM.####\nCASH.YY.MM.####\nLAZA.YY.MM.####\nLINE.YY.MM.####\nSHOP.YY.MM.####"
+			"value": "PTN.YY-BE.MM.####\nCORP.YY-BE.MM.####\nHOSP.YY-BE.MM.####\nEDU.YY-BE.MM.####\nIND.YY-BE.MM.####\nPHAR.YY-BE.MM.####\nCLN.YY-BE.MM.####\nCASH.YY-BE.MM.####\nLAZA.YY-BE.MM.####\nLINE.YY-BE.MM.####\nSHOP.YY-BE.MM.####"
 		},
 		{
 			"_assign": null,

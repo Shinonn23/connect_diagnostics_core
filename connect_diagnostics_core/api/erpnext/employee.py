@@ -12,7 +12,7 @@ BUDDHIST_ERA_YEAR_OFFSET = 543
 
 def _get_series_date(doc: Any):
     if doc:
-        for fieldname in ("date_of_joining", "posting_date", "transaction_date", "date"):
+        for fieldname in ("posting_date", "transaction_date", "date", "date_of_joining"):
             value = doc.get(fieldname) if hasattr(doc, "get") else getattr(doc, fieldname, None)
             if value:
                 return getdate(value)
