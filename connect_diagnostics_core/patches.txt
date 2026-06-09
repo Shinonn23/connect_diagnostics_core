@@ -8,3 +8,4 @@ connect_diagnostics_core.patches.v1_0.refresh_address_display
 connect_diagnostics_core.patches.v1_0.disable_collapsible_sections
 connect_diagnostics_core.patches.v1_0.disable_quick_entry
 connect_diagnostics_core.patches.v1_0.restructure_employee_names
+connect_diagnostics_core.patches.v1_0.rollback_make_terms_mandatory_with_remark_label
