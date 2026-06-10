@@ -144,7 +144,11 @@ jinja = {
 override_doctype_class = {
     "Customer": "connect_diagnostics_core.api.erpnext.customer.CustomCustomer",
     "Supplier": "connect_diagnostics_core.api.erpnext.supplier.CustomSupplier",
-    "Employee": "connect_diagnostics_core.api.erpnext.employee.CustomEmployee",
+}
+
+naming_series_variables = {
+    "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
+    "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
 }
 
 # Document Events
@@ -153,6 +157,7 @@ override_doctype_class = {
 
 
 doc_events = {
+    "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
     },

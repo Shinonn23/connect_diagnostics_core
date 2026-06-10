@@ -80,7 +80,7 @@
 		"value": "Company\nIndividual\nPartnership\nPublic Company Limited"
 	},
 	{
-		"default_value": "CORP.YY.MM.####",
+		"default_value": "CORP.YY-BE.MM.####",
 		"doc_type": "Customer",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -93,7 +93,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PTN.YY.MM.####\nCORP.YY.MM.####\nHOSP.YY.MM.####\nEDU.YY.MM.####\nIND.YY.MM.####\nPHAR.YY.MM.####\nCLN.YY.MM.####\nCASH.YY.MM.####\nLAZA.YY.MM.####\nLINE.YY.MM.####\nSHOP.YY.MM.####"
+		"value": "PTN.YY-BE.MM.####\nCORP.YY-BE.MM.####\nHOSP.YY-BE.MM.####\nEDU.YY-BE.MM.####\nIND.YY-BE.MM.####\nPHAR.YY-BE.MM.####\nCLN.YY-BE.MM.####\nCASH.YY-BE.MM.####\nLAZA.YY-BE.MM.####\nLINE.YY-BE.MM.####\nSHOP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -109,10 +109,10 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PTN.YY.MM.####"
+		"value": "PTN.YY-BE.MM.####"
 	},
 	{
-		"default_value": "YY.MM.###",
+		"default_value": "YY-BE.MM.###",
 		"doc_type": "Employee",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -125,7 +125,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "YY.MM.###\nC.YY.MM.###"
+		"value": "YY-BE.MM.###\nC.YY-BE.MM.###"
 	},
 	{
 		"default_value": null,
@@ -141,10 +141,10 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PI.YY-DATE.MM-DATE.####"
+		"value": "PI.YY-BE.MM-DATE.####"
 	},
 	{
-		"default_value": "SI.YY.MM.####",
+		"default_value": "SI.YY-BE.MM.####",
 		"doc_type": "Sales Invoice",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -157,7 +157,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SI.YY-DATE.MM-DATE.####\nCN.YY-DATE.MM-DATE.####"
+		"value": "SI.YY-BE.MM-DATE.####\nCN.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -189,7 +189,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SI.YY-DATE.MM-DATE.####"
+		"value": "SI.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -205,7 +205,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AS.YY.MM.####"
+		"value": "AS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -221,7 +221,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AS.YY.MM.####"
+		"value": "AS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -237,7 +237,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AP.YY.MM.####"
+		"value": "AP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -253,7 +253,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AP.YY.MM.####"
+		"value": "AP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -269,7 +269,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AS.YY.MM.####"
+		"value": "AS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -285,7 +285,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AS.YY.MM.####"
+		"value": "AS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -301,7 +301,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AC.YY-DATE.MM-DATE.####"
+		"value": "AC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -317,7 +317,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AC.YY-DATE.MM-DATE.####"
+		"value": "AC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -333,7 +333,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ADS.YY.MM.####"
+		"value": "ADS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -349,7 +349,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ADS.YY.MM.####"
+		"value": "ADS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -365,7 +365,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AML.YY.MM.####"
+		"value": "AML.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -381,7 +381,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AML.YY.MM.####"
+		"value": "AML.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -397,7 +397,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AR.YY.MM.####"
+		"value": "AR.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -413,7 +413,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "AR.YY.MM.####"
+		"value": "AR.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -429,7 +429,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ASA.YY.MM.####"
+		"value": "ASA.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -445,7 +445,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ASA.YY.MM.####"
+		"value": "ASA.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -461,7 +461,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "A.YY.MM.####"
+		"value": "A.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -477,7 +477,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "A.YY.MM.####"
+		"value": "A.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -493,7 +493,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BT.YY-DATE.MM-DATE.####"
+		"value": "BT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -509,7 +509,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BT.YY-DATE.MM-DATE.####"
+		"value": "BT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -525,7 +525,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BO.YY.MM.####"
+		"value": "BO.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -541,7 +541,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BO.YY.MM.####"
+		"value": "BO.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -557,7 +557,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BG.YY.MM.####"
+		"value": "BG.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -573,7 +573,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "BG.YY.MM.####"
+		"value": "BG.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -589,7 +589,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CP.YY.MM.####"
+		"value": "CP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -605,7 +605,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CP.YY.MM.####"
+		"value": "CP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -621,7 +621,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CC.YY.MM.####"
+		"value": "CC.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -637,7 +637,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CC.YY.MM.####"
+		"value": "CC.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -653,7 +653,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CSB.YY.MM.####"
+		"value": "CSB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -669,7 +669,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "CSB.YY.MM.####"
+		"value": "CSB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -685,7 +685,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DN.YY-DATE.MM-DATE.####"
+		"value": "DN.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -701,7 +701,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DN.YY-DATE.MM-DATE.####"
+		"value": "DN.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -717,7 +717,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DT.YY.MM.####"
+		"value": "DT.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -733,7 +733,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DT.YY.MM.####"
+		"value": "DT.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -749,7 +749,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DE.YY.MM.####"
+		"value": "DE.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -765,7 +765,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DE.YY.MM.####"
+		"value": "DE.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -781,7 +781,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DV.YY.MM.####"
+		"value": "DV.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -797,7 +797,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DV.YY.MM.####"
+		"value": "DV.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -813,7 +813,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DNN.YY-DATE.MM-DATE.####"
+		"value": "DNN.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -829,7 +829,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "DNN.YY-DATE.MM-DATE.####"
+		"value": "DNN.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -845,7 +845,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "YY.MM.###"
+		"value": "YY-BE.MM.###"
 	},
 	{
 		"default_value": null,
@@ -861,7 +861,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EA.YY-DATE.MM-DATE.####"
+		"value": "EA.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -877,7 +877,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EA.YY-DATE.MM-DATE.####"
+		"value": "EA.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -893,7 +893,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EI.YY.MM.####"
+		"value": "EI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -909,7 +909,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EI.YY.MM.####"
+		"value": "EI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -925,7 +925,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EC.YY-DATE.MM-DATE.####"
+		"value": "EC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -941,7 +941,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "EC.YY-DATE.MM-DATE.####"
+		"value": "EC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -957,7 +957,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "IN.YY.MM.####"
+		"value": "IN.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -973,7 +973,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "IN.YY.MM.####"
+		"value": "IN.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -989,7 +989,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ISS.YY.MM.####"
+		"value": "ISS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1005,7 +1005,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "ISS.YY.MM.####"
+		"value": "ISS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1021,7 +1021,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JC.YY-DATE.MM-DATE.####"
+		"value": "JC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1037,7 +1037,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JC.YY-DATE.MM-DATE.####"
+		"value": "JC.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1053,7 +1053,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JR.YY-DATE.MM-DATE.####"
+		"value": "JR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1069,7 +1069,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JR.YY-DATE.MM-DATE.####"
+		"value": "JR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1085,10 +1085,10 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JE.YY-DATE.MM-DATE.####"
+		"value": "JE.YY-BE.MM-DATE.####"
 	},
 	{
-		"default_value": "JE.YY.MM.####",
+		"default_value": "JE.YY-BE.MM.####",
 		"doc_type": "Journal Entry",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -1101,7 +1101,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JE.YY-DATE.MM-DATE.####\nICJE.YY-DATE.MM-DATE.####\nBK.YY-DATE.MM-DATE.####\nCE.YY-DATE.MM-DATE.####\nCC.YY-DATE.MM-DATE.####\nDN.YY-DATE.MM-DATE.####\nCN.YY-DATE.MM-DATE.####\nCT.YY-DATE.MM-DATE.####\nEX.YY-DATE.MM-DATE.####\nWO.YY-DATE.MM-DATE.####\nOP.YY-DATE.MM-DATE.####\nDP.YY-DATE.MM-DATE.####\nERR.YY-DATE.MM-DATE.####\nEGL.YY-DATE.MM-DATE.####\nDR.YY-DATE.MM-DATE.####\nDE.YY-DATE.MM-DATE.####"
+		"value": "JE.YY-BE.MM-DATE.####\nICJE.YY-BE.MM-DATE.####\nBK.YY-BE.MM-DATE.####\nCE.YY-BE.MM-DATE.####\nCC.YY-BE.MM-DATE.####\nDN.YY-BE.MM-DATE.####\nCN.YY-BE.MM-DATE.####\nCT.YY-BE.MM-DATE.####\nEX.YY-BE.MM-DATE.####\nWO.YY-BE.MM-DATE.####\nOP.YY-BE.MM-DATE.####\nDP.YY-BE.MM-DATE.####\nERR.YY-BE.MM-DATE.####\nEGL.YY-BE.MM-DATE.####\nDR.YY-BE.MM-DATE.####\nDE.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1117,7 +1117,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JVT.YY.MM.####"
+		"value": "JVT.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1133,7 +1133,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "JVT.YY.MM.####"
+		"value": "JVT.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1149,7 +1149,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LCV.YY-DATE.MM-DATE.####"
+		"value": "LCV.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1165,7 +1165,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LCV.YY-DATE.MM-DATE.####"
+		"value": "LCV.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1181,7 +1181,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "L.YY.MM.####"
+		"value": "L.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1197,7 +1197,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "L.YY.MM.####"
+		"value": "L.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1213,7 +1213,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LA.YY.MM.####"
+		"value": "LA.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1229,7 +1229,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LA.YY.MM.####"
+		"value": "LA.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1245,7 +1245,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LAP.YY-DATE.MM-DATE.####"
+		"value": "LAP.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1261,7 +1261,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "LAP.YY-DATE.MM-DATE.####"
+		"value": "LAP.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1277,7 +1277,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MS.YY.MM.####"
+		"value": "MS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1293,7 +1293,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MS.YY.MM.####"
+		"value": "MS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1309,7 +1309,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MV.YY.MM.####"
+		"value": "MV.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1325,7 +1325,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MV.YY.MM.####"
+		"value": "MV.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1341,7 +1341,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MR.YY-DATE.MM-DATE.####"
+		"value": "MR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1357,7 +1357,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "MR.YY-DATE.MM-DATE.####"
+		"value": "MR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1373,7 +1373,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "OPP.YY.MM.####"
+		"value": "OPP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1389,7 +1389,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "OPP.YY.MM.####"
+		"value": "OPP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1405,7 +1405,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "POSI.YY-DATE.MM-DATE.####"
+		"value": "POSI.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1421,7 +1421,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "POSI.YY-DATE.MM-DATE.####"
+		"value": "POSI.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1437,7 +1437,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PS.YY.MM.####"
+		"value": "PS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1453,7 +1453,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PS.YY.MM.####"
+		"value": "PS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1469,10 +1469,10 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PE.YY-DATE.MM-DATE.####"
+		"value": "PE.YY-BE.MM-DATE.####"
 	},
 	{
-		"default_value": "PE.YY.MM.####",
+		"default_value": "PE.YY-BE.MM.####",
 		"doc_type": "Payment Entry",
 		"docstatus": 0,
 		"doctype": "Property Setter",
@@ -1485,7 +1485,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PE.YY-DATE.MM-DATE.####"
+		"value": "PE.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1501,7 +1501,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PAO.YY-DATE.MM-DATE.####"
+		"value": "PAO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1517,7 +1517,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PAO.YY-DATE.MM-DATE.####"
+		"value": "PAO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1533,7 +1533,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RE.YY.MM.####"
+		"value": "RE.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1549,7 +1549,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RE.YY.MM.####\nRV.YY.MM.####"
+		"value": "RE.YY-BE.MM.####\nRV.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1565,7 +1565,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PARQ.YY-DATE.MM-DATE.####"
+		"value": "PARQ.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1581,7 +1581,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PARQ.YY-DATE.MM-DATE.####"
+		"value": "PARQ.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1597,7 +1597,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PCH.YY.MM.####"
+		"value": "PCH.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1613,7 +1613,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PCH.YY.MM.####"
+		"value": "PCH.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1629,7 +1629,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PL.YY.MM.####"
+		"value": "PL.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1645,7 +1645,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PL.YY.MM.####"
+		"value": "PL.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1661,7 +1661,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PCR.YY.MM.####"
+		"value": "PCR.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1677,7 +1677,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PCR.YY.MM.####"
+		"value": "PCR.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1693,7 +1693,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PDP.YY-DATE.MM-DATE.####"
+		"value": "PDP.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1709,7 +1709,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PDP.YY-DATE.MM-DATE.####"
+		"value": "PDP.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1725,7 +1725,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "P.YY.MM.####"
+		"value": "P.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1741,7 +1741,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "P.YY.MM.####"
+		"value": "P.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1757,7 +1757,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PU.YY.MM.####"
+		"value": "PU.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1773,7 +1773,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PU.YY.MM.####"
+		"value": "PU.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1789,7 +1789,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PUB.YY.MM.####"
+		"value": "PUB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1805,7 +1805,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PUB.YY.MM.####"
+		"value": "PUB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1821,7 +1821,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PI.YY-DATE.MM-DATE.####"
+		"value": "PI.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1837,7 +1837,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PO.YY-DATE.MM-DATE.####"
+		"value": "PO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1853,7 +1853,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PO.YY-DATE.MM-DATE.####"
+		"value": "PO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1869,7 +1869,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PR.YY-DATE.MM-DATE.####"
+		"value": "PR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1885,7 +1885,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PR.YY-DATE.MM-DATE.####"
+		"value": "PR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1901,7 +1901,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PTI.YY.MM.####"
+		"value": "PTI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1917,7 +1917,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "PTI.YY.MM.####"
+		"value": "PTI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1933,7 +1933,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QI.YY.MM.####"
+		"value": "QI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1949,7 +1949,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QI.YY.MM.####"
+		"value": "QI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -1965,7 +1965,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QT.YY-DATE.MM-DATE.####"
+		"value": "QT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1981,7 +1981,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "QT.YY-DATE.MM-DATE.####"
+		"value": "QT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -1997,7 +1997,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RQT.YY-DATE.MM-DATE.####"
+		"value": "RQT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2013,7 +2013,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "RQT.YY-DATE.MM-DATE.####"
+		"value": "RQT.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2029,7 +2029,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SB.YY.MM.####"
+		"value": "SB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2045,7 +2045,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SB.YY.MM.####"
+		"value": "SB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2061,7 +2061,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SO.YY-DATE.MM-DATE.####"
+		"value": "SO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2077,7 +2077,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SO.YY-DATE.MM-DATE.####"
+		"value": "SO.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2093,7 +2093,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "STI.YY.MM.####"
+		"value": "STI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2109,7 +2109,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "STI.YY.MM.####"
+		"value": "STI.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2125,7 +2125,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SBB.YY.MM.####"
+		"value": "SBB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2141,7 +2141,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SBB.YY.MM.####"
+		"value": "SBB.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2157,7 +2157,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SH.YY.MM.####"
+		"value": "SH.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2173,7 +2173,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SH.YY.MM.####"
+		"value": "SH.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2189,7 +2189,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SE.YY-DATE.MM-DATE.####"
+		"value": "SE.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2205,7 +2205,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SE.YY-DATE.MM-DATE.####"
+		"value": "SE.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2221,7 +2221,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SR.YY-DATE.MM-DATE.####"
+		"value": "SR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2237,7 +2237,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SR.YY-DATE.MM-DATE.####"
+		"value": "SR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2253,7 +2253,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCO.YY.MM.####"
+		"value": "SCO.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2269,7 +2269,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCO.YY.MM.####"
+		"value": "SCO.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2285,7 +2285,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCR.YY-DATE.MM-DATE.####"
+		"value": "SCR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2301,7 +2301,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SCR.YY-DATE.MM-DATE.####"
+		"value": "SCR.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2317,7 +2317,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SQ.YY-DATE.MM-DATE.####"
+		"value": "SQ.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2333,7 +2333,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SQ.YY-DATE.MM-DATE.####"
+		"value": "SQ.YY-BE.MM-DATE.####"
 	},
 	{
 		"default_value": null,
@@ -2349,7 +2349,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SSP.YY.MM.####"
+		"value": "SSP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2365,7 +2365,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "SSP.YY.MM.####"
+		"value": "SSP.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2381,7 +2381,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "TS.YY.MM.####"
+		"value": "TS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2397,7 +2397,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "TS.YY.MM.####"
+		"value": "TS.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2413,7 +2413,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "VL.YY.MM.####"
+		"value": "VL.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2429,7 +2429,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "VL.YY.MM.####"
+		"value": "VL.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2445,7 +2445,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "WC.YY.MM.####"
+		"value": "WC.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2461,7 +2461,7 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "WC.YY.MM.####"
+		"value": "WC.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2477,7 +2477,7 @@
 		"property": "default",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "WO.YY.MM.####"
+		"value": "WO.YY-BE.MM.####"
 	},
 	{
 		"default_value": null,
@@ -2493,422 +2493,6 @@
 		"property": "options",
 		"property_type": "Text",
 		"row_name": null,
-		"value": "WO.YY.MM.####"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Blanket Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Blanket Order-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Blanket Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Blanket Order-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Delivery Note",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Delivery Note-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Delivery Note",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Delivery Note-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Material Request",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Material Request-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Material Request",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Material Request-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "POS Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "POS Invoice-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "POS Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "POS Invoice-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Invoice-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Invoice-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Order-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Order-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Receipt",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Receipt-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Purchase Receipt",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Purchase Receipt-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Quotation-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Quotation-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Request for Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Request for Quotation-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Request for Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Request for Quotation-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Sales Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Sales Invoice-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Sales Invoice",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Sales Invoice-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Sales Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Sales Order-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Sales Order",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Sales Order-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Supplier Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Supplier Quotation-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Supplier Quotation",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Supplier Quotation-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Terms and Conditions",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Terms and Conditions-terms-reqd",
-		"property": "reqd",
-		"property_type": "Check",
-		"row_name": null,
-		"value": "1"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Terms and Conditions",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "terms",
-		"is_system_generated": 0,
-		"modified": "2026-06-07 12:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Terms and Conditions-terms-label",
-		"property": "label",
-		"property_type": "Data",
-		"row_name": null,
-		"value": "Terms and Conditions Content (Remark)"
+		"value": "WO.YY-BE.MM.####"
 	}
 ]

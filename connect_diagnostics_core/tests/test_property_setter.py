@@ -98,12 +98,12 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
             with self.subTest(doc_type=doc_type):
                 default = self.default_rows[doc_type]["value"]
                 options = self.options_rows[doc_type]["value"].splitlines()
-                self.assertIn(".YY-DATE.MM-DATE.", default)
+                self.assertIn(".YY-BE.MM-DATE.", default)
                 self.assertTrue(options)
-                self.assertTrue(all(".YY-DATE.MM-DATE." in option for option in options))
+                self.assertTrue(all(".YY-BE.MM-DATE." in option for option in options))
 
     def test_customization_exports_match_fixture_naming_series(self) -> None:
-        for doc_type in ("Purchase Invoice", "Sales Invoice"):
+        for doc_type in ("Employee", "Purchase Invoice", "Sales Invoice"):
             with self.subTest(doc_type=doc_type):
                 customization = json.loads(
                     (CUSTOMIZATION_PATH / f"{doc_type.lower().replace(' ', '_')}.json").read_text()
@@ -152,6 +152,7 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
                 doc = _dict({date_field: "2025-03-15"})
                 series = self.default_rows[doc_type]["value"]
                 self.assertIn(
-                    "2503",
-                    parse_naming_series(series, doc=doc, number_generator=generate_number),  # ty:ignore[invalid-argument-type]
+                    "6803",
+                    # pyrefly: ignore [bad-argument-type]
+                    parse_naming_series(series, doc=doc, number_generator=generate_number),
                 )
