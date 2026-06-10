@@ -58,6 +58,22 @@ class TestDepartmentUserPermission(FrappeTestCase):
         else:
             self.emp_name = existing_emp
 
+        # Resolve test company dynamically
+        self.company_name = frappe.db.get_value("Company", "_Test Company") or frappe.db.get_value(
+            "Company", "DKSH"
+        )
+        if not self.company_name:
+            self.company_name = frappe.db.get_value("Company", {})
+        if not self.company_name:
+            # Create a dummy company if none exists
+            company = frappe.new_doc("Company")
+            company.company_name = "DKSH"
+            company.abbr = "DKSH"
+            company.default_currency = "THB"
+            company.country = "Thailand"
+            company.insert(ignore_permissions=True)
+            self.company_name = company.name
+
     def test_get_employees_in_department(self):
         employees = get_employees_in_department(self.dept_name)
         self.assertEqual(len(employees), 1)
@@ -68,7 +84,7 @@ class TestDepartmentUserPermission(FrappeTestCase):
         doc = frappe.new_doc("Department User Permission")
         doc.department = self.dept_name
         doc.allow = "Company"
-        doc.for_value = "DKSH"
+        doc.for_value = self.company_name
         doc.is_default = 1
         doc.apply_to_all_doctypes = 1
 
@@ -93,7 +109,12 @@ class TestDepartmentUserPermission(FrappeTestCase):
         # Verify the User Permission record exists
         user_perm_exists = frappe.db.exists(
             "User Permission",
-            {"user": "test_user_perm@example.com", "allow": "Company", "for_value": "DKSH", "is_default": 1},
+            {
+                "user": "test_user_perm@example.com",
+                "allow": "Company",
+                "for_value": self.company_name,
+                "is_default": 1,
+            },
         )
         self.assertTrue(user_perm_exists)
 
@@ -103,6 +124,7 @@ class TestDepartmentUserPermission(FrappeTestCase):
 
         # Verify the User Permission record has been deleted
         user_perm_deleted = not frappe.db.exists(
-            "User Permission", {"user": "test_user_perm@example.com", "allow": "Company", "for_value": "DKSH"}
+            "User Permission",
+            {"user": "test_user_perm@example.com", "allow": "Company", "for_value": self.company_name},
         )
         self.assertTrue(user_perm_deleted)
