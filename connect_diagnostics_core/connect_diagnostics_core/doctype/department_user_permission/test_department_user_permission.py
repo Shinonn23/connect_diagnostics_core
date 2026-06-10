@@ -9,6 +9,7 @@ from connect_diagnostics_core.connect_diagnostics_core.doctype.department_user_p
     get_employees_in_department,
     remove_permissions,
 )
+test_ignore = ["Employee", "Department", "User"]
 
 
 class TestDepartmentUserPermission(FrappeTestCase):
