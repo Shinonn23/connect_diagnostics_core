@@ -32,7 +32,7 @@ class DepartmentUserPermission(Document):
 
 
 @frappe.whitelist()
-def get_employees_in_department(department):
+def get_employees_in_department(department: str) -> list[dict]:
     if not department:
         return []
     # Fetch active employees with a valid user_id in the selected department
@@ -45,7 +45,7 @@ def get_employees_in_department(department):
 
 
 @frappe.whitelist()
-def apply_permissions(docname):
+def apply_permissions(docname: str) -> dict[str, int]:
     doc = frappe.get_doc("Department User Permission", docname)
     if not doc.users:
         frappe.throw(_("No users found in the table to apply permissions to."))
@@ -89,14 +89,11 @@ def apply_permissions(docname):
             up.insert(ignore_permissions=True)
             applied_count += 1
 
-    # Commit changes
-    frappe.db.commit()
-
     return {"applied": applied_count, "updated": updated_count}
 
 
 @frappe.whitelist()
-def remove_permissions(docname):
+def remove_permissions(docname: str) -> dict[str, int]:
     doc = frappe.get_doc("Department User Permission", docname)
     if not doc.users:
         frappe.throw(_("No users found in the table to remove permissions from."))
@@ -123,7 +120,5 @@ def remove_permissions(docname):
             frappe.delete_doc("User Permission", name, ignore_permissions=True)
             removed_count += 1
 
-    # Commit changes
-    frappe.db.commit()
-
     return {"removed": removed_count}
+
