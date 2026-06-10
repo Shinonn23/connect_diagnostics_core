@@ -121,4 +121,3 @@ def remove_permissions(docname: str) -> dict[str, int]:
             removed_count += 1
 
     return {"removed": removed_count}
-
