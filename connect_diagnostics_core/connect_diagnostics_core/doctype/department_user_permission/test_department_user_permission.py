@@ -42,6 +42,7 @@ class TestDepartmentUserPermission(FrappeTestCase):
             emp.user_id = "test_user_perm@example.com"
             emp.department = self.dept_name
             emp.status = "Active"
+            emp.create_user_permission = 0
 
             # Mandatory fields for this installation
             emp.gender = "Female"
@@ -80,6 +81,9 @@ class TestDepartmentUserPermission(FrappeTestCase):
         self.assertEqual(employees[0]["user_id"], "test_user_perm@example.com")
 
     def test_apply_and_remove_permissions(self):
+        # Clear any pre-existing User Permission records for the test user to guarantee a clean state
+        frappe.db.delete("User Permission", {"user": "test_user_perm@example.com"})
+
         # Create a Department User Permission document
         doc = frappe.new_doc("Department User Permission")
         doc.department = self.dept_name
