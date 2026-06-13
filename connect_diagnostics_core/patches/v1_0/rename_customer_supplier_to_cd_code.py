@@ -22,9 +22,7 @@ def _rename_to_cd_code(doctype: str, cd_field: str, dksh_field: str) -> None:
     )
 
     to_rename = [
-        row
-        for row in rows
-        if row[dksh_field] and row.name == row[dksh_field] and row.name != row[cd_field]
+        row for row in rows if row[dksh_field] and row.name == row[dksh_field] and row.name != row[cd_field]
     ]
 
     for row in to_rename:
