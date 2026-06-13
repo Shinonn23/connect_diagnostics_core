@@ -45,7 +45,6 @@ def get_item_with_stock(
                   AND (
                     i.name LIKE %(txt)s
                     OR i.item_name LIKE %(txt)s
-                    OR i.custom_item_name_th LIKE %(txt)s
                     OR i.custom_dksh_item_code LIKE %(txt)s
                     OR i.custom_model LIKE %(txt)s
                     OR ian.name_value LIKE %(txt)s
