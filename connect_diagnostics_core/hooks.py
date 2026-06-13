@@ -133,15 +133,6 @@ jinja = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
-# DocType Class
-# ---------------
-# Override standard doctype classes
-
-override_doctype_class = {
-    "Customer": "connect_diagnostics_core.api.erpnext.customer.CustomCustomer",
-    "Supplier": "connect_diagnostics_core.api.erpnext.supplier.CustomSupplier",
-}
-
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
@@ -154,9 +145,6 @@ naming_series_variables = {
 
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
-    "Customer": {
-        "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
-    },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
@@ -166,9 +154,6 @@ doc_events = {
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
     # },
-    "Supplier": {
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
-    },
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
