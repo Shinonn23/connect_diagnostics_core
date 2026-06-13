@@ -176,6 +176,18 @@ If a bug or issue is discovered during implementation (outside the current task 
 - Avoid non-deterministic behavior (random values, time-dependent defaults, unordered dict iteration) unless explicitly required
 - Use `frappe.utils.now()` or `frappe.utils.today()` instead of Python stdlib equivalents for consistent test behavior
 
+### Versioning
+
+- **Single source of truth**: `connect_diagnostics_core/__init__.py` — the `__version__` string
+- **Scheme**: SemVer `0.MINOR.PATCH` (MAJOR stays `0` until the project owner declares production-stable)
+- **Bump triggers** (applied when a PR is merged to `developments`):
+    - `feat:` / `feat(...)` PR → `+1 MINOR`, PATCH resets to `0`
+    - `fix:` / `refactor:` / `chore:` / `style:` / `test:` / `docs:` PR → `+1 PATCH`
+    - A revert PR counts as the inverse of what it reverted
+- **Where the bump lives**: the version bump commit is the **last commit on the PR branch** before merge — format: `chore: bump version to X.Y.Z`
+- Never bump the version outside of a PR merge (no ad-hoc bumps on `developments` directly)
+- Do not bump when opening the PR — only when the PR is ready to merge and approved
+
 ### Git Discipline
 
 - Commits must be atomic — one logical change per commit
