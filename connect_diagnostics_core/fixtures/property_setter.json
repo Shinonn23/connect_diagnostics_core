@@ -2494,5 +2494,37 @@
 		"property_type": "Text",
 		"row_name": null,
 		"value": "WO.YY-BE.MM.####"
+	},
+	{
+		"default_value": null,
+		"doc_type": "Purchase Order Item",
+		"docstatus": 0,
+		"doctype": "Property Setter",
+		"doctype_or_field": "DocField",
+		"field_name": "required_by",
+		"is_system_generated": 0,
+		"modified": "2026-06-12 22:14:37.140416",
+		"module": "Connect Diagnostics Core",
+		"name": "Purchase Order Item-required_by-in_list_view",
+		"property": "in_list_view",
+		"property_type": "Check",
+		"row_name": null,
+		"value": "0"
+	},
+	{
+		"default_value": null,
+		"doc_type": "Purchase Order Item",
+		"docstatus": 0,
+		"doctype": "Property Setter",
+		"doctype_or_field": "DocField",
+		"field_name": "item_name",
+		"is_system_generated": 0,
+		"modified": "2026-06-12 22:14:37.140416",
+		"module": "Connect Diagnostics Core",
+		"name": "Purchase Order Item-item_name-in_list_view",
+		"property": "in_list_view",
+		"property_type": "Check",
+		"row_name": null,
+		"value": "1"
 	}
 ]
