@@ -3,10 +3,7 @@
 	"creation": "2026-06-13 00:00:00.000000",
 	"doctype": "DocType",
 	"engine": "InnoDB",
-	"field_order": [
-		"name_value",
-		"name_label"
-	],
+	"field_order": ["name_value", "name_label"],
 	"fields": [
 		{
 			"fieldname": "name_value",

@@ -19,6 +19,4 @@ def execute():
     )
     if conflicts:
         frappe.log_error(str(conflicts), "Item Rename Conflicts — ดูก่อน run rename patch")
-        frappe.throw(
-            f"พบ item_code conflict {len(conflicts)} รายการ — ดู Error Log แล้วแก้ข้อมูลก่อน"
-        )
+        frappe.throw(f"พบ item_code conflict {len(conflicts)} รายการ — ดู Error Log แล้วแก้ข้อมูลก่อน")
