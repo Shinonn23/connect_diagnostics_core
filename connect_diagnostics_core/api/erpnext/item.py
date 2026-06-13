@@ -32,25 +32,24 @@ def get_item_with_stock(
         "page_len": page_len,
     }
 
-    where_txt = """(
-        i.name LIKE %(txt)s
-        OR i.item_name LIKE %(txt)s
-        OR i.custom_item_name_th LIKE %(txt)s
-        OR i.custom_dksh_item_code LIKE %(txt)s
-        OR i.custom_model LIKE %(txt)s
-        OR ian.name_value LIKE %(txt)s
-    )"""
-
     if warehouse:
         params["warehouse"] = warehouse
         return _format(
             frappe.db.sql(
-                f"""
+                """
                 SELECT i.name, i.item_name, IFNULL(SUM(b.actual_qty), 0) AS qty
                 FROM `tabItem` i
                 LEFT JOIN `tabBin` b ON i.name = b.item_code AND b.warehouse = %(warehouse)s
                 LEFT JOIN `tabItem Alternative Name` ian ON ian.parent = i.name
-                WHERE i.disabled = 0 AND {where_txt}
+                WHERE i.disabled = 0
+                  AND (
+                    i.name LIKE %(txt)s
+                    OR i.item_name LIKE %(txt)s
+                    OR i.custom_item_name_th LIKE %(txt)s
+                    OR i.custom_dksh_item_code LIKE %(txt)s
+                    OR i.custom_model LIKE %(txt)s
+                    OR ian.name_value LIKE %(txt)s
+                  )
                 GROUP BY i.name
                 LIMIT %(start)s, %(page_len)s
                 """,
@@ -60,12 +59,20 @@ def get_item_with_stock(
 
     return _format(
         frappe.db.sql(
-            f"""
+            """
             SELECT i.name, i.item_name, IFNULL(SUM(b.actual_qty), 0) AS qty
             FROM `tabItem` i
             LEFT JOIN `tabBin` b ON i.name = b.item_code
             LEFT JOIN `tabItem Alternative Name` ian ON ian.parent = i.name
-            WHERE i.disabled = 0 AND {where_txt}
+            WHERE i.disabled = 0
+              AND (
+                i.name LIKE %(txt)s
+                OR i.item_name LIKE %(txt)s
+                OR i.custom_item_name_th LIKE %(txt)s
+                OR i.custom_dksh_item_code LIKE %(txt)s
+                OR i.custom_model LIKE %(txt)s
+                OR ian.name_value LIKE %(txt)s
+              )
             GROUP BY i.name
             LIMIT %(start)s, %(page_len)s
             """,
