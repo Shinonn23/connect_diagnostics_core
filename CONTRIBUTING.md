@@ -105,6 +105,25 @@ Every PR should:
 - Follow the type hint and import conventions above
 - Have a clear Summary / Changes / Test Plan in the PR body
 
+## Versioning
+
+Version is tracked in `connect_diagnostics_core/__init__.py` as `__version__`.
+
+**Scheme**: SemVer `0.MINOR.PATCH`
+
+| PR type                                                        | Bump                         | Example           |
+| -------------------------------------------------------------- | ---------------------------- | ----------------- |
+| `feat:` / `feat(...)`                                          | `+1 MINOR`, PATCH → `0`      | `0.7.1` → `0.8.0` |
+| `fix:` / `refactor:` / `chore:` / `style:` / `test:` / `docs:` | `+1 PATCH`                   | `0.7.0` → `0.7.1` |
+| Revert PR                                                      | Inverse of what was reverted | —                 |
+
+**Rules:**
+
+- Include the version bump as the **last commit on the PR branch** before merge
+- Commit format: `chore: bump version to X.Y.Z`
+- Never bump on `developments` directly — only through a PR
+- MAJOR stays `0` until the project owner declares the app production-stable
+
 ---
 
 ## AI-Assisted Development
