@@ -156,7 +156,7 @@
 			"idx": 3,
 			"ignore_user_permissions": 0,
 			"ignore_xss_filter": 0,
-			"in_global_search": 0,
+			"in_global_search": 1,
 			"in_list_view": 0,
 			"in_preview": 0,
 			"in_standard_filter": 0,
@@ -185,7 +185,7 @@
 			"read_only_depends_on": null,
 			"report_hide": 0,
 			"reqd": 0,
-			"search_index": 0,
+			"search_index": 1,
 			"show_dashboard": 0,
 			"sort_options": 0,
 			"translatable": 0,
@@ -285,7 +285,7 @@
 			"property": "description",
 			"property_type": "Text",
 			"row_name": null,
-			"value": "If CD or DKSH code is set, series will be ignored."
+			"value": "If CD code is set, naming series will be ignored."
 		},
 		{
 			"_assign": null,
@@ -331,7 +331,7 @@
 			"property": "options",
 			"property_type": "Text",
 			"row_name": null,
-			"value": "PTN.YY-BE.MM.####\nCORP.YY-BE.MM.####\nHOSP.YY-BE.MM.####\nEDU.YY-BE.MM.####\nIND.YY-BE.MM.####\nPHAR.YY-BE.MM.####\nCLN.YY-BE.MM.####\nCASH.YY-BE.MM.####\nLAZA.YY-BE.MM.####\nLINE.YY-BE.MM.####\nSHOP.YY-BE.MM.####"
+			"value": "SUP-#####"
 		},
 		{
 			"_assign": null,
