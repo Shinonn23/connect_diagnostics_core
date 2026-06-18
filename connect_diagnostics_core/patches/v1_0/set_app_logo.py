@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import frappe
 
-APP_LOGO_URL = "/assets/connect_diagnostics_core/images/cd_logo.jpg"
+APP_LOGO_URL = "/assets/connect_diagnostics_core/images/cd_logo.jpg?v=2"
 
 
 def execute() -> None:
