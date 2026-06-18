@@ -25,7 +25,7 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core.css"
+app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core.css"
 # app_include_js = "/assets/connect_diagnostics_core/js/connect_diagnostics_core.js"
 
 # include js, css files in header of web template
