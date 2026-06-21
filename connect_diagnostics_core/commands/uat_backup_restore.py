@@ -25,6 +25,7 @@ STAGING_FOLDER_NAME = "uat_restore_staging"
 @dataclass(frozen=True)
 class RcloneBackupFile:
     name: str
+    path: str
     modified_time: str | None = None
     size: int | None = None
 
@@ -173,7 +174,7 @@ def verify_rclone(rclone_config: RcloneConfig) -> None:
 
 def list_rclone_files(rclone_config: RcloneConfig) -> list[RcloneBackupFile]:
     result = run_rclone_command(
-        ["lsjson", rclone_config.remote_path],
+        ["lsjson", rclone_config.remote_path, "--files-only"],
         rclone_config=rclone_config,
         capture_output=True,
     )
@@ -186,12 +187,14 @@ def list_rclone_files(rclone_config: RcloneConfig) -> list[RcloneBackupFile]:
     for file_data in data:
         if file_data.get("IsDir"):
             continue
-        name = file_data.get("Name") or file_data.get("Path")
-        if not name:
+        path = file_data.get("Path")
+        name = file_data.get("Name") or path
+        if not name or not path:
             continue
         files.append(
             RcloneBackupFile(
                 name=str(name),
+                path=str(path),
                 modified_time=file_data.get("ModTime"),
                 size=file_data.get("Size"),
             )
@@ -224,7 +227,7 @@ def download_rclone_file(
     staging_dir: Path,
 ) -> Path:
     destination = staging_dir / backup_file.name
-    source = f"{rclone_config.remote_path}/{backup_file.name}"
+    source = f"{rclone_config.remote_path}/{backup_file.path}"
     run_rclone_command(["copyto", source, str(destination)], rclone_config=rclone_config)
 
     if not destination.exists() or destination.stat().st_size == 0:

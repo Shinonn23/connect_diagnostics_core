@@ -33,12 +33,22 @@ class TestUatBackupRestoreHelpers(TestCase):
     def test_select_latest_database_backup_uses_source_slug_and_ignores_sidecar_files(self) -> None:
         backup_file = select_latest_database_backup(
             [
-                RcloneBackupFile("20260620_190631-uat_erp_connectdiagnostics_net-database.sql.gz"),
                 RcloneBackupFile(
-                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz:Zone.Identifier"
+                    "20260620_190631-uat_erp_connectdiagnostics_net-database.sql.gz",
+                    "20260620_190631-uat_erp_connectdiagnostics_net-database.sql.gz",
                 ),
-                RcloneBackupFile("20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz"),
-                RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+                RcloneBackupFile(
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz:Zone.Identifier",
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz:Zone.Identifier",
+                ),
+                RcloneBackupFile(
+                    "20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz",
+                    "20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz",
+                ),
+                RcloneBackupFile(
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                ),
             ],
             "uat_erp_connectdiagnostics_net",
         )
@@ -48,7 +58,12 @@ class TestUatBackupRestoreHelpers(TestCase):
     def test_select_latest_database_backup_fails_when_no_candidate_exists(self) -> None:
         with self.assertRaises(click.ClickException):
             select_latest_database_backup(
-                [RcloneBackupFile("20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz")],
+                [
+                    RcloneBackupFile(
+                        "20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz",
+                        "20260621_120005-dev_erp_connectdiagnostics_net-database.sql.gz",
+                    )
+                ],
                 "uat_erp_connectdiagnostics_net",
             )
 
@@ -105,6 +120,7 @@ class TestUatBackupRestoreHelpers(TestCase):
                 [
                     {"Name": "folder", "IsDir": True},
                     {
+                        "Path": "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
                         "Name": "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
                         "Size": 123,
                         "ModTime": "2026-06-21T12:00:03Z",
@@ -120,13 +136,14 @@ class TestUatBackupRestoreHelpers(TestCase):
             [
                 RcloneBackupFile(
                     name="20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                    path="20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
                     modified_time="2026-06-21T12:00:03Z",
                     size=123,
                 )
             ],
         )
         run_rclone_command.assert_called_once_with(
-            ["lsjson", "gdrive:backups"],
+            ["lsjson", "gdrive:backups", "--files-only"],
             rclone_config=RcloneConfig(remote_path="gdrive:backups"),
             capture_output=True,
         )
@@ -142,7 +159,10 @@ class TestUatBackupRestoreHelpers(TestCase):
         with TemporaryDirectory() as temporary_directory:
             downloaded_path = download_rclone_file(
                 RcloneConfig(remote_path="gdrive:backups"),
-                RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+                RcloneBackupFile(
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                    "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                ),
                 Path(temporary_directory),
             )
 
@@ -187,7 +207,10 @@ class TestUatBackupRestoreCommands(TestCase):
     @patch("connect_diagnostics_core.commands.uat_backup_restore.prepare_restore")
     def test_test_command_checks_without_download(self, prepare_restore: Mock) -> None:
         prepare_restore.return_value = (
-            RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+            RcloneBackupFile(
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+            ),
             None,
             "/home/frappe/frappe-bench",
         )
@@ -209,7 +232,10 @@ class TestUatBackupRestoreCommands(TestCase):
     @patch("connect_diagnostics_core.commands.uat_backup_restore.prepare_restore")
     def test_test_command_can_download_without_restore(self, prepare_restore: Mock) -> None:
         prepare_restore.return_value = (
-            RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+            RcloneBackupFile(
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+            ),
             Path("/tmp/20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
             "/home/frappe/frappe-bench",
         )
@@ -236,7 +262,10 @@ class TestUatBackupRestoreCommands(TestCase):
         run_bench_command: Mock,
     ) -> None:
         prepare_restore.return_value = (
-            RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+            RcloneBackupFile(
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+            ),
             None,
             "/home/frappe/frappe-bench",
         )
@@ -264,7 +293,10 @@ class TestUatBackupRestoreCommands(TestCase):
     ) -> None:
         downloaded_path = Path("/tmp/20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz")
         prepare_restore.return_value = (
-            RcloneBackupFile("20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
+            RcloneBackupFile(
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+                "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz",
+            ),
             downloaded_path,
             "/home/frappe/frappe-bench",
         )
