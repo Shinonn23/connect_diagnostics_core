@@ -147,7 +147,7 @@ def is_truthy(value: Any) -> bool:
 
 
 def ensure_staging_dir() -> Path:
-    staging_dir = Path(frappe.get_site_path("private", "backups", STAGING_FOLDER_NAME))
+    staging_dir = Path(frappe.get_site_path("private", STAGING_FOLDER_NAME))
     staging_dir.mkdir(parents=True, exist_ok=True)
     if not os.access(staging_dir, os.W_OK):
         raise click.ClickException(f"Staging folder is not writable: {staging_dir}")
