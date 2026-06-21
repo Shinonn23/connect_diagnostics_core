@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -22,11 +23,16 @@ STAGING_FOLDER_NAME = "uat_restore_staging"
 
 
 @dataclass(frozen=True)
-class GoogleDriveBackupFile:
-    file_id: str
+class RcloneBackupFile:
     name: str
     modified_time: str | None = None
-    size: str | None = None
+    size: int | None = None
+
+
+@dataclass(frozen=True)
+class RcloneConfig:
+    remote_path: str
+    config_path: str | None = None
 
 
 @click.command("restore-uat-backup")
@@ -39,7 +45,7 @@ class GoogleDriveBackupFile:
 @click.option("--dry-run", is_flag=True, help="Validate and locate the latest backup without restoring.")
 @pass_context
 def restore_uat_backup(context: Any, source_site_slug: str, dry_run: bool) -> None:
-    """Download the latest UAT database backup from Google Drive and restore it to this site."""
+    """Download the latest UAT database backup with rclone and restore it to this site."""
 
     site = get_single_site(context)
     backup_file, downloaded_path, bench_path = prepare_restore(site, source_site_slug, download=not dry_run)
@@ -86,7 +92,7 @@ def prepare_restore(
     source_site_slug: str,
     *,
     download: bool,
-) -> tuple[GoogleDriveBackupFile, Path | None, str]:
+) -> tuple[RcloneBackupFile, Path | None, str]:
     frappe.init(site=site)
     downloaded_path: Path | None = None
     try:
@@ -94,15 +100,14 @@ def prepare_restore(
         bench_path = get_bench_path()
         staging_dir = ensure_staging_dir()
         get_bench_executable()
+        rclone_config = get_rclone_config()
+        verify_rclone(rclone_config)
 
-        frappe.connect()
-        google_drive, account = get_google_drive_object()
-        folder_id = get_backup_folder_id(account)
-        backup_files = list_google_drive_files(google_drive, folder_id)
+        backup_files = list_rclone_files(rclone_config)
         backup_file = select_latest_database_backup(backup_files, source_site_slug)
 
         if download:
-            downloaded_path = download_google_drive_file(google_drive, backup_file, staging_dir)
+            downloaded_path = download_rclone_file(rclone_config, backup_file, staging_dir)
 
         return backup_file, downloaded_path, bench_path
     finally:
@@ -148,53 +153,59 @@ def ensure_staging_dir() -> Path:
     return staging_dir
 
 
-def get_google_drive_object() -> tuple[Any, Any]:
-    from frappe.integrations.doctype.google_drive.google_drive import get_google_drive_object
-
-    return get_google_drive_object()
-
-
-def get_backup_folder_id(account: Any) -> str:
-    backup_folder_id = getattr(account, "backup_folder_id", None)
-    if not backup_folder_id:
-        raise click.ClickException("Google Drive backup_folder_id is not configured.")
-    return str(backup_folder_id)
-
-
-def list_google_drive_files(google_drive: Any, folder_id: str) -> list[GoogleDriveBackupFile]:
-    files: list[GoogleDriveBackupFile] = []
-    page_token: str | None = None
-    query = f"'{folder_id}' in parents and trashed=false"
-
-    while True:
-        request = google_drive.files().list(
-            q=query,
-            fields="nextPageToken, files(id, name, modifiedTime, size)",
-            pageToken=page_token,
-            pageSize=1000,
+def get_rclone_config() -> RcloneConfig:
+    remote_path = frappe.conf.get("uat_backup_rclone_remote_path")
+    if not remote_path:
+        raise click.ClickException(
+            "site_config uat_backup_rclone_remote_path must point to the rclone backup folder."
         )
-        response = request.execute()
-        for file_data in response.get("files", []):
-            files.append(
-                GoogleDriveBackupFile(
-                    file_id=file_data["id"],
-                    name=file_data["name"],
-                    modified_time=file_data.get("modifiedTime"),
-                    size=file_data.get("size"),
-                )
-            )
 
-        page_token = response.get("nextPageToken")
-        if not page_token:
-            return files
+    config_path = frappe.conf.get("uat_backup_rclone_config_path")
+    return RcloneConfig(
+        remote_path=str(remote_path).rstrip("/"), config_path=str(config_path) if config_path else None
+    )
+
+
+def verify_rclone(rclone_config: RcloneConfig) -> None:
+    get_rclone_executable()
+    run_rclone_command(["version"], rclone_config=rclone_config, capture_output=True)
+
+
+def list_rclone_files(rclone_config: RcloneConfig) -> list[RcloneBackupFile]:
+    result = run_rclone_command(
+        ["lsjson", rclone_config.remote_path],
+        rclone_config=rclone_config,
+        capture_output=True,
+    )
+    try:
+        data = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError as error:
+        raise click.ClickException("rclone lsjson returned invalid JSON.") from error
+
+    files: list[RcloneBackupFile] = []
+    for file_data in data:
+        if file_data.get("IsDir"):
+            continue
+        name = file_data.get("Name") or file_data.get("Path")
+        if not name:
+            continue
+        files.append(
+            RcloneBackupFile(
+                name=str(name),
+                modified_time=file_data.get("ModTime"),
+                size=file_data.get("Size"),
+            )
+        )
+
+    return files
 
 
 def select_latest_database_backup(
-    backup_files: list[GoogleDriveBackupFile],
+    backup_files: list[RcloneBackupFile],
     source_site_slug: str,
-) -> GoogleDriveBackupFile:
+) -> RcloneBackupFile:
     pattern = re.compile(rf"^(?P<timestamp>\d{{8}}_\d{{6}})-{re.escape(source_site_slug)}-database\.sql\.gz$")
-    candidates: list[tuple[str, GoogleDriveBackupFile]] = []
+    candidates: list[tuple[str, RcloneBackupFile]] = []
 
     for backup_file in backup_files:
         match = pattern.match(backup_file.name)
@@ -207,26 +218,51 @@ def select_latest_database_backup(
     return max(candidates, key=lambda candidate: candidate[0])[1]
 
 
-def download_google_drive_file(
-    google_drive: Any,
-    backup_file: GoogleDriveBackupFile,
+def download_rclone_file(
+    rclone_config: RcloneConfig,
+    backup_file: RcloneBackupFile,
     staging_dir: Path,
 ) -> Path:
-    from googleapiclient.http import MediaIoBaseDownload
-
     destination = staging_dir / backup_file.name
-    request = google_drive.files().get_media(fileId=backup_file.file_id)
+    source = f"{rclone_config.remote_path}/{backup_file.name}"
+    run_rclone_command(["copyto", source, str(destination)], rclone_config=rclone_config)
 
-    with destination.open("wb") as output_file:
-        downloader = MediaIoBaseDownload(output_file, request)
-        done = False
-        while not done:
-            _status, done = downloader.next_chunk()
-
-    if destination.stat().st_size == 0:
+    if not destination.exists() or destination.stat().st_size == 0:
         raise click.ClickException(f"Downloaded backup is empty: {destination}")
 
     return destination
+
+
+def get_rclone_executable() -> str:
+    executable = shutil.which("rclone")
+    if executable:
+        return executable
+    raise click.ClickException("rclone executable was not found in PATH.")
+
+
+def build_rclone_command(args: list[str], *, rclone_config: RcloneConfig) -> list[str]:
+    command = [get_rclone_executable()]
+    if rclone_config.config_path:
+        command.extend(["--config", rclone_config.config_path])
+    command.extend(args)
+    return command
+
+
+def run_rclone_command(
+    args: list[str],
+    *,
+    rclone_config: RcloneConfig,
+    capture_output: bool = False,
+) -> subprocess.CompletedProcess[str]:
+    command = build_rclone_command(args, rclone_config=rclone_config)
+    if not capture_output:
+        click.echo("Running: " + " ".join(command))
+    return subprocess.run(
+        command,
+        check=True,
+        text=True,
+        capture_output=capture_output,
+    )
 
 
 def get_bench_executable() -> str:
