@@ -6,6 +6,23 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
+from frappe import _
+
+
+def validate(doc, method=None):
+    if doc.has_dksh_code:
+        if doc.item_code_is_dksh_code:
+            # OPTI / DKSH-only: item_code itself is the DKSH code. Do NOT copy it into
+            # dksh_item_code — a CD-coded item may legitimately map to the same
+            # DKSH code via that field, and copying it would trip the unique constraint.
+            # Search still matches these items by item_code (= name).
+            doc.dksh_item_code = None
+        elif not doc.dksh_item_code:
+            frappe.throw(_("DKSH Item Code is required when 'Has DKSH Code' is ticked."))
+    else:
+        # keep data clean + free the unique value when unticked
+        doc.item_code_is_dksh_code = 0
+        doc.dksh_item_code = None
 
 
 @frappe.whitelist()
@@ -45,8 +62,8 @@ def get_item_with_stock(
                   AND (
                     i.name LIKE %(txt)s
                     OR i.item_name LIKE %(txt)s
-                    OR i.custom_dksh_item_code LIKE %(txt)s
-                    OR i.custom_model LIKE %(txt)s
+                    OR i.dksh_item_code LIKE %(txt)s
+                    OR i.model LIKE %(txt)s
                     OR ian.name_value LIKE %(txt)s
                   )
                 GROUP BY i.name
@@ -67,9 +84,8 @@ def get_item_with_stock(
               AND (
                 i.name LIKE %(txt)s
                 OR i.item_name LIKE %(txt)s
-                OR i.custom_item_name_th LIKE %(txt)s
-                OR i.custom_dksh_item_code LIKE %(txt)s
-                OR i.custom_model LIKE %(txt)s
+                OR i.dksh_item_code LIKE %(txt)s
+                OR i.model LIKE %(txt)s
                 OR ian.name_value LIKE %(txt)s
               )
             GROUP BY i.name

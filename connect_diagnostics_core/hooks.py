@@ -52,7 +52,10 @@ doctype_js = {
     "Sales Order": "public/js/custom/sales_order/doctype.js",
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
-doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
+doctype_list_js = {
+    "Item": "public/js/custom/item/list_view.js",
+    "Sales Order": "public/js/custom/sales_order/list_view.js",
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -91,7 +94,8 @@ jinja = {
 # ------------
 
 # before_install = "connect_diagnostics_core.install.before_install"
-# after_install = "connect_diagnostics_core.install.after_install"
+after_install = "connect_diagnostics_core.setup.after_install"
+after_migrate = "connect_diagnostics_core.setup.after_migrate"
 
 # Uninstallation
 # ------------
@@ -150,6 +154,9 @@ doc_events = {
     },
     "Payment Entry": {
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
+    },
+    "Item": {
+        "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
