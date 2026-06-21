@@ -65,9 +65,7 @@ def execute():
             continue  # fresh install or already migrated
 
         _ensure_new_field(doctype, new, field_def)
-        frappe.db.sql(
-            f"UPDATE `tab{doctype}` SET `{new}` = `{old}` WHERE `{old}` IS NOT NULL"
-        )
+        frappe.db.sql(f"UPDATE `tab{doctype}` SET `{new}` = `{old}` WHERE `{old}` IS NOT NULL")
         _drop_old(doctype, old)
 
     frappe.db.commit()
@@ -96,8 +94,7 @@ def _rename_table_field(doctype, old, new, field_def):
     child_doctype = field_def.get("options")
     if child_doctype and frappe.db.table_exists(child_doctype):
         frappe.db.sql(
-            f"UPDATE `tab{child_doctype}` SET parentfield = %s "
-            "WHERE parentfield = %s AND parenttype = %s",
+            f"UPDATE `tab{child_doctype}` SET parentfield = %s WHERE parentfield = %s AND parenttype = %s",
             (new, old, doctype),
         )
     _ensure_new_field(doctype, new, field_def)

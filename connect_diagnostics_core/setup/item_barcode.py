@@ -2,7 +2,7 @@
 
 # (fieldname or None for DocType-level, property, value, property_type)
 PROPERTY_SETTERS = {
-    'Item Barcode': [
-        ('barcode', 'hidden', '0', 'Check'),
+    "Item Barcode": [
+        ("barcode", "hidden", "0", "Check"),
     ],
 }

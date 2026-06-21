@@ -39,10 +39,16 @@ frappe.listview_settings["Item"] = {
 	onload(listview) {
 		// --- 1. Column order ---------------------------------------------------
 		const get_df = (fieldname) =>
-			frappe.meta.get_docfield("Item", fieldname) || { label: fieldname, fieldname };
+			frappe.meta.get_docfield("Item", fieldname) || {
+				label: fieldname,
+				fieldname,
+			};
 
 		listview.columns = [
-			{ type: "Subject", df: { label: __("Item Code"), fieldname: "name" } },
+			{
+				type: "Subject",
+				df: { label: __("Item Code"), fieldname: "name" },
+			},
 			{ type: "Tag" },
 			{ type: "Field", df: get_df("item_name") },
 			{ type: "Field", df: get_df("item_group") },
@@ -92,7 +98,12 @@ frappe.listview_settings["Item"] = {
 			const txt = listview._cd_search_text;
 			if (txt) {
 				const like = `%${txt}%`;
-				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [dt, fn, "like", like]);
+				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [
+					dt,
+					fn,
+					"like",
+					like,
+				]);
 				args.distinct = 1;
 			}
 			return args;
