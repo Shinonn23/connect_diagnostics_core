@@ -11,10 +11,14 @@ It is idempotent and a no-op on fresh installs (the old columns never exist ther
 patches so their flags are set before the rename.
 """
 
+import re
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from connect_diagnostics_core import setup as cdc_setup
+
+_IDENT_RE = re.compile(r"^[A-Za-z0-9_ ]+$")
 
 # (doctype, old fieldname, new fieldname)
 RENAMES = [
@@ -65,10 +69,22 @@ def execute():
             continue  # fresh install or already migrated
 
         _ensure_new_field(doctype, new, field_def)
-        frappe.db.sql(f"UPDATE `tab{doctype}` SET `{new}` = `{old}` WHERE `{old}` IS NOT NULL")
+        dt, new_col, old_col = _ident(doctype), _ident(new), _ident(old)
+        # Identifiers come from the hardcoded RENAMES list and are whitelisted by _ident();
+        # table/column names cannot be passed as query parameters.
+        frappe.db.sql(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+            f"UPDATE `tab{dt}` SET `{new_col}` = `{old_col}` WHERE `{old_col}` IS NOT NULL"
+        )
         _drop_old(doctype, old)
 
     frappe.db.commit()
+
+
+def _ident(name):
+    """Whitelist a trusted table/column identifier before interpolating it into SQL."""
+    if not _IDENT_RE.match(name or ""):
+        frappe.throw(f"Unsafe SQL identifier: {name!r}")
+    return name
 
 
 def _field_def(doctype, fieldname):
@@ -93,8 +109,10 @@ def _ensure_new_field(doctype, new, field_def):
 def _rename_table_field(doctype, old, new, field_def):
     child_doctype = field_def.get("options")
     if child_doctype and frappe.db.table_exists(child_doctype):
-        frappe.db.sql(
-            f"UPDATE `tab{child_doctype}` SET parentfield = %s WHERE parentfield = %s AND parenttype = %s",
+        child = _ident(child_doctype)
+        # child table name is a trusted constant from the field def; values are parameterized.
+        frappe.db.sql(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
+            f"UPDATE `tab{child}` SET parentfield = %s WHERE parentfield = %s AND parenttype = %s",
             (new, old, doctype),
         )
     _ensure_new_field(doctype, new, field_def)
@@ -107,4 +125,4 @@ def _drop_old(doctype, old):
         # deleting the Custom Field also drops its column (for non-table fields)
         frappe.delete_doc("Custom Field", old_name, ignore_permissions=True, force=True)
     if frappe.db.has_column(doctype, old):
-        frappe.db.sql_ddl(f"ALTER TABLE `tab{doctype}` DROP COLUMN `{old}`")
+        frappe.db.sql_ddl(f"ALTER TABLE `tab{_ident(doctype)}` DROP COLUMN `{_ident(old)}`")
