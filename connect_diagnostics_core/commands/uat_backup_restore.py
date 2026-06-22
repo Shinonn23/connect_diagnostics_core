@@ -20,6 +20,14 @@ from frappe.utils import get_bench_path
 
 DEFAULT_SOURCE_SITE_SLUG = "uat_erp_connectdiagnostics_net"
 STAGING_FOLDER_NAME = "uat_restore_staging"
+# site_config keys checked (in order) for the MariaDB root password used by restore.
+# "root_password" is Frappe's own native key, kept as a fallback.
+DB_ROOT_PASSWORD_CONF_KEYS = ("db_root_password", "root_password")
+
+# Cron management for the scheduled restore.
+DEFAULT_CRON_SCHEDULE = "0 1 * * *"  # every day at 01:00
+CRON_MARKER_PREFIX = "connect_diagnostics_core:uat-restore-cron"
+LOG_FILE_NAME = "uat_restore.log"
 
 
 @dataclass(frozen=True)
@@ -44,12 +52,28 @@ class RcloneConfig:
     help="Source site slug used in Frappe backup filenames.",
 )
 @click.option("--dry-run", is_flag=True, help="Validate and locate the latest backup without restoring.")
+@click.option(
+    "--db-root-password",
+    default=None,
+    help=(
+        "Override the MariaDB root password used by 'bench restore'. "
+        "By default it is read from the site_config 'db_root_password' key so the restore never prompts."
+    ),
+)
 @pass_context
-def restore_uat_backup(context: Any, source_site_slug: str, dry_run: bool) -> None:
+def restore_uat_backup(
+    context: Any, source_site_slug: str, dry_run: bool, db_root_password: str | None
+) -> None:
     """Download the latest UAT database backup with rclone and restore it to this site."""
 
     site = get_single_site(context)
-    backup_file, downloaded_path, bench_path = prepare_restore(site, source_site_slug, download=not dry_run)
+    backup_file, downloaded_path, bench_path, db_root_password = prepare_restore(
+        site,
+        source_site_slug,
+        download=not dry_run,
+        db_root_password=db_root_password,
+        require_db_root_password=not dry_run,
+    )
 
     if dry_run:
         click.echo(f"{site}: latest backup is {backup_file.name}")
@@ -60,7 +84,11 @@ def restore_uat_backup(context: Any, source_site_slug: str, dry_run: bool) -> No
         raise click.ClickException("Backup was not downloaded.")
 
     run_bench_command(["--site", site, "backup", "--ignore-backup-conf"], bench_path=bench_path)
-    run_bench_command(["--site", site, "restore", str(downloaded_path), "--force"], bench_path=bench_path)
+    run_bench_command(
+        ["--site", site, "restore", str(downloaded_path), "--db-root-password", db_root_password, "--force"],
+        bench_path=bench_path,
+        redact=(db_root_password,),
+    )
     run_bench_command(["--site", site, "migrate"], bench_path=bench_path)
     run_bench_command(["--site", site, "clear-cache"], bench_path=bench_path)
     click.echo(f"{site}: restored {backup_file.name}.")
@@ -79,7 +107,9 @@ def test_uat_backup_restore(context: Any, source_site_slug: str, download: bool)
     """Validate the UAT backup restore prerequisites without restoring the database."""
 
     site = get_single_site(context)
-    backup_file, downloaded_path, _bench_path = prepare_restore(site, source_site_slug, download=download)
+    backup_file, downloaded_path, _bench_path, _password = prepare_restore(
+        site, source_site_slug, download=download
+    )
     click.echo(f"{site}: guard ok.")
     click.echo(f"{site}: latest backup is {backup_file.name}.")
     if downloaded_path:
@@ -93,11 +123,16 @@ def prepare_restore(
     source_site_slug: str,
     *,
     download: bool,
-) -> tuple[RcloneBackupFile, Path | None, str]:
+    db_root_password: str | None = None,
+    require_db_root_password: bool = False,
+) -> tuple[RcloneBackupFile, Path | None, str, str | None]:
     frappe.init(site=site)
     downloaded_path: Path | None = None
+    resolved_password: str | None = None
     try:
         validate_environment_guard(site)
+        if require_db_root_password:
+            resolved_password = resolve_db_root_password(db_root_password)
         bench_path = get_bench_path()
         staging_dir = ensure_staging_dir()
         get_bench_executable()
@@ -110,9 +145,22 @@ def prepare_restore(
         if download:
             downloaded_path = download_rclone_file(rclone_config, backup_file, staging_dir)
 
-        return backup_file, downloaded_path, bench_path
+        return backup_file, downloaded_path, bench_path, resolved_password
     finally:
         frappe.destroy()
+
+
+def resolve_db_root_password(explicit: str | None) -> str:
+    if explicit:
+        return explicit
+    for key in DB_ROOT_PASSWORD_CONF_KEYS:
+        password = frappe.conf.get(key)
+        if password:
+            return str(password)
+    raise click.ClickException(
+        "Database root password is required for restore; set 'db_root_password' in the site's "
+        "site_config.json (or pass --db-root-password)."
+    )
 
 
 def get_single_site(context: Any) -> str:
@@ -277,7 +325,133 @@ def get_bench_executable() -> str:
     raise click.ClickException("bench executable was not found in PATH.")
 
 
-def run_bench_command(args: list[str], *, bench_path: str) -> None:
+def run_bench_command(args: list[str], *, bench_path: str, redact: tuple[str, ...] = ()) -> None:
     command = [get_bench_executable(), *args]
-    click.echo("Running: " + " ".join(command))
+    secrets = {secret for secret in redact if secret}
+    display = " ".join("***" if arg in secrets else arg for arg in command)
+    click.echo("Running: " + display)
     subprocess.run(command, cwd=bench_path, check=True)
+
+
+@click.command("setup-uat-restore-cron")
+@click.option(
+    "--cron-schedule",
+    default=DEFAULT_CRON_SCHEDULE,
+    show_default=True,
+    help="Cron schedule (5 fields) for the restore. Default runs every day at 01:00.",
+)
+@click.option("--remove", is_flag=True, help="Remove the UAT restore cron entry for this site.")
+@click.option("--dry-run", is_flag=True, help="Print the change without modifying the crontab.")
+@pass_context
+def setup_uat_restore_cron(context: Any, cron_schedule: str, remove: bool, dry_run: bool) -> None:
+    """Install or remove a system crontab entry that runs restore-uat-backup for this site."""
+
+    site = get_single_site(context)
+    bench_path = get_bench_path()
+    marker = build_cron_marker(site)
+    entry: str | None = None
+    if not remove:
+        validate_cron_schedule(cron_schedule)
+        log_path = get_uat_restore_log_path(bench_path)
+        entry = build_cron_line(
+            site=site,
+            schedule=cron_schedule,
+            bench_path=bench_path,
+            bench_executable=get_bench_executable(),
+            log_path=log_path,
+            marker=marker,
+        )
+
+    updated = apply_cron_entry(read_crontab(), marker, entry)
+
+    if dry_run:
+        if entry:
+            click.echo("Would install cron entry:")
+            click.echo(entry)
+        else:
+            click.echo(f"Would remove cron entry for {site}.")
+        return
+
+    write_crontab(updated)
+    if remove:
+        click.echo(f"{site}: removed UAT restore cron entry.")
+    else:
+        click.echo(f"{site}: installed UAT restore cron entry.")
+        click.echo(entry or "")
+        click.echo(f"{site}: logs will be written to {get_uat_restore_log_path(bench_path)}.")
+
+
+@click.command("show-uat-restore-log")
+@click.option("--lines", default=50, show_default=True, help="Number of trailing log lines to show.")
+@click.option("--follow", "-f", is_flag=True, help="Follow the log (like tail -f).")
+@pass_context
+def show_uat_restore_log(context: Any, lines: int, follow: bool) -> None:
+    """Show the tail of the UAT restore cron log."""
+
+    log_path = get_uat_restore_log_path(get_bench_path())
+    if not log_path.exists():
+        raise click.ClickException(
+            f"Log file not found yet: {log_path}. It is created the first time the cron runs."
+        )
+
+    if follow:
+        subprocess.run(["tail", "-n", str(lines), "-f", str(log_path)], check=False)
+        return
+
+    tail = select_tail_lines(log_path.read_text(encoding="utf-8", errors="replace").splitlines(), lines)
+    click.echo("\n".join(tail))
+
+
+def get_uat_restore_log_path(bench_path: str) -> Path:
+    return Path(bench_path) / "logs" / LOG_FILE_NAME
+
+
+def build_cron_marker(site: str) -> str:
+    return f"# {CRON_MARKER_PREFIX}:{site}"
+
+
+def validate_cron_schedule(schedule: str) -> str:
+    if len(schedule.split()) != 5:
+        raise click.ClickException(f"Cron schedule must have 5 fields, got: {schedule!r}")
+    return schedule
+
+
+def build_cron_line(
+    *,
+    site: str,
+    schedule: str,
+    bench_path: str,
+    bench_executable: str,
+    log_path: Path,
+    marker: str,
+) -> str:
+    command = f"cd {bench_path} && {bench_executable} --site {site} restore-uat-backup >> {log_path} 2>&1"
+    return f"{schedule} {command} {marker}"
+
+
+def apply_cron_entry(existing_lines: list[str], marker: str, entry: str | None) -> list[str]:
+    kept = [line for line in existing_lines if marker not in line]
+    if entry:
+        kept.append(entry)
+    return kept
+
+
+def read_crontab() -> list[str]:
+    result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+    if result.returncode != 0:
+        # No crontab yet for this user; start from an empty list.
+        return []
+    return result.stdout.splitlines()
+
+
+def write_crontab(lines: list[str]) -> None:
+    payload = "\n".join(lines)
+    if payload:
+        payload += "\n"
+    subprocess.run(["crontab", "-"], input=payload, text=True, check=True)
+
+
+def select_tail_lines(lines: list[str], count: int) -> list[str]:
+    if count <= 0:
+        return []
+    return lines[-count:]
