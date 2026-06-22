@@ -161,7 +161,7 @@ CUSTOM_FIELDS = {
             "insert_after": "has_dksh_code",
             "default": "0",
             "depends_on": "eval:doc.has_dksh_code",
-            "description": "Tick when the item has no CD code and item_code itself is the DKSH code (e.g. OPTI).",
+            "description": "Tick when the item has no CD code and Item Code itself is the DKSH code (e.g. OPTI).",
         },
     ],
 }
