@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -15,7 +16,6 @@ from frappe.utils import getdate
 import connect_diagnostics_core
 
 FIXTURE_PATH = Path(connect_diagnostics_core.__file__).parent / "fixtures" / "property_setter.json"
-CUSTOMIZATION_PATH = Path(connect_diagnostics_core.__file__).parent / "connect_diagnostics_core" / "custom"
 DOCUMENT_DATE_FIELDS = {
     "Asset Capitalization": "posting_date",
     "Bank Transaction": "date",
@@ -51,6 +51,17 @@ DOCUMENT_DATE_FIELDS = {
 def _load_fixture() -> list[dict]:
     with FIXTURE_PATH.open() as f:
         return json.load(f)
+
+
+def _setup_naming_series_setters(doc_type: str) -> dict[str, str]:
+    """naming_series default/options property setters declared in connect_diagnostics_core/setup."""
+    module = importlib.import_module(f"connect_diagnostics_core.setup.{doc_type.lower().replace(' ', '_')}")
+    property_setters = getattr(module, "PROPERTY_SETTERS", {}).get(doc_type, [])
+    return {
+        prop: value
+        for field_name, prop, value, _property_type in property_setters
+        if field_name == "naming_series" and prop in ("default", "options")
+    }
 
 
 class TestNamingSeriesPropertySetters(FrappeTestCase):
@@ -105,15 +116,7 @@ class TestNamingSeriesPropertySetters(FrappeTestCase):
     def test_customization_exports_match_fixture_naming_series(self) -> None:
         for doc_type in ("Employee", "Purchase Invoice", "Sales Invoice"):
             with self.subTest(doc_type=doc_type):
-                customization = json.loads(
-                    (CUSTOMIZATION_PATH / f"{doc_type.lower().replace(' ', '_')}.json").read_text()
-                )
-                setters = {
-                    row["property"]: row["value"]
-                    for row in customization["property_setters"]
-                    if row.get("field_name") == "naming_series"
-                    and row.get("property") in ("default", "options")
-                }
+                setters = _setup_naming_series_setters(doc_type)
                 self.assertEqual(setters["options"], self.options_rows[doc_type]["value"])
                 if "default" in setters:
                     self.assertEqual(setters["default"], self.default_rows[doc_type]["value"])

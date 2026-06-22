@@ -1,0 +1,83 @@
+"""Programmatic custom field / property setter setup (erpnext_thailand style).
+
+Replaces the old custom/*.json export-customization fixtures. Applied on both
+after_install and after_migrate (both are idempotent).
+"""
+
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+from connect_diagnostics_core.setup import (
+    account,
+    contact,
+    currency_exchange,
+    customer,
+    employee,
+    item,
+    item_barcode,
+    item_default,
+    item_group,
+    journal_entry_account,
+    packed_item,
+    purchase_invoice,
+    purchase_invoice_item,
+    purchase_taxes_and_charges,
+    sales_invoice,
+    sales_invoice_item,
+    sales_order_item,
+    sales_taxes_and_charges,
+    supplier,
+    uom,
+    warehouse,
+)
+
+_MODULES = (
+    account,
+    contact,
+    currency_exchange,
+    customer,
+    employee,
+    item,
+    item_barcode,
+    item_default,
+    item_group,
+    journal_entry_account,
+    packed_item,
+    purchase_invoice,
+    purchase_invoice_item,
+    purchase_taxes_and_charges,
+    sales_invoice,
+    sales_invoice_item,
+    sales_order_item,
+    sales_taxes_and_charges,
+    supplier,
+    uom,
+    warehouse,
+)
+
+
+def apply_all():
+    for module in _MODULES:
+        custom_fields = getattr(module, "CUSTOM_FIELDS", None)
+        if custom_fields:
+            create_custom_fields(custom_fields, ignore_validate=True)
+    for module in _MODULES:
+        for doctype, setters in getattr(module, "PROPERTY_SETTERS", {}).items():
+            for fieldname, prop, value, property_type in setters:
+                make_property_setter(
+                    doctype,
+                    fieldname,
+                    prop,
+                    value,
+                    property_type,
+                    for_doctype=fieldname is None,
+                    validate_fields_for_doctype=False,
+                )
+
+
+def after_install():
+    apply_all()
+
+
+def after_migrate():
+    apply_all()
