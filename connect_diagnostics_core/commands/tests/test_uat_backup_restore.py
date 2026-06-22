@@ -17,12 +17,20 @@ from connect_diagnostics_core.commands.uat_backup_restore import (
     RcloneBackupFile,
     RcloneConfig,
     build_rclone_command,
+    apply_cron_entry,
+    build_cron_line,
+    build_cron_marker,
     download_rclone_file,
     ensure_staging_dir,
     get_rclone_config,
+    get_uat_restore_log_path,
     list_rclone_files,
+    resolve_db_root_password,
     restore_uat_backup,
+    run_bench_command,
     select_latest_database_backup,
+    select_tail_lines,
+    validate_cron_schedule,
     validate_environment_guard,
 )
 from connect_diagnostics_core.commands.uat_backup_restore import (
@@ -55,6 +63,100 @@ class TestUatBackupRestoreHelpers(TestCase):
         )
 
         self.assertEqual(backup_file.name, "20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz")
+
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
+    def test_resolve_db_root_password_prefers_explicit_value(self, frappe: Mock) -> None:
+        frappe.conf.get.return_value = "from-config"
+        self.assertEqual(resolve_db_root_password("explicit"), "explicit")
+        frappe.conf.get.assert_not_called()
+
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
+    def test_resolve_db_root_password_reads_db_root_password_from_site_config(self, frappe: Mock) -> None:
+        frappe.conf.get.side_effect = lambda key: {"db_root_password": "from-config"}.get(key)
+        self.assertEqual(resolve_db_root_password(None), "from-config")
+
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
+    def test_resolve_db_root_password_falls_back_to_native_root_password(self, frappe: Mock) -> None:
+        frappe.conf.get.side_effect = lambda key: {"root_password": "native-root"}.get(key)
+        self.assertEqual(resolve_db_root_password(None), "native-root")
+
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
+    def test_resolve_db_root_password_raises_when_missing(self, frappe: Mock) -> None:
+        frappe.conf.get.return_value = None
+        with self.assertRaises(click.ClickException) as error:
+            resolve_db_root_password(None)
+        self.assertIn("db_root_password", str(error.exception))
+
+    def test_build_cron_line_includes_schedule_command_and_marker(self) -> None:
+        line = build_cron_line(
+            site="deverp.connectdiagnostics.net",
+            schedule="0 1 * * *",
+            bench_path="/home/erp/frappe-bench",
+            bench_executable="/home/erp/.local/bin/bench",
+            log_path=get_uat_restore_log_path("/home/erp/frappe-bench"),
+            marker=build_cron_marker("deverp.connectdiagnostics.net"),
+        )
+
+        self.assertEqual(
+            line,
+            "0 1 * * * cd /home/erp/frappe-bench && /home/erp/.local/bin/bench "
+            "--site deverp.connectdiagnostics.net restore-uat-backup "
+            ">> /home/erp/frappe-bench/logs/uat_restore.log 2>&1 "
+            "# connect_diagnostics_core:uat-restore-cron:deverp.connectdiagnostics.net",
+        )
+
+    def test_apply_cron_entry_replaces_existing_marked_line(self) -> None:
+        marker = build_cron_marker("deverp.connectdiagnostics.net")
+        existing = [
+            "0 */6 * * * bench --site all backup",
+            f"0 2 * * * old command {marker}",
+        ]
+
+        updated = apply_cron_entry(existing, marker, f"0 1 * * * new command {marker}")
+
+        self.assertEqual(
+            updated,
+            [
+                "0 */6 * * * bench --site all backup",
+                f"0 1 * * * new command {marker}",
+            ],
+        )
+
+    def test_apply_cron_entry_removes_marked_line_when_entry_is_none(self) -> None:
+        marker = build_cron_marker("deverp.connectdiagnostics.net")
+        existing = [
+            "0 */6 * * * bench --site all backup",
+            f"0 1 * * * restore {marker}",
+        ]
+
+        updated = apply_cron_entry(existing, marker, None)
+
+        self.assertEqual(updated, ["0 */6 * * * bench --site all backup"])
+
+    def test_validate_cron_schedule_rejects_wrong_field_count(self) -> None:
+        with self.assertRaises(click.ClickException):
+            validate_cron_schedule("0 1 * *")
+
+    def test_select_tail_lines_returns_last_n_lines(self) -> None:
+        self.assertEqual(select_tail_lines(["a", "b", "c", "d"], 2), ["c", "d"])
+        self.assertEqual(select_tail_lines(["a"], 5), ["a"])
+        self.assertEqual(select_tail_lines(["a", "b"], 0), [])
+
+    def test_run_bench_command_redacts_secrets_in_echo(self) -> None:
+        with patch(
+            "connect_diagnostics_core.commands.uat_backup_restore.get_bench_executable",
+            return_value="bench",
+        ), patch("connect_diagnostics_core.commands.uat_backup_restore.subprocess.run") as run, patch(
+            "connect_diagnostics_core.commands.uat_backup_restore.click.echo"
+        ) as echo:
+            run_bench_command(
+                ["restore", "dump.sql.gz", "--db-root-password", "s3cret"],
+                bench_path="/bench",
+                redact=("s3cret",),
+            )
+
+        echo.assert_called_once_with("Running: bench restore dump.sql.gz --db-root-password ***")
+        run.assert_called_once()
 
     def test_select_latest_database_backup_fails_when_no_candidate_exists(self) -> None:
         with self.assertRaises(click.ClickException):
@@ -237,6 +339,7 @@ class TestUatBackupRestoreCommands(TestCase):
             ),
             None,
             "/home/frappe/frappe-bench",
+            None,
         )
 
         result = CliRunner().invoke(
@@ -262,6 +365,7 @@ class TestUatBackupRestoreCommands(TestCase):
             ),
             Path("/tmp/20260621_120003-uat_erp_connectdiagnostics_net-database.sql.gz"),
             "/home/frappe/frappe-bench",
+            None,
         )
 
         result = CliRunner().invoke(
@@ -292,6 +396,7 @@ class TestUatBackupRestoreCommands(TestCase):
             ),
             None,
             "/home/frappe/frappe-bench",
+            None,
         )
 
         result = CliRunner().invoke(
@@ -305,6 +410,8 @@ class TestUatBackupRestoreCommands(TestCase):
             "deverp.connectdiagnostics.net",
             "uat_erp_connectdiagnostics_net",
             download=False,
+            db_root_password=None,
+            require_db_root_password=False,
         )
         run_bench_command.assert_not_called()
 
@@ -323,15 +430,23 @@ class TestUatBackupRestoreCommands(TestCase):
             ),
             downloaded_path,
             "/home/frappe/frappe-bench",
+            "s3cret",
         )
 
         result = CliRunner().invoke(
             restore_uat_backup,
-            ["--source-site-slug", "uat_erp_connectdiagnostics_net"],
+            ["--source-site-slug", "uat_erp_connectdiagnostics_net", "--db-root-password", "s3cret"],
             obj={"sites": ["deverp.connectdiagnostics.net"], "profile": False},
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
+        prepare_restore.assert_called_once_with(
+            "deverp.connectdiagnostics.net",
+            "uat_erp_connectdiagnostics_net",
+            download=True,
+            db_root_password="s3cret",
+            require_db_root_password=True,
+        )
         self.assertEqual(
             run_bench_command.call_args_list,
             [
@@ -345,9 +460,12 @@ class TestUatBackupRestoreCommands(TestCase):
                         "deverp.connectdiagnostics.net",
                         "restore",
                         str(downloaded_path),
+                        "--db-root-password",
+                        "s3cret",
                         "--force",
                     ],
                     bench_path="/home/frappe/frappe-bench",
+                    redact=("s3cret",),
                 ),
                 call(
                     ["--site", "deverp.connectdiagnostics.net", "migrate"],
