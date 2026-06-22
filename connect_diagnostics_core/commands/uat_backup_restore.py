@@ -425,10 +425,7 @@ def build_cron_line(
     log_path: Path,
     marker: str,
 ) -> str:
-    command = (
-        f"cd {bench_path} && {bench_executable} --site {site} restore-uat-backup "
-        f">> {log_path} 2>&1"
-    )
+    command = f"cd {bench_path} && {bench_executable} --site {site} restore-uat-backup >> {log_path} 2>&1"
     return f"{schedule} {command} {marker}"
 
 

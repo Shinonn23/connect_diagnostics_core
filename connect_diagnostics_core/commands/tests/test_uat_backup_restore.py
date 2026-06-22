@@ -16,10 +16,10 @@ from click.testing import CliRunner
 from connect_diagnostics_core.commands.uat_backup_restore import (
     RcloneBackupFile,
     RcloneConfig,
-    build_rclone_command,
     apply_cron_entry,
     build_cron_line,
     build_cron_marker,
+    build_rclone_command,
     download_rclone_file,
     ensure_staging_dir,
     get_rclone_config,
@@ -143,12 +143,14 @@ class TestUatBackupRestoreHelpers(TestCase):
         self.assertEqual(select_tail_lines(["a", "b"], 0), [])
 
     def test_run_bench_command_redacts_secrets_in_echo(self) -> None:
-        with patch(
-            "connect_diagnostics_core.commands.uat_backup_restore.get_bench_executable",
-            return_value="bench",
-        ), patch("connect_diagnostics_core.commands.uat_backup_restore.subprocess.run") as run, patch(
-            "connect_diagnostics_core.commands.uat_backup_restore.click.echo"
-        ) as echo:
+        with (
+            patch(
+                "connect_diagnostics_core.commands.uat_backup_restore.get_bench_executable",
+                return_value="bench",
+            ),
+            patch("connect_diagnostics_core.commands.uat_backup_restore.subprocess.run") as run,
+            patch("connect_diagnostics_core.commands.uat_backup_restore.click.echo") as echo,
+        ):
             run_bench_command(
                 ["restore", "dump.sql.gz", "--db-root-password", "s3cret"],
                 bench_path="/bench",
