@@ -18,6 +18,7 @@ from connect_diagnostics_core.commands.uat_backup_restore import (
     RcloneConfig,
     build_rclone_command,
     download_rclone_file,
+    ensure_staging_dir,
     get_rclone_config,
     list_rclone_files,
     restore_uat_backup,
@@ -177,6 +178,29 @@ class TestUatBackupRestoreHelpers(TestCase):
             ],
             rclone_config=RcloneConfig(remote_path="gdrive:backups"),
         )
+
+    @patch("pathlib.Path.mkdir")
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.os.access")
+    @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
+    def test_staging_dir_is_not_inside_frappe_backup_folder(
+        self,
+        frappe: Mock,
+        os_access: Mock,
+        path_mkdir: Mock,
+    ) -> None:
+        frappe.get_site_path.side_effect = lambda *parts: (
+            "/sites/deverp.connectdiagnostics.net/" + "/".join(parts)
+        )
+        os_access.return_value = True
+
+        staging_dir = ensure_staging_dir()
+
+        self.assertEqual(
+            staging_dir,
+            Path("/sites/deverp.connectdiagnostics.net/private/uat_restore_staging"),
+        )
+        self.assertNotIn("/private/backups/", str(staging_dir))
+        path_mkdir.assert_called_once_with(parents=True, exist_ok=True)
 
     @patch("connect_diagnostics_core.commands.uat_backup_restore.frappe")
     def test_validate_environment_guard_requires_development_marker(self, frappe: Mock) -> None:
