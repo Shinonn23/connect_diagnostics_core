@@ -7,7 +7,7 @@ CUSTOM_FIELDS = {
             "label": "Abbreviation",
             "fieldtype": "Data",
             "insert_after": "supplier_name",
-            "description": "2-4 ตัวอักษรย่อ (พิมพ์ใหญ่) ใช้สร้าง Item Code เช่น AD, ZY, WP",
+            "description": "2-4 uppercase letters used to generate Item Code e.g. AD, ZY, WP",
             "length": 4,
             "in_list_view": 1,
         },

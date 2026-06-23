@@ -4,7 +4,7 @@ from typing import Any
 
 import frappe
 
-# Customer groups that map to prefix 4H (รพ. / หน่วยงานรัฐ)
+# Customer groups that map to prefix 4H (hospitals / government agencies)
 _HOSPITAL_GOV_GROUPS: frozenset[str] = frozenset()
 
 CUSTOMER_SERIES_MAP = {

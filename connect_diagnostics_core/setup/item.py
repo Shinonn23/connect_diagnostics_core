@@ -8,7 +8,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Link",
             "options": "Supplier",
             "insert_after": "item_group",
-            "description": "Supplier หลักของ Item นี้ ใช้สร้าง Item Code อัตโนมัติ",
+            "description": "Primary supplier for this item, used to auto-generate the Item Code.",
         },
         {
             "fieldname": "column_break_lhwzh",
