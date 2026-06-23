@@ -57,15 +57,10 @@ def _seed_item_counters() -> None:
 
 
 def _max_numeric_suffix(doctype: str, prefix: str) -> int:
-    table = f"tab{doctype}"
-    rows = frappe.db.sql(
-        f"SELECT name FROM `{table}` WHERE name LIKE %s",
-        (f"{prefix}%",),
-        as_list=True,
-    )
+    names = frappe.db.get_all(doctype, filters={"name": ["like", f"{prefix}%"]}, pluck="name")
     max_val = 0
-    for (name,) in rows:
-        suffix = name[len(prefix) :]
+    for name in names:
+        suffix = name[len(prefix):]
         if suffix.isdigit():
             max_val = max(max_val, int(suffix))
     return max_val
