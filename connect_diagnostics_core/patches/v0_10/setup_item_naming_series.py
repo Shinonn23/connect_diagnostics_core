@@ -60,7 +60,7 @@ def _max_numeric_suffix(doctype: str, prefix: str) -> int:
     names = frappe.db.get_all(doctype, filters={"name": ["like", f"{prefix}%"]}, pluck="name")
     max_val = 0
     for name in names:
-        suffix = name[len(prefix):]
+        suffix = name[len(prefix) :]
         if suffix.isdigit():
             max_val = max(max_val, int(suffix))
     return max_val
