@@ -3,6 +3,15 @@
 CUSTOM_FIELDS = {
     "Supplier": [
         {
+            "fieldname": "abbr",
+            "label": "Abbreviation",
+            "fieldtype": "Data",
+            "insert_after": "supplier_name",
+            "description": "2-4 ตัวอักษรย่อ (พิมพ์ใหญ่) ใช้สร้าง Item Code เช่น AD, ZY, WP",
+            "length": 4,
+            "in_list_view": 1,
+        },
+        {
             "fieldname": "branch_code",
             "label": "Branch Code",
             "fieldtype": "Data",
@@ -38,7 +47,8 @@ PROPERTY_SETTERS = {
         (None, "quick_entry", "0", "Check"),
         ("naming_series", "description", "If CD code is set, naming series will be ignored.", "Text"),
         ("naming_series", "hidden", "0", "Check"),
-        ("naming_series", "options", "SUP-#####", "Text"),
+        ("naming_series", "default", "5B.###", "Text"),
+        ("naming_series", "options", "5B.###\nSUP-#####", "Text"),
         ("naming_series", "reqd", "1", "Check"),
         ("supplier_type", "options", "Company\nIndividual\nPartnership\nPublic Company Limited", "Text"),
     ],
