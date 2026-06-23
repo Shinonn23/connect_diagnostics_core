@@ -3,6 +3,14 @@
 CUSTOM_FIELDS = {
     "Item": [
         {
+            "fieldname": "primary_supplier",
+            "label": "Primary Supplier",
+            "fieldtype": "Link",
+            "options": "Supplier",
+            "insert_after": "item_group",
+            "description": "Primary supplier for this item, used to auto-generate the Item Code.",
+        },
+        {
             "fieldname": "column_break_lhwzh",
             "fieldtype": "Column Break",
             "insert_after": "withholding_tax_type",
@@ -172,8 +180,9 @@ PROPERTY_SETTERS = {
         ("barcodes", "hidden", "0", "Check"),
         ("item_code", "hidden", "0", "Check"),
         ("item_code", "reqd", "1", "Check"),
-        ("naming_series", "hidden", "1", "Check"),
-        ("naming_series", "options", "STO-ITEM-.YYYY.-", "Text"),
-        ("naming_series", "reqd", "0", "Check"),
+        ("naming_series", "default", "ITEM01.###", "Text"),
+        ("naming_series", "hidden", "0", "Check"),
+        ("naming_series", "options", "ITEM01.###\nITEM02.###\nITEM03.###", "Text"),
+        ("naming_series", "reqd", "1", "Check"),
     ],
 }
