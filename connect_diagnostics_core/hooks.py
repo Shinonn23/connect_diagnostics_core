@@ -167,6 +167,9 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
+    "Supplier": {
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+    },
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
     # },
