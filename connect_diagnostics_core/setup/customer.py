@@ -56,7 +56,12 @@ PROPERTY_SETTERS = {
         (None, "customer_type", "Company\nIndividual\nPartnership\nPublic Company Limited", "options"),
         (None, "quick_entry", "0", "Check"),
         ("naming_series", "default", "2S.###", "Text"),
-        ("naming_series", "description", "Auto-selected by customer type: Individual→2S, Company→4A, Hospital/Gov→4H", "Text"),
+        (
+            "naming_series",
+            "description",
+            "Auto-selected by customer type: Individual→2S, Company→4A, Hospital/Gov→4H",
+            "Text",
+        ),
         ("naming_series", "hidden", "0", "Check"),
         ("naming_series", "options", "2S.###\n4A.###\n4H.###", "Text"),
         (

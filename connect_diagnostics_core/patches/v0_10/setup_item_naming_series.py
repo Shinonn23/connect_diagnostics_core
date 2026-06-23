@@ -65,7 +65,7 @@ def _max_numeric_suffix(doctype: str, prefix: str) -> int:
     )
     max_val = 0
     for (name,) in rows:
-        suffix = name[len(prefix):]
+        suffix = name[len(prefix) :]
         if suffix.isdigit():
             max_val = max(max_val, int(suffix))
     return max_val
