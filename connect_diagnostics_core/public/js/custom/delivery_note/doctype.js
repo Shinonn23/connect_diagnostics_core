@@ -61,14 +61,10 @@ function build_summary_text(items) {
 	return blocks.join("\n\n");
 }
 
-// Render plain text into the HTML field using DOM APIs (no HTML markup authored);
-// `white-space: pre-wrap` preserves the line breaks / indentation.
+// Render plain text into the HTML field via jQuery (no HTML markup authored —
+// `.text()` sets textContent); `white-space: pre-wrap` keeps the line breaks.
 function set_summary_text(field, text) {
-	const $wrapper = field.$wrapper;
-	$wrapper.empty();
-
-	const block = document.createElement("div");
-	block.style.whiteSpace = "pre-wrap";
-	block.textContent = text;
-	$wrapper.append(block);
+	field.$wrapper
+		.empty()
+		.append($("<div>").css("white-space", "pre-wrap").text(text));
 }
