@@ -24,7 +24,7 @@ function render_serial_no_summary(frm) {
 	if (frm.is_new()) {
 		set_summary_text(
 			field,
-			__("Save the document to see the serial number summary.")
+			__("Save the document to see the serial number summary."),
 		);
 		return;
 	}
