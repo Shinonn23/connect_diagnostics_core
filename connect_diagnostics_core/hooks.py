@@ -140,12 +140,6 @@ after_migrate = "connect_diagnostics_core.setup.after_migrate"
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
-    # Item code prefixes: ITEM01 → 01-{supplier_abbr}-01 (เครื่อง)
-    #                     ITEM02 → 01-{supplier_abbr}-02 (Reagent)
-    #                     ITEM03 → 01-{supplier_abbr}-03 (อื่นๆ)
-    "ITEM01": "connect_diagnostics_core.naming.item.get_item_prefix",
-    "ITEM02": "connect_diagnostics_core.naming.item.get_item_prefix",
-    "ITEM03": "connect_diagnostics_core.naming.item.get_item_prefix",
 }
 
 # Document Events
@@ -166,9 +160,6 @@ doc_events = {
     },
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
-    },
-    "Supplier": {
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
     },
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
