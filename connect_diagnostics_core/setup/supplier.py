@@ -3,15 +3,6 @@
 CUSTOM_FIELDS = {
     "Supplier": [
         {
-            "fieldname": "abbr",
-            "label": "Abbreviation",
-            "fieldtype": "Data",
-            "insert_after": "supplier_name",
-            "description": "2-4 uppercase letters used to generate Item Code e.g. AD, ZY, WP",
-            "length": 4,
-            "in_list_view": 1,
-        },
-        {
             "fieldname": "branch_code",
             "label": "Branch Code",
             "fieldtype": "Data",

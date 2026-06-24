@@ -64,22 +64,6 @@
 		"value": "5B.###\nSUP-#####"
 	},
 	{
-		"default_value": null,
-		"doc_type": "Item",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "naming_series",
-		"is_system_generated": 1,
-		"modified": "2026-06-22 14:44:47.129985",
-		"module": "Connect Diagnostics Core",
-		"name": "Item-naming_series-options",
-		"property": "options",
-		"property_type": "Text",
-		"row_name": null,
-		"value": "ITEM01.###\nITEM02.###\nITEM03.###"
-	},
-	{
 		"default_value": "CORP.YY-BE.MM.####",
 		"doc_type": "Customer",
 		"docstatus": 0,
@@ -2542,21 +2526,5 @@
 		"property_type": "Text",
 		"row_name": null,
 		"value": "5B.###"
-	},
-	{
-		"default_value": null,
-		"doc_type": "Item",
-		"docstatus": 0,
-		"doctype": "Property Setter",
-		"doctype_or_field": "DocField",
-		"field_name": "naming_series",
-		"is_system_generated": 0,
-		"modified": "2026-06-22 00:00:00",
-		"module": "Connect Diagnostics Core",
-		"name": "Item-naming_series-default",
-		"property": "default",
-		"property_type": "Text",
-		"row_name": null,
-		"value": "ITEM01.###"
 	}
 ]
