@@ -172,8 +172,5 @@ PROPERTY_SETTERS = {
         ("barcodes", "hidden", "0", "Check"),
         ("item_code", "hidden", "0", "Check"),
         ("item_code", "reqd", "1", "Check"),
-        ("naming_series", "hidden", "1", "Check"),
-        ("naming_series", "options", "STO-ITEM-.YYYY.-", "Text"),
-        ("naming_series", "reqd", "0", "Check"),
     ],
 }
