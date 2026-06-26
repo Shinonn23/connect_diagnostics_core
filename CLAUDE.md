@@ -1,7 +1,13 @@
-# AI Agent Rules — connect_diagnostics_core
+# Connect Diagnostics Core — Project Rules
 
-> Behavioral rules enforced on every turn. For procedural guides, use slash commands:
-> `/scaffold-hook` `/scaffold-command` `/scaffold-test` `/scaffold-feature` `/commit` `/pr` `/fix-style` `/check` `/save-knowledge`
+Custom ERPNext app for Connect Diagnostics. This file is **auto-loaded every
+session** and is the contract for how we work: behavioral/engineering rules plus
+**how we branch, version, and ship**. Workflow narrative:
+[`.github/WORKFLOW.md`](.github/WORKFLOW.md).
+
+> For procedural guides, use the slash skills:
+> `/ship-pr` `/dispatch-test` `/test-result` `/promote-uat` `/promote-prod`
+> `/commit` `/pr` `/review` and the scaffold/check helpers.
 
 ---
 
@@ -22,6 +28,96 @@ When rules conflict, follow this order:
 - **Do NOT assume** any other apps exist (e.g., Healthcare, Education, E-Commerce)
 - **Custom field definitions**: `connect_diagnostics_core/cd_stock/custom/*.json`
 - **Custom field prefix**: `cd_` (e.g., `cd_custom_format`, `cd_registration_type`)
+- **Bench**: `/home/frappe/frappe-bench`, dev site `dev.erp.connectdiacnostics.local`
+  (= the `developments` environment). `gh` is authenticated as `Shinonn23`
+  (scopes include `repo` + `project`). Run server code via
+  `bench --site … console` with `exec(open(f).read(), globals())`.
+
+---
+
+# Workflow, Branching & Releases
+
+## Roles
+
+- **Tester / UAT certifier:** GitHub `newyodsapad` (Yodsapad Junta). Only his
+  `/test-pass` on a test task counts as certification to promote.
+- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off.
+
+## Branch & environment topology
+
+```
+feature work ─PR→ developments ─PR→ user-acceptance-testing ─PR→ production
+                  (DEV / default)    (UAT)                       (PROD)
+```
+
+All three long-lived branches are protected (required checks `Server` +
+`Frappe Linter`, 1 review). We **merge first, then test on the DEV site** — code
+review + CI are the pre-merge gate; manual functional testing happens after merge
+on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
+
+## Branch naming rule
+
+`<type>/<short-kebab-summary>` — optionally `<type>/<issue#>-<summary>`.
+
+- **type** ∈ `feat` `fix` `refactor` `chore` `style` `test` `docs` `perf` `build`
+  `ci` `revert` — the same set the version bump understands (keep them aligned).
+- lowercase, words separated by `-`, no spaces. One logical change = one branch = one PR.
+  Examples: `feat/general-ledger-th`, `fix/employee-be-naming-series`, `chore/281-bump-deps`.
+- ❌ Never use the `codex/` prefix. ❌ Do not use `feature/` — use `feat/`.
+- Do not create branches off anything but the intended base (default base = `developments`).
+
+## Commit & PR title rule (drives versioning)
+
+- **Conventional Commits**: `<type>: <summary>` (same type set as branches).
+  Commits must be atomic — one logical change per commit.
+- The PR **title** type is what `auto-version.yml` reads on PRs into `developments`,
+  so it must match the nature of the change.
+
+## Version bump rule
+
+Single source of truth: `connect_diagnostics_core/__init__.py` → `__version__`,
+SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-stable).
+
+| PR title type (merged into `developments`)                         | Bump                                                         |
+| ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `feat`                                                             | **+1 MINOR**, PATCH → 0                                      |
+| `fix` `refactor` `chore` `style` `test` `docs` `perf` `build` `ci` | **+1 PATCH**                                                 |
+| `revert` / unrecognized                                            | **skipped** — bump manually (inverse of the reverted change) |
+
+- Bumping is **automatic** via `auto-version.yml` — it runs only on PRs targeting
+  `developments` (promotion PRs to UAT/PROD never double-bump) and is idempotent.
+  The bump commit is the last commit on the PR branch: `chore: bump version to X.Y.Z`.
+- **Do not hand-edit `__version__`** and never bump on `developments` directly. The
+  only exception is a `revert` PR: edit `__version__` on the PR branch before merge.
+
+## Issue ↔ PR rule
+
+- 1 issue → 1 PR (default); 1 PR → many related issues (allowed when tightly related).
+- Reference issues with **`Refs #<n>`**, never `Closes #<n>` — issues stay open
+  through testing and are closed only after `newyodsapad` certifies the tests pass.
+
+## Ship & promote — use the skills
+
+| Skill                                            | What it does                                                                                                |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments` + dispatch test task to `newyodsapad`            |
+| `/dispatch-test <PR#>`                           | (re)create / assign the manual-test task for a PR                                                           |
+| `/test-result <PR#\|issue#> pass\|fail [reason]` | tester records the result + certifies                                                                       |
+| `/promote-uat`                                   | gate: every test task certified `/test-pass` by `newyodsapad` → PR `developments → user-acceptance-testing` |
+| `/promote-prod`                                  | gate: UAT sign-off (`/uat-approve` by owner) → PR `user-acceptance-testing → production`                    |
+
+## Board #6 reference (for skills using `gh project`)
+
+- Owner `Shinonn23`, project number `6`, id `PVT_kwHOB1tcMM4BLM7I`
+- **Status** field `PVTSSF_lAHOB1tcMM4BLM7Izg62NJg`: TODO `f75ad846` · DEV Ready `61e4505c` · Dev In progress `47fc9ee4` · Dev review `df73e18b` · Test In progress `18955566` · Test Review `6c769416` · UAT Deploy `98236657` · PROD Deploy `dba9dd7f` · Hold `232c6587`
+- **Test Status** field `PVTSSF_lAHOB1tcMM4BLM7IzhWdi_0`: Not Tested `9d66b7d0` · Testing `2556afad` · Passed `97d946bc` · Failed `15087b1c`
+- **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text)
+- Set a value: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`).
+- An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json`.
+
+---
+
+# Engineering Rules
 
 ## General
 
@@ -30,10 +126,10 @@ When rules conflict, follow this order:
 - No placeholder/TODO code — all code must be complete and functional
 - Run `pre-commit run --all-files` before considering any code change done
 - Copyright header on all Python files:
-    ```python
-    # Copyright (c) 2026, Siwat Sroisuwan and contributors
-    # For license information, please see license.txt
-    ```
+  ```python
+  # Copyright (c) 2026, Siwat Sroisuwan and contributors
+  # For license information, please see license.txt
+  ```
 
 ### Uncertainty & Honesty
 
@@ -129,8 +225,8 @@ If not found after all five steps: **stop and ask**. Do not assume it doesn't ex
 
 - **Before starting any non-trivial task**, check `.claude/knowledge/` for existing notes on the relevant topic; read them before re-exploring the codebase
 - **After completing any non-trivial task**, save exploration findings by running `/save-knowledge`
-    - Knowledge files: `.claude/knowledge/<topic>.md` — lowercase, hyphen-separated names (e.g., `employee-autoname.md`, `customer-hooks.md`)
-    - Contents: key files, functions/hooks used, patterns, non-obvious constraints
+  - Knowledge files: `.claude/knowledge/<topic>.md` — lowercase, hyphen-separated names (e.g., `employee-autoname.md`, `customer-hooks.md`)
+  - Contents: key files, functions/hooks used, patterns, non-obvious constraints
 - Update the file if new findings extend or contradict prior notes
 - `.claude/knowledge/` is an internal AI working directory — do not commit it (add to `.gitignore`)
 
@@ -176,24 +272,6 @@ If a bug or issue is discovered during implementation (outside the current task 
 - Avoid non-deterministic behavior (random values, time-dependent defaults, unordered dict iteration) unless explicitly required
 - Use `frappe.utils.now()` or `frappe.utils.today()` instead of Python stdlib equivalents for consistent test behavior
 
-### Versioning
-
-- **Single source of truth**: `connect_diagnostics_core/__init__.py` — the `__version__` string
-- **Scheme**: SemVer `0.MINOR.PATCH` (MAJOR stays `0` until the project owner declares production-stable)
-- **Bump triggers** (applied when a PR is merged to `developments`):
-    - `feat:` / `feat(...)` PR → `+1 MINOR`, PATCH resets to `0`
-    - `fix:` / `refactor:` / `chore:` / `style:` / `test:` / `docs:` PR → `+1 PATCH`
-    - A revert PR counts as the inverse of what it reverted
-- **Where the bump lives**: the version bump commit is the **last commit on the PR branch** before merge — format: `chore: bump version to X.Y.Z`
-- Never bump the version outside of a PR merge (no ad-hoc bumps on `developments` directly)
-- Do not bump when opening the PR — only when the PR is ready to merge and approved
-
-### Git Discipline
-
-- Commits must be atomic — one logical change per commit
-- Follow [Conventional Commits](https://www.conventionalcommits.org/) format: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:`
-- One feature = one branch = one PR
-
 ## Python
 
 - Formatting enforced by ruff via `pyproject.toml` — do not duplicate config here
@@ -206,12 +284,12 @@ If a bug or issue is discovered during implementation (outside the current task 
 - Import order: stdlib → third-party → frappe → local modules
 - No wildcard imports (`from frappe import *`); no unused imports
 - **Maximize type coverage** — type everything possible:
-    - Use `cast()` to narrow types from frappe/erpnext: `doc = cast(ProductRegistration, frappe.get_doc(...))`
-    - Always type `doc.get()` calls: `value: str = cast(str, doc.get("field") or "")`
-    - Prefer `cast()` to narrow types over ignore directives — only use ignore as a last resort
-    - When ignore is unavoidable, it must be specific with a reason: `# ty: ignore[unresolved-attribute] - runtime-injected custom field (cd_stock/custom/item.json)`
-    - Custom field definitions: `connect_diagnostics_core/cd_stock/custom/*`
-    - Never use bare `# type: ignore` or `# ty: ignore` without a specific error code and reason
+  - Use `cast()` to narrow types from frappe/erpnext: `doc = cast(ProductRegistration, frappe.get_doc(...))`
+  - Always type `doc.get()` calls: `value: str = cast(str, doc.get("field") or "")`
+  - Prefer `cast()` to narrow types over ignore directives — only use ignore as a last resort
+  - When ignore is unavoidable, it must be specific with a reason: `# ty: ignore[unresolved-attribute] - runtime-injected custom field (cd_stock/custom/item.json)`
+  - Custom field definitions: `connect_diagnostics_core/cd_stock/custom/*`
+  - Never use bare `# type: ignore` or `# ty: ignore` without a specific error code and reason
 
 ### Error Handling
 
@@ -245,8 +323,8 @@ If a bug or issue is discovered during implementation (outside the current task 
 
 - **hooks.py**: organize by hook type, references point to `api/` module functions
 - **API files**: `connect_diagnostics_core/api/<system>/<doctype_name>.py`
-    - `<system>` = `erpnext` for ERPNext doctypes, `frappe` for Frappe core doctypes
-    - `<doctype_name>` = lowercase, spaces → underscores
+  - `<system>` = `erpnext` for ERPNext doctypes, `frappe` for Frappe core doctypes
+  - `<doctype_name>` = lowercase, spaces → underscores
 - **APIs**: expose via `@frappe.whitelist()` with `frappe.has_permission()` checks; validate all inputs server-side
 - **DocTypes**: never hand-edit JSON files — use Frappe desk
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
@@ -370,12 +448,7 @@ If a change is truly needed, document the exact reason and get explicit approval
 - Tests must clean up after themselves — no leftover test data on the site
 - Use `FrappeTestCase` for all tests; never use bare `unittest.TestCase`
 - Test edge cases: empty inputs, boundary values, Thai-specific logic where applicable:
-    - Thai address format validation
-    - THB currency rounding (2 decimal places, banker's rounding)
-    - Thai tax ID (13-digit) format and checksum validation
-    - Buddhist year (BE) vs Gregorian year (CE) conversion
-
-# Agent Instructions
-
-- Do not create branches with the `codex/` prefix.
-- When creating a branch, use a name that reflects the actual issue scope, such as `fix/...`, `feature/...`, or `chore/...`, unless the user specifies a branch name.
+  - Thai address format validation
+  - THB currency rounding (2 decimal places, banker's rounding)
+  - Thai tax ID (13-digit) format and checksum validation
+  - Buddhist year (BE) vs Gregorian year (CE) conversion
