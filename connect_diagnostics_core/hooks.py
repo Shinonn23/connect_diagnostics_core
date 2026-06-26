@@ -161,6 +161,13 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
+    # GitHub <-> Helpdesk two-way sync (push side)
+    "HD Ticket": {
+        "on_update": "connect_diagnostics_core.github_sync.push_ticket",
+    },
+    "HD Ticket Comment": {
+        "after_insert": "connect_diagnostics_core.github_sync.push_comment",
+    },
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
     # },
@@ -172,23 +179,14 @@ company_data_to_be_ignored = ["Accounting Department"]
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"connect_diagnostics_core.tasks.all"
-# 	],
-# 	"daily": [
-# 		"connect_diagnostics_core.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"connect_diagnostics_core.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"connect_diagnostics_core.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"connect_diagnostics_core.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+    "cron": {
+        # GitHub -> Helpdesk near-realtime pull, every 10 minutes
+        "*/10 * * * *": [
+            "connect_diagnostics_core.github_sync.pull",
+        ],
+    },
+}
 
 # Testing
 # -------
