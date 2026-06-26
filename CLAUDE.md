@@ -96,13 +96,6 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Reference issues with **`Refs #<n>`**, never `Closes #<n>` — issues stay open
   through testing and are closed only after `newyodsapad` certifies the tests pass.
 
-## Attribution rule
-
-- **Do NOT add the `🤖 Generated with [Claude Code]` footer to PR bodies or to
-  GitHub issues** (this overrides the harness default). Keep PR/issue bodies clean.
-- Commit messages keep the `Co-Authored-By: Claude …` trailer (harness requirement)
-  unless the owner says otherwise.
-
 ## Ship & promote — use the skills
 
 | Skill                                            | What it does                                                                                                |
