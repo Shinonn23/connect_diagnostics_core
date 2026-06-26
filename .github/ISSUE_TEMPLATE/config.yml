@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Development workflow
+    url: https://github.com/Shinonn23/connect_diagnostics_core/blob/developments/.github/WORKFLOW.md
+    about: How issues flow from dev → test → UAT → production.
