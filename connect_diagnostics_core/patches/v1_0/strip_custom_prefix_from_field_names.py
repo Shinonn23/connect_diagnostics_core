@@ -69,12 +69,9 @@ def execute():
             continue  # fresh install or already migrated
 
         _ensure_new_field(doctype, new, field_def)
-        dt, new_col, old_col = _ident(doctype), _ident(new), _ident(old)
-        # Identifiers come from the hardcoded RENAMES list and are whitelisted by _ident();
-        # table/column names cannot be passed as query parameters.
-        frappe.db.sql(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-            f"UPDATE `tab{dt}` SET `{new_col}` = `{old_col}` WHERE `{old_col}` IS NOT NULL"
-        )
+        table = frappe.qb.DocType(_ident(doctype))
+        new_col, old_col = _ident(new), _ident(old)
+        frappe.qb.update(table).set(table[new_col], table[old_col]).where(table[old_col].isnotnull()).run()
         _drop_old(doctype, old)
 
     frappe.db.commit()
@@ -109,12 +106,10 @@ def _ensure_new_field(doctype, new, field_def):
 def _rename_table_field(doctype, old, new, field_def):
     child_doctype = field_def.get("options")
     if child_doctype and frappe.db.table_exists(child_doctype):
-        child = _ident(child_doctype)
-        # child table name is a trusted constant from the field def; values are parameterized.
-        frappe.db.sql(  # nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection
-            f"UPDATE `tab{child}` SET parentfield = %s WHERE parentfield = %s AND parenttype = %s",
-            (new, old, doctype),
-        )
+        child_table = frappe.qb.DocType(_ident(child_doctype))
+        frappe.qb.update(child_table).set(child_table.parentfield, new).where(
+            (child_table.parentfield == old) & (child_table.parenttype == doctype)
+        ).run()
     _ensure_new_field(doctype, new, field_def)
     _drop_old(doctype, old)
 

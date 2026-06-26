@@ -14,12 +14,9 @@ frappe.ui.form.on("Accounting Department", {
 	},
 	refresh: function (frm) {
 		if (!frm.is_new()) {
-			frm.add_custom_button(
-				__("Update Department Name / Number"),
-				function () {
-					frm.trigger("update_department_number");
-				},
-			);
+			frm.add_custom_button(__("Update Department Name / Number"), function () {
+				frm.trigger("update_department_number");
+			});
 		}
 
 		let intro_txt = "";
@@ -38,12 +35,9 @@ frappe.ui.form.on("Accounting Department", {
 		frm.set_intro(intro_txt);
 
 		if (!frm.doc.__islocal) {
-			frm.add_custom_button(
-				__("Chart of Accounting Departments"),
-				function () {
-					frappe.set_route("Tree", "Accounting Department");
-				},
-			);
+			frm.add_custom_button(__("Chart of Accounting Departments"), function () {
+				frappe.set_route("Tree", "Accounting Department");
+			});
 		}
 	},
 
@@ -94,20 +88,10 @@ frappe.ui.form.on("Accounting Department", {
 						frappe.dom.unfreeze();
 						if (!r.exc) {
 							if (r.message) {
-								frappe.set_route(
-									"Form",
-									"Accounting Department",
-									r.message,
-								);
+								frappe.set_route("Form", "Accounting Department", r.message);
 							} else {
-								frm.set_value(
-									"department_name",
-									data.department_name,
-								);
-								frm.set_value(
-									"department_number",
-									data.department_number,
-								);
+								frm.set_value("department_name", data.department_name);
+								frm.set_value("department_number", data.department_number);
 							}
 							d.hide();
 						}
@@ -128,13 +112,9 @@ frappe.ui.form.on("Accounting Department", {
 	hide_unhide_group_ledger(frm) {
 		let doc = frm.doc;
 		if (doc.is_group == 1) {
-			frm.add_custom_button(__("Convert to Non-Group"), () =>
-				frm.events.convert_to_ledger(frm),
-			);
+			frm.add_custom_button(__("Convert to Non-Group"), () => frm.events.convert_to_ledger(frm));
 		} else if (doc.is_group == 0) {
-			frm.add_custom_button(__("Convert to Group"), () =>
-				frm.events.convert_to_group(frm),
-			);
+			frm.add_custom_button(__("Convert to Group"), () => frm.events.convert_to_group(frm));
 		}
 	},
 

@@ -98,12 +98,7 @@ frappe.listview_settings["Item"] = {
 			const txt = listview._cd_search_text;
 			if (txt) {
 				const like = `%${txt}%`;
-				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [
-					dt,
-					fn,
-					"like",
-					like,
-				]);
+				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [dt, fn, "like", like]);
 				args.distinct = 1;
 			}
 			return args;
