@@ -19,15 +19,10 @@ frappe.ui.form.on("Purchase Order Item", {
 		if (!row.item_code || frm.doc.supplier) return;
 
 		// Auto-fill supplier from Item Supplier table (primary supplier for this item)
-		frappe.db.get_value(
-			"Item Supplier",
-			{ parent: row.item_code },
-			"supplier",
-			(r) => {
-				if (r && r.supplier) {
-					frm.set_value("supplier", r.supplier);
-				}
-			},
-		);
+		frappe.db.get_value("Item Supplier", { parent: row.item_code }, "supplier", (r) => {
+			if (r && r.supplier) {
+				frm.set_value("supplier", r.supplier);
+			}
+		});
 	},
 });

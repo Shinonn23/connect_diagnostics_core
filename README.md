@@ -26,6 +26,7 @@ bench install-app connect_diagnostics_core
 - `erpnext`
 - `erpnext_thailand`
 - `hrms`
+- `helpdesk`
 
 ## Contributing
 
