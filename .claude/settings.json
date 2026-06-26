@@ -1,9 +1,9 @@
 {
-  "enabledPlugins": {
-    "code-review@claude-plugins-official": true
-  },
-  "attribution": {
-    "pr": "",
-    "sessionUrl": false
-  }
+	"enabledPlugins": {
+		"code-review@claude-plugins-official": true
+	},
+	"attribution": {
+		"pr": "",
+		"sessionUrl": false
+	}
 }
