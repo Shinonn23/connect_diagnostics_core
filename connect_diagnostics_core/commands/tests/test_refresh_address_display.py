@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -18,7 +19,7 @@ class TestRefreshAddressDisplayCommand(TestCase):
         result = CliRunner().invoke(
             refresh_address_display,
             ["--doctype", "Sales Invoice"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -40,7 +41,7 @@ class TestRefreshAddressDisplayCommand(TestCase):
         result = CliRunner().invoke(
             refresh_address_display,
             ["--all", "--sync-fixtures", "--apply"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -51,7 +52,7 @@ class TestRefreshAddressDisplayCommand(TestCase):
         result = CliRunner().invoke(
             refresh_address_display,
             ["--all", "--sync-fixtures"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 2)

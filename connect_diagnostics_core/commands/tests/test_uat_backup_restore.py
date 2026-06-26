@@ -7,6 +7,7 @@ import json
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
@@ -347,7 +348,7 @@ class TestUatBackupRestoreCommands(TestCase):
         result = CliRunner().invoke(
             test_uat_backup_restore_command,
             ["--source-site-slug", "uat_erp_connectdiagnostics_net"],
-            obj={"sites": ["deverp.connectdiagnostics.net"], "profile": False},
+            obj=SimpleNamespace(sites=["deverp.connectdiagnostics.net"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -373,7 +374,7 @@ class TestUatBackupRestoreCommands(TestCase):
         result = CliRunner().invoke(
             test_uat_backup_restore_command,
             ["--source-site-slug", "uat_erp_connectdiagnostics_net", "--download"],
-            obj={"sites": ["deverp.connectdiagnostics.net"], "profile": False},
+            obj=SimpleNamespace(sites=["deverp.connectdiagnostics.net"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -404,7 +405,7 @@ class TestUatBackupRestoreCommands(TestCase):
         result = CliRunner().invoke(
             restore_uat_backup,
             ["--source-site-slug", "uat_erp_connectdiagnostics_net", "--dry-run"],
-            obj={"sites": ["deverp.connectdiagnostics.net"], "profile": False},
+            obj=SimpleNamespace(sites=["deverp.connectdiagnostics.net"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -438,7 +439,7 @@ class TestUatBackupRestoreCommands(TestCase):
         result = CliRunner().invoke(
             restore_uat_backup,
             ["--source-site-slug", "uat_erp_connectdiagnostics_net", "--db-root-password", "s3cret"],
-            obj={"sites": ["deverp.connectdiagnostics.net"], "profile": False},
+            obj=SimpleNamespace(sites=["deverp.connectdiagnostics.net"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)

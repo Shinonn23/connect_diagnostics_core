@@ -34,4 +34,24 @@ def before_tests() -> None:
         )
 
     enable_all_roles_and_domains()
+    _seed_thai_tax_settings("_Test Company")
     frappe.db.commit()
+
+
+def _seed_thai_tax_settings(company: str) -> None:
+    """Seed a minimal Thai Tax Settings row for the test company.
+
+    erpnext_thailand registers a GL Entry ``after_insert`` hook
+    (``create_tax_invoice_on_gl_tax``) that calls ``get_thai_tax_settings(company)``
+    *before* its voucher-type guard, so any GL Entry on a company without a matching
+    row throws — including the opening-stock entries erpnext creates while building its
+    test records on Frappe v16. The account links on the row are optional; only the
+    company match is needed to clear the guard.
+    """
+    if not frappe.db.exists("DocType", "Thai Tax Settings"):
+        return
+    settings = frappe.get_single("Thai Tax Settings")
+    if any(row.company == company for row in settings.company_accounts):
+        return
+    settings.append("company_accounts", {"company": company})
+    settings.save(ignore_permissions=True)
