@@ -6,7 +6,6 @@ tags
 node_modules
 __pycache__
 .ruff_cache
-.claude
 
 frappe-semgrep-rules
 typings

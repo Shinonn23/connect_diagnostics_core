@@ -14,12 +14,9 @@ default_stages: [pre-commit]
 fail_fast: false
 
 default_language_version:
-    python: python3.12
+    python: python3
 
 repos:
-    # =========================================================
-    # Basic sanity checks
-    # =========================================================
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v5.0.0
       hooks:
@@ -41,9 +38,6 @@ repos:
           - id: check-yaml
             args: [--unsafe]
 
-    # =========================================================
-    # Ruff (lint + import sort + autofix)
-    # =========================================================
     - repo: https://github.com/astral-sh/ruff-pre-commit
       rev: v0.14.1
       hooks:
@@ -58,42 +52,6 @@ repos:
             name: ruff-format
             exclude: "typings/"
 
-    # =========================================================
-    # Pyrefly (type checking)
-    # =========================================================
-    - repo: local
-      hooks:
-          - id: pyrefly
-            name: pyrefly
-            language: system
-            entry: pyrefly check
-            types: [python]
-
-            # ค่อย ๆ เปิด scope ก่อนสำหรับ frappe
-            files: "^connect_diagnostics_core/"
-
-    # =========================================================
-    # Semgrep
-    # =========================================================
-    - repo: https://github.com/semgrep/pre-commit
-      rev: v1.163.0
-      hooks:
-          - id: semgrep
-            name: semgrep-frappe
-            args:
-                - --config=https://github.com/frappe/semgrep-rules
-                - --config=r/python.lang.correctness
-            exclude: |
-                (?x)^(
-                    typings/.*|
-                    node_modules/.*|
-                    .*/dist/.*
-                )$
-
-    # =========================================================
-    # Prettier
-    # ใช้ local เพราะ sync กับ package.json จริง
-    # =========================================================
     - repo: local
       hooks:
           - id: prettier
@@ -111,10 +69,6 @@ repos:
                     connect_diagnostics_core/public/js/lib/.*
                 )$
 
-    # =========================================================
-    # ESLint
-    # ใช้ local เพื่อใช้ dependency จริงของ project
-    # =========================================================
     - repo: local
       hooks:
           - id: eslint
@@ -132,14 +86,24 @@ repos:
                     connect_diagnostics_core/public/js/lib/.*
                 )$
 
-# =============================================================
-# pre-commit.ci
-# =============================================================
-ci:
-    autoupdate_schedule: weekly
-    submodules: false
+    - repo: local
+      hooks:
+          - id: semgrep-frappe
+            name: semgrep-frappe
+            language: python
+            additional_dependencies:
+                - semgrep
+            entry: bash -c 'rules_dir="$(mktemp -d /tmp/frappe-semgrep-rules.XXXXXX)" && trap '"'"'rm -rf "$rules_dir"'"'"' EXIT && git clone --depth 1 https://github.com/frappe/semgrep-rules.git "$rules_dir" && semgrep ci --config "$rules_dir/rules" --config r/python.lang.correctness'
+            pass_filenames: false
+            always_run: true
 
-    # semgrep + pyrefly มักหนักสำหรับ auto-fix bot
-    skip:
-        - semgrep-frappe
-        - pyrefly
+    - repo: local
+      hooks:
+          - id: pip-audit
+            name: pip-audit
+            language: python
+            additional_dependencies:
+                - pip-audit
+            entry: pip-audit --desc on .
+            pass_filenames: false
+            always_run: true
