@@ -6,9 +6,7 @@ frappe.ui.form.on("Department User Permission", {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("Apply Permissions"), function () {
 				frappe.confirm(
-					__(
-						"Are you sure you want to apply this permission to the selected users?",
-					),
+					__("Are you sure you want to apply this permission to the selected users?"),
 					function () {
 						frappe.call({
 							method: "connect_diagnostics_core.connect_diagnostics_core.doctype.department_user_permission.department_user_permission.apply_permissions",
@@ -20,13 +18,10 @@ frappe.ui.form.on("Department User Permission", {
 							callback: function (r) {
 								if (!r.exc && r.message) {
 									frappe.show_alert({
-										message: __(
-											"Applied permissions to {0} users, updated {1} users.",
-											[
-												r.message.applied,
-												r.message.updated,
-											],
-										),
+										message: __("Applied permissions to {0} users, updated {1} users.", [
+											r.message.applied,
+											r.message.updated,
+										]),
 										indicator: "green",
 									});
 								}
@@ -38,9 +33,7 @@ frappe.ui.form.on("Department User Permission", {
 
 			frm.add_custom_button(__("Remove Permissions"), function () {
 				frappe.confirm(
-					__(
-						"Are you sure you want to remove this permission from the selected users?",
-					),
+					__("Are you sure you want to remove this permission from the selected users?"),
 					function () {
 						frappe.call({
 							method: "connect_diagnostics_core.connect_diagnostics_core.doctype.department_user_permission.department_user_permission.remove_permissions",
@@ -52,10 +45,9 @@ frappe.ui.form.on("Department User Permission", {
 							callback: function (r) {
 								if (!r.exc && r.message) {
 									frappe.show_alert({
-										message: __(
-											"Removed permissions from {0} users.",
-											[r.message.removed],
-										),
+										message: __("Removed permissions from {0} users.", [
+											r.message.removed,
+										]),
 										indicator: "orange",
 									});
 								}

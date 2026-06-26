@@ -22,10 +22,7 @@ function render_serial_no_summary(frm) {
 	}
 
 	if (frm.is_new()) {
-		set_summary_text(
-			field,
-			__("Save the document to see the serial number summary."),
-		);
+		set_summary_text(field, __("Save the document to see the serial number summary."));
 		return;
 	}
 
@@ -48,12 +45,8 @@ function build_summary_text(items) {
 		const count = serial_nos.length;
 		const qty = flt(item.qty);
 
-		const header = `${item.item_code} — ${
-			item.item_name || ""
-		}  (${count})`;
-		const lines = count
-			? serial_nos.map((sn) => `    ${sn}`)
-			: [`    ${__("No serial no")}`];
+		const header = `${item.item_code} — ${item.item_name || ""}  (${count})`;
+		const lines = count ? serial_nos.map((sn) => `    ${sn}`) : [`    ${__("No serial no")}`];
 
 		return [header, ...lines].join("\n");
 	});
@@ -64,7 +57,5 @@ function build_summary_text(items) {
 // Render plain text into the HTML field via jQuery (no HTML markup authored —
 // `.text()` sets textContent); `white-space: pre-wrap` keeps the line breaks.
 function set_summary_text(field, text) {
-	field.$wrapper
-		.empty()
-		.append($("<div>").css("white-space", "pre-wrap").text(text));
+	field.$wrapper.empty().append($("<div>").css("white-space", "pre-wrap").text(text));
 }

@@ -32,10 +32,10 @@ This project enforces conventions through `CLAUDE.md` — the single source of t
 - **`frappe.throw()`** for user-facing errors, not `raise ValueError`
 - **Hook signatures** — `(doc: Document, method: str) -> None`
 - **Copyright header** on all files:
-    ```python
-    # Copyright (c) 2026, Siwat Sroisuwan and contributors
-    # For license information, please see license.txt
-    ```
+  ```python
+  # Copyright (c) 2026, Siwat Sroisuwan and contributors
+  # For license information, please see license.txt
+  ```
 - **`cast()` for narrow types** — `doc = cast(ProductRegistration, frappe.get_doc(...))`
 - **`# ty: ignore` with reason** — never bare `# type: ignore`
 

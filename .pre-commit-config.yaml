@@ -1,109 +1,115 @@
 exclude: |
-    (?x)^(
-        \.git/.*|
-        \.zed/.*|
-        \.vscode/.*|
-        node_modules/.*|
-        .*/dist/.*|
-        .*/coverage/.*|
-        .*/__pycache__/.*|
-        typings/.*
-    )$
+  (?x)^(
+      \.git/.*|
+      \.zed/.*|
+      \.vscode/.*|
+      node_modules/.*|
+      .*/dist/.*|
+      .*/coverage/.*|
+      .*/__pycache__/.*|
+      typings/.*
+  )$
 
 default_stages: [pre-commit]
 fail_fast: false
 
 default_language_version:
-    python: python3
+  python: python3
 
 repos:
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v5.0.0
-      hooks:
-          - id: trailing-whitespace
-            exclude: ".*(json|txt|csv|md|svg)$"
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ".*(json|txt|csv|md|svg)$"
 
-          - id: end-of-file-fixer
+      - id: end-of-file-fixer
 
-          - id: check-merge-conflict
+      - id: check-merge-conflict
 
-          - id: check-ast
+      - id: check-ast
 
-          - id: debug-statements
+      - id: debug-statements
 
-          - id: check-json
+      - id: check-json
 
-          - id: check-toml
+      - id: check-toml
 
-          - id: check-yaml
-            args: [--unsafe]
+      - id: check-yaml
+        args: [--unsafe]
 
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.14.1
-      hooks:
-          - id: ruff-check
-            name: ruff-check
-            args:
-                - --fix
-                - --exit-non-zero-on-fix
-            exclude: "typings/"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.1
+    hooks:
+      - id: ruff-check
+        name: ruff-check
+        args:
+          - --fix
+          - --exit-non-zero-on-fix
+        exclude: "typings/"
 
-          - id: ruff-format
-            name: ruff-format
-            exclude: "typings/"
+      - id: ruff-format
+        name: ruff-format
+        exclude: "typings/"
 
-    - repo: local
-      hooks:
-          - id: prettier
-            name: prettier
-            language: system
-            entry: npx prettier --write
-            types_or:
-                [javascript, jsx, ts, tsx, vue, scss, css, json, yaml, markdown]
+  - repo: local
+    hooks:
+      - id: prettier-eslint
+        name: prettier-eslint
+        language: system
+        entry: npx prettier-eslint --write
+        types_or: [javascript, jsx, ts, tsx, vue]
 
-            exclude: |
-                (?x)^(
-                    node_modules/.*|
-                    .*/dist/.*|
-                    .*boilerplate.*|
-                    connect_diagnostics_core/public/js/lib/.*
-                )$
+        exclude: |
+          (?x)^(
+              node_modules/.*|
+              cypress/.*|
+              .*/dist/.*|
+              .*boilerplate.*|
+              connect_diagnostics_core/public/js/lib/.*
+          )$
 
-    - repo: local
-      hooks:
-          - id: eslint
-            name: eslint
-            language: system
-            entry: npx eslint --quiet
-            types_or: [javascript, jsx, ts, tsx, vue]
+      - id: prettier-json
+        name: prettier-json
+        language: system
+        entry: npx prettier --write
+        types: [json]
 
-            exclude: |
-                (?x)^(
-                    node_modules/.*|
-                    cypress/.*|
-                    .*/dist/.*|
-                    .*boilerplate.*|
-                    connect_diagnostics_core/public/js/lib/.*
-                )$
+        exclude: |
+          (?x)^(
+              node_modules/.*|
+              .*/dist/.*|
+              .*boilerplate.*|
+              connect_diagnostics_core/public/js/lib/.*
+          )$
 
-    - repo: local
-      hooks:
-          - id: semgrep-frappe
-            name: semgrep-frappe
-            language: python
-            additional_dependencies:
-                - semgrep
-            entry: bash -c 'rules_dir="$(mktemp -d /tmp/frappe-semgrep-rules.XXXXXX)" && trap '"'"'rm -rf "$rules_dir"'"'"' EXIT && git clone --depth 1 https://github.com/frappe/semgrep-rules.git "$rules_dir" && semgrep ci --config "$rules_dir/rules" --config r/python.lang.correctness'
-            pass_filenames: false
-            always_run: true
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty-check
+        language: python
+        additional_dependencies:
+          - ty==0.0.43
+        entry: ty check --python ../../env/bin/python
+        pass_filenames: false
+        always_run: true
 
-    - repo: local
-      hooks:
-          - id: pip-audit
-            name: pip-audit
-            language: python
-            additional_dependencies:
-                - pip-audit
-            entry: pip-audit --desc on .
-            pass_filenames: false
-            always_run: true
+      - id: semgrep-frappe
+        name: semgrep-frappe
+        language: python
+        additional_dependencies:
+          - semgrep
+        entry: bash -c 'rules_dir="$(mktemp -d /tmp/frappe-semgrep-rules.XXXXXX)" && trap '"'"'rm -rf "$rules_dir"'"'"' EXIT && git clone --depth 1 https://github.com/frappe/semgrep-rules.git "$rules_dir" && semgrep ci --config "$rules_dir/rules" --config r/python.lang.correctness'
+        pass_filenames: false
+        always_run: true
+
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit
+        language: python
+        additional_dependencies:
+          - pip-audit
+        entry: pip-audit --desc on .
+        pass_filenames: false
+        always_run: true

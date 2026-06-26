@@ -1,60 +1,60 @@
 name: Discord Release Notify
 on:
-    release:
-        types: [published]
+  release:
+    types: [published]
 jobs:
-    notify:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Notify Release to Discord
-              env:
-                  WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
-                  RELEASE_NAME: ${{ github.event.release.name }}
-                  RELEASE_URL: ${{ github.event.release.html_url }}
-                  RELEASE_BODY: ${{ github.event.release.body }}
-                  RELEASE_TAG: ${{ github.event.release.tag_name }}
-                  RELEASE_ACTOR: ${{ github.event.release.author.login }}
-                  RELEASE_AVATAR: ${{ github.event.release.author.avatar_url }}
-                  RELEASE_CREATED: ${{ github.event.release.created_at }}
-                  REPO: ${{ github.repository }}
-              run: |
-                  COLOR=5763719
-                  BODY_CONTENT="$RELEASE_BODY"
-                  if [ ${#BODY_CONTENT} -gt 300 ]; then
-                    BODY_CONTENT="${BODY_CONTENT:0:300}..."
-                  fi
-                  PAYLOAD=$(jq -n \
-                    --arg title "$RELEASE_NAME" \
-                    --arg url "$RELEASE_URL" \
-                    --arg repo "$REPO" \
-                    --arg tag "$RELEASE_TAG" \
-                    --arg actor "$RELEASE_ACTOR" \
-                    --arg avatar "$RELEASE_AVATAR" \
-                    --arg body "$BODY_CONTENT" \
-                    --arg color "$COLOR" \
-                    --arg created "$RELEASE_CREATED" \
-                    '{
-                      username: "GitHub Releases",
-                      avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                      embeds: [{
-                        title: $title,
-                        url: $url,
-                        description: (if $body and $body != "" then $body else "*No release notes*" end),
-                        color: ($color | tonumber),
-                        author: {
-                          name: $actor,
-                          icon_url: $avatar,
-                          url: ("https://github.com/" + $actor)
-                        },
-                        fields: [
-                          { name: "Repository", value: $repo, inline: true },
-                          { name: "Version",    value: $tag,  inline: true }
-                        ],
-                        footer: {
-                          text: ("Released • " + ($created | split("T")[0]))
-                        }
-                      }]
-                    }')
-                  curl -X POST -H "Content-Type: application/json" \
-                    -d "$PAYLOAD" \
-                    "$WEBHOOK"
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Release to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_ACTOR: ${{ github.event.release.author.login }}
+          RELEASE_AVATAR: ${{ github.event.release.author.avatar_url }}
+          RELEASE_CREATED: ${{ github.event.release.created_at }}
+          REPO: ${{ github.repository }}
+        run: |
+          COLOR=5763719
+          BODY_CONTENT="$RELEASE_BODY"
+          if [ ${#BODY_CONTENT} -gt 300 ]; then
+            BODY_CONTENT="${BODY_CONTENT:0:300}..."
+          fi
+          PAYLOAD=$(jq -n \
+            --arg title "$RELEASE_NAME" \
+            --arg url "$RELEASE_URL" \
+            --arg repo "$REPO" \
+            --arg tag "$RELEASE_TAG" \
+            --arg actor "$RELEASE_ACTOR" \
+            --arg avatar "$RELEASE_AVATAR" \
+            --arg body "$BODY_CONTENT" \
+            --arg color "$COLOR" \
+            --arg created "$RELEASE_CREATED" \
+            '{
+              username: "GitHub Releases",
+              avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              embeds: [{
+                title: $title,
+                url: $url,
+                description: (if $body and $body != "" then $body else "*No release notes*" end),
+                color: ($color | tonumber),
+                author: {
+                  name: $actor,
+                  icon_url: $avatar,
+                  url: ("https://github.com/" + $actor)
+                },
+                fields: [
+                  { name: "Repository", value: $repo, inline: true },
+                  { name: "Version",    value: $tag,  inline: true }
+                ],
+                footer: {
+                  text: ("Released • " + ($created | split("T")[0]))
+                }
+              }]
+            }')
+          curl -X POST -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK"
