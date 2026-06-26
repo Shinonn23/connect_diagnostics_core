@@ -34,9 +34,7 @@ frappe.ui.form.on("GitHub Integration Settings", {
 				callback: (r) => {
 					frm.reload_doc();
 					frappe.show_alert({
-						message: __("Loaded {0} board columns", [
-							(r.message || {}).options || 0,
-						]),
+						message: __("Loaded {0} board columns", [(r.message || {}).options || 0]),
 						indicator: "green",
 					});
 				},

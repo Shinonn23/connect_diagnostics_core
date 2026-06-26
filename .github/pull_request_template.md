@@ -11,6 +11,7 @@
 ## Related issues
 
 Refs #<!-- issue number -->
+
 <!-- add more: Refs #x, Refs #y if this PR covers several related issues -->
 
 ## Type of change
@@ -25,9 +26,9 @@ Refs #<!-- issue number -->
 <!-- Copy the test steps from the linked issue(s); tester ticks these on the issue. -->
 
 | Test step | Expected result | Pass |
-|-----------|-----------------|:----:|
-|           |                 | ☐ |
-|           |                 | ☐ |
+| --------- | --------------- | :--: |
+|           |                 |  ☐   |
+|           |                 |  ☐   |
 
 ## Pre-merge checklist
 

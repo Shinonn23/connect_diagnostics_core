@@ -5,10 +5,10 @@ frappe.treeview_settings["Accounting Department"] = {
 		{
 			fieldname: "company",
 			fieldtype: "Select",
-			// eslint-disable-next-line no-undef
+
 			options: erpnext.utils.get_tree_options("company"),
 			label: __("Company"),
-			// eslint-disable-next-line no-undef
+
 			default: erpnext.utils.get_tree_default("company"),
 		},
 	],
