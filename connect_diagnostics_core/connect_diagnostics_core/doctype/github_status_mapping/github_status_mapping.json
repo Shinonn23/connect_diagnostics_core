@@ -5,7 +5,7 @@
 	"doctype": "DocType",
 	"editable_grid": 1,
 	"engine": "InnoDB",
-	"field_order": ["board_column", "hd_status", "category", "option_id"],
+	"field_order": ["board_column", "hd_status", "category", "color", "option_id"],
 	"fields": [
 		{
 			"columns": 3,
@@ -24,12 +24,20 @@
 			"options": "HD Ticket Status"
 		},
 		{
-			"columns": 2,
+			"columns": 1,
 			"fieldname": "category",
 			"fieldtype": "Select",
 			"in_list_view": 1,
 			"label": "Category",
 			"options": "Open\nPaused\nResolved"
+		},
+		{
+			"columns": 1,
+			"fieldname": "color",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"label": "Color",
+			"options": "Black\nGray\nBlue\nGreen\nRed\nPink\nOrange\nAmber\nYellow\nCyan\nTeal\nViolet\npurple"
 		},
 		{
 			"columns": 3,

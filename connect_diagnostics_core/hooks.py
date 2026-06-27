@@ -8,7 +8,7 @@ app_license = "bsl-1.0"
 # Apps
 # ------------------
 
-required_apps = ["erpnext", "erpnext_thailand", "hrms"]
+required_apps = ["erpnext", "erpnext_thailand", "hrms", "helpdesk"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -49,6 +49,7 @@ doctype_js = {
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
+    "HD Ticket": "public/js/custom/hd_ticket/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
@@ -161,13 +162,8 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
-    # GitHub <-> Helpdesk two-way sync (push side)
-    "HD Ticket": {
-        "on_update": "connect_diagnostics_core.github_sync.push_ticket",
-    },
-    "HD Ticket Comment": {
-        "after_insert": "connect_diagnostics_core.github_sync.push_comment",
-    },
+    # GitHub -> Helpdesk sync is pull-only (scheduled); the one Helpdesk -> GitHub path
+    # is the manual github_sync.escalate_to_github action, so no push doc_events here.
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
     # },

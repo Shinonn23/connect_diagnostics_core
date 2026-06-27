@@ -22,11 +22,9 @@
 		"status_mappings",
 		"sb_sync",
 		"pull_enabled",
-		"push_comments",
-		"push_close_state",
-		"push_status_to_board",
-		"column_break_sync",
-		"comment_attribution",
+		"resolved_status",
+		"sb_assignment",
+		"github_user_map",
 		"last_pull",
 		"last_pull_status"
 	],
@@ -44,7 +42,7 @@
 		},
 		{
 			"default": "GitHub CLI (gh)",
-			"description": "GitHub CLI uses the server's <code>gh auth</code> login — no token needed. Switch to Token to use the Personal Access Token below.",
+			"description": "GitHub CLI uses the server's <code>gh auth</code> login \u2014 no token needed. Switch to Token to use the Personal Access Token below.",
 			"fieldname": "auth_method",
 			"fieldtype": "Select",
 			"label": "Auth Method",
@@ -54,6 +52,7 @@
 			"default": "Shinonn23",
 			"fieldname": "github_owner",
 			"fieldtype": "Data",
+			"in_list_view": 1,
 			"label": "GitHub Owner / Org",
 			"reqd": 1
 		},
@@ -61,6 +60,7 @@
 			"default": "connect_diagnostics_core",
 			"fieldname": "github_repo",
 			"fieldtype": "Data",
+			"in_list_view": 1,
 			"label": "Repository",
 			"reqd": 1
 		},
@@ -119,10 +119,10 @@
 		{
 			"fieldname": "sb_mappings",
 			"fieldtype": "Section Break",
-			"label": "Board Column ↔ Status Mapping"
+			"label": "Board Column \u2194 Status Mapping"
 		},
 		{
-			"description": "Use “Fetch Board Metadata” to auto-fill columns and option IDs.",
+			"description": "Use \u201cFetch Board Metadata\u201d to auto-fill columns and option IDs.",
 			"fieldname": "status_mappings",
 			"fieldtype": "Table",
 			"label": "Status Mappings",
@@ -135,43 +135,30 @@
 		},
 		{
 			"default": "1",
-			"description": "Pull GitHub → Helpdesk on the scheduled job (every 10 min).",
+			"description": "Pull GitHub \u2192 Helpdesk on the scheduled job (every 10 min). This is the only automatic direction.",
 			"fieldname": "pull_enabled",
 			"fieldtype": "Check",
-			"label": "Enable Pull (GitHub → Helpdesk)"
+			"label": "Enable Pull (GitHub \u2192 Helpdesk)"
 		},
 		{
-			"default": "1",
-			"description": "Push new ticket comments to the GitHub issue.",
-			"fieldname": "push_comments",
-			"fieldtype": "Check",
-			"label": "Push Comments → GitHub"
+			"default": "Resolved",
+			"description": "HD Ticket Status applied when a linked GitHub issue is closed (e.g. PR merged). The ticket awaits the user's confirmation; the final close stays a Helpdesk action.",
+			"fieldname": "resolved_status",
+			"fieldtype": "Link",
+			"label": "Resolved Status (on issue close)",
+			"options": "HD Ticket Status"
 		},
 		{
-			"default": "1",
-			"description": "Closing/reopening a ticket closes/reopens the GitHub issue.",
-			"fieldname": "push_close_state",
-			"fieldtype": "Check",
-			"label": "Push Open/Closed State → GitHub"
+			"fieldname": "sb_assignment",
+			"fieldtype": "Section Break",
+			"label": "Assignee Mapping (GitHub \u2192 User)"
 		},
 		{
-			"default": "0",
-			"description": "Move the GitHub Project card when ticket status changes. Requires <code>project</code> token scope.",
-			"fieldname": "push_status_to_board",
-			"fieldtype": "Check",
-			"label": "Push Status → GitHub Board"
-		},
-		{
-			"fieldname": "column_break_sync",
-			"fieldtype": "Column Break"
-		},
-		{
-			"default": "Token owner + agent name",
-			"description": "GitHub shows comments as the token owner. “+ agent name” prepends the Helpdesk agent's name in the comment body.",
-			"fieldname": "comment_attribution",
-			"fieldtype": "Select",
-			"label": "Comment Attribution",
-			"options": "Token owner + agent name\nToken owner only"
+			"description": "Maps a GitHub login to an ERPNext User. Pull uses this to auto-assign HD Tickets from the board's Assignees.",
+			"fieldname": "github_user_map",
+			"fieldtype": "Table",
+			"label": "GitHub User Map",
+			"options": "GitHub User Map"
 		},
 		{
 			"fieldname": "last_pull",
@@ -190,10 +177,10 @@
 	"index_web_pages_for_search": 1,
 	"issingle": 1,
 	"links": [],
-	"modified": "2026-06-26 16:35:00",
+	"modified": "2026-06-26 23:27:44.127655",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Core",
-	"name": "GitHub Integration Settings",
+	"name": "GitHub Helpdesk Sync Settings",
 	"owner": "Administrator",
 	"permissions": [
 		{
@@ -202,7 +189,6 @@
 			"email": 1,
 			"print": 1,
 			"read": 1,
-			"report": 1,
 			"role": "System Manager",
 			"share": 1,
 			"write": 1

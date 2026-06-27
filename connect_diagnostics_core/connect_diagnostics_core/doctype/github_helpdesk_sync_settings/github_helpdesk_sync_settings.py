@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 
 
-class GitHubIntegrationSettings(Document):
+class GitHubHelpdeskSyncSettings(Document):
     # begin: auto-generated types
     # This code is auto-generated. Do not modify anything in this block.
 
@@ -18,26 +18,28 @@ class GitHubIntegrationSettings(Document):
         from connect_diagnostics_core.connect_diagnostics_core.doctype.github_status_mapping.github_status_mapping import (
             GitHubStatusMapping,
         )
+        from connect_diagnostics_core.connect_diagnostics_core.doctype.github_user_map.github_user_map import (
+            GitHubUserMap,
+        )
 
         auth_method: DF.Literal["GitHub CLI (gh)", "Personal Access Token"]
-        comment_attribution: DF.Literal["Token owner + agent name", "Token owner only"]
         connection_status: DF.SmallText | None
-        gh_path: DF.Data | None
         enabled: DF.Check
+        gh_path: DF.Data | None
         github_owner: DF.Data
         github_repo: DF.Data
         github_token: DF.Password | None
+        github_user_map: DF.Table[GitHubUserMap]
         last_pull: DF.Data | None
         last_pull_status: DF.SmallText | None
         project_id: DF.Data | None
         project_number: DF.Int
         pull_enabled: DF.Check
-        push_close_state: DF.Check
-        push_comments: DF.Check
-        push_status_to_board: DF.Check
+        resolved_status: DF.Link | None
         status_field_id: DF.Data | None
         status_mappings: DF.Table[GitHubStatusMapping]
     # end: auto-generated types
+
     pass
 
 
@@ -52,13 +54,11 @@ def test_connection():
         msg = _("OK — connected to {0} via {1}. Scopes: {2}").format(
             info.get("target"), info.get("transport"), info.get("scopes") or "(unknown)"
         )
-        if not info.get("can_push_board"):
-            msg += "\n" + _("⚠ Board-status push needs the 'project' scope. Run: gh auth refresh -s project")
-        frappe.db.set_single_value("GitHub Integration Settings", "connection_status", msg)
+        frappe.db.set_single_value("GitHub Helpdesk Sync Settings", "connection_status", msg)
         return info
     except Exception as e:
         frappe.db.set_single_value(
-            "GitHub Integration Settings", "connection_status", _("FAILED: {0}").format(str(e))
+            "GitHub Helpdesk Sync Settings", "connection_status", _("FAILED: {0}").format(str(e))
         )
         return {"ok": False, "error": str(e)}
 
@@ -69,23 +69,7 @@ def fetch_board_metadata():
     from connect_diagnostics_core import github_sync as g
 
     frappe.only_for("System Manager")
-    meta = g.fetch_project_metadata()
-    doc = frappe.get_single("GitHub Integration Settings")
-    doc.project_id = meta["project_id"]
-    doc.status_field_id = meta["status_field_id"]
-    doc.status_mappings = []
-    for name, option_id in meta["options"].items():
-        doc.append(
-            "status_mappings",
-            {
-                "board_column": name,
-                "option_id": option_id,
-                "hd_status": name if frappe.db.exists("HD Ticket Status", name) else None,
-                "category": g.BOARD_CATEGORY.get(name, "Open"),
-            },
-        )
-    doc.save(ignore_permissions=True)
-    return {"options": len(meta["options"])}
+    return g.refresh_project_metadata()
 
 
 @frappe.whitelist()
@@ -94,4 +78,44 @@ def sync_now():
     from connect_diagnostics_core import github_sync as g
 
     frappe.only_for("System Manager")
-    return g.pull()
+    return g.pull(run_type="Manual Pull")
+
+
+@frappe.whitelist()
+def preflight_check():
+    """Validate GitHub integration setup without mutating synced records."""
+    from connect_diagnostics_core import github_sync as g
+
+    frappe.only_for("System Manager")
+    return g.preflight_check()
+
+
+@frappe.whitelist()
+def repair_setup():
+    """Repair local custom fields and refresh GitHub project metadata."""
+    from connect_diagnostics_core import github_sync as g
+
+    frappe.only_for("System Manager")
+    return g.repair_setup()
+
+
+@frappe.whitelist()
+def retry_issue(issue_number: int):
+    """Pull one GitHub issue immediately."""
+    from connect_diagnostics_core import github_sync as g
+
+    frappe.only_for("System Manager")
+    return g.retry_issue(int(issue_number))
+
+
+@frappe.whitelist()
+def import_backlog(commit: int = 0):
+    """One-off bootstrap: create HD Tickets for GitHub issues that have none yet.
+
+    Pass commit=0 (default) for a dry-run preview, commit=1 to actually create them.
+    Idempotent — issues already linked to a ticket are skipped.
+    """
+    from connect_diagnostics_core import github_sync as g
+
+    frappe.only_for("System Manager")
+    return g.import_from_github(commit=bool(frappe.utils.cint(commit)))

@@ -77,9 +77,18 @@ def apply_all():
                 )
 
 
+def apply_github_sync_setup():
+    from connect_diagnostics_core import github_sync
+
+    github_sync.ensure_ticket_fields()
+    github_sync.ensure_ticket_template_fields()
+
+
 def after_install():
     apply_all()
+    apply_github_sync_setup()
 
 
 def after_migrate():
     apply_all()
+    apply_github_sync_setup()
