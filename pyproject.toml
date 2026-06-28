@@ -48,9 +48,5 @@ quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 
-[tool.pyrefly]
-python-interpreter-path = "../../env/bin/python"
-project-includes = [
-    "**/*.py*",
-    "**/*.ipynb",
-]
+[tool.ty.environment]
+python = "../../env/bin/python"
