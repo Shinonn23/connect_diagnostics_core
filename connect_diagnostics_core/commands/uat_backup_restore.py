@@ -82,6 +82,7 @@ def restore_uat_backup(
 
     if not downloaded_path:
         raise click.ClickException("Backup was not downloaded.")
+    assert db_root_password is not None
 
     run_bench_command(["--site", site, "backup", "--ignore-backup-conf"], bench_path=bench_path)
     run_bench_command(
