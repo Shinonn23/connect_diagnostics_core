@@ -88,11 +88,12 @@ class AccountingDepartment(NestedSet):
             [self.name],
         )
 
-    # pyrefly: ignore [bad-override]
-    def before_rename(self, olddn: str, newdn: str, merge: bool = False) -> str:
+    def before_rename(
+        self, olddn: str, newdn: str, merge: bool = False, group_fname: str = "is_group"
+    ) -> str:
         new_department = get_name_with_abbr(newdn, self.company)
 
-        super().before_rename(olddn, new_department, merge, "is_group")
+        super().before_rename(olddn, new_department, merge, group_fname)
         if not merge:
             new_department = get_name_with_number(new_department, self.department_number)
 

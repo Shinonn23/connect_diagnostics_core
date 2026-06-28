@@ -11,11 +11,5 @@
         "editor.formatOnSave": true
     },
     "python.analysis.completeFunctionParens": true,
-    "python.pyrefly.configPath": "./pyproject.toml",
-    "python.pyrefly.typeCheckingMode": "strict",
-    "python.pyrefly.diagnosticMode": "workspace",
-    "python.pyrefly.disableTypeErrors": false,
-    "pyrefly.trace.server": "verbose",
-    "pyrefly.commentFoldingRanges": true,
     "makefile.configureOnOpen": false
 }
