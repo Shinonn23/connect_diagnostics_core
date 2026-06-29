@@ -19,7 +19,11 @@ from typing import Any, TypedDict
 import frappe
 from frappe import _
 
-from connect_diagnostics_core.data_export.exporter import build_module_workbook, list_target_doctypes
+from connect_diagnostics_core.data_export.exporter import (
+    FrappeClient,
+    build_module_workbook,
+    list_target_doctypes,
+)
 
 # drive.file lets the app upload and later replace only the files it creates.
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
@@ -188,22 +192,27 @@ def export_to_drive(
     token_path: str | None = None,
     *,
     excel: bool = False,
+    client: FrappeClient | None = None,
+    catalog: dict[str, str] | None = None,
 ) -> list[DriveExportSummary]:
     """Export every DocType to Google Drive, one file per module.
 
     Each module is uploaded into the Drive folder (``folder_id`` or the one saved
     in site config), replacing the file of the same name when it exists.
+    Pass ``client`` to fetch data from a remote Frappe site via HTTP instead of
+    the local database. Pass ``catalog`` (loaded via ``load_catalog()``) to filter
+    and categorize DocTypes using a ``DocType_Categorized.xlsx`` catalog file.
     """
     folder = folder_id or frappe.conf.get(CONFIG_FOLDER)
     if not folder:
         frappe.throw(_("No Google Drive folder configured. Pass --folder or run login with --folder first."))
 
-    grouped = list_target_doctypes(modules)
+    grouped = list_target_doctypes(modules, client=client, catalog=catalog)
     service = _drive_service(token_path)
 
     summary: list[DriveExportSummary] = []
     for module, module_doctypes in grouped.items():
-        content = build_module_workbook(module_doctypes)
+        content = build_module_workbook(module_doctypes, client=client)
         if excel:
             file_id, action = upload_module_as_excel(service, folder, module, content)
             target = "Excel file"
