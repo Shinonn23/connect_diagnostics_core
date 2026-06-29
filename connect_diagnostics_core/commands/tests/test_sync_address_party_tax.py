@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -23,7 +24,7 @@ class TestSyncAddressPartyTaxCommand(TestCase):
         result = CliRunner().invoke(
             sync_address_party_tax,
             ["--address", "CUST-001-Billing"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -39,7 +40,7 @@ class TestSyncAddressPartyTaxCommand(TestCase):
         result = CliRunner().invoke(
             sync_address_party_tax,
             ["--party-type", "Customer", "--party", "CUST-001", "--overwrite", "--apply"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
@@ -56,7 +57,7 @@ class TestSyncAddressPartyTaxCommand(TestCase):
         result = CliRunner().invoke(
             sync_address_party_tax,
             ["--party", "CUST-001"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertEqual(result.exit_code, 2)
@@ -70,7 +71,7 @@ class TestSyncAddressPartyTaxCommand(TestCase):
         result = CliRunner().invoke(
             sync_address_party_tax,
             ["--address", "CUST-001-Billing", "--apply"],
-            obj={"sites": ["dev.local"], "profile": False},
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
         )
 
         self.assertNotEqual(result.exit_code, 0)
