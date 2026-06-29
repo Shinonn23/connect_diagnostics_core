@@ -44,6 +44,7 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 
 # include js in doctype views
 doctype_js = {
+    "Address": "public/js/custom/address/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
@@ -87,7 +88,10 @@ doctype_list_js = {
 
 # add methods and filters to jinja environment
 jinja = {
-    "methods": ["connect_diagnostics_core.utils.thai_words.number_to_thai_currency"]
+    "methods": [
+        "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
+        "connect_diagnostics_core.utils.currency.print_currency",
+    ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
 
@@ -267,4 +271,5 @@ export_python_type_annotations = True
 fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
+    {"doctype": "Terms and Conditions"},
 ]

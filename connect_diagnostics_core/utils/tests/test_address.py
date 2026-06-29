@@ -6,9 +6,13 @@ from unittest.mock import Mock, patch
 from frappe import _dict
 
 from connect_diagnostics_core.utils.address import (
+    AddressPartyTaxCandidate,
     _ensure_rendered_address,
     _refresh_linked_address_display,
+    _sync_single_address_party_tax,
     get_display_field,
+    get_linked_party_tax_candidates,
+    get_party_tax_mismatches_for_links_list,
     refresh_address_display_values,
     validate_refresh_address_display_selectors,
 )
@@ -144,3 +148,230 @@ class TestRefreshAddressDisplayValues(TestCase):
 
         render_addresses.assert_called_once_with(None)
         refresh_party_primary_addresses.assert_called_once_with({}, apply=False)
+
+
+class TestSyncAddressPartyTax(TestCase):
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    def test_preview_counts_changed_without_writing(self, get_candidates: Mock, frappe: Mock) -> None:
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Customer",
+                party="CUST-001",
+                tax_id="1234567890123",
+                branch_code="00000",
+            )
+        ]
+
+        result = _sync_single_address_party_tax(
+            "CUST-001-Billing",
+            address_tax_id=None,
+            address_branch_code=None,
+            party_type=None,
+            party=None,
+            overwrite=False,
+            apply=False,
+        )
+
+        self.assertEqual((result.changed, result.unchanged, result.skipped, result.conflict), (1, 0, 0, 0))
+        frappe.db.set_value.assert_not_called()
+
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    def test_apply_writes_party_tax_without_touching_modified(
+        self, get_candidates: Mock, frappe: Mock
+    ) -> None:
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Supplier",
+                party="SUPP-001",
+                tax_id="9876543210987",
+                branch_code="00001",
+            )
+        ]
+
+        result = _sync_single_address_party_tax(
+            "SUPP-001-Billing",
+            address_tax_id=None,
+            address_branch_code=None,
+            party_type="Supplier",
+            party="SUPP-001",
+            overwrite=False,
+            apply=True,
+        )
+
+        self.assertEqual(result.changed, 1)
+        frappe.db.set_value.assert_called_once_with(
+            "Address",
+            "SUPP-001-Billing",
+            {"tax_id": "9876543210987", "branch_code": "00001"},
+            update_modified=False,
+        )
+
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    def test_default_does_not_overwrite_existing_values(self, get_candidates: Mock, frappe: Mock) -> None:
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Customer",
+                party="CUST-001",
+                tax_id="1234567890123",
+                branch_code="00000",
+            )
+        ]
+
+        result = _sync_single_address_party_tax(
+            "CUST-001-Billing",
+            address_tax_id="OLD-TAX",
+            address_branch_code="OLD-BRANCH",
+            party_type=None,
+            party=None,
+            overwrite=False,
+            apply=True,
+        )
+
+        self.assertEqual(result.unchanged, 1)
+        frappe.db.set_value.assert_not_called()
+
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    def test_overwrite_replaces_existing_values(self, get_candidates: Mock, frappe: Mock) -> None:
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Customer",
+                party="CUST-001",
+                tax_id="1234567890123",
+                branch_code="00000",
+            )
+        ]
+
+        result = _sync_single_address_party_tax(
+            "CUST-001-Billing",
+            address_tax_id="OLD-TAX",
+            address_branch_code="OLD-BRANCH",
+            party_type=None,
+            party=None,
+            overwrite=True,
+            apply=True,
+        )
+
+        self.assertEqual(result.changed, 1)
+        frappe.db.set_value.assert_called_once_with(
+            "Address",
+            "CUST-001-Billing",
+            {"tax_id": "1234567890123", "branch_code": "00000"},
+            update_modified=False,
+        )
+
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    def test_different_linked_party_tax_values_are_conflict(self, get_candidates: Mock, frappe: Mock) -> None:
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Customer",
+                party="CUST-001",
+                tax_id="1234567890123",
+                branch_code="00000",
+            ),
+            AddressPartyTaxCandidate(
+                party_type="Supplier",
+                party="SUPP-001",
+                tax_id="9876543210987",
+                branch_code="00001",
+            ),
+        ]
+
+        result = _sync_single_address_party_tax(
+            "Shared-Billing",
+            address_tax_id=None,
+            address_branch_code=None,
+            party_type=None,
+            party=None,
+            overwrite=True,
+            apply=True,
+        )
+
+        self.assertEqual(result.conflict, 1)
+        frappe.db.set_value.assert_not_called()
+
+
+class TestLinkedPartyTaxCandidatesEndpoint(TestCase):
+    @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    def test_checks_address_permission_and_returns_candidates(
+        self, frappe: Mock, get_candidates: Mock
+    ) -> None:
+        address = Mock(name="CUST-001-Billing")
+        frappe.get_doc.return_value = address
+        get_candidates.return_value = [
+            AddressPartyTaxCandidate(
+                party_type="Customer",
+                party="CUST-001",
+                party_name="Customer One",
+                tax_id="1234567890123",
+                branch_code="00000",
+            )
+        ]
+
+        result = get_linked_party_tax_candidates.__wrapped__("CUST-001-Billing")
+
+        address.check_permission.assert_called_once_with("read")
+        self.assertEqual(
+            result,
+            [
+                {
+                    "party_type": "Customer",
+                    "party": "CUST-001",
+                    "party_name": "Customer One",
+                    "tax_id": "1234567890123",
+                    "branch_code": "00000",
+                    "label": "Customer: Customer One",
+                }
+            ],
+        )
+
+
+class TestPartyTaxMismatchForLinks(TestCase):
+    @patch("connect_diagnostics_core.utils.address._get_party_tax_values")
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    def test_returns_mismatch_for_unsaved_customer_link(
+        self, frappe: Mock, get_party_tax_values: Mock
+    ) -> None:
+        get_party_tax_values.return_value = _dict(
+            tax_id="PARTY-TAX",
+            branch_code="00001",
+            customer_name="Customer One",
+        )
+
+        result = get_party_tax_mismatches_for_links_list(
+            links=[{"link_doctype": "Customer", "link_name": "CUST-001"}],
+            tax_id="ADDRESS-TAX",
+            branch_code="00000",
+        )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].label, "Customer: Customer One")
+        self.assertEqual(result[0].party_tax_id, "PARTY-TAX")
+        self.assertEqual(result[0].address_tax_id, "ADDRESS-TAX")
+        frappe.has_permission.assert_called_once_with("Customer", "read", "CUST-001", throw=True)
+
+    @patch("connect_diagnostics_core.utils.address._get_party_tax_values")
+    @patch("connect_diagnostics_core.utils.address.frappe")
+    def test_ignores_matching_and_non_party_links(self, frappe: Mock, get_party_tax_values: Mock) -> None:
+        get_party_tax_values.return_value = _dict(
+            tax_id="MATCHED-TAX",
+            branch_code="00000",
+            supplier_name="Supplier One",
+        )
+
+        result = get_party_tax_mismatches_for_links_list(
+            links=[
+                {"link_doctype": "Supplier", "link_name": "SUPP-001"},
+                {"link_doctype": "Lead", "link_name": "LEAD-001"},
+            ],
+            tax_id="MATCHED-TAX",
+            branch_code="00000",
+        )
+
+        self.assertEqual(result, [])
+        frappe.has_permission.assert_not_called()
