@@ -49,6 +49,7 @@ class TestDataExportRunCommand(TestCase):
         self.assertIn("created 'Stock' (4 doctypes) -> id1", result.output)
         self.assertIn("updated 'Accounts' (6 doctypes) -> id2", result.output)
         self.assertIn("dev.local: uploaded 2 module spreadsheet(s)", result.output)
+        export_to_drive.assert_called_once_with((), None, None, excel=False)
         frappe.connect.assert_called_once_with()
         frappe.destroy.assert_called_once_with()
 
@@ -64,4 +65,21 @@ class TestDataExportRunCommand(TestCase):
         )
 
         self.assertEqual(result.exit_code, 0, result.output)
-        export_to_drive.assert_called_once_with(("Stock", "Accounts"), None, None)
+        export_to_drive.assert_called_once_with(("Stock", "Accounts"), None, None, excel=False)
+
+    @patch("connect_diagnostics_core.commands.data_export.export_to_drive")
+    @patch("connect_diagnostics_core.commands.data_export.frappe")
+    def test_run_excel_uploads_xlsx_files(self, frappe: Mock, export_to_drive: Mock) -> None:
+        export_to_drive.return_value = [
+            {"module": "Stock", "file_id": "id1", "action": "created", "doctypes": 4},
+        ]
+
+        result = CliRunner().invoke(
+            cd_data_export,
+            ["run", "--excel"],
+            obj=SimpleNamespace(sites=["dev.local"], profile=False),
+        )
+
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("dev.local: uploaded 1 Excel file(s)", result.output)
+        export_to_drive.assert_called_once_with((), None, None, excel=True)

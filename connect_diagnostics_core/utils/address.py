@@ -260,7 +260,7 @@ def get_linked_party_tax_candidates(address_name: str) -> list[dict[str, str | N
 @frappe.whitelist()
 def get_party_tax_mismatches_for_links(
     *,
-    links: str | list[dict[str, Any]],
+    links: str,
     tax_id: str | None = None,
     branch_code: str | None = None,
 ) -> list[dict[str, str | None]]:

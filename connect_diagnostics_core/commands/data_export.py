@@ -74,9 +74,16 @@ def login(context, client_secret: str, folder_id: str | None, token_path: str | 
     default=None,
     help="Path to token.json. Defaults to the site's private files.",
 )
+@click.option("--excel", is_flag=True, help="Upload Excel .xlsx files instead of native Google Sheets.")
 @pass_context
-def run(context, modules: tuple[str, ...], folder_id: str | None, token_path: str | None) -> None:
-    """Export every DocType to Google Sheets, one spreadsheet per module."""
+def run(
+    context,
+    modules: tuple[str, ...],
+    folder_id: str | None,
+    token_path: str | None,
+    excel: bool,
+) -> None:
+    """Export every DocType to Google Drive, one file per module."""
     if not context.sites:
         raise frappe.SiteNotSpecifiedError
 
@@ -84,12 +91,13 @@ def run(context, modules: tuple[str, ...], folder_id: str | None, token_path: st
         frappe.init(site=site)
         try:
             frappe.connect()
-            summary = export_to_drive(modules, folder_id, token_path)
+            summary = export_to_drive(modules, folder_id, token_path, excel=excel)
             for item in summary:
                 click.echo(
                     f"{site}: {item['action']} '{item['module']}' "
                     f"({item['doctypes']} doctypes) -> {item['file_id']}"
                 )
-            click.echo(f"{site}: uploaded {len(summary)} module spreadsheet(s)")
+            kind = "Excel file" if excel else "module spreadsheet"
+            click.echo(f"{site}: uploaded {len(summary)} {kind}(s)")
         finally:
             frappe.destroy()

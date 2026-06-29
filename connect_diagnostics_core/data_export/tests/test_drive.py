@@ -10,7 +10,9 @@ from connect_diagnostics_core.data_export import drive
 from connect_diagnostics_core.data_export.drive import (
     CONFIG_FOLDER,
     GOOGLE_SHEET_MIME,
+    XLSX_MIME,
     get_drive_credentials,
+    upload_module_as_excel,
     upload_module_as_sheet,
 )
 
@@ -42,6 +44,30 @@ class TestUploadModuleAsSheet(TestCase):
         service = _service_with_existing("existing-id")
 
         file_id, action = upload_module_as_sheet(service, "folder", "Stock", b"xlsx")
+
+        self.assertEqual((file_id, action), ("existing-id", "updated"))
+        _, kwargs = service.files.return_value.update.call_args
+        self.assertEqual(kwargs["fileId"], "existing-id")
+        service.files.return_value.create.assert_not_called()
+
+
+class TestUploadModuleAsExcel(TestCase):
+    def test_creates_xlsx_file_when_absent(self) -> None:
+        service = _service_with_existing(None)
+
+        file_id, action = upload_module_as_excel(service, "folder", "Stock", b"xlsx")
+
+        self.assertEqual((file_id, action), ("created-id", "created"))
+        _, kwargs = service.files.return_value.create.call_args
+        self.assertEqual(kwargs["body"]["mimeType"], XLSX_MIME)
+        self.assertEqual(kwargs["body"]["name"], "Stock.xlsx")
+        self.assertEqual(kwargs["body"]["parents"], ["folder"])
+        service.files.return_value.update.assert_not_called()
+
+    def test_replaces_existing_xlsx_file(self) -> None:
+        service = _service_with_existing("existing-id")
+
+        file_id, action = upload_module_as_excel(service, "folder", "Stock", b"xlsx")
 
         self.assertEqual((file_id, action), ("existing-id", "updated"))
         _, kwargs = service.files.return_value.update.call_args
@@ -120,6 +146,28 @@ class TestExportToDrive(TestCase):
             summary,
             [{"module": "Stock", "file_id": "created-id", "action": "created", "doctypes": 1}],
         )
+
+    @patch.object(drive, "_drive_service")
+    @patch.object(drive, "build_module_workbook")
+    @patch.object(drive, "list_target_doctypes")
+    @patch.object(drive, "frappe")
+    def test_uploads_excel_files_when_requested(
+        self, frappe: Mock, list_target_doctypes: Mock, build_module_workbook: Mock, drive_service: Mock
+    ) -> None:
+        frappe.conf.get.return_value = "folder123"
+        list_target_doctypes.return_value = {"Stock": [{"name": "Item", "category": "Master"}]}
+        build_module_workbook.return_value = b"xlsx"
+        drive_service.return_value = _service_with_existing(None)
+
+        summary = drive.export_to_drive(excel=True)
+
+        self.assertEqual(
+            summary,
+            [{"module": "Stock", "file_id": "created-id", "action": "created", "doctypes": 1}],
+        )
+        _, kwargs = drive_service.return_value.files.return_value.create.call_args
+        self.assertEqual(kwargs["body"]["name"], "Stock.xlsx")
+        self.assertEqual(kwargs["body"]["mimeType"], XLSX_MIME)
 
     @patch.object(drive, "frappe")
     def test_throws_without_configured_folder(self, frappe: Mock) -> None:

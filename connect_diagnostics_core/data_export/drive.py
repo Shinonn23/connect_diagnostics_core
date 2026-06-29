@@ -1,12 +1,13 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Authorize Google Drive and upload module exports as native Google Sheets.
+"""Authorize Google Drive and upload module exports to Google Drive.
 
 ``authorize`` runs the localhost OAuth flow once and saves the token to a
 ``token.json`` file (refreshed automatically on later runs). ``export_to_drive``
-then builds each module workbook in memory and uploads it as a Google Sheet,
-replacing the spreadsheet of the same name in the folder when one already exists.
+then builds each module workbook in memory and uploads it as either a native
+Google Sheet or an Excel file, replacing the file of the same name in the folder
+when one already exists.
 """
 
 from __future__ import annotations
@@ -131,10 +132,14 @@ def _drive_service(token_path: str | None = None) -> Any:
 
 def _find_existing_sheet(service: Any, folder_id: str, name: str) -> str | None:
     """Return the id of a Google Sheet named ``name`` in ``folder_id``, if any."""
+    return _find_existing_file(service, folder_id, name, GOOGLE_SHEET_MIME)
+
+
+def _find_existing_file(service: Any, folder_id: str, name: str, mime_type: str) -> str | None:
+    """Return the id of a Drive file named ``name`` in ``folder_id``, if any."""
     escaped = name.replace("\\", "\\\\").replace("'", "\\'")
     query = (
-        f"name = '{escaped}' and '{folder_id}' in parents "
-        f"and mimeType = '{GOOGLE_SHEET_MIME}' and trashed = false"
+        f"name = '{escaped}' and '{folder_id}' in parents and mimeType = '{mime_type}' and trashed = false"
     )
     response = service.files().list(q=query, spaces="drive", fields="files(id, name)", pageSize=1).execute()
     files = response.get("files", [])
@@ -161,13 +166,33 @@ def upload_module_as_sheet(service: Any, folder_id: str, name: str, xlsx_bytes: 
     return created["id"], "created"
 
 
+def upload_module_as_excel(service: Any, folder_id: str, name: str, xlsx_bytes: bytes) -> tuple[str, str]:
+    """Upload ``xlsx_bytes`` as an Excel file, replacing one of the same name."""
+    from googleapiclient.http import MediaIoBaseUpload
+
+    filename = f"{name}.xlsx"
+    media = MediaIoBaseUpload(BytesIO(xlsx_bytes), mimetype=XLSX_MIME, resumable=True)
+    existing_id = _find_existing_file(service, folder_id, filename, XLSX_MIME)
+    if existing_id:
+        service.files().update(fileId=existing_id, media_body=media).execute()
+        return existing_id, "updated"
+
+    metadata = {"name": filename, "mimeType": XLSX_MIME, "parents": [folder_id]}
+    created = service.files().create(body=metadata, media_body=media, fields="id").execute()
+    return created["id"], "created"
+
+
 def export_to_drive(
-    modules: tuple[str, ...] = (), folder_id: str | None = None, token_path: str | None = None
+    modules: tuple[str, ...] = (),
+    folder_id: str | None = None,
+    token_path: str | None = None,
+    *,
+    excel: bool = False,
 ) -> list[DriveExportSummary]:
-    """Export every DocType to Google Sheets, one spreadsheet per module.
+    """Export every DocType to Google Drive, one file per module.
 
     Each module is uploaded into the Drive folder (``folder_id`` or the one saved
-    in site config), replacing the spreadsheet of the same name when it exists.
+    in site config), replacing the file of the same name when it exists.
     """
     folder = folder_id or frappe.conf.get(CONFIG_FOLDER)
     if not folder:
@@ -179,7 +204,12 @@ def export_to_drive(
     summary: list[DriveExportSummary] = []
     for module, module_doctypes in grouped.items():
         content = build_module_workbook(module_doctypes)
-        file_id, action = upload_module_as_sheet(service, folder, module, content)
+        if excel:
+            file_id, action = upload_module_as_excel(service, folder, module, content)
+            target = "Excel file"
+        else:
+            file_id, action = upload_module_as_sheet(service, folder, module, content)
+            target = "Google Sheet"
         summary.append(
             {
                 "module": module,
@@ -188,6 +218,6 @@ def export_to_drive(
                 "doctypes": len(module_doctypes),
             }
         )
-        frappe.logger(__name__).info(f"Data export {action} Google Sheet for module {module!r} ({file_id})")
+        frappe.logger(__name__).info(f"Data export {action} {target} for module {module!r} ({file_id})")
 
     return summary
