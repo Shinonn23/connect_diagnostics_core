@@ -1,10 +1,7 @@
 // Copyright (c) 2026, Siwat Sroisuwan and contributors
 // For license information, please see license.txt
 
-const CD_PAYMENT_ENTRY_REFERENCE_DOCTYPES = [
-	"Purchase Invoice",
-	"Sales Invoice",
-];
+const CD_PAYMENT_ENTRY_REFERENCE_DOCTYPES = ["Purchase Invoice", "Sales Invoice"];
 
 frappe.ui.form.on("Payment Entry", {
 	refresh(frm) {
@@ -39,10 +36,7 @@ async function get_dimension_fields(frm) {
 	frm.cd_dimension_fields = dimensions
 		.map((dimension) => dimension.fieldname)
 		.filter((fieldname, index, fieldnames) => {
-			return (
-				fieldnames.indexOf(fieldname) === index &&
-				frappe.meta.has_field(frm.doctype, fieldname)
-			);
+			return fieldnames.indexOf(fieldname) === index && frappe.meta.has_field(frm.doctype, fieldname);
 		});
 
 	return frm.cd_dimension_fields;
@@ -107,20 +101,12 @@ function is_invoice_reference(row) {
 	);
 }
 
-async function get_reference_dimensions(
-	reference_doctype,
-	reference_name,
-	dimensions,
-) {
+async function get_reference_dimensions(reference_doctype, reference_name, dimensions) {
 	const fields = dimensions.filter((fieldname) => {
 		return frappe.meta.has_field(reference_doctype, fieldname);
 	});
 	if (!fields.length) return null;
 
-	const response = await frappe.db.get_value(
-		reference_doctype,
-		reference_name,
-		fields,
-	);
+	const response = await frappe.db.get_value(reference_doctype, reference_name, fields);
 	return response.message || null;
 }

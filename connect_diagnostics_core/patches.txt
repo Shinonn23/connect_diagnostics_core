@@ -1,6 +1,7 @@
 [pre_model_sync]
 # Patches added in this section will be executed before doctypes are migrated
 # Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
+connect_diagnostics_core.patches.v1_0.rename_github_sync_doctypes
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
@@ -16,3 +17,13 @@ connect_diagnostics_core.patches.v1_0.migrate_alias_to_item_child
 connect_diagnostics_core.patches.v1_0.remove_alias_name_doctype
 connect_diagnostics_core.patches.v1_0.migrate_item_name_th_to_alternative_name
 connect_diagnostics_core.patches.v1_0.remove_custom_item_name_th_field
+connect_diagnostics_core.patches.v1_0.rename_customer_supplier_to_cd_code
+connect_diagnostics_core.patches.v1_0.set_app_logo
+connect_diagnostics_core.patches.v1_0.set_item_has_dksh_code_flag
+connect_diagnostics_core.patches.v1_0.set_item_code_is_dksh_flag
+connect_diagnostics_core.patches.v1_0.set_dksh_flags_for_numeric_item_code
+connect_diagnostics_core.patches.v1_0.strip_custom_prefix_from_field_names
+connect_diagnostics_core.patches.v1_0.drop_custom_item_name_th_column
+connect_diagnostics_core.patches.v0_10.setup_item_naming_series
+connect_diagnostics_core.patches.v1_0.revert_item_naming_series
+connect_diagnostics_core.patches.v1_0.simplify_github_sync_to_one_way

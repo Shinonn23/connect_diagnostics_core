@@ -1,94 +1,68 @@
 name: Linters
 
 on:
-    pull_request:
-    workflow_dispatch:
+  pull_request:
+  workflow_dispatch:
 
 permissions:
-    contents: read
+  contents: read
 
 concurrency:
-    group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-    linter:
-        name: "Lint and Type Check"
-        runs-on: ubuntu-latest
+  linter:
+    name: "Frappe Linter"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
-        steps:
-            - name: "Checkout"
-              uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install Node.js dependencies
+        run: npm ci
+      - uses: pre-commit/action@v3.0.0
+        env:
+          SKIP: ty-check
 
-            - name: "Setup Python"
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.13"
-                  cache: "pip"
+      - name: Download Semgrep rules
+        run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
 
-            - name: "Setup Node.js"
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "24"
-                  cache: "npm"
+      - name: Run Semgrep rules
+        run: |
+          pip install semgrep
+          semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
 
-            - name: "Install Node.js dependencies"
-              run: npm ci
+  deps-vulnerable-check:
+    name: "Vulnerable Dependency Check"
+    runs-on: ubuntu-latest
 
-            - name: "Install Python tools"
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install pre-commit ty
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-            - name: "Run pre-commit"
-              uses: pre-commit/action@v3.0.0
-              env:
-                  SKIP: "semgrep-frappe, ty"
+      - uses: actions/checkout@v4
 
-    semgrep:
-        name: "Semgrep"
-        runs-on: ubuntu-latest
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
 
-        steps:
-            - name: "Checkout"
-              uses: actions/checkout@v4
-
-            - name: "Setup Python"
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.13"
-                  cache: "pip"
-
-            - name: "Install Semgrep"
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install semgrep
-
-            - name: "Run Semgrep"
-              run: |
-                  semgrep \
-                    --config=https://github.com/frappe/semgrep-rules \
-                    --config=r/python.lang.correctness
-
-    deps-vulnerable-check:
-        name: "Vulnerable Dependency Check"
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: "Checkout"
-              uses: actions/checkout@v4
-
-            - name: "Setup Python"
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.13"
-                  cache: "pip"
-
-            - name: "Install pip-audit"
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install pip-audit
-
-            - name: "Audit dependencies"
-              run: |
-                  pip-audit --desc on .
+      - name: Install and run pip-audit
+        run: |
+          pip install pip-audit
+          cd ${GITHUB_WORKSPACE}
+          pip-audit --desc on .

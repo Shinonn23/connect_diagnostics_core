@@ -8,7 +8,7 @@ app_license = "bsl-1.0"
 # Apps
 # ------------------
 
-required_apps = ["erpnext", "erpnext_thailand", "hrms"]
+required_apps = ["erpnext", "erpnext_thailand", "hrms", "helpdesk"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -25,7 +25,7 @@ required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core.css"
+app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core.css"
 # app_include_js = "/assets/connect_diagnostics_core/js/connect_diagnostics_core.js"
 
 # include js, css files in header of web template
@@ -50,10 +50,14 @@ doctype_js = {
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
+    "HD Ticket": "public/js/custom/hd_ticket/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
-doctype_list_js = {"Sales Order": "public/js/custom/sales_order/list_view.js"}
+doctype_list_js = {
+    "Item": "public/js/custom/item/list_view.js",
+    "Sales Order": "public/js/custom/sales_order/list_view.js",
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -95,7 +99,8 @@ jinja = {
 # ------------
 
 # before_install = "connect_diagnostics_core.install.before_install"
-# after_install = "connect_diagnostics_core.install.after_install"
+after_install = "connect_diagnostics_core.setup.after_install"
+after_migrate = "connect_diagnostics_core.setup.after_migrate"
 
 # Uninstallation
 # ------------
@@ -137,15 +142,6 @@ jinja = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
-# DocType Class
-# ---------------
-# Override standard doctype classes
-
-override_doctype_class = {
-    "Customer": "connect_diagnostics_core.api.erpnext.customer.CustomCustomer",
-    "Supplier": "connect_diagnostics_core.api.erpnext.supplier.CustomSupplier",
-}
-
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
@@ -159,7 +155,7 @@ naming_series_variables = {
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
-        "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
+        "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -167,12 +163,14 @@ doc_events = {
     "Payment Entry": {
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
+    "Item": {
+        "validate": "connect_diagnostics_core.api.erpnext.item.validate",
+    },
+    # GitHub -> Helpdesk sync is pull-only (scheduled); the one Helpdesk -> GitHub path
+    # is the manual github_sync.escalate_to_github action, so no push doc_events here.
     # "Sales Invoice": {
     #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
     # },
-    "Supplier": {
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
-    },
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
@@ -181,23 +179,14 @@ company_data_to_be_ignored = ["Accounting Department"]
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"connect_diagnostics_core.tasks.all"
-# 	],
-# 	"daily": [
-# 		"connect_diagnostics_core.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"connect_diagnostics_core.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"connect_diagnostics_core.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"connect_diagnostics_core.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+    "cron": {
+        # GitHub -> Helpdesk near-realtime pull, every 10 minutes
+        "*/10 * * * *": [
+            "connect_diagnostics_core.github_sync.pull",
+        ],
+    },
+}
 
 # Testing
 # -------

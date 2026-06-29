@@ -217,8 +217,8 @@ def _get_data(filters: frappe._dict) -> list[dict]:
     data: list[dict] = []
 
     for account in accounts:
-        acct_num = account.account_number
-        acct_name = account.account_name
+        acct_num = account["account_number"]
+        acct_name = account["account_name"]
 
         opening_balance = _get_opening_balance(filters, acct_num)
         gl_entries = _get_gl_entries(filters, acct_num)
@@ -245,23 +245,23 @@ def _get_data(filters: frappe._dict) -> list[dict]:
         running_balance = opening_balance
 
         for gle in gl_entries:
-            debit = flt(gle.debit)
-            credit = flt(gle.credit)
+            debit = flt(gle.get("debit"))
+            credit = flt(gle.get("credit"))
             running_balance += debit - credit
 
             # Build description from against + remarks
             desc_parts = []
-            if gle.against:
-                desc_parts.append(gle.against)
-            if gle.remarks:
-                desc_parts.append(gle.remarks)
+            if gle.get("against"):
+                desc_parts.append(gle["against"])
+            if gle.get("remarks"):
+                desc_parts.append(gle["remarks"])
             description = " | ".join(desc_parts) if desc_parts else ""
 
             data.append(
                 {
-                    "posting_date": gle.posting_date,
-                    "voucher_type": gle.voucher_type,
-                    "voucher_no": gle.voucher_no,
+                    "posting_date": gle["posting_date"],
+                    "voucher_type": gle["voucher_type"],
+                    "voucher_no": gle["voucher_no"],
                     "description": description,
                     "debit": debit if debit else None,
                     "credit": credit if credit else None,
@@ -271,8 +271,8 @@ def _get_data(filters: frappe._dict) -> list[dict]:
             )
 
         # Account total row (movement totals for this account)
-        total_debit = sum(flt(e.debit) for e in gl_entries)
-        total_credit = sum(flt(e.credit) for e in gl_entries)
+        total_debit = sum(flt(e.get("debit")) for e in gl_entries)
+        total_credit = sum(flt(e.get("credit")) for e in gl_entries)
 
         if gl_entries:
             data.append(

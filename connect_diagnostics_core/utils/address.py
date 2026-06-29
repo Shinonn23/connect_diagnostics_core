@@ -133,7 +133,6 @@ def refresh_address_display_values(
 
     for doctype in _get_selected_doctypes(all=all, doctypes=doctypes, addresses=addresses):
         meta = frappe.get_meta(doctype)
-        # pyrefly: ignore [missing-attribute]
         if meta.is_virtual:
             continue
 
@@ -467,17 +466,17 @@ def validate_refresh_address_display_selectors(
         raise ValueError("--name requires exactly one --doctype.")
 
 
-def _render_addresses(addresses: tuple[str, ...] | None) -> dict[str, str | None]:
+def _render_addresses(addresses: tuple[str, ...] | None) -> dict[str, str]:
     if addresses == ():
         return {}
 
-    filters: dict[str, tuple[str, str] | tuple[str, tuple[str, ...]]] | None = (
-        {"name": ("in", addresses)} if addresses is not None else None
-    )
-    return {
-        address: render_address(address, check_permissions=False)
-        for address in frappe.get_all("Address", filters=filters, pluck="name", order_by=None)
-    }
+    filters = {"name": ("in", addresses)} if addresses is not None else None
+    rendered_addresses: dict[str, str] = {}
+    for address in frappe.get_all("Address", filters=filters, pluck="name", order_by=None):
+        rendered = render_address(address, check_permissions=False)
+        if rendered is not None:
+            rendered_addresses[address] = rendered
+    return rendered_addresses
 
 
 def _get_selected_doctypes(
@@ -499,7 +498,7 @@ def _get_selected_doctypes(
 
 
 def _refresh_party_primary_addresses(
-    rendered_addresses: dict[str, str | None],
+    rendered_addresses: dict[str, str],
     *,
     apply: bool,
 ) -> RefreshAddressDisplayResult:
@@ -534,14 +533,14 @@ def _refresh_linked_address_display(
     doctype: str,
     address_field: str,
     display_field: str,
-    rendered_addresses: dict[str, str | None],
+    rendered_addresses: dict[str, str],
     *,
     names: tuple[str, ...],
     addresses: tuple[str, ...],
     apply: bool,
     lazy_render: bool = False,
 ) -> RefreshAddressDisplayResult:
-    filters: dict[str, tuple[str, str] | tuple[str, tuple[str, ...]]] = {address_field: ("is", "set")}
+    filters: dict[str, tuple[str, object]] = {address_field: ("is", "set")}
     if names:
         filters["name"] = ("in", names)
     if addresses:
@@ -578,15 +577,20 @@ def _refresh_linked_address_display(
 
 
 def _ensure_rendered_address(
-    address: str,
-    rendered_addresses: dict[str, str | None],
+    address: str | None,
+    rendered_addresses: dict[str, str],
     *,
     lazy_render: bool,
 ) -> bool:
+    if not address:
+        return False
     if address in rendered_addresses:
         return True
     if not lazy_render or not frappe.db.exists("Address", address):
         return False
 
-    rendered_addresses[address] = render_address(address, check_permissions=False)
+    rendered = render_address(address, check_permissions=False)
+    if rendered is None:
+        return False
+    rendered_addresses[address] = rendered
     return True

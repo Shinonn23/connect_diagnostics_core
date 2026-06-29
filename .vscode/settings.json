@@ -1,0 +1,15 @@
+{
+    "workbench.colorTheme": "Dark 2026",
+    "python.languageServer": "None",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true
+    },
+    "python.analysis.completeFunctionParens": true,
+    "makefile.configureOnOpen": false
+}

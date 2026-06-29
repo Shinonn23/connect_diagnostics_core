@@ -79,13 +79,17 @@ def apply_permissions(docname: str) -> dict[str, int]:
         else:
             # Create new user permission
             up = frappe.new_doc("User Permission")
-            up.user = u.user
-            up.allow = doc.allow
-            up.for_value = doc.for_value
-            up.is_default = doc.is_default
-            up.applicable_for = doc.applicable_for or None
-            up.apply_to_all_doctypes = doc.apply_to_all_doctypes
-            up.hide_descendants = doc.hide_descendants
+            up.update(
+                {
+                    "user": u.user,
+                    "allow": doc.allow,
+                    "for_value": doc.for_value,
+                    "is_default": doc.is_default,
+                    "applicable_for": doc.applicable_for or None,
+                    "apply_to_all_doctypes": doc.apply_to_all_doctypes,
+                    "hide_descendants": doc.hide_descendants,
+                }
+            )
             up.insert(ignore_permissions=True)
             applied_count += 1
 
