@@ -1,7 +1,6 @@
 [pre_model_sync]
 # Patches added in this section will be executed before doctypes are migrated
 # Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
-connect_diagnostics_core.patches.v1_0.rename_github_sync_doctypes
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
@@ -26,4 +25,4 @@ connect_diagnostics_core.patches.v1_0.strip_custom_prefix_from_field_names
 connect_diagnostics_core.patches.v1_0.drop_custom_item_name_th_column
 connect_diagnostics_core.patches.v0_10.setup_item_naming_series
 connect_diagnostics_core.patches.v1_0.revert_item_naming_series
-connect_diagnostics_core.patches.v1_0.simplify_github_sync_to_one_way
+connect_diagnostics_core.patches.v1_0.remove_github_helpdesk_sync

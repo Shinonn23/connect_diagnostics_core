@@ -111,13 +111,3 @@ Two extra board fields support testing:
 | `feature/*` → `developments`               | CI green **+** 1 review                             |
 | `developments` → `user-acceptance-testing` | every batched issue **Test Status = Passed** on DEV |
 | `user-acceptance-testing` → `production`   | UAT sign-off complete                               |
-
----
-
-## 6. Helpdesk mirror
-
-Issues are mirrored to Frappe Helpdesk (`HD Ticket`) by `github_sync.py`. The
-board **Status** column drives `HD Ticket.status`; board **Assignees** drive the
-ticket's _Assigned To_. A per-ticket **Sync to GitHub** flag controls whether a
-ticket participates in the sync (and lets a Helpdesk-only ticket create a GitHub
-issue). See `connect_diagnostics_core/github_sync.py`.
