@@ -22,9 +22,9 @@ When rules conflict, follow this order:
 
 ## Project Context
 
-- **Installed apps**: `frappe`, `erpnext`, `erpnext_thailand`, `hrms`, `telephony`, `helpdesk`, `connect_diagnostics_core`
-- **Required apps** (from hooks.py): `erpnext`, `erpnext_thailand`, `hrms`, `helpdesk` (pulls in `telephony`)
-- **Frappe stack**: version-16 (frappe/erpnext/hrms on `version-16`; helpdesk `main`, telephony `develop`)
+- **Installed apps**: `frappe`, `erpnext`, `erpnext_thailand`, `hrms`, `connect_diagnostics_core`
+- **Required apps** (from hooks.py): `erpnext`, `erpnext_thailand`, `hrms`
+- **Frappe stack**: version-16 (frappe/erpnext/hrms on `version-16`)
 - **Python**: 3.14 (required by Frappe v16) | **Node**: 24
 - **Do NOT assume** any other apps exist (e.g., Healthcare, Education, E-Commerce)
 - **Custom field definitions**: `connect_diagnostics_core/cd_stock/custom/*.json`
