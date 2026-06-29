@@ -114,11 +114,7 @@ frappe.ui.form.on("Address", {
 			callback(r) {
 				const candidates = r.message || [];
 				if (!candidates.length) {
-					frappe.msgprint(
-						__(
-							"No linked Customer or Supplier with tax details was found.",
-						),
-					);
+					frappe.msgprint(__("No linked Customer or Supplier with tax details was found."));
 					return;
 				}
 
@@ -137,9 +133,7 @@ frappe.ui.form.on("Address", {
 			label: [
 				candidate.label,
 				candidate.tax_id ? __("Tax ID: {0}", [candidate.tax_id]) : null,
-				candidate.branch_code
-					? __("Branch: {0}", [candidate.branch_code])
-					: null,
+				candidate.branch_code ? __("Branch: {0}", [candidate.branch_code]) : null,
 			]
 				.filter(Boolean)
 				.join(" | "),
@@ -157,10 +151,7 @@ frappe.ui.form.on("Address", {
 				},
 			],
 			(values) => {
-				frm.events.set_party_tax_values(
-					frm,
-					candidates[Number(values.source)],
-				);
+				frm.events.set_party_tax_values(frm, candidates[Number(values.source)]);
 			},
 			__("Select Tax Source"),
 			__("Use"),
@@ -173,10 +164,9 @@ frappe.ui.form.on("Address", {
 		frm.refresh_field("tax_id");
 		frm.refresh_field("branch_code");
 		frappe.show_alert({
-			message: __(
-				"Tax details copied from {0}. Save the Address to keep the changes.",
-				[candidate.label],
-			),
+			message: __("Tax details copied from {0}. Save the Address to keep the changes.", [
+				candidate.label,
+			]),
 			indicator: "green",
 		});
 	},
