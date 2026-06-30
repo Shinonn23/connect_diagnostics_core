@@ -245,8 +245,8 @@ def _get_data(filters: frappe._dict) -> list[dict]:
         running_balance = opening_balance
 
         for gle in gl_entries:
-            debit = flt(gle.get("debit"))
-            credit = flt(gle.get("credit"))
+            debit = flt(gle.get("debit") or 0)
+            credit = flt(gle.get("credit") or 0)
             running_balance += debit - credit
 
             # Build description from against + remarks
@@ -271,8 +271,8 @@ def _get_data(filters: frappe._dict) -> list[dict]:
             )
 
         # Account total row (movement totals for this account)
-        total_debit = sum(flt(e.get("debit")) for e in gl_entries)
-        total_credit = sum(flt(e.get("credit")) for e in gl_entries)
+        total_debit = sum(flt(e.get("debit") or 0) for e in gl_entries)
+        total_credit = sum(flt(e.get("credit") or 0) for e in gl_entries)
 
         if gl_entries:
             data.append(
