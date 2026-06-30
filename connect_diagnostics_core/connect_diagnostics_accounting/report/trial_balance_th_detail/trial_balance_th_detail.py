@@ -204,10 +204,10 @@ def _get_data(filters: frappe._dict) -> list[dict]:
         op = opening.get(key, {})
         mv = movement.get(key, {})
 
-        op_debit = flt(op.get("opening_debit"))
-        op_credit = flt(op.get("opening_credit"))
-        mv_debit = flt(mv.get("movement_debit"))
-        mv_credit = flt(mv.get("movement_credit"))
+        op_debit = flt(op.get("opening_debit") or 0)
+        op_credit = flt(op.get("opening_credit") or 0)
+        mv_debit = flt(mv.get("movement_debit") or 0)
+        mv_credit = flt(mv.get("movement_credit") or 0)
 
         opening_net = op_debit - op_credit
         opening_debit, opening_credit = _net_to_debit_credit(opening_net)
