@@ -54,8 +54,10 @@ doctype_js = {
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {
+    "Customer": "public/js/custom/customer/list_view.js",
     "Item": "public/js/custom/item/list_view.js",
     "Sales Order": "public/js/custom/sales_order/list_view.js",
+    "Supplier": "public/js/custom/supplier/list_view.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -155,6 +157,14 @@ doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
+        "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
+        "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
+        "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
+    },
+    "Supplier": {
+        "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+        "on_update": "connect_diagnostics_core.api.erpnext.supplier.on_update",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -165,6 +175,12 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
+}
+
+# Standard link-search queries (override the default link search per doctype).
+standard_queries = {
+    "Customer": "connect_diagnostics_core.api.erpnext.customer.customer_query",
+    "Supplier": "connect_diagnostics_core.api.erpnext.supplier.supplier_query",
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
