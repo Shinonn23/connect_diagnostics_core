@@ -36,10 +36,15 @@ def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_
 class TestPartyDkshNaming(FrappeTestCase):
     group: str
     territory: str
+    _old_master_name: str | None
 
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
+        # CD code = naming-series number, which requires Customer naming by series.
+        # The CI test DB does not seed this global default, so set it explicitly.
+        cls._old_master_name = frappe.defaults.get_global_default("cust_master_name")
+        frappe.db.set_default("cust_master_name", "Naming Series")
         cls.group = _leaf(
             "Customer Group",
             "customer_group_name",
@@ -50,6 +55,14 @@ class TestPartyDkshNaming(FrappeTestCase):
         cls.territory = _leaf(
             "Territory", "territory_name", "parent_territory", "All Territories", "_Test CD Territory"
         )
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if cls._old_master_name:
+            frappe.db.set_default("cust_master_name", cls._old_master_name)
+        else:
+            frappe.db.set_default("cust_master_name", "")
+        super().tearDownClass()
 
     def _new_customer(self, name: str, **kwargs) -> Any:
         doc = frappe.get_doc(
