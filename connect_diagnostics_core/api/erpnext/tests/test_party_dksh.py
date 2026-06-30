@@ -11,32 +11,45 @@ from frappe.tests.utils import FrappeTestCase
 from connect_diagnostics_core.api.erpnext.customer import customer_query
 from connect_diagnostics_core.api.erpnext.supplier import supplier_query
 
-_GROUP = "_Test CD Customer Group"
-_TERRITORY = "_Test CD Territory"
+
+def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_name: str) -> str:
+    """Return an existing leaf node, or create one (under an existing/created root).
+
+    Kept environment-agnostic: the CI test DB is not seeded with the ERPNext default
+    tree roots, so fall back to reusing whatever leaf exists before creating any node.
+    """
+    existing = frappe.db.get_value(doctype, {"is_group": 0}, "name")
+    if existing:
+        return existing
+    root = frappe.db.get_value(doctype, {"is_group": 1}, "name")
+    if not root:
+        frappe.get_doc({"doctype": doctype, name_field: root_name, "is_group": 1}).insert(
+            ignore_permissions=True
+        )
+        root = root_name
+    doc = frappe.get_doc(
+        {"doctype": doctype, name_field: new_name, parent_field: root, "is_group": 0}
+    ).insert(ignore_permissions=True)
+    return doc.name
 
 
 class TestPartyDkshNaming(FrappeTestCase):
+    group: str
+    territory: str
+
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        if not frappe.db.exists("Customer Group", _GROUP):
-            frappe.get_doc(
-                {
-                    "doctype": "Customer Group",
-                    "customer_group_name": _GROUP,
-                    "parent_customer_group": "All Customer Groups",
-                    "is_group": 0,
-                }
-            ).insert(ignore_permissions=True)
-        if not frappe.db.exists("Territory", _TERRITORY):
-            frappe.get_doc(
-                {
-                    "doctype": "Territory",
-                    "territory_name": _TERRITORY,
-                    "parent_territory": "All Territories",
-                    "is_group": 0,
-                }
-            ).insert(ignore_permissions=True)
+        cls.group = _leaf(
+            "Customer Group",
+            "customer_group_name",
+            "parent_customer_group",
+            "All Customer Groups",
+            "_Test CD Customer Group",
+        )
+        cls.territory = _leaf(
+            "Territory", "territory_name", "parent_territory", "All Territories", "_Test CD Territory"
+        )
 
     def _new_customer(self, name: str, **kwargs) -> Any:
         doc = frappe.get_doc(
@@ -44,8 +57,8 @@ class TestPartyDkshNaming(FrappeTestCase):
                 "doctype": "Customer",
                 "customer_name": name,
                 "customer_type": "Company",
-                "customer_group": _GROUP,
-                "territory": _TERRITORY,
+                "customer_group": self.group,
+                "territory": self.territory,
                 **kwargs,
             }
         )
