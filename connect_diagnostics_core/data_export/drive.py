@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 from io import BytesIO
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 import frappe
 from frappe import _
@@ -206,6 +206,7 @@ def export_to_drive(
     folder = folder_id or frappe.conf.get(CONFIG_FOLDER)
     if not folder:
         frappe.throw(_("No Google Drive folder configured. Pass --folder or run login with --folder first."))
+    folder = cast(str, folder)
 
     grouped = list_target_doctypes(modules, client=client, catalog=catalog)
     service = _drive_service(token_path)

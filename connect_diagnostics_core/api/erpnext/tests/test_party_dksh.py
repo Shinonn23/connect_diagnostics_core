@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import frappe
+import frappe.defaults
 from frappe.tests.utils import FrappeTestCase
 
 from connect_diagnostics_core.api.erpnext.customer import customer_query
@@ -30,7 +31,7 @@ def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_
     doc = frappe.get_doc(
         {"doctype": doctype, name_field: new_name, parent_field: root, "is_group": 0}
     ).insert(ignore_permissions=True)
-    return doc.name
+    return cast(str, doc.name)
 
 
 class TestPartyDkshNaming(FrappeTestCase):
