@@ -5,6 +5,7 @@ from typing import Any, cast
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import UserPermission
 from frappe.model.document import Document
 
 

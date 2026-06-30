@@ -27,6 +27,7 @@ from urllib.parse import urljoin
 import frappe
 import requests
 from openpyxl import load_workbook
+from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
 INDEX_SHEET_NAME = "_Index"
 INDEX_HEADERS = ["DocType", "Category", "Sheet", "Records"]
