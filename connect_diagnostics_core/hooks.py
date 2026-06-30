@@ -8,7 +8,7 @@ app_license = "bsl-1.0"
 # Apps
 # ------------------
 
-required_apps = ["erpnext", "erpnext_thailand", "hrms", "helpdesk"]
+required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -44,18 +44,20 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 
 # include js in doctype views
 doctype_js = {
+    "Address": "public/js/custom/address/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
-    "HD Ticket": "public/js/custom/hd_ticket/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {
+    "Customer": "public/js/custom/customer/list_view.js",
     "Item": "public/js/custom/item/list_view.js",
     "Sales Order": "public/js/custom/sales_order/list_view.js",
+    "Supplier": "public/js/custom/supplier/list_view.js",
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -87,7 +89,10 @@ doctype_list_js = {
 
 # add methods and filters to jinja environment
 jinja = {
-    "methods": ["connect_diagnostics_core.utils.thai_words.number_to_thai_currency"]
+    "methods": [
+        "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
+        "connect_diagnostics_core.utils.currency.print_currency",
+    ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
 
@@ -152,6 +157,14 @@ doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
+        "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
+        "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
+        "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
+    },
+    "Supplier": {
+        "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+        "on_update": "connect_diagnostics_core.api.erpnext.supplier.on_update",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -162,11 +175,12 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
-    # GitHub -> Helpdesk sync is pull-only (scheduled); the one Helpdesk -> GitHub path
-    # is the manual github_sync.escalate_to_github action, so no push doc_events here.
-    # "Sales Invoice": {
-    #     "before_save": "connect_diagnostics_core.api.erpnext.sales_invoice.before_save",
-    # },
+}
+
+# Standard link-search queries (override the default link search per doctype).
+standard_queries = {
+    "Customer": "connect_diagnostics_core.api.erpnext.customer.customer_query",
+    "Supplier": "connect_diagnostics_core.api.erpnext.supplier.supplier_query",
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
@@ -175,14 +189,7 @@ company_data_to_be_ignored = ["Accounting Department"]
 # Scheduled Tasks
 # ---------------
 
-scheduler_events = {
-    "cron": {
-        # GitHub -> Helpdesk near-realtime pull, every 10 minutes
-        "*/10 * * * *": [
-            "connect_diagnostics_core.github_sync.pull",
-        ],
-    },
-}
+# scheduler_events = {}
 
 # Testing
 # -------
@@ -267,4 +274,5 @@ export_python_type_annotations = True
 fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
+    {"doctype": "Terms and Conditions"},
 ]

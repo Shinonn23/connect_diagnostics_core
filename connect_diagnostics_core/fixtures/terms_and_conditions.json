@@ -1,0 +1,15 @@
+[
+	{
+		"buying": 0,
+		"copy_attachments_to_transaction": 0,
+		"disabled": 0,
+		"docstatus": 0,
+		"doctype": "Terms and Conditions",
+		"hr": 0,
+		"modified": "2026-06-01 19:46:31.535844",
+		"name": "Terms & Conditions / ข้อกำหนดและเงื่อนไข ทั่วไป",
+		"selling": 1,
+		"terms": "<div class=\"ql-editor read-mode\"><p>o สินค้านี้ขายขาดไม่รับคืนหรือเปลี่ยน</p><p>o บริษัทฯ จะนำใบเสร็จรับเงินมาเรียกเก็บเงินในภายหลัง</p><p>o ช่องทางการชำระเงิน ธนาคาร กสิกรไทย 796-2033304 สาขา วัชรพล บริษัทคอนเนคไดแอกโนสติกส์ จำกัด</p></div>",
+		"title": "Terms & Conditions / ข้อกำหนดและเงื่อนไข ทั่วไป"
+	}
+]
