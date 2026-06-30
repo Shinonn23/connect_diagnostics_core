@@ -1,0 +1,63 @@
+// Copyright (c) 2026, Siwat Sroisuwan and contributors
+// For license information, please see license.txt
+
+/*
+ * Supplier list view
+ * ==================
+ *
+ * Single "search everything" box that searches ACROSS several fields at once —
+ * the same set the Supplier link search uses (see api/erpnext/supplier.py):
+ *     name (= CD code / DKSH code), supplier_name, DKSH supplier code,
+ *     and every Supplier Alternative Name (child table).
+ *
+ * Implemented server-side by injecting `or_filters` into the list query via
+ * get_args(), so paging/counting stay correct. `distinct` collapses the
+ * duplicate parent rows the child-table join would otherwise produce.
+ */
+
+const SEARCH_TARGETS = [
+	["Supplier", "name"],
+	["Supplier", "supplier_name"],
+	["Supplier", "dksh_supplier_code"],
+	["Supplier Alternative Name", "name_value"],
+];
+
+frappe.listview_settings["Supplier"] = {
+	add_fields: ["supplier_name", "supplier_group"],
+
+	onload(listview) {
+		const apply_search = frappe.utils.debounce((value) => {
+			listview._cd_search_text = (value || "").trim();
+			listview.start = 0;
+			listview.refresh();
+		}, 300);
+
+		const field = listview.page.add_field({
+			fieldtype: "Data",
+			fieldname: "cd_supplier_search",
+			label: __("Search"),
+			placeholder: __("Supplier ID, name, alt name, DKSH code…"),
+			onchange() {
+				apply_search(this.get_value());
+			},
+		});
+		// Live search while typing, not only on commit/blur.
+		field.$input.on("input", () => apply_search(field.get_value()));
+
+		// Unregister from page.fields_dict so get_standard_filters() doesn't turn this
+		// synthetic box into a query filter (cd_supplier_search is not a real field).
+		delete listview.page.fields_dict["cd_supplier_search"];
+
+		const get_args = listview.get_args.bind(listview);
+		listview.get_args = function () {
+			const args = get_args();
+			const txt = listview._cd_search_text;
+			if (txt) {
+				const like = `%${txt}%`;
+				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [dt, fn, "like", like]);
+				args.distinct = 1;
+			}
+			return args;
+		};
+	},
+};

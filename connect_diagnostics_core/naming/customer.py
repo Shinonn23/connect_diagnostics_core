@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import frappe
-
 # Customer groups that map to prefix 4H (hospitals / government agencies)
 _HOSPITAL_GOV_GROUPS: frozenset[str] = frozenset()
 
@@ -21,14 +19,18 @@ def _is_hospital_or_gov(customer_group: str | None) -> bool:
     return "HOSP" in upper or upper.startswith("GOV")
 
 
+def series_for_customer(doc: Any) -> str:
+    """Return the CD-code naming series for a Customer based on type / group."""
+    if doc.customer_type == "Individual":
+        return "2S.###"
+    if _is_hospital_or_gov(doc.customer_group):
+        return "4H.###"
+    return "4A.###"
+
+
 def set_naming_series(doc: Any, method: str | None = None) -> None:
     """before_naming hook: auto-select Customer naming series from customer_type/group."""
     if doc.get("naming_series") and doc.naming_series in ("2S.###", "4A.###", "4H.###"):
         return
 
-    if doc.customer_type == "Individual":
-        doc.naming_series = "2S.###"
-    elif _is_hospital_or_gov(doc.customer_group):
-        doc.naming_series = "4H.###"
-    else:
-        doc.naming_series = "4A.###"
+    doc.naming_series = series_for_customer(doc)
