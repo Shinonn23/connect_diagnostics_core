@@ -24,10 +24,8 @@ class TestPrintCurrency(TestCase):
 
 class TestCdPrintFormats(TestCase):
     def test_currency_values_use_print_currency(self) -> None:
-        print_format_root = (
-            Path(__file__).resolve().parents[2] / "connect_diagnostics_accounting" / "print_format"
-        )
-        print_formats = sorted(print_format_root.glob("cd_*/*.json"))
+        print_format_root = Path(__file__).resolve().parents[2] / "connect_diagnostics_core" / "print_format"
+        print_formats = sorted(print_format_root.glob("*/*.json"))
 
         self.assertEqual(len(print_formats), 8)
 
