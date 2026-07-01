@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-from typing import cast
+from typing import Any, cast
 
 import frappe
 from frappe import _
@@ -73,7 +73,7 @@ def apply_permissions(docname: str) -> dict[str, int]:
 
         if existing_name:
             # Update existing permission
-            up = cast(UserPermission, frappe.get_doc("User Permission", existing_name))
+            up = cast(Any, frappe.get_doc("User Permission", existing_name))
             up.is_default = doc.is_default
             up.apply_to_all_doctypes = doc.apply_to_all_doctypes
             up.hide_descendants = doc.hide_descendants
@@ -81,7 +81,7 @@ def apply_permissions(docname: str) -> dict[str, int]:
             updated_count += 1
         else:
             # Create new user permission
-            up = frappe.new_doc("User Permission")
+            up = cast(Any, frappe.new_doc("User Permission"))
             up.update(
                 {
                     "user": u.user,

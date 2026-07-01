@@ -20,7 +20,7 @@ def execute():
         )
         if already:
             continue
-        frappe.get_doc(
+        doc = frappe.get_doc(
             {
                 "doctype": "Item Alternative Name",
                 "name": frappe.generate_hash(length=10),
@@ -31,7 +31,8 @@ def execute():
                 "name_value": alias.alias_name,
                 "name_label": "Other",
             }
-        ).insert(ignore_permissions=True)
+        )
+        doc.db_insert()
         migrated += 1
 
     frappe.db.commit()

@@ -203,7 +203,7 @@ def export_to_drive(
     the local database. Pass ``catalog`` (loaded via ``load_catalog()``) to filter
     and categorize DocTypes using a ``DocType_Categorized.xlsx`` catalog file.
     """
-    folder = folder_id or frappe.conf.get(CONFIG_FOLDER)
+    folder = cast(str | None, folder_id or frappe.conf.get(CONFIG_FOLDER))
     if not folder:
         frappe.throw(_("No Google Drive folder configured. Pass --folder or run login with --folder first."))
     folder = cast(str, folder)
