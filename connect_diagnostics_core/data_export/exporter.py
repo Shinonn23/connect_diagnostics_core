@@ -26,8 +26,8 @@ from urllib.parse import urljoin
 
 import frappe
 import requests
-from frappe.utils.xlsxutils import get_sanitized_sheet_name
 from openpyxl import load_workbook
+from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
 INDEX_SHEET_NAME = "_Index"
 INDEX_HEADERS = ["DocType", "Category", "Sheet", "Records"]
@@ -35,6 +35,7 @@ MAX_SHEET_NAME_LENGTH = 31
 EXCLUDED_CATALOG_CATEGORIES: frozenset[str] = frozenset({"Child Table", "Virtual DocType", "Review Required"})
 
 ILLEGAL_XML_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+INVALID_SHEET_TITLE_RE = re.compile(r"[\[\]:*?/\\]")
 EXCEL_CELL_LIMIT = 32_767
 
 
@@ -334,9 +335,15 @@ def _safe_count(doctype: str, *, client: FrappeClient | None = None) -> int:
         return 0
 
 
+def _sanitize_sheet_name(name: str) -> str:
+    """Return an Excel-safe sheet title."""
+    sanitized = INVALID_SHEET_TITLE_RE.sub("_", name).strip().strip("'")
+    return sanitized[:MAX_SHEET_NAME_LENGTH]
+
+
 def _unique_sheet_name(doctype: str, used: set[str]) -> str:
     """Return an Excel-safe, unique sheet name derived from ``doctype``."""
-    base = get_sanitized_sheet_name(doctype) or "Sheet"
+    base = _sanitize_sheet_name(doctype) or "Sheet"
     candidate = base
     suffix = 1
     while candidate in used:

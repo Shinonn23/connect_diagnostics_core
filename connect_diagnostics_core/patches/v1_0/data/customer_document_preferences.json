@@ -1,0 +1,9138 @@
+{
+	"2S067": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S069": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S077": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S082": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S083": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S084": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S087": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S088": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S096": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S097": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S098": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S099": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S101": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S102": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S103": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S104": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S110": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S111": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S115": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S116": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S117": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S118": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S119": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S120": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S122": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S126": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S127": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S128": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S129": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S130": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S131": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S142": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S144": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S145": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S146": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S147": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S148": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S149": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S150": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S151": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S152": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S154": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S161": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S162": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S163": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S165": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S166": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S167": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S168": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S169": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S170": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S171": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S172": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S173": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S174": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S175": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S176": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S177": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S178": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S179": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S181": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S182": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S183": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S184": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S185": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S186": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S187": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S188": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S189": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S190": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S191": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S192": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S193": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S194": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S195": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S196": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S197": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S198": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S199": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S200": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S201": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S202": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S203": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S204": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S205": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S212": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S213": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S214": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S215": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S216": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S217": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S218": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S219": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S221": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S222": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S223": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S224": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S225": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S226": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S229": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S230": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S231": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S232": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S233": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S235": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S236": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S237": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S238": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S239": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S240": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S241": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S242": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S243": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S244": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S245": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S247": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S248": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S251": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S252": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S253": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S254": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S255": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S256": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S257": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S258": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S259": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S260": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S261": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S262": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S263": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S265": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S266": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S267": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S268": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S269": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S270": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S271": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S272": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S273": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S274": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S277": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S278": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S279": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S280": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S281": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S282": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S283": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S284": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S285": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S286": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S287": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S288": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S289": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S292": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S293": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S294": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S295": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S296": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S297": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S298": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"2S299": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S300": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S301": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S302": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S303": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S304": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S305": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S306": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S307": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S308": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S309": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S311": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S312": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S313": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S314": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S315": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S316": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S317": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S318": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S319": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S320": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S321": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S322": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S323": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S324": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S325": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S326": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S327": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S328": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S329": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S330": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S331": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S332": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S333": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S334": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S335": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S336": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S337": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S338": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S340": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S341": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S342": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S343": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S344": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S345": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S346": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S347": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S348": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S350": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S351": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S352": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S353": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S354": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S355": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S356": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"2S370": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A015": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A016": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A017": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A018": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A019": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A020": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A023": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A024": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A025": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A026": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A027": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A028": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A029": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A030": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A031": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A032": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A033": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A034": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A035": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A036": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A037": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A038": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A039": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A040": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A042": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A043": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A045": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A047": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A049": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A050": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A051": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A052": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A053": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A054": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A055": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A056": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A057": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A058": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A059": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A060": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A061": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A062": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A063": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A066": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A067": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A069": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A070": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A071": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A072": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A074": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A075": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A076": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A077": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A078": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A079": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A080": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A083": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A084": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A085": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A086": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A087": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A088": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A090": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A091": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A092": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A093": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A094": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A095": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A096": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A097": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A098": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A099": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A100": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A104": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A105": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A106": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A107": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A108": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A109": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A110": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A111": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A112": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A113": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A115": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A116": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A117": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A118": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A119": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A120": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A121": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A122": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A123": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A124": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A125": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A126": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A127": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A128": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A129": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A131": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A132": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A133": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A134": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A135": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A136": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A137": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A138": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A139": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A141": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A142": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A143": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A144": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A145": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A146": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A147": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A148": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A149": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A150": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A151": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A155": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A156": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A157": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A158": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A159": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A160": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A161": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A162": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A163": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A164": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A165": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A166": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A167": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A168": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A169": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A170": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A171": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A172": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A173": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A174": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A175": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A176": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A177": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A178": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A179": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A180": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A181": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A182": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A183": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A184": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A185": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A186": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A187": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A188": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A191": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A192": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A193": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A194": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A195": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A196": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A197": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A198": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A199": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A200": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A201": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A202": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A203": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A204": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A205": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A206": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A207": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A208": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A209": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A211": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A212": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A213": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A214": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A215": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A216": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A217": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A218": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A219": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A223": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A224": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A225": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A226": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A227": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A228": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A229": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A230": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A231": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A232": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A233": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A234": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A235": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A237": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A238": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A239": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A240": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A241": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A242": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A243": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A244": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A245": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A246": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A247": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A248": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A249": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A250": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A251": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A252": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A253": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A254": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A256": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A257": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A258": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A259": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A260": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A261": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A262": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A263": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A264": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A265": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A266": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A267": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A268": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A269": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A270": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A271": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A272": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A273": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A274": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A275": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A276": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A277": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A278": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A279": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A280": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A281": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4A282": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A283": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A284": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A285": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A286": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A287": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A288": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A294": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A297": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A305": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A308": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4A309": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4B012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4C014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4D001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4D003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4D004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4D005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4D007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4F001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H003": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H004": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H005": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H006": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H007": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H008": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H009": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H010": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H011": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H013": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H014": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H015": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H016": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H018": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H019": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H020": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H021": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H022": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H023": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H025": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H026": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H028": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H029": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H030": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H031": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H032": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H033": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H034": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H035": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H036": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H038": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H039": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H040": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H041": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H042": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H043": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H044": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H045": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H046": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H047": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H048": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H049": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H050": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H051": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H052": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H053": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H054": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H055": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H056": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H057": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H058": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H059": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H060": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H061": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H062": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H063": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H064": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H066": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H067": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H068": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H069": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H070": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H071": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H072": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H073": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H074": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H075": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H076": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H077": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H078": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H080": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H081": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H082": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H083": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H084": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H085": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H086": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H087": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H089": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H090": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H091": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H092": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H093": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H095": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H096": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H097": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H098": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H099": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H100": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H101": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H102": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H103": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H104": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H105": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H106": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H107": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H108": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H109": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H110": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H111": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H112": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H113": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H114": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H115": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H116": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H117": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H118": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H119": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H120": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H121": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H122": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H123": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H124": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H125": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H126": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H127": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H128": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H129": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H130": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H131": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H132": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H133": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H134": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H135": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H136": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H137": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H138": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H140": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H141": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H143": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H144": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H145": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H146": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H147": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H148": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H149": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H150": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H151": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H152": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H153": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H156": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H157": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H158": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H159": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H160": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H161": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H162": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H163": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H165": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H166": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H167": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H169": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H170": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H171": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H172": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H173": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H174": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H175": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H176": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H177": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H178": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H179": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H180": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H182": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H183": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H184": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H185": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H186": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H187": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H188": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H189": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H190": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H191": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H192": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H193": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H196": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H197": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H198": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H199": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H200": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H201": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H202": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H203": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H204": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H205": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H206": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H207": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H208": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H209": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H210": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H211": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H212": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H213": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H214": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H216": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H217": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H218": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H219": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H220": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H221": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H223": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H224": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H225": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H226": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H227": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H228": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H229": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H232": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H233": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H234": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H235": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H237": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H238": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H239": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H240": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H241": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H242": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H243": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H244": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H245": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H246": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H247": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H250": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H252": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H253": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H254": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H255": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H256": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H257": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H258": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H259": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H260": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H261": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H262": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H263": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H264": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H266": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H267": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H268": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H269": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H270": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H273": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H274": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H275": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H276": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H277": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H278": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H279": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H280": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H282": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H283": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H284": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H285": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H287": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H288": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H306": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H307": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H308": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H309": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H310": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H311": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H312": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H314": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H315": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H316": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H317": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H318": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H319": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H321": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H322": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H323": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H324": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H325": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H326": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H328": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H329": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H330": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H331": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H332": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H333": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H334": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H335": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H337": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H338": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 1,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H339": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H340": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H341": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H346": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4H352": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H353": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H359": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4H361": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4I003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4I005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4J009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K0002": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4K001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4K014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4L003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4L004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4L005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4L008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4L010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M002": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4M003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4M012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N016": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N018": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N020": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4N022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4O001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4O003": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4O005": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4P001": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4P002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P018": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P019": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P020": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P023": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P024": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P025": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P026": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P027": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P028": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4P029": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4R008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S015": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S016": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S017": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S018": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S019": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S020": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S023": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S024": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S025": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S026": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S027": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4S028": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S029": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S030": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S031": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S032": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S033": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S034": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S035": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S036": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S037": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S038": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S039": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S040": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S041": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S042": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S043": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S044": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S046": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S047": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S048": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S053": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S054": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S055": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S057": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S061": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S064": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S065": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S066": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S067": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S069": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S070": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S071": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S072": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S073": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S074": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S075": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S076": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S078": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4S079": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T013": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T014": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T016": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T017": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T018": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T019": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T020": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T023": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T024": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T026": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T027": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T028": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T029": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T032": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T033": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T034": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T035": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T036": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T038": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T039": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T041": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T042": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T043": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T044": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T045": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T046": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T047": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T048": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T049": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T050": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T052": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T053": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T054": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T055": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T056": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T057": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T058": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T059": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T060": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T062": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T063": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T064": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T066": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T068": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T069": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T070": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T071": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T072": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T073": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T075": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T077": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T078": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T079": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T080": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T081": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T082": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T083": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T084": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T085": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T086": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T087": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T088": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T089": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T091": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T092": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T094": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T096": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T097": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T098": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T100": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T102": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T103": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T104": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T105": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T107": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T108": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T109": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T110": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T111": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T112": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T113": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T114": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T115": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T116": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T117": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T118": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T119": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T120": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T121": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T122": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T123": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T124": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T126": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T127": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T129": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T130": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T131": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T132": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T133": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T134": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T135": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T136": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T137": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T138": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T139": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T141": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T142": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T143": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T144": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T145": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T146": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T147": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T148": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T150": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T151": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T152": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T153": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T154": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T155": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T156": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T159": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T160": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T161": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T162": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T163": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T165": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T166": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T167": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T169": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T171": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T172": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T173": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T174": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T176": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T177": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T181": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4T182": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4T184": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4U001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4V001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4V002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4V003": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4V004": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4V005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4V007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4V008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W005": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4W006": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W007": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W008": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W009": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W010": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W011": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4W012": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Y001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Y002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Y003": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4Y004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Y005": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Z025": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4Z026": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4Z027": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"4Z067": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Z068": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"4Z999": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"CASH26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"CORP26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"CORP26050002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"CORP26050003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"CORP26050004": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050003": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050004": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050005": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"HOSP26050006": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 1,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"IND26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"IND26050002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"LAZA26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"LINE26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"LINE26050002": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"N021": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"N022": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	},
+	"N023": {
+		"print_date": 0,
+		"use_abbreviated_tax_invoice": 0,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 1,
+		"use_tax_invoice": 1
+	},
+	"SHOP26050001": {
+		"print_date": 1,
+		"use_abbreviated_tax_invoice": 1,
+		"use_customer_po": 0,
+		"use_quotation": 0,
+		"use_receipt": 0,
+		"use_tax_invoice": 1
+	}
+}

@@ -275,4 +275,5 @@ fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},
+    {"doctype": "Print Format", "filters": [["disabled", "=", 1]]},
 ]
