@@ -86,11 +86,11 @@ class TestImportCustomerDocumentPreferences(FrappeTestCase):
         with patch.object(patch_module, "load_preferences", return_value=prefs):
             patch_module.execute()
 
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_use_quotation"), 1)
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_use_customer_po"), 0)
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_use_tax_invoice"), 1)
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_use_receipt"), 1)
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_print_date"), 0)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "use_quotation"), 1)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "use_customer_po"), 0)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "use_tax_invoice"), 1)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "use_receipt"), 1)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "print_date"), 0)
 
     def test_import_is_idempotent(self) -> None:
         doc = self._new_customer("_Test CD DocPref Idempotent")
@@ -108,8 +108,8 @@ class TestImportCustomerDocumentPreferences(FrappeTestCase):
             patch_module.execute()
             patch_module.execute()
 
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_use_tax_invoice"), 1)
-        self.assertEqual(frappe.db.get_value("Customer", doc.name, "cd_print_date"), 1)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "use_tax_invoice"), 1)
+        self.assertEqual(frappe.db.get_value("Customer", doc.name, "print_date"), 1)
 
     def test_import_skips_missing_customer(self) -> None:
         prefs = {

@@ -16,7 +16,7 @@ frappe.ui.form.on("Delivery Note", {
 });
 
 function render_serial_no_summary(frm) {
-	const field = frm.get_field("cd_serial_no_summary");
+	const field = frm.get_field("serial_no_summary");
 	if (!field) {
 		return;
 	}
