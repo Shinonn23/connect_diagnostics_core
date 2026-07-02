@@ -4,7 +4,7 @@
 """Rollback for import_customer_document_preferences.
 
 Resets the document / print preference fields back to their field defaults
-(all ``cd_use_*`` checks to 0, ``cd_print_date`` to 1) for the customers that
+(all ``use_*`` checks to 0, ``print_date`` to 1) for the customers that
 were populated by the import.
 """
 
@@ -18,7 +18,7 @@ from connect_diagnostics_core.patches.v1_0.import_customer_document_preferences 
 )
 
 _DEFAULTS: dict[str, int] = {
-    fieldname: (1 if fieldname == "cd_print_date" else 0) for fieldname in FIELD_MAP.values()
+    fieldname: (1 if fieldname == "print_date" else 0) for fieldname in FIELD_MAP.values()
 }
 
 

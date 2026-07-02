@@ -5,7 +5,7 @@
 
 The preferences originate from ``Customer terms และเอกสารใบกำกับภาษี.xlsx`` and
 were extracted into ``data/customer_document_preferences.json`` (keyed by Customer
-name / CD code). This patch backfills the ``cd_use_*`` and ``cd_print_date`` custom
+name / CD code). This patch backfills the ``use_*`` and ``print_date`` custom
 fields on existing Customer records.
 
 Idempotent: re-running sets the same values. Customers absent from the site are
@@ -26,12 +26,12 @@ _DATA_FILE = Path(__file__).parent / "data" / "customer_document_preferences.jso
 
 # JSON key -> Customer custom fieldname
 FIELD_MAP: dict[str, str] = {
-    "use_quotation": "cd_use_quotation",
-    "use_customer_po": "cd_use_customer_po",
-    "use_tax_invoice": "cd_use_tax_invoice",
-    "use_receipt": "cd_use_receipt",
-    "use_abbreviated_tax_invoice": "cd_use_abbreviated_tax_invoice",
-    "print_date": "cd_print_date",
+    "use_quotation": "use_quotation",
+    "use_customer_po": "use_customer_po",
+    "use_tax_invoice": "use_tax_invoice",
+    "use_receipt": "use_receipt",
+    "use_abbreviated_tax_invoice": "use_abbreviated_tax_invoice",
+    "print_date": "print_date",
 }
 
 
