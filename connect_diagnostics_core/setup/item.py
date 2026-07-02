@@ -58,7 +58,8 @@ CUSTOM_FIELDS = {
             "fieldname": "material_type_code",
             "label": "Material Type Code",
             "fieldtype": "Data",
-            "insert_after": "model",
+            "insert_after": "mat_group4_code",
+            "depends_on": "eval:doc.has_dksh_code",
         },
         {
             "fieldname": "max_storage_days",
@@ -77,6 +78,13 @@ CUSTOM_FIELDS = {
             "label": "Model",
             "fieldtype": "Data",
             "insert_after": "stock_uom",
+        },
+        {
+            "fieldname": "product_group",
+            "label": "Product Group",
+            "fieldtype": "Link",
+            "insert_after": "item_group",
+            "options": "Product Group",
         },
         {
             "fieldname": "regulation_class",
