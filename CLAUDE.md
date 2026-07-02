@@ -27,8 +27,10 @@ When rules conflict, follow this order:
 - **Frappe stack**: version-16 (frappe/erpnext/hrms on `version-16`)
 - **Python**: 3.14 (required by Frappe v16) | **Node**: 24
 - **Do NOT assume** any other apps exist (e.g., Healthcare, Education, E-Commerce)
-- **Custom field definitions**: `connect_diagnostics_core/cd_stock/custom/*.json`
-- **Custom field prefix**: `cd_` (e.g., `cd_custom_format`, `cd_registration_type`)
+- **Custom field definitions**: `connect_diagnostics_core/setup/*.py` (applied on
+  `after_install` / `after_migrate`)
+- **Custom field naming**: no prefix — the name must describe the data it holds
+  (e.g., `print_date`, `product_group`, `dksh_item_code`); naming is important
 - **Bench**: `/home/frappe/frappe-bench`, dev site `dev.erp.connectdiacnostics.local`
   (= the `developments` environment). `gh` is authenticated as `Shinonn23`
   (scopes include `repo` + `project`). Run server code via
@@ -288,8 +290,8 @@ If a bug or issue is discovered during implementation (outside the current task 
   - Use `cast()` to narrow types from frappe/erpnext: `doc = cast(ProductRegistration, frappe.get_doc(...))`
   - Always type `doc.get()` calls: `value: str = cast(str, doc.get("field") or "")`
   - Prefer `cast()` to narrow types over ignore directives — only use ignore as a last resort
-  - When ignore is unavoidable, it must be specific with a reason: `# ty: ignore[unresolved-attribute] - runtime-injected custom field (cd_stock/custom/item.json)`
-  - Custom field definitions: `connect_diagnostics_core/cd_stock/custom/*`
+  - When ignore is unavoidable, it must be specific with a reason: `# ty: ignore[unresolved-attribute] - runtime-injected custom field (setup/item.py)`
+  - Custom field definitions: `connect_diagnostics_core/setup/*.py`
   - Never use bare `# type: ignore` or `# ty: ignore` without a specific error code and reason
 
 ### Error Handling
@@ -345,10 +347,16 @@ return {"data": <payload>, "message": <str>}
 
 ### Custom Fields
 
-- **NEVER** create custom fields via Python fixtures or migration scripts — use Frappe desk only
-- `cd_` prefix is mandatory on all custom field names — no exceptions
-- Custom field definitions live in `connect_diagnostics_core/cd_stock/custom/*.json` (managed by desk)
-- To reference a custom field in code, declare the `# ty: ignore` with the source JSON file
+- Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
+  (`CUSTOM_FIELDS` / `PROPERTY_SETTERS`), applied idempotently on `after_install` and
+  `after_migrate` — do not create fields ad hoc via desk or console
+- **Naming is important** — no prefix; the fieldname must describe the data it holds
+  (e.g., `print_date`, `product_group`, `dksh_item_code`). Do not add `cd_`, `custom_`,
+  or any other namespace prefix
+- Renaming or removing an existing field requires a data-migration patch in
+  `connect_diagnostics_core/patches/` (see `remove_cd_prefix_from_custom_fields.py`)
+- To reference a custom field in code, declare the `# ty: ignore` with the source
+  `setup/*.py` file
 
 ### Multi-Tenancy
 

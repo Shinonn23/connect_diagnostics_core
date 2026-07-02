@@ -14,6 +14,7 @@ class ProductGroup(Document):
     if TYPE_CHECKING:
         from frappe.types import DF
 
-        product_group_name: DF.Data | None
+        product_group_name: DF.Data
     # end: auto-generated types
+
     pass
