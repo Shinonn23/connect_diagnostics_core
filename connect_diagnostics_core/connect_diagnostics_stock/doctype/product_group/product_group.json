@@ -1,6 +1,8 @@
 {
 	"actions": [],
+	"allow_bulk_edit": 1,
 	"allow_rename": 1,
+	"autoname": "field:product_group_name",
 	"creation": "2026-05-19 14:32:14.453059",
 	"doctype": "DocType",
 	"engine": "InnoDB",
@@ -9,16 +11,20 @@
 		{
 			"fieldname": "product_group_name",
 			"fieldtype": "Data",
-			"label": "Product Group Name"
+			"in_list_view": 1,
+			"label": "Product Group Name",
+			"reqd": 1,
+			"unique": 1
 		}
 	],
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-05-19 14:32:41.746002",
+	"modified": "2026-07-03 02:42:02.501845",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Stock",
 	"name": "Product Group",
+	"naming_rule": "By fieldname",
 	"owner": "Administrator",
 	"permissions": [
 		{
