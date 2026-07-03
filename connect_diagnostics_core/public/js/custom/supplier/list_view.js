@@ -5,8 +5,10 @@
  * Supplier list view
  * ==================
  *
- * Single "search everything" box that searches ACROSS several fields at once —
- * the same set the Supplier link search uses (see api/erpnext/supplier.py):
+ * Single "search everything" box, placed at the far LEFT of the filter bar.
+ * The default ID filter is hidden (hide_name_filter) — the box covers it.
+ * Typing in it searches ACROSS several fields at once — the same set the
+ * Supplier link search uses (see api/erpnext/supplier.py):
  *     name (= CD code / DKSH code), supplier_name, DKSH supplier code,
  *     and every Supplier Alternative Name (child table).
  *
@@ -24,6 +26,8 @@ const SEARCH_TARGETS = [
 
 frappe.listview_settings["Supplier"] = {
 	add_fields: ["supplier_name", "supplier_group"],
+
+	hide_name_filter: true, // replaced by the single search box below
 
 	onload(listview) {
 		const apply_search = frappe.utils.debounce((value) => {
@@ -43,6 +47,10 @@ frappe.listview_settings["Supplier"] = {
 		});
 		// Live search while typing, not only on commit/blur.
 		field.$input.on("input", () => apply_search(field.get_value()));
+
+		// add_field() appends after the filter/tag section (far right); move the box
+		// to the far left of the bar, ahead of the remaining standard filters.
+		$(field.wrapper).prependTo(listview.page.page_form.find(".standard-filter-section"));
 
 		// Unregister from page.fields_dict so get_standard_filters() doesn't turn this
 		// synthetic box into a query filter (cd_supplier_search is not a real field).
