@@ -154,16 +154,4 @@ frappe.listview_settings["Sales Order"] = {
 		listview.columns.splice(2, 0, customerNameCol);
 		listview.render_header(true);
 	},
-
-	formatters: {
-		name(val) {
-			return `${val}`;
-		},
-		customer_name(val) {
-			return val || "-";
-		},
-		status(val) {
-			return `<span>${val}</span>`;
-		},
-	},
 };

@@ -92,6 +92,7 @@ jinja = {
     "methods": [
         "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
         "connect_diagnostics_core.utils.currency.print_currency",
+        "connect_diagnostics_core.utils.date.format_date",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }

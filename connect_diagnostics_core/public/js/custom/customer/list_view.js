@@ -5,8 +5,10 @@
  * Customer list view
  * ==================
  *
- * Single "search everything" box that searches ACROSS several fields at once —
- * the same set the Customer link search uses (see api/erpnext/customer.py):
+ * Single "search everything" box, placed at the far LEFT of the filter bar.
+ * The default ID filter is hidden (hide_name_filter) — the box covers it.
+ * Typing in it searches ACROSS several fields at once — the same set the
+ * Customer link search uses (see api/erpnext/customer.py):
  *     name (= CD code / DKSH code), customer_name, DKSH customer code,
  *     and every Customer Alternative Name (child table).
  *
@@ -24,6 +26,8 @@ const SEARCH_TARGETS = [
 
 frappe.listview_settings["Customer"] = {
 	add_fields: ["customer_name", "customer_group"],
+
+	hide_name_filter: true, // replaced by the single search box below
 
 	onload(listview) {
 		const apply_search = frappe.utils.debounce((value) => {
@@ -43,6 +47,10 @@ frappe.listview_settings["Customer"] = {
 		});
 		// Live search while typing, not only on commit/blur.
 		field.$input.on("input", () => apply_search(field.get_value()));
+
+		// add_field() appends after the filter/tag section (far right); move the box
+		// to the far left of the bar, ahead of the remaining standard filters.
+		$(field.wrapper).prependTo(listview.page.page_form.find(".standard-filter-section"));
 
 		// Unregister from page.fields_dict so get_standard_filters() doesn't turn this
 		// synthetic box into a query filter (cd_customer_search is not a real field).
