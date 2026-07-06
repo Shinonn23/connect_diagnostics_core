@@ -57,10 +57,16 @@ class BackupSettings(Document):
 
     @frappe.whitelist()
     def run_backup_now(self) -> dict:
-        """Manually trigger a backup + upload + mirror run. Raises on failure."""
+        """Manually back up the database to the frequent bucket only. Raises on failure.
+
+        Unlike the scheduled run, this does not touch the daily/monthly tiers or
+        the file mirror -- it is a quick on-demand database snapshot.
+        """
         if not frappe.has_permission(self.doctype, "write"):
             frappe.throw(_("Not permitted to run a backup."), frappe.PermissionError)
-        result = _run_backup(self, throw_on_error=True)
+        if not self.frequent_bucket:
+            frappe.throw(_("Set a Frequent Bucket before running a backup."))
+        result = _run_backup(self, throw_on_error=True, only_frequent=True, publish=True)
         return {
             "data": result,
             "message": _("Backup uploaded to: {0}").format(", ".join(result["tiers"]) or _("no buckets")),
@@ -124,41 +130,61 @@ def _collect_backup_files(odb: object) -> list[str]:
     return [path for path in paths if path]
 
 
-def _run_backup(settings: BackupSettings, *, throw_on_error: bool) -> dict:
+def _run_backup(
+    settings: BackupSettings,
+    *,
+    throw_on_error: bool,
+    only_frequent: bool = False,
+    publish: bool = False,
+) -> dict:
     """Back up the database to the due tiers and mirror files to the mirror bucket.
 
     The database backup (db + config, never files) goes to whichever retention
     tiers are due; public/private files are additively mirrored separately so the
-    backups stay small and nothing is ever deleted from the buckets. On failure
-    the status is recorded; the error is re-raised only when ``throw_on_error`` is
-    set (manual runs), otherwise logged (scheduler).
+    backups stay small and nothing is ever deleted from the buckets. With
+    ``only_frequent`` the run targets just the frequent bucket and skips the
+    daily/monthly tiers and the file mirror (used by the manual button). With
+    ``publish`` a progress bar is streamed to the client. On failure the status
+    is recorded; the error is re-raised only when ``throw_on_error`` is set
+    (manual runs), otherwise logged (scheduler).
     """
     now = now_datetime()
     prefix = site_slug(cast(str, frappe.local.site))
 
+    def _progress(percent: int, description: str) -> None:
+        if publish:
+            frappe.publish_progress(percent, title=_("Backing up"), description=description)
+
     try:
+        _progress(10, _("Creating database backup…"))
         odb = new_backup(ignore_files=True, force=True)
         files = _collect_backup_files(odb)
 
-        due = buckets_due(
-            now=now,
-            frequent_bucket=settings.frequent_bucket,
-            daily_bucket=settings.daily_bucket,
-            monthly_bucket=settings.monthly_bucket,
-            last_daily_on=getdate(settings.last_daily_on) if settings.last_daily_on else None,
-            last_monthly_on=settings.last_monthly_on,
-        )
+        if only_frequent:
+            due = {"frequent": settings.frequent_bucket} if settings.frequent_bucket else {}
+        else:
+            due = buckets_due(
+                now=now,
+                frequent_bucket=settings.frequent_bucket,
+                daily_bucket=settings.daily_bucket,
+                monthly_bucket=settings.monthly_bucket,
+                last_daily_on=getdate(settings.last_daily_on) if settings.last_daily_on else None,
+                last_monthly_on=settings.last_monthly_on,
+            )
 
+        _progress(50, _("Uploading database backup…"))
         uploaded_tiers: list[str] = []
         for tier, bucket in due.items():
             upload_files_to_bucket(bucket, prefix, files, settings.gcs_project or None)
             uploaded_tiers.append(tier)
 
         mirrored = False
-        if settings.mirror_bucket:
+        if not only_frequent and settings.mirror_bucket:
+            _progress(75, _("Mirroring files…"))
             mirror_files_to_bucket(settings.mirror_bucket, mirror_roots(), settings.gcs_project or None)
             mirrored = True
 
+        _progress(100, _("Backup complete."))
         settings.db_set(
             {
                 "last_backup_on": now,

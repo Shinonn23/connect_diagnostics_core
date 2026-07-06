@@ -14,15 +14,20 @@ frappe.ui.form.on("Backup Settings", {
 		});
 
 		frm.add_custom_button(__("Run Backup Now"), () => {
-			frappe.confirm(__("Generate a backup and upload it to the due buckets now?"), () => {
+			frappe.confirm(__("Back up the database to the frequent bucket now?"), () => {
+				// The server streams a progress bar via frappe.publish_progress.
+				frappe.show_progress(__("Backing up"), 1, 100, __("Starting…"));
 				frm.call({
 					method: "run_backup_now",
 					doc: frm.doc,
-					freeze: true,
-					freeze_message: __("Running backup…"),
-				}).then((r) => {
-					frappe.show_alert({ message: r.message.message, indicator: "green" });
-					frm.reload_doc();
+					callback: (r) => {
+						frappe.hide_progress();
+						if (r.message) {
+							frappe.show_alert({ message: r.message.message, indicator: "green" });
+							frm.reload_doc();
+						}
+					},
+					error: () => frappe.hide_progress(),
 				});
 			});
 		});
