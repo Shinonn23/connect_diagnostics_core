@@ -4,7 +4,7 @@
 frappe.ui.form.on("Backup Settings", {
 	refresh(frm) {
 		frm.add_custom_button(__("Test Connection"), () => {
-			frm.call("test_connection").then((r) => {
+			frm.call({ method: "test_connection", doc: frm.doc, freeze: true }).then((r) => {
 				frappe.msgprint({
 					title: __("Bucket Access"),
 					message: r.message.message,
@@ -14,14 +14,21 @@ frappe.ui.form.on("Backup Settings", {
 		});
 
 		frm.add_custom_button(__("Run Backup Now"), () => {
-			frappe.confirm(__("Generate a backup and upload it to the due buckets now?"), () => {
-				frappe.dom.freeze(__("Running backup…"));
-				frm.call("run_backup_now")
-					.then((r) => {
-						frappe.show_alert({ message: r.message.message, indicator: "green" });
-						frm.reload_doc();
-					})
-					.finally(() => frappe.dom.unfreeze());
+			frappe.confirm(__("Back up the database to the frequent bucket now?"), () => {
+				// The server streams a progress bar via frappe.publish_progress.
+				frappe.show_progress(__("Backing up"), 1, 100, __("Starting…"));
+				frm.call({
+					method: "run_backup_now",
+					doc: frm.doc,
+					callback: (r) => {
+						frappe.hide_progress();
+						if (r.message) {
+							frappe.show_alert({ message: r.message.message, indicator: "green" });
+							frm.reload_doc();
+						}
+					},
+					error: () => frappe.hide_progress(),
+				});
 			});
 		});
 
@@ -29,7 +36,7 @@ frappe.ui.form.on("Backup Settings", {
 			frappe.confirm(
 				__("Force-mirror every file to the mirror bucket (overwrites, never deletes)?"),
 				() => {
-					frm.call("backup_files_now").then((r) => {
+					frm.call({ method: "backup_files_now", doc: frm.doc, freeze: true }).then((r) => {
 						frappe.show_alert({ message: r.message.message, indicator: "blue" });
 					});
 				},
