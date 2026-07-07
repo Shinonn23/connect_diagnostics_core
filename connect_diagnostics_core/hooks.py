@@ -176,6 +176,9 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
+    "File": {
+        "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
+    },
 }
 
 # Standard link-search queries (override the default link search per doctype).
@@ -190,7 +193,14 @@ company_data_to_be_ignored = ["Accounting Department"]
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {}
+scheduler_events = {
+    "cron": {
+        # Runs hourly; the handler self-throttles to Backup Settings.backup_interval_hours.
+        "0 * * * *": [
+            "connect_diagnostics_core.connect_diagnostics_core.doctype.backup_settings.backup_settings.run_scheduled_backup"
+        ]
+    }
+}
 
 # Testing
 # -------
