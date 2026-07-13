@@ -470,6 +470,7 @@ If a change is truly needed, document the exact reason and get explicit approval
 ## Testing
 
 - All new features must include corresponding tests unless the task description explicitly states tests are not needed
+- Test currency-formatting helpers directly, but do not require every Print Format to use `print_currency`; formats may intentionally render numeric amounts without a currency symbol
 - Minimum coverage: one test per hook handler and one per whitelisted API method
 - Test method names must use `test_<expected_behavior>` pattern (e.g., `test_validates_registration_uniqueness`)
 - Test documents created during tests must use descriptive prefixes (e.g., `_Test Registration`) for easy identification and cleanup
