@@ -20,9 +20,11 @@ the batch currently on UAT has been signed off. Roles in `CLAUDE.md`.
    ones in board column **UAT Deploy**).
 2. **Gate — UAT sign-off.** Every source issue in the batch must be signed off by
    the owner (`Shinonn23`):
-   - a `/uat-approve` comment **authored by `Shinonn23`** on the issue (or on the
-     UAT promotion PR), `gh issue view <n> --json comments` → check
-     `.comments[] | select(.author.login=="Shinonn23")`;
+   - a `/uat-approve` comment **authored by `Shinonn23`** on a source issue or the
+     UAT promotion PR. Read source-issue comments with
+     `gh issue view <n> --json comments`; read promotion-PR comments with
+     `gh pr view <n> --json comments`. Check
+     `.comments[] | select(.author.login=="Shinonn23")` in the correct result;
    - and the issue is not reopened / not labelled `uat-bug`.
 3. **If any item lacks sign-off:** STOP and report the pending items. Do not open
    the PR. A failed UAT item → open a fix issue and it re-enters the dev loop.
