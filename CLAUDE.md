@@ -378,6 +378,12 @@ return {"data": <payload>, "message": <str>}
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
   (`CUSTOM_FIELDS` / `PROPERTY_SETTERS`), applied idempotently on `after_install` and
   `after_migrate` — do not create fields ad hoc via desk or console
+- Print Formats are app-owned only: `after_sync` and `after_migrate` remove every
+  `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
+  `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`). Retired formats are
+  removed explicitly; `Sales Invoice Print` is retired and Sales Invoice defaults to
+  `Tax Invoice Delivery Note and Invoice`. Do not add a Print Format fixture that restores
+  records from other modules.
 - **Naming is important** — no prefix; the fieldname must describe the data it holds
   (e.g., `print_date`, `product_group`, `dksh_item_code`). Do not add `cd_`, `custom_`,
   or any other namespace prefix

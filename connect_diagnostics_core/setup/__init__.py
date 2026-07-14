@@ -31,6 +31,7 @@ from connect_diagnostics_core.setup import (
     uom,
     warehouse,
 )
+from connect_diagnostics_core.setup.print_format import remove_non_app_print_formats
 
 _MODULES = (
     account,
@@ -81,5 +82,10 @@ def after_install():
     apply_all()
 
 
+def after_sync():
+    remove_non_app_print_formats()
+
+
 def after_migrate():
     apply_all()
+    remove_non_app_print_formats()
