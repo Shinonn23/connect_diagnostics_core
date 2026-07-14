@@ -102,6 +102,7 @@ jinja = {
 
 # before_install = "connect_diagnostics_core.install.before_install"
 after_install = "connect_diagnostics_core.setup.after_install"
+after_sync = "connect_diagnostics_core.setup.after_sync"
 after_migrate = "connect_diagnostics_core.setup.after_migrate"
 
 # Uninstallation
@@ -286,7 +287,6 @@ fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},
-    {"doctype": "Print Format", "filters": [["disabled", "=", 1]]},
     {
         "doctype": "Email Template",
         "filters": [

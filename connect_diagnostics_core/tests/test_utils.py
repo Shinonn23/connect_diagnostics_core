@@ -3,7 +3,12 @@
 
 from __future__ import annotations
 
+from unittest import TestCase
+from unittest.mock import Mock, call, patch
+
 import frappe
+
+from connect_diagnostics_core.setup import print_format
 
 
 def before_tests() -> None:
@@ -15,3 +20,27 @@ def before_tests() -> None:
     under Frappe v16's eager test-record bootstrap.
     """
     frappe.clear_cache()
+
+
+class TestPrintFormatCleanup(TestCase):
+    @patch.object(print_format, "frappe")
+    def test_removes_print_formats_not_owned_by_app_or_explicitly_retired(self, frappe_mock: Mock) -> None:
+        frappe_mock.get_all.return_value = [
+            {"name": "Core Invoice", "module": "Connect Diagnostics Core"},
+            {"name": "Accounting Invoice", "module": "Connect Diagnostics Accounting"},
+            {"name": "ERPNext Invoice", "module": "Accounts"},
+            {"name": "User Format", "module": None},
+            {"name": "Sales Invoice Print", "module": "Connect Diagnostics Accounting"},
+        ]
+
+        print_format.remove_non_app_print_formats()
+
+        frappe_mock.get_all.assert_called_once_with("Print Format", fields=["name", "module"])
+        self.assertEqual(
+            frappe_mock.delete_doc.call_args_list,
+            [
+                call("Print Format", "ERPNext Invoice", force=True, ignore_missing=True),
+                call("Print Format", "User Format", force=True, ignore_missing=True),
+                call("Print Format", "Sales Invoice Print", force=True, ignore_missing=True),
+            ],
+        )

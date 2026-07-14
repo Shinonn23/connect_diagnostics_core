@@ -99,7 +99,7 @@ PROPERTY_SETTERS = {
         ("disable_rounded_total", "default", "0", "Text"),
         ("in_words", "hidden", "0", "Check"),
         ("in_words", "print_hide", "0", "Check"),
-        (None, "default_print_format", "Sales Invoice Print", "Data"),
+        (None, "default_print_format", "Tax Invoice Delivery Note and Invoice", "Data"),
         ("more_info", "collapsible", "0", "Check"),
         ("naming_series", "default", "SI.YY-BE.MM-DATE.####", "Text"),
         ("naming_series", "depends_on", "eval:!doc.amended_from", "Data"),

@@ -50,13 +50,3 @@ class TestCdPrintFormatsUseFormatDate(TestCase):
         for print_format in print_formats:
             with self.subTest(print_format=print_format.name):
                 self._assert_uses_format_date(print_format)
-
-    def test_accounting_sales_invoice_print_uses_format_date(self) -> None:
-        print_format = (
-            Path(__file__).resolve().parents[2]
-            / "connect_diagnostics_accounting"
-            / "print_format"
-            / "sales_invoice_print"
-            / "sales_invoice_print.json"
-        )
-        self._assert_uses_format_date(print_format)
