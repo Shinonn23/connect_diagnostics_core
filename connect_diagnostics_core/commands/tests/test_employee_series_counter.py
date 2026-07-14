@@ -44,7 +44,9 @@ class TestEmployeeSeriesCounterCommand(TestCase):
         )
         frappe.db.set_value.assert_not_called()
         frappe.get_doc.assert_not_called()
-        frappe.db.get_value.assert_called_once_with("Series", "6807", "current", order_by="name", for_update=False)
+        frappe.db.get_value.assert_called_once_with(
+            "Series", "6807", "current", order_by="name", for_update=False
+        )
 
     @patch("connect_diagnostics_core.commands.employee_series_counter.frappe")
     def test_apply_updates_only_counter_below_highest_employee_number(self, frappe: Mock) -> None:

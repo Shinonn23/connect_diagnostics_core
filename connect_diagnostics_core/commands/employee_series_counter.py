@@ -12,7 +12,6 @@ import frappe
 from frappe.commands import pass_context
 from frappe.utils import cint
 
-
 COUNTER_SUFFIX_PATTERN = re.compile(r"\.(#+)$")
 
 
