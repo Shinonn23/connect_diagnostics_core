@@ -17,16 +17,19 @@ after verifying every change in the batch was manually tested and certified by
    git fetch origin developments user-acceptance-testing
    git log --oneline origin/user-acceptance-testing..origin/developments
    ```
-   Collect the **merged PRs** in that range (`gh pr list --base developments
---state merged` and match by merge commit / date), and from each PR body the
-   `Refs #` **source issues**.
+   Collect the complete set of **merged PRs** with
+   `gh pr list --base developments --state merged --limit 1000 --json number,title,body,url,mergeCommit,mergedAt`
+   and retain PRs whose merge commit is in the Git range. Verify that every
+   non-promotion commit in the range maps to a PR; if any commit is unaccounted
+   for, STOP and report it rather than silently excluding it. From every included
+   PR body, collect the `Refs #` **source issues**.
 2. **Find each PR's test task** (`🧪 Test: PR #<n>`, label `manual-test`).
 3. **Gate — every item must satisfy ALL of:**
    - test task is **closed**, and all its `- [x]` steps are ticked (no `- [ ]` left);
    - board **Test Status = Passed** on the test task and its source issues;
-   - a `/test-pass` comment exists **authored by `newyodsapad`** and there is no
-     later `/test-fail` (`gh issue view <n> --json comments` → check
-     `.comments[] | select(.author.login=="newyodsapad")`).
+   - a `/test-pass` comment exists **authored by `newyodsapad`** after the latest
+     `/test-fail` or `/retest-start` marker (`gh issue view <n> --json comments`
+     → compare comment timestamps and authors).
 4. **If any item fails the gate:** STOP. Report a table of pending items (PR,
    test task, what's missing: not certified / Test Status not Passed / open steps).
    Do not open the promotion PR.
@@ -37,12 +40,15 @@ after verifying every change in the batch was manually tested and certified by
      --body "<list of included PRs + certified source issues>"
    ```
    (Base is `user-acceptance-testing`, so `auto-version` does not bump.)
-6. **Advance the board:** move the promoted source issues → **UAT Deploy**
-   (`98236657`). Note in the PR that UAT sign-off (`/uat-approve` by the owner) is
-   required before `/promote-prod`.
+6. **Advance the board only after deployment.** Wait until the promotion PR is
+   merged and its UAT deployment is explicitly verified, then move the promoted
+   source issues → **UAT Deploy** (`98236657`). Until both conditions are true,
+   leave their board status unchanged. Note in the PR that UAT sign-off
+   (`/uat-approve` by the owner) is required before `/promote-prod`.
 
 ## Output
 
 Either the blocking table (nothing promoted) or the promotion PR url + the list of
-certified issues moved to UAT Deploy. Never auto-merge — branch protection +
-review apply.
+certified issues. Report board movement as pending until merge and UAT deployment
+are verified; only then report the issues moved to UAT Deploy. Never auto-merge —
+branch protection + review apply.

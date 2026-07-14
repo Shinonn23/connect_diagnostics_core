@@ -11,5 +11,6 @@ frappe-semgrep-rules
 typings
 docs
 
-# internal AI working directory (CLAUDE.md > Codebase Knowledge Cache)
+# internal AI working directories (project knowledge caches)
 .claude/knowledge/
+.codex/knowledge/

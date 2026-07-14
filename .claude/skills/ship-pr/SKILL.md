@@ -1,12 +1,12 @@
 ---
 name: ship-pr
-description: From the current work branch, open a ready-to-merge PR into `developments` (conventional title, Refs the issues, aggregated manual-test checklist, CI), then dispatch a manual-test task to newyodsapad. Use when the user says "ship", "open a PR", "ready to merge", or finishes a feature/fix.
+description: From the current work branch, open a ready-to-merge PR into `developments` with a conventional title, issue references, tests, and CI; dispatch manual testing only after merge and verified DEV deployment. Use when the user says "ship", "open a PR", "ready to merge", or finishes a feature/fix.
 ---
 
 # Ship PR
 
 Turn the current work branch into a **ready-to-merge** PR into `developments`
-and queue its manual testing for `newyodsapad`. Follows the project rules in
+and prepare its post-deployment manual testing for `newyodsapad`. Follows the project rules in
 `CLAUDE.md` and `.github/WORKFLOW.md`.
 
 ## Preconditions
@@ -36,13 +36,15 @@ and queue its manual testing for `newyodsapad`. Follows the project rules in
 6. **Report readiness.** Poll CI: `gh pr checks <PR#>`. "Ready to merge" =
    `Server` + `Frappe Linter` green and 1 review present. Do **not** auto-merge
    (branch protection + human review). Tell the user the exact blockers if any.
-7. **Dispatch the test task** — run the `dispatch-test` skill steps for this PR
-   (create the `🧪 Test: PR #<N>` issue assigned to `newyodsapad`, move source
-   issues to **Test In progress** / **Test Status = Testing**, comment on the PR).
-   Note in the test task that testing happens **after this PR is merged & deployed
-   to the DEV site**.
+7. **Dispatch only after merge and deployment.** Read the PR state with
+   `gh pr view <PR#> --json state,mergedAt`. Run the `dispatch-test` skill only
+   when the PR is merged and its deployment to the DEV site has been explicitly
+   verified. Otherwise leave source issues in **Dev review**, report manual-test
+   dispatch as the pending post-deployment action, and do not create or update
+   test tasks or testing board fields.
 
 ## Output
 
-Report: PR url + title, CI status, the test-task issue url, and the source issues
-moved to testing. If anything blocks "ready to merge", list it explicitly.
+Report: PR url + title, CI status, and any blockers to "ready to merge". If merge
+and DEV deployment are verified, also report the test-task issue url and source
+issues moved to testing; otherwise report that dispatch remains pending.

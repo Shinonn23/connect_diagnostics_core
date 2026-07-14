@@ -11,6 +11,25 @@ session** and is the contract for how we work: behavioral/engineering rules plus
 
 ---
 
+## Agent Configuration Parity
+
+- Any project change that affects architecture, behavior, commands, workflows,
+  conventions, dependencies, testing, or releases must update both `CLAUDE.md`
+  and `AGENTS.md` in the same change.
+- Keep corresponding agent configuration synchronized in both directions:
+  - `.claude/skills/<name>/` ↔ `.agents/skills/<name>/`
+  - `.claude/knowledge/` ↔ `.codex/knowledge/`
+  - `.claude/settings.json` ↔ `.codex/config.toml` when an equivalent setting exists
+- Keep the semantic content equivalent. Differences are allowed only when required
+  by a platform, such as skill frontmatter, invocation syntax, or file location.
+- When adding, updating, renaming, or removing an instruction, skill, knowledge
+  note, or supported setting on one side, mirror the change on the other side.
+- Before completing any project change, verify this parity and report any intentional
+  platform-specific difference. Do not invent an unsupported setting merely to make
+  the files textually identical.
+- The Codex project instruction filename is `AGENTS.md` (plural). Do not create
+  `AGENT.md`.
+
 ## Rule Priority
 
 When rules conflict, follow this order:
@@ -103,7 +122,7 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 
 | Skill                                            | What it does                                                                                                |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments` + dispatch test task to `newyodsapad`            |
+| `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments`; dispatch testing only after DEV deployment      |
 | `/dispatch-test <PR#>`                           | (re)create / assign the manual-test task for a PR                                                           |
 | `/test-result <PR#\|issue#> pass\|fail [reason]` | tester records the result + certifies                                                                       |
 | `/promote-uat`                                   | gate: every test task certified `/test-pass` by `newyodsapad` → PR `developments → user-acceptance-testing` |
@@ -116,7 +135,7 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - **Test Status** field `PVTSSF_lAHOB1tcMM4BLM7IzhWdi_0`: Not Tested `9d66b7d0` · Testing `2556afad` · Passed `97d946bc` · Failed `15087b1c`
 - **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text)
 - Set a value: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`).
-- An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json`.
+- An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
 
 ---
 
@@ -345,6 +364,15 @@ return {"data": <payload>, "message": <str>}
 - Never return raw strings, bare lists, or inconsistent shapes.
 - Existing API response structures are immutable — do not change the shape of an existing endpoint unless explicitly approved
 
+### Leave Notifications
+
+- `Leave Approval Notification` emails an open Leave Application to its leave approver;
+  `Leave Status Notification` emails Approved, Rejected, or Cancelled results to the employee.
+- Both templates are code-managed in `fixtures/email_template.json` and store
+  their Jinja/HTML content in `response_html` with `use_html` enabled.
+- Do not fixture the complete HR Settings Single DocType. Select both templates
+  in HR Settings per site so unrelated environment-specific HR configuration is not overwritten.
+
 ### Custom Fields
 
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
@@ -451,6 +479,7 @@ If a change is truly needed, document the exact reason and get explicit approval
 ## Testing
 
 - All new features must include corresponding tests unless the task description explicitly states tests are not needed
+- Test currency-formatting helpers directly, but do not require every Print Format to use `print_currency`; formats may intentionally render numeric amounts without a currency symbol
 - Minimum coverage: one test per hook handler and one per whitelisted API method
 - Test method names must use `test_<expected_behavior>` pattern (e.g., `test_validates_registration_uniqueness`)
 - Test documents created during tests must use descriptive prefixes (e.g., `_Test Registration`) for easy identification and cleanup
