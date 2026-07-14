@@ -287,4 +287,14 @@ fixtures = [
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},
     {"doctype": "Print Format", "filters": [["disabled", "=", 1]]},
+    {
+        "doctype": "Email Template",
+        "filters": [
+            [
+                "name",
+                "in",
+                ["Leave Approval Notification", "Leave Status Notification"],
+            ]
+        ],
+    },
 ]
