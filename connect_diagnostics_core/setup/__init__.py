@@ -20,6 +20,7 @@ from connect_diagnostics_core.setup import (
     item_group,
     journal_entry_account,
     packed_item,
+    payment_approval,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -46,6 +47,7 @@ _MODULES = (
     item_group,
     journal_entry_account,
     packed_item,
+    payment_approval,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -59,7 +61,7 @@ _MODULES = (
 )
 
 
-def apply_all():
+def apply_all() -> None:
     for module in _MODULES:
         custom_fields = getattr(module, "CUSTOM_FIELDS", None)
         if custom_fields:
@@ -76,16 +78,17 @@ def apply_all():
                     for_doctype=fieldname is None,
                     validate_fields_for_doctype=False,
                 )
+    payment_approval.ensure_configuration()
 
 
-def after_install():
+def after_install() -> None:
     apply_all()
 
 
-def after_sync():
+def after_sync() -> None:
     remove_non_app_print_formats()
 
 
-def after_migrate():
+def after_migrate() -> None:
     apply_all()
     remove_non_app_print_formats()

@@ -218,6 +218,16 @@ If context is discovered to be insufficient mid-implementation:
 
 Do not "fill in" missing information to complete the task.
 
+### Long-Running Commands
+
+- Any command expected to run longer than 60 seconds must use a supervised session that can yield output; never start it as an unmonitored blocking call.
+- Poll the session and report progress to the user at least once every 60 seconds while it is running.
+- Apply a hard timeout to tests, pre-commit, code review, and other potentially long-running commands. The default maximum is 20 minutes.
+- If a command produces no new output for 5 minutes, inspect its process state, CPU activity, and available logs instead of continuing to wait blindly.
+- Stop the process when its timeout is reached and report what it was doing, the last useful output, and what remains incomplete.
+- Do not rerun a timed-out or stalled command unchanged until the previous failure has been diagnosed.
+- A command may exceed the 20-minute default only when its expected duration and a new explicit timeout are stated to the user before it starts.
+
 ### Task Completion
 
 A task is considered done when **all** of the following are met:
@@ -373,6 +383,38 @@ return {"data": <payload>, "message": <str>}
 - Do not fixture the complete HR Settings Single DocType. Select both templates
   in HR Settings per site so unrelated environment-specific HR configuration is not overwritten.
 
+### Payment Entry Approval
+
+- The code-managed Frappe Workflow `Payment Entry Approval` applies only to
+  `Payment Entry.payment_type = "Pay"`; Receive and Internal Transfer keep their
+  standard submit path.
+- Outgoing payments below THB 1,500 can be approved immediately by the primary
+  executive or the accounting approver. THB 1,500 exactly and higher require the
+  primary executive.
+- After 24 calendar hours, the secondary executive is added as an approver. The
+  original primary remains eligible; low-value payments also remain eligible for
+  the accounting approver. The first approval or rejection completes the shared
+  Workflow Action.
+- Self-approval is disabled and revalidated server-side. The creator is immutable,
+  the 24-hour deadline is server-owned, and the low-value threshold is revalidated
+  before approval so changing document data cannot bypass the required approver.
+  Payment approver roles do not grant the Accounts role required to submit Receive
+  or Internal Transfer entries. Standard Payment Entry cancellation remains
+  available; cancelled documents move to the workflow's `Payment Cancelled`
+  docstatus-2 state.
+- The workflow, custom roles, profiles, fields, and Custom DocPerm records are
+  managed in `connect_diagnostics_core/setup/payment_approval.py`. The scheduler in
+  `connect_diagnostics_core/api/erpnext/payment_approval.py` checks escalation
+  deadlines every five minutes.
+- Setup and migration append the approved payment profile when a User already uses
+  Role Profiles. For a User with no Role Profiles they add only the profile's roles
+  directly so existing direct roles are not erased. Missing or disabled approver
+  Users do not block a fresh installation; later migrations retry the assignment.
+  Arirat receives primary plus low-value access, Sopha receives low-value access,
+  and Sasin receives the secondary direct role until his later Role Profile migration.
+- Workflow Actions work without email, but email delivery requires a configured
+  Default Outgoing Email Account on each site.
+
 ### Custom Fields
 
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
@@ -490,7 +532,10 @@ If a change is truly needed, document the exact reason and get explicit approval
 - Test method names must use `test_<expected_behavior>` pattern (e.g., `test_validates_registration_uniqueness`)
 - Test documents created during tests must use descriptive prefixes (e.g., `_Test Registration`) for easy identification and cleanup
 - Tests must clean up after themselves — no leftover test data on the site
-- Use `FrappeTestCase` for all tests; never use bare `unittest.TestCase`
+- Import test bases from `frappe.tests`: use `UnitTestCase` for isolated or fully
+  mocked tests and `IntegrationTestCase` for tests that require a site, database,
+  DocType metadata, or real Documents. Never use legacy `FrappeTestCase` or bare
+  `unittest.TestCase`; every test must be categorized by the Frappe v16 runner.
 - Test edge cases: empty inputs, boundary values, Thai-specific logic where applicable:
   - Thai address format validation
   - THB currency rounding (2 decimal places, banker's rounding)

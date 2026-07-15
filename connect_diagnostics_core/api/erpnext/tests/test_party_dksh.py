@@ -7,7 +7,7 @@ from typing import Any, cast
 
 import frappe
 import frappe.defaults
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from connect_diagnostics_core.api.erpnext.customer import customer_query
 from connect_diagnostics_core.api.erpnext.supplier import supplier_query
@@ -34,7 +34,7 @@ def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_
     return cast(str, doc.name)
 
 
-class TestPartyDkshNaming(FrappeTestCase):
+class TestPartyDkshNaming(IntegrationTestCase):
     group: str
     territory: str
     _old_master_name: str | None
@@ -164,7 +164,7 @@ class TestPartyDkshNaming(FrappeTestCase):
         self.assertIn(doc.name, [row[0] for row in rows])
 
 
-class TestSupplierDksh(FrappeTestCase):
+class TestSupplierDksh(IntegrationTestCase):
     def _new_supplier(self, name: str, **kwargs) -> Any:
         doc = frappe.get_doc(
             {

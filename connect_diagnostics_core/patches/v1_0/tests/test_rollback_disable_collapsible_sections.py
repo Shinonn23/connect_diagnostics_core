@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import call, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import rollback_disable_collapsible_sections as rollback_module
 
 
-class TestRollbackDisableCollapsibleSectionsPatch(TestCase):
+class TestRollbackDisableCollapsibleSectionsPatch(UnitTestCase):
     @patch.object(rollback_module, "frappe")
     def test_execute_deletes_property_setters_and_clears_cache(self, frappe) -> None:
         frappe.get_all.return_value = [

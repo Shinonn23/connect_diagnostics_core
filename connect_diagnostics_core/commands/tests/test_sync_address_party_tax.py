@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.commands.sync_address_party_tax import sync_address_party_tax
 from connect_diagnostics_core.utils.address import SyncAddressPartyTaxResult
 
 
-class TestSyncAddressPartyTaxCommand(TestCase):
+class TestSyncAddressPartyTaxCommand(UnitTestCase):
     @patch("connect_diagnostics_core.commands.sync_address_party_tax.sync_address_party_tax_values")
     @patch("connect_diagnostics_core.commands.sync_address_party_tax.frappe")
     def test_preview_does_not_commit(self, frappe: Mock, sync_address_party_tax_values: Mock) -> None:

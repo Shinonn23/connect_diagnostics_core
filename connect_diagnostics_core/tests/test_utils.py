@@ -3,10 +3,10 @@
 
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
 import frappe
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.setup import print_format
 
@@ -14,15 +14,15 @@ from connect_diagnostics_core.setup import print_format
 def before_tests() -> None:
     """Minimal test bootstrap.
 
-    The app's tests are self-contained unit tests (no DocType fixtures), so there is no
-    need to run the ERPNext setup wizard here. Doing so previously created a THB
-    "_Test Company" that collided with ERPNext's own USD "_Test Company" test records
-    under Frappe v16's eager test-record bootstrap.
+    The app's unit and integration tests create their own required records, so there
+    is no need to run the ERPNext setup wizard here. Doing so previously created a
+    THB "_Test Company" that collided with ERPNext's own USD "_Test Company" test
+    records under Frappe v16's eager test-record bootstrap.
     """
     frappe.clear_cache()
 
 
-class TestPrintFormatCleanup(TestCase):
+class TestPrintFormatCleanup(UnitTestCase):
     @patch.object(print_format, "frappe")
     def test_removes_print_formats_not_owned_by_app_or_explicitly_retired(self, frappe_mock: Mock) -> None:
         frappe_mock.get_all.return_value = [

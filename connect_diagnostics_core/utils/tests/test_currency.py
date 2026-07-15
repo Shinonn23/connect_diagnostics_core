@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.utils.currency import print_currency
 
 
-class TestPrintCurrency(TestCase):
+class TestPrintCurrency(UnitTestCase):
     @patch("connect_diagnostics_core.utils.currency.fmt_money")
     def test_passes_currency_as_keyword_argument(self, fmt_money) -> None:
         print_currency(1234.5, "USD")
