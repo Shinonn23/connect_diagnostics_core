@@ -1,13 +1,14 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-from unittest import TestCase
 from unittest.mock import call, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import remove_legacy_print_formats as patch_module
 
 
-class TestRemoveLegacyPrintFormatsPatch(TestCase):
+class TestRemoveLegacyPrintFormatsPatch(UnitTestCase):
     @patch.object(patch_module, "frappe")
     def test_execute_deletes_existing_legacy_print_formats(self, frappe) -> None:
         existing_print_formats = {

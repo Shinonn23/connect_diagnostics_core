@@ -3,8 +3,9 @@
 
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import Mock, mock_open, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.data_export import drive
 from connect_diagnostics_core.data_export.drive import (
@@ -27,7 +28,7 @@ def _service_with_existing(file_id: str | None) -> Mock:
     return service
 
 
-class TestUploadModuleAsSheet(TestCase):
+class TestUploadModuleAsSheet(UnitTestCase):
     def test_creates_google_sheet_when_absent(self) -> None:
         service = _service_with_existing(None)
 
@@ -51,7 +52,7 @@ class TestUploadModuleAsSheet(TestCase):
         service.files.return_value.create.assert_not_called()
 
 
-class TestUploadModuleAsExcel(TestCase):
+class TestUploadModuleAsExcel(UnitTestCase):
     def test_creates_xlsx_file_when_absent(self) -> None:
         service = _service_with_existing(None)
 
@@ -75,7 +76,7 @@ class TestUploadModuleAsExcel(TestCase):
         service.files.return_value.create.assert_not_called()
 
 
-class TestGetDriveCredentials(TestCase):
+class TestGetDriveCredentials(UnitTestCase):
     @patch("google.oauth2.credentials.Credentials")
     @patch.object(drive.os.path, "exists", return_value=True)
     def test_returns_existing_valid_token_without_login(self, _exists: Mock, credentials_cls: Mock) -> None:
@@ -127,7 +128,7 @@ class TestGetDriveCredentials(TestCase):
             get_drive_credentials(token_path="/tmp/token.json")
 
 
-class TestExportToDrive(TestCase):
+class TestExportToDrive(UnitTestCase):
     @patch.object(drive, "_drive_service")
     @patch.object(drive, "build_module_workbook")
     @patch.object(drive, "list_target_doctypes")
@@ -178,7 +179,7 @@ class TestExportToDrive(TestCase):
             drive.export_to_drive()
 
 
-class TestAuthorize(TestCase):
+class TestAuthorize(UnitTestCase):
     @patch("frappe.installer.update_site_config")
     @patch.object(drive, "get_drive_credentials")
     @patch.object(drive, "frappe")

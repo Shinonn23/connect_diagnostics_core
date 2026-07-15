@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import call, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import restructure_employee_names as patch_module
 
 
-class TestRestructureEmployeeNamesPatch(TestCase):
+class TestRestructureEmployeeNamesPatch(UnitTestCase):
     @patch.object(patch_module, "delete_custom_fields")
     @patch.object(patch_module, "create_custom_fields")
     @patch.object(patch_module, "frappe")

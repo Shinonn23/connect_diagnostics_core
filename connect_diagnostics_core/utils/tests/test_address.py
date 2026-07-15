@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from frappe import _dict
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.utils.address import (
     AddressPartyTaxCandidate,
@@ -18,7 +18,7 @@ from connect_diagnostics_core.utils.address import (
 )
 
 
-class TestGetDisplayField(TestCase):
+class TestGetDisplayField(UnitTestCase):
     def test_uses_known_field_mapping(self) -> None:
         meta = Mock()
         meta.get_field.side_effect = lambda fieldname: fieldname == "address_display"
@@ -32,7 +32,7 @@ class TestGetDisplayField(TestCase):
         self.assertEqual(get_display_field(meta, "custom_shipping_address_name"), "custom_shipping_address")
 
 
-class TestValidateSelectors(TestCase):
+class TestValidateSelectors(UnitTestCase):
     def test_requires_explicit_scope(self) -> None:
         with self.assertRaisesRegex(ValueError, "--all, --doctype, or --address"):
             validate_refresh_address_display_selectors(all=False, doctypes=(), names=(), addresses=())
@@ -56,7 +56,7 @@ class TestValidateSelectors(TestCase):
             )
 
 
-class TestRefreshLinkedAddressDisplay(TestCase):
+class TestRefreshLinkedAddressDisplay(UnitTestCase):
     @patch("connect_diagnostics_core.utils.address.frappe")
     def test_preview_counts_without_writing(self, frappe: Mock) -> None:
         frappe.get_all.return_value = [
@@ -129,7 +129,7 @@ class TestRefreshLinkedAddressDisplay(TestCase):
         render_address.assert_called_once_with("Customer-Billing", check_permissions=False)
 
 
-class TestRefreshAddressDisplayValues(TestCase):
+class TestRefreshAddressDisplayValues(UnitTestCase):
     @patch("connect_diagnostics_core.utils.address._get_selected_doctypes", return_value=())
     @patch("connect_diagnostics_core.utils.address._refresh_party_primary_addresses")
     @patch("connect_diagnostics_core.utils.address._render_addresses", return_value={})
@@ -150,7 +150,7 @@ class TestRefreshAddressDisplayValues(TestCase):
         refresh_party_primary_addresses.assert_called_once_with({}, apply=False)
 
 
-class TestSyncAddressPartyTax(TestCase):
+class TestSyncAddressPartyTax(UnitTestCase):
     @patch("connect_diagnostics_core.utils.address.frappe")
     @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
     def test_preview_counts_changed_without_writing(self, get_candidates: Mock, frappe: Mock) -> None:
@@ -295,7 +295,7 @@ class TestSyncAddressPartyTax(TestCase):
         frappe.db.set_value.assert_not_called()
 
 
-class TestLinkedPartyTaxCandidatesEndpoint(TestCase):
+class TestLinkedPartyTaxCandidatesEndpoint(UnitTestCase):
     @patch("connect_diagnostics_core.utils.address.get_address_party_tax_candidates")
     @patch("connect_diagnostics_core.utils.address.frappe")
     def test_checks_address_permission_and_returns_candidates(
@@ -331,7 +331,7 @@ class TestLinkedPartyTaxCandidatesEndpoint(TestCase):
         )
 
 
-class TestPartyTaxMismatchForLinks(TestCase):
+class TestPartyTaxMismatchForLinks(UnitTestCase):
     @patch("connect_diagnostics_core.utils.address._get_party_tax_values")
     @patch("connect_diagnostics_core.utils.address.frappe")
     def test_returns_mismatch_for_unsaved_customer_link(

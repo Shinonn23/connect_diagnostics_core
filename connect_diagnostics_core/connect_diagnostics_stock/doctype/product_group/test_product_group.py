@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 TEST_NAME = "_Test Product Group"
 
 
-class TestProductGroup(FrappeTestCase):
+class TestProductGroup(IntegrationTestCase):
     def tearDown(self) -> None:
         if frappe.db.exists("Product Group", TEST_NAME):
             frappe.delete_doc("Product Group", TEST_NAME)

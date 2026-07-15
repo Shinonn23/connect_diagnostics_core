@@ -7,7 +7,7 @@ from typing import Any, cast
 from unittest.mock import patch
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from connect_diagnostics_core.patches.v1_0 import import_customer_document_preferences as patch_module
 
@@ -28,7 +28,7 @@ def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_
     return cast(str, doc.name)
 
 
-class TestImportCustomerDocumentPreferences(FrappeTestCase):
+class TestImportCustomerDocumentPreferences(IntegrationTestCase):
     group: str
     territory: str
 

@@ -8,11 +8,11 @@ import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
 import click
 from click.testing import CliRunner
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.commands.uat_backup_restore import (
     RcloneBackupFile,
@@ -39,7 +39,7 @@ from connect_diagnostics_core.commands.uat_backup_restore import (
 )
 
 
-class TestUatBackupRestoreHelpers(TestCase):
+class TestUatBackupRestoreHelpers(UnitTestCase):
     def test_select_latest_database_backup_uses_source_slug_and_ignores_sidecar_files(self) -> None:
         backup_file = select_latest_database_backup(
             [
@@ -332,7 +332,7 @@ class TestUatBackupRestoreHelpers(TestCase):
         self.assertIn("allow_uat_restore must be enabled", str(error.exception))
 
 
-class TestUatBackupRestoreCommands(TestCase):
+class TestUatBackupRestoreCommands(UnitTestCase):
     @patch("connect_diagnostics_core.commands.uat_backup_restore.prepare_restore")
     def test_test_command_checks_without_download(self, prepare_restore: Mock) -> None:
         prepare_restore.return_value = (

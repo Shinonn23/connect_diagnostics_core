@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import call, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import disable_collapsible_sections as patch_module
 
 
-class TestDisableCollapsibleSectionsPatch(TestCase):
+class TestDisableCollapsibleSectionsPatch(UnitTestCase):
     @patch.object(patch_module, "make_property_setter")
     @patch.object(patch_module, "frappe")
     def test_execute_disables_standard_custom_and_property_setter_sections(
