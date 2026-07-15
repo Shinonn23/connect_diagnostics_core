@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, call, patch
 
 from frappe import _dict
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import sync_address_linked_tax_values as patch_module
 from connect_diagnostics_core.patches.v1_0.sync_address_linked_tax_values import AddressTaxSource
 
 
-class TestSyncAddressLinkedTaxValuesPatch(TestCase):
+class TestSyncAddressLinkedTaxValuesPatch(UnitTestCase):
     @patch.object(patch_module, "refresh_address_display_values")
     @patch.object(patch_module, "sync_linked_address_tax_values")
     @patch.object(patch_module, "frappe")

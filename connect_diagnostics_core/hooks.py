@@ -102,6 +102,7 @@ jinja = {
 
 # before_install = "connect_diagnostics_core.install.before_install"
 after_install = "connect_diagnostics_core.setup.after_install"
+after_sync = "connect_diagnostics_core.setup.after_sync"
 after_migrate = "connect_diagnostics_core.setup.after_migrate"
 
 # Uninstallation
@@ -171,6 +172,13 @@ doc_events = {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
     "Payment Entry": {
+        "before_save": [
+            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_approval_transition",
+            "connect_diagnostics_core.api.erpnext.payment_approval.clear_completed_workflow_actions_for_next_state",
+        ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.payment_approval.set_cancelled_workflow_state",
+        "before_discard": "connect_diagnostics_core.api.erpnext.payment_approval.validate_before_discard",
+        "before_submit": "connect_diagnostics_core.api.erpnext.payment_approval.validate_before_submit",
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     "Item": {
@@ -195,10 +203,13 @@ company_data_to_be_ignored = ["Accounting Department"]
 
 scheduler_events = {
     "cron": {
+        "*/5 * * * *": [
+            "connect_diagnostics_core.api.erpnext.payment_approval.escalate_due_payment_approvals"
+        ],
         # Runs hourly; the handler self-throttles to Backup Settings.backup_interval_hours.
         "0 * * * *": [
             "connect_diagnostics_core.connect_diagnostics_core.doctype.backup_settings.backup_settings.run_scheduled_backup"
-        ]
+        ],
     }
 }
 
@@ -286,7 +297,6 @@ fixtures = [
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},
-    {"doctype": "Print Format", "filters": [["disabled", "=", 1]]},
     {
         "doctype": "Email Template",
         "filters": [

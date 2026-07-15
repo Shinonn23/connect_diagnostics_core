@@ -6,16 +6,16 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.commands.data_export import cd_data_export
 from connect_diagnostics_core.data_export.exporter import FrappeClient
 
 
-class TestDataExportLoginCommand(TestCase):
+class TestDataExportLoginCommand(UnitTestCase):
     @patch("connect_diagnostics_core.commands.data_export.authorize")
     @patch("connect_diagnostics_core.commands.data_export.frappe")
     def test_login_authorizes_and_reports(self, frappe: Mock, authorize: Mock) -> None:
@@ -33,7 +33,7 @@ class TestDataExportLoginCommand(TestCase):
         frappe.destroy.assert_called_once_with()
 
 
-class TestDataExportRunCommand(TestCase):
+class TestDataExportRunCommand(UnitTestCase):
     @patch("connect_diagnostics_core.commands.data_export.export_to_drive")
     @patch("connect_diagnostics_core.commands.data_export.frappe")
     def test_run_uploads_and_reports_summary(self, frappe: Mock, export_to_drive: Mock) -> None:
@@ -122,7 +122,7 @@ class TestDataExportRunCommand(TestCase):
         export_to_drive.assert_not_called()
 
 
-class TestDataExportRunLocalCommand(TestCase):
+class TestDataExportRunLocalCommand(UnitTestCase):
     @patch("connect_diagnostics_core.commands.data_export.build_module_workbook")
     @patch("connect_diagnostics_core.commands.data_export.list_target_doctypes")
     @patch("connect_diagnostics_core.commands.data_export.frappe")
@@ -203,7 +203,7 @@ class TestDataExportRunLocalCommand(TestCase):
         frappe.connect.assert_not_called()
 
 
-class TestDataExportRunWithCatalog(TestCase):
+class TestDataExportRunWithCatalog(UnitTestCase):
     @patch("connect_diagnostics_core.commands.data_export.load_catalog")
     @patch("connect_diagnostics_core.commands.data_export.export_to_drive")
     @patch("connect_diagnostics_core.commands.data_export.frappe")
