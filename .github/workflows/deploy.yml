@@ -74,6 +74,7 @@ jobs:
                     "bash -s -- ${quoted_bench_path}" <<'REMOTE_SCRIPT'
                   set -Eeuo pipefail
                   bench_path=$1
+                  export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
 
                   if [[ ! -d "$bench_path" ]]; then
                     echo "Configured Bench directory does not exist." >&2
@@ -83,7 +84,11 @@ jobs:
                     echo "flock is not installed on the deployment host." >&2
                     exit 1
                   fi
-                  if [[ ! -x "$bench_path/env/bin/bench" ]]; then
+                  if ! bench_executable=$(command -v bench); then
+                    echo "Bench executable was not found in the deployment PATH." >&2
+                    exit 1
+                  fi
+                  if [[ "$bench_executable" != /* || ! -x "$bench_executable" ]]; then
                     echo "Bench executable is missing or not executable." >&2
                     exit 1
                   fi
@@ -95,5 +100,5 @@ jobs:
                   fi
 
                   cd "$bench_path"
-                  "$bench_path/env/bin/bench" update --reset
+                  "$bench_executable" update --reset
                   REMOTE_SCRIPT

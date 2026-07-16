@@ -134,7 +134,8 @@ environment, credentials, concurrency group, and remote lock as automatic runs.
 
 Create GitHub Environments named exactly `DEV` and `UAT`. Set the Environment
 secret `BENCH_PATH` in each environment; its initial value is
-`/home/erp/frappe`. Configure these Repository secrets:
+`/home/erp/frappe`. This is the Frappe Bench root containing `apps`, `sites`, and
+`env`, not the path to the `bench` executable. Configure these Repository secrets:
 
 - `SSH_PRIVATE_KEY` — the complete, passphrase-free `google_compute_engine`
   private key authorized on both hosts.
@@ -145,12 +146,13 @@ The workflow does not print these secrets. SSH requires a matching key from
 
 ### Deployment safety
 
-Before deployment, the remote script verifies the Bench directory, `flock`, and
-the executable at `$BENCH_PATH/env/bin/bench`. It then waits up to 60 minutes for
-an environment-local deployment lock and runs:
+Before deployment, the remote script verifies the Bench directory and `flock`,
+prepends `$HOME/.local/bin` and `/usr/local/bin` to the remote `PATH`, and requires
+`command -v bench` to resolve to an absolute executable path. It then waits up to
+60 minutes for an environment-local deployment lock and runs from the Bench root:
 
 ```sh
-cd "$BENCH_PATH" && "$BENCH_PATH/env/bin/bench" update --reset
+cd "$BENCH_PATH" && bench update --reset
 ```
 
 DEV and UAT use separate concurrency groups. `cancel-in-progress` is disabled,
