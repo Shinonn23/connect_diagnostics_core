@@ -143,13 +143,17 @@ secret `BENCH_PATH` in each environment; its initial value is
 
 The workflow does not print these secrets. SSH requires a matching key from
 `SSH_KNOWN_HOSTS`; it never learns or accepts a host key at deployment time.
+The `erp` account on each host must have NVM at `$HOME/.nvm/nvm.sh`, with Node.js
+24, npm, and Yarn installed for that NVM user.
 
 ### Deployment safety
 
 Before deployment, the remote script verifies the Bench directory and `flock`,
 prepends `$HOME/.local/bin` and `/usr/local/bin` to the remote `PATH`, and requires
-`command -v bench` to resolve to an absolute executable path. It then waits up to
-60 minutes for an environment-local deployment lock and runs from the Bench root:
+`command -v bench` to resolve to an absolute executable path. It initializes NVM
+directly, selects Node.js 24, and checks the absolute executable paths and versions
+of `node`, `npm`, and `yarn`. It then waits up to 60 minutes for an environment-local
+deployment lock and runs from the Bench root:
 
 ```sh
 cd "$BENCH_PATH" && bench update --reset
