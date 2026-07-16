@@ -1,0 +1,99 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            - developments
+            - user-acceptance-testing
+    workflow_dispatch:
+        inputs:
+            target_environment:
+                description: Environment to deploy
+                required: true
+                type: choice
+                options:
+                    - DEV
+                    - UAT
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+        concurrency:
+            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+            cancel-in-progress: false
+
+        steps:
+            - name: Configure SSH
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+              run: |
+                  set -Eeuo pipefail
+                  if [[ -z "$SSH_PRIVATE_KEY" || -z "$SSH_KNOWN_HOSTS" ]]; then
+                    echo "Required SSH secrets are not configured." >&2
+                    exit 1
+                  fi
+
+                  install -d -m 700 "$HOME/.ssh"
+                  umask 077
+                  printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/google_compute_engine"
+                  printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+                  chmod 600 "$HOME/.ssh/google_compute_engine" "$HOME/.ssh/known_hosts"
+
+            - name: Update Bench
+              env:
+                  BENCH_PATH: ${{ secrets.BENCH_PATH }}
+                  DEPLOY_HOST: ${{ ((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || (github.event_name == 'push' && github.ref_name == 'developments')) && '34.143.156.218' || '136.110.8.47' }}
+              run: |
+                  set -Eeuo pipefail
+                  if [[ -z "$BENCH_PATH" ]]; then
+                    echo "BENCH_PATH is not configured for the selected environment." >&2
+                    exit 1
+                  fi
+                  if [[ ! "$BENCH_PATH" =~ ^/[A-Za-z0-9._/-]+$ ]]; then
+                    echo "BENCH_PATH must be an absolute path containing only safe characters." >&2
+                    exit 1
+                  fi
+
+                  printf -v quoted_bench_path '%q' "$BENCH_PATH"
+                  ssh \
+                    -i "$HOME/.ssh/google_compute_engine" \
+                    -o BatchMode=yes \
+                    -o ConnectTimeout=30 \
+                    -o ServerAliveInterval=30 \
+                    -o ServerAliveCountMax=6 \
+                    -o StrictHostKeyChecking=yes \
+                    -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+                    "erp@${DEPLOY_HOST}" \
+                    "bash -s -- ${quoted_bench_path}" <<'REMOTE_SCRIPT'
+                  set -Eeuo pipefail
+                  bench_path=$1
+
+                  if [[ ! -d "$bench_path" ]]; then
+                    echo "Configured Bench directory does not exist." >&2
+                    exit 1
+                  fi
+                  if ! command -v flock >/dev/null 2>&1; then
+                    echo "flock is not installed on the deployment host." >&2
+                    exit 1
+                  fi
+                  if [[ ! -x "$bench_path/env/bin/bench" ]]; then
+                    echo "Bench executable is missing or not executable." >&2
+                    exit 1
+                  fi
+
+                  exec 9>"$bench_path/.github-deploy.lock"
+                  if ! flock --exclusive --timeout 3600 9; then
+                    echo "Timed out after 60 minutes waiting for the deployment lock." >&2
+                    exit 1
+                  fi
+
+                  cd "$bench_path"
+                  "$bench_path/env/bin/bench" update --reset
+                  REMOTE_SCRIPT

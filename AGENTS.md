@@ -77,6 +77,26 @@ All three long-lived branches are protected (required checks `Server` +
 review + CI are the pre-merge gate; manual functional testing happens after merge
 on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
 
+## Automated DEV and UAT deployment
+
+- `.github/workflows/deploy.yml` deploys every push to `developments` to GitHub
+  Environment `DEV` (`34.143.156.218`) and every push to
+  `user-acceptance-testing` to `UAT` (`136.110.8.47`). It does not deploy PROD.
+- `workflow_dispatch` supports an explicit `DEV` or `UAT` target for retrying or
+  manually starting the same deployment flow.
+- Both GitHub Environments require an Environment secret named `BENCH_PATH`,
+  initially `/home/erp/frappe`. Repository secret `SSH_PRIVATE_KEY` contains the
+  passphrase-free `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified
+  host-key entries for both servers. Never print these values in workflow logs.
+- Deployment connects as `erp`, validates the directory, `flock`, and Bench
+  executable, then runs `bench update --reset`. Jobs have a 120-minute timeout;
+  the remote lock waits up to 60 minutes before failing.
+- DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
+  Never cancel a running deployment or enable cancellation mid-deploy. GitHub
+  preserves the running job and retains only the newest pending job per environment.
+- The remote `flock` coordinates GitHub workflow deployments only. Anyone running
+  `bench update` manually must wait for the workflow deployment to finish.
+
 ## Branch naming rule
 
 `<type>/<short-kebab-summary>` — optionally `<type>/<issue#>-<summary>`.
