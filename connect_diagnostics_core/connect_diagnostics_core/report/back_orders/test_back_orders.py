@@ -42,9 +42,7 @@ class TestBackOrders(IntegrationTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.partial_order = cls._make_order(
-            "Partial", add_days(REFERENCE_DATE, -5), delivered_qty=4
-        )
+        cls.partial_order = cls._make_order("Partial", add_days(REFERENCE_DATE, -5), delivered_qty=4)
         cls.same_date_order = cls._make_order("Alpha", REFERENCE_DATE, include_second_item=True)
         cls.pending_order = cls._make_order("Pending", REFERENCE_DATE)
         cls.future_order = cls._make_order("Future", add_days(REFERENCE_DATE, 5))
@@ -55,13 +53,9 @@ class TestBackOrders(IntegrationTestCase):
         cls.cancelled_order = cls._make_order(
             "Cancelled", add_days(REFERENCE_DATE, 2), docstatus=2, status="Cancelled"
         )
-        cls.on_hold_order = cls._make_order(
-            "On Hold", add_days(REFERENCE_DATE, 2), status="On Hold"
-        )
+        cls.on_hold_order = cls._make_order("On Hold", add_days(REFERENCE_DATE, 2), status="On Hold")
         cls.closed_order = cls._make_order("Closed", add_days(REFERENCE_DATE, 2), status="Closed")
-        cls.completed_order = cls._make_order(
-            "Completed", add_days(REFERENCE_DATE, 2), status="Completed"
-        )
+        cls.completed_order = cls._make_order("Completed", add_days(REFERENCE_DATE, 2), status="Completed")
         cls.skip_delivery_note_order = cls._make_order(
             "Skip Delivery Note", add_days(REFERENCE_DATE, 2), skip_delivery_note=True
         )
@@ -231,7 +225,9 @@ class TestBackOrders(IntegrationTestCase):
             [self.partial_order.name],
         )
         self.assertEqual(
-            self._run_report(company="_Test Missing Back Orders Company", sales_order=self.partial_order.name),
+            self._run_report(
+                company="_Test Missing Back Orders Company", sales_order=self.partial_order.name
+            ),
             [],
         )
 
