@@ -84,6 +84,44 @@ jobs:
                     echo "flock is not installed on the deployment host." >&2
                     exit 1
                   fi
+
+                  export NVM_DIR="$HOME/.nvm"
+                  if [[ ! -r "$NVM_DIR/nvm.sh" ]]; then
+                    echo "NVM is not installed on the deployment host." >&2
+                    exit 1
+                  fi
+                  set +u
+                  if ! . "$NVM_DIR/nvm.sh"; then
+                    set -u
+                    echo "NVM could not be initialized on the deployment host." >&2
+                    exit 1
+                  fi
+                  if ! nvm use --silent 24 >/dev/null; then
+                    set -u
+                    echo "Node.js 24 is not installed for the deployment user." >&2
+                    exit 1
+                  fi
+                  set -u
+
+                  for command_name in node npm yarn; do
+                    if ! command_path=$(command -v "$command_name"); then
+                      echo "Required deployment command was not found: $command_name." >&2
+                      exit 1
+                    fi
+                    if [[ "$command_path" != /* || ! -x "$command_path" ]]; then
+                      echo "Required deployment command is not executable: $command_name." >&2
+                      exit 1
+                    fi
+                    if ! "$command_name" --version >/dev/null; then
+                      echo "Required deployment command failed its version check: $command_name." >&2
+                      exit 1
+                    fi
+                  done
+                  if [[ "$(node --version)" != v24.* ]]; then
+                    echo "Node.js 24 is required for deployment." >&2
+                    exit 1
+                  fi
+
                   if ! bench_executable=$(command -v bench); then
                     echo "Bench executable was not found in the deployment PATH." >&2
                     exit 1

@@ -90,9 +90,12 @@ on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
   `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified host-key entries
   for both servers. Never print these values in workflow logs.
 - Deployment connects as `erp`, validates the directory and `flock`, prepends
-  `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, resolves an absolute executable
-  with `command -v bench`, then runs `bench update --reset` from `BENCH_PATH`. Jobs
-  have a 120-minute timeout; the remote lock waits up to 60 minutes before failing.
+  `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, initializes
+  `$HOME/.nvm/nvm.sh`, selects Node.js 24, and validates executable `node`, `npm`,
+  `yarn`, and `bench` commands before running `bench update --reset` from
+  `BENCH_PATH`. Jobs have a 120-minute timeout; the remote lock waits up to 60
+  minutes before failing. Do not source interactive shell configuration such as
+  `.zshrc` in deployment automation.
 - DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
   Never cancel a running deployment or enable cancellation mid-deploy. GitHub
   preserves the running job and retains only the newest pending job per environment.
