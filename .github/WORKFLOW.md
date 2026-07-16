@@ -24,6 +24,8 @@ feature/* ──PR──▶ developments ──PR──▶ user-acceptance-testi
   into `developments`, `user-acceptance-testing`, and `production`.
 - `auto-version.yml` bumps `__version__` **only** on PRs into `developments`
   (feature `+1 MINOR`, fix/chore `+1 PATCH`). Promotion PRs never double-bump.
+- `deploy.yml` deploys `developments` to DEV and `user-acceptance-testing` to
+  UAT after each push to those branches. Production deployment remains manual.
 - All three long-lived branches are **protected**: required checks
   (`Server`, `Frappe Linter`) + 1 review. Admins may override for hotfixes.
 
@@ -111,3 +113,52 @@ Two extra board fields support testing:
 | `feature/*` → `developments`               | CI green **+** 1 review                             |
 | `developments` → `user-acceptance-testing` | every batched issue **Test Status = Passed** on DEV |
 | `user-acceptance-testing` → `production`   | UAT sign-off complete                               |
+
+---
+
+## 6. Automated DEV and UAT deployment
+
+`deploy.yml` connects as `erp` over SSH and runs `bench update --reset` after
+updates to the deployed branches:
+
+| Trigger branch            | GitHub Environment | Host             |
+| ------------------------- | ------------------ | ---------------- |
+| `developments`            | `DEV`              | `34.143.156.218` |
+| `user-acceptance-testing` | `UAT`              | `136.110.8.47`   |
+
+The workflow can also be retried or started from the Actions UI with
+`workflow_dispatch`; select `DEV` or `UAT` explicitly. Manual runs use the same
+environment, credentials, concurrency group, and remote lock as automatic runs.
+
+### Required GitHub configuration
+
+Create GitHub Environments named exactly `DEV` and `UAT`. Set the Environment
+secret `BENCH_PATH` in each environment; its initial value is
+`/home/erp/frappe`. Configure these Repository secrets:
+
+- `SSH_PRIVATE_KEY` — the complete, passphrase-free `google_compute_engine`
+  private key authorized on both hosts.
+- `SSH_KNOWN_HOSTS` — verified SSH host-key entries for both deployment hosts.
+
+The workflow does not print these secrets. SSH requires a matching key from
+`SSH_KNOWN_HOSTS`; it never learns or accepts a host key at deployment time.
+
+### Deployment safety
+
+Before deployment, the remote script verifies the Bench directory, `flock`, and
+the executable at `$BENCH_PATH/env/bin/bench`. It then waits up to 60 minutes for
+an environment-local deployment lock and runs:
+
+```sh
+cd "$BENCH_PATH" && "$BENCH_PATH/env/bin/bench" update --reset
+```
+
+DEV and UAT use separate concurrency groups. `cancel-in-progress` is disabled,
+so a running deployment is never interrupted; if several updates arrive, GitHub
+keeps the newest pending run for that environment. Do not cancel a running
+deployment or enable cancellation, because interrupting `bench update` can leave
+the remote checkout or services inconsistent. Each job has a 120-minute timeout.
+
+The remote lock coordinates deployments started by this GitHub workflow. A
+manually started `bench update` does not acquire the lock and must wait until the
+workflow run finishes.
