@@ -86,6 +86,12 @@ jobs:
           bench build
         env:
           CI: "Yes"
+      - name: Run Type Checks
+        uses: pre-commit/action@v3.0.0
+        with:
+          extra_args: ty-check --all-files
+        env:
+          TY_PYTHON: /home/runner/frappe-bench/env/bin/python
       - name: Run Tests
         working-directory: /home/runner/frappe-bench
         run: |
