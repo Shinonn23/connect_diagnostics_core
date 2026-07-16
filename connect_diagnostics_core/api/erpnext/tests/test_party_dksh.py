@@ -3,14 +3,16 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, cast
 
 import frappe
 import frappe.defaults
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from connect_diagnostics_core.api.erpnext.customer import customer_query
 from connect_diagnostics_core.api.erpnext.supplier import supplier_query
+from connect_diagnostics_core.naming.customer import series_for_customer
 
 
 def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_name: str) -> str:
@@ -32,6 +34,21 @@ def _leaf(doctype: str, name_field: str, parent_field: str, root_name: str, new_
         {"doctype": doctype, name_field: new_name, parent_field: root, "is_group": 0}
     ).insert(ignore_permissions=True)
     return cast(str, doc.name)
+
+
+class TestCustomerSeries(UnitTestCase):
+    def test_series_for_customer_matches_business_rules(self) -> None:
+        cases = (
+            ("Individual", "Commercial", "2S.###"),
+            ("Company", "Commercial", "4A.###"),
+            ("Company", "Hospital", "4H.###"),
+            ("Company", "Government", "4H.###"),
+        )
+
+        for customer_type, customer_group, expected_series in cases:
+            with self.subTest(customer_type=customer_type, customer_group=customer_group):
+                doc = SimpleNamespace(customer_type=customer_type, customer_group=customer_group)
+                self.assertEqual(series_for_customer(doc), expected_series)
 
 
 class TestPartyDkshNaming(IntegrationTestCase):
@@ -137,10 +154,12 @@ class TestPartyDkshNaming(IntegrationTestCase):
 
         doc.reload()
         doc.customer_code_is_dksh_code = 0
+        expected_prefix = series_for_customer(doc).partition(".")[0]
         doc.save(ignore_permissions=True)
 
         # Record is renamed to a CD series number; the DKSH code is preserved.
-        self.assertTrue(doc.name.startswith("4A"))
+        self.assertTrue(doc.name.startswith(expected_prefix))
+        self.assertTrue(doc.name[len(expected_prefix) :].isdigit())
         self.assertFalse(frappe.db.exists("Customer", old_name))
         self.assertEqual(doc.dksh_customer_code, "_TEST_DKSH_CONV_1")
         self.assertTrue(doc.has_dksh_code)
