@@ -147,6 +147,8 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Never introduce new dependencies without explicit approval
 - No placeholder/TODO code — all code must be complete and functional
 - Run `pre-commit run --all-files` before considering any code change done
+- The local `ty-check` hook uses `../../env/bin/python` by default. CI must set
+  `TY_PYTHON` to its bench interpreter and run the hook only after bench installation.
 - Copyright header on all Python files:
   ```python
   # Copyright (c) 2026, Siwat Sroisuwan and contributors
