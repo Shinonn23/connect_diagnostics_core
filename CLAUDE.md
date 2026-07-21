@@ -62,8 +62,30 @@ When rules conflict, follow this order:
 ## Roles
 
 - **Tester / UAT certifier:** GitHub `newyodsapad` (Yodsapad Junta). Only his
-  `/test-pass` on a test task counts as certification to promote.
-- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off.
+  target-qualified `/test-pass — all steps verified on <environment> @ <full
+  SHA>` matching the task's current Test target counts as certification to
+  promote; a bare, stale, or target-mismatched marker does not. The owner may
+  explicitly bypass the UAT manual-test gate with
+  `/promote-uat --bypass-test "<reason>"`; a bypass is not certification and must
+  not change test results. A later `/test-fail` reopens the source issue and
+  invalidates its earlier UAT approval. Deferred certification must name the exact
+  deployed environment and commit tested. Each bypassed source issue carries an
+  owner-authored `/test-bypass` marker linked to the matching UAT PR audit entry.
+- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off
+  must be newer than the latest `/test-fail` on each source issue; a generic marker
+  on a shared test task blocks promotion until its failing source issues are
+  identified. Production deployment does not close bypassed or otherwise
+  uncertified source issues, regardless of the Test Status enum. Failed or active
+  re-test issues normally block production promotion. An unresolved failure on an
+  already-PROD issue globally
+  blocks unrelated production batches until it passes and receives newer approval.
+  A remediation-only batch may deploy a fix when every included developments PR
+  directly `Refs` an actively held source; the hold remains until that new PROD
+  target passes. Any source without either target-matched certification or a
+  matching bypass audit is a production blocker, even if Test Status says Passed.
+  Each current source must use the UAT promotion PR that introduced its latest
+  included developments PR; cumulative PROD batches may map sources to different
+  UAT promotions.
 
 ## Branch & environment topology
 
@@ -140,18 +162,21 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 ## Issue ↔ PR rule
 
 - 1 issue → 1 PR (default); 1 PR → many related issues (allowed when tightly related).
-- Reference issues with **`Refs #<n>`**, never `Closes #<n>` — issues stay open
-  through testing and are closed only after `newyodsapad` certifies the tests pass.
+- A PR may have no issue when no related issue exists. Record `None` in the PR
+  template; never create an issue solely to satisfy the template or a skill.
+- When related issues exist, reference them with **`Refs #<n>`**, never
+  `Closes #<n>` — issues stay open through testing and are closed only after
+  `newyodsapad` certifies the tests pass.
 
 ## Ship & promote — use the skills
 
 | Skill                                            | What it does                                                                                                |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments`; dispatch testing only after DEV deployment      |
-| `/dispatch-test <PR#>`                           | (re)create / assign the manual-test task for a PR                                                           |
-| `/test-result <PR#\|issue#> pass\|fail [reason]` | tester records the result + certifies                                                                       |
-| `/promote-uat`                                   | gate: every test task certified `/test-pass` by `newyodsapad` → PR `developments → user-acceptance-testing` |
-| `/promote-prod`                                  | gate: UAT sign-off (`/uat-approve` by owner) → PR `user-acceptance-testing → production`                    |
+| `/dispatch-test <PR#>`                           | bind a manual-test task to the exact deployed environment and commit                                          |
+| `/test-result <PR#\|issue#> pass\|fail [reason]` | record revision-bound results; map failures and create post-PROD holds                                         |
+| `/promote-uat [--bypass-test "<reason>"]`        | gate tests; record matching PR and source-issue bypass audit markers                                           |
+| `/promote-prod`                                  | map UAT batches; enforce holds, approvals, audits, and remediation-only releases                            |
 
 ## Board #6 reference (for skills using `gh project`)
 
