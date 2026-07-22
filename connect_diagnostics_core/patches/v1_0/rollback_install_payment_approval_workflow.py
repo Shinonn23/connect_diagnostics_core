@@ -9,9 +9,11 @@ import frappe
 from frappe.model.document import Document
 
 from connect_diagnostics_core.setup.payment_approval import (
+    LEGACY_WORKFLOW_STATE_STYLES,
     LOW_VALUE_APPROVER_PROFILE,
     MANAGED_ROLES,
     PAYMENT_ENTRY_DOCTYPE,
+    PAYMENT_REQUEST_DOCTYPE,
     PRIMARY_APPROVER_PROFILE,
     SECONDARY_APPROVER_PROFILE,
     WORKFLOW_STATE_STYLES,
@@ -78,14 +80,21 @@ def _remove_user_child_rows(
 
 
 def _delete_managed_workflow_actions() -> None:
-    workflow_action_names = frappe.get_all(
-        "Workflow Action",
-        filters={
-            "reference_doctype": PAYMENT_ENTRY_DOCTYPE,
-            "workflow_state": ["in", tuple(WORKFLOW_STATE_STYLES)],
-        },
-        pluck="name",
-    )
+    workflow_action_names: list[str] = []
+    for reference_doctype, workflow_states in (
+        (PAYMENT_REQUEST_DOCTYPE, WORKFLOW_STATE_STYLES),
+        (PAYMENT_ENTRY_DOCTYPE, LEGACY_WORKFLOW_STATE_STYLES),
+    ):
+        workflow_action_names.extend(
+            frappe.get_all(
+                "Workflow Action",
+                filters={
+                    "reference_doctype": reference_doctype,
+                    "workflow_state": ["in", tuple(workflow_states)],
+                },
+                pluck="name",
+            )
+        )
     for workflow_action_name in workflow_action_names:
         if frappe.db.exists("Workflow Action", workflow_action_name):
             frappe.delete_doc("Workflow Action", workflow_action_name, force=True, ignore_permissions=True)

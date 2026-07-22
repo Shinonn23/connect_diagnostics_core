@@ -62,8 +62,30 @@ When rules conflict, follow this order:
 ## Roles
 
 - **Tester / UAT certifier:** GitHub `newyodsapad` (Yodsapad Junta). Only his
-  `/test-pass` on a test task counts as certification to promote.
-- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off.
+  target-qualified `/test-pass — all steps verified on <environment> @ <full
+  SHA>` matching the task's current Test target counts as certification to
+  promote; a bare, stale, or target-mismatched marker does not. The owner may
+  explicitly bypass the UAT manual-test gate with
+  `/promote-uat --bypass-test "<reason>"`; a bypass is not certification and must
+  not change test results. A later `/test-fail` reopens the source issue and
+  invalidates its earlier UAT approval. Deferred certification must name the exact
+  deployed environment and commit tested. Each bypassed source issue carries an
+  owner-authored `/test-bypass` marker linked to the matching UAT PR audit entry.
+- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off
+  must be newer than the latest `/test-fail` on each source issue; a generic marker
+  on a shared test task blocks promotion until its failing source issues are
+  identified. Production deployment does not close bypassed or otherwise
+  uncertified source issues, regardless of the Test Status enum. Failed or active
+  re-test issues normally block production promotion. An unresolved failure on an
+  already-PROD issue globally
+  blocks unrelated production batches until it passes and receives newer approval.
+  A remediation-only batch may deploy a fix when every included developments PR
+  directly `Refs` an actively held source; the hold remains until that new PROD
+  target passes. Any source without either target-matched certification or a
+  matching bypass audit is a production blocker, even if Test Status says Passed.
+  Each current source must use the UAT promotion PR that introduced its latest
+  included developments PR; cumulative PROD batches may map sources to different
+  UAT promotions.
 
 ## Branch & environment topology
 
@@ -76,6 +98,31 @@ All three long-lived branches are protected (required checks `Server` +
 `Frappe Linter`, 1 review). We **merge first, then test on the DEV site** — code
 review + CI are the pre-merge gate; manual functional testing happens after merge
 on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
+
+## Automated DEV and UAT deployment
+
+- `.github/workflows/deploy.yml` deploys every push to `developments` to GitHub
+  Environment `DEV` (`34.143.156.218`) and every push to
+  `user-acceptance-testing` to `UAT` (`136.110.8.47`). It does not deploy PROD.
+- `workflow_dispatch` supports an explicit `DEV` or `UAT` target for retrying or
+  manually starting the same deployment flow.
+- Both GitHub Environments require an Environment secret named `BENCH_PATH`,
+  initially `/home/erp/frappe`; it is the Frappe Bench root, not the CLI path.
+  Repository secret `SSH_PRIVATE_KEY` contains the passphrase-free
+  `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified host-key entries
+  for both servers. Never print these values in workflow logs.
+- Deployment connects as `erp`, validates the directory and `flock`, prepends
+  `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, initializes
+  `$HOME/.nvm/nvm.sh`, selects Node.js 24, and validates executable `node`, `npm`,
+  `yarn`, and `bench` commands before running `bench update --reset` from
+  `BENCH_PATH`. Jobs have a 120-minute timeout; the remote lock waits up to 60
+  minutes before failing. Do not source interactive shell configuration such as
+  `.zshrc` in deployment automation.
+- DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
+  Never cancel a running deployment or enable cancellation mid-deploy. GitHub
+  preserves the running job and retains only the newest pending job per environment.
+- The remote `flock` coordinates GitHub workflow deployments only. Anyone running
+  `bench update` manually must wait for the workflow deployment to finish.
 
 ## Branch naming rule
 
@@ -115,18 +162,21 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 ## Issue ↔ PR rule
 
 - 1 issue → 1 PR (default); 1 PR → many related issues (allowed when tightly related).
-- Reference issues with **`Refs #<n>`**, never `Closes #<n>` — issues stay open
-  through testing and are closed only after `newyodsapad` certifies the tests pass.
+- A PR may have no issue when no related issue exists. Record `None` in the PR
+  template; never create an issue solely to satisfy the template or a skill.
+- When related issues exist, reference them with **`Refs #<n>`**, never
+  `Closes #<n>` — issues stay open through testing and are closed only after
+  `newyodsapad` certifies the tests pass.
 
 ## Ship & promote — use the skills
 
 | Skill                                            | What it does                                                                                                |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments`; dispatch testing only after DEV deployment      |
-| `/dispatch-test <PR#>`                           | (re)create / assign the manual-test task for a PR                                                           |
-| `/test-result <PR#\|issue#> pass\|fail [reason]` | tester records the result + certifies                                                                       |
-| `/promote-uat`                                   | gate: every test task certified `/test-pass` by `newyodsapad` → PR `developments → user-acceptance-testing` |
-| `/promote-prod`                                  | gate: UAT sign-off (`/uat-approve` by owner) → PR `user-acceptance-testing → production`                    |
+| `/dispatch-test <PR#>`                           | bind a manual-test task to the exact deployed environment and commit                                          |
+| `/test-result <PR#\|issue#> pass\|fail [reason]` | record revision-bound results; map failures and create post-PROD holds                                         |
+| `/promote-uat [--bypass-test "<reason>"]`        | gate tests; record matching PR and source-issue bypass audit markers                                           |
+| `/promote-prod`                                  | map UAT batches; enforce holds, approvals, audits, and remediation-only releases                            |
 
 ## Board #6 reference (for skills using `gh project`)
 
@@ -147,6 +197,8 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Never introduce new dependencies without explicit approval
 - No placeholder/TODO code — all code must be complete and functional
 - Run `pre-commit run --all-files` before considering any code change done
+- The local `ty-check` hook uses `../../env/bin/python` by default. CI must set
+  `TY_PYTHON` to its bench interpreter and run the hook only after bench installation.
 - Copyright header on all Python files:
   ```python
   # Copyright (c) 2026, Siwat Sroisuwan and contributors
@@ -383,29 +435,34 @@ return {"data": <payload>, "message": <str>}
 - Do not fixture the complete HR Settings Single DocType. Select both templates
   in HR Settings per site so unrelated environment-specific HR configuration is not overwritten.
 
-### Payment Entry Approval
+### Payment Request Approval
 
-- The code-managed Frappe Workflow `Payment Entry Approval` applies only to
-  `Payment Entry.payment_type = "Pay"`; Receive and Internal Transfer keep their
-  standard submit path.
-- Outgoing payments below THB 1,500 can be approved immediately by the primary
-  executive or the accounting approver. THB 1,500 exactly and higher require the
-  primary executive.
+- The code-managed Frappe Workflow `Payment Request Approval` applies only to
+  `Payment Request.payment_request_type = "Outward"`. Inward requests use the
+  standard submit path. Payment Entry Receive and Internal Transfer behavior is
+  unchanged.
+- `Company.low_value_payment_approval_limit` is expressed in company currency.
+  Blank or zero sends every Outward request to the primary approver. With a
+  positive limit, amounts below the limit use the low-value approver; amounts equal
+  to or above it use the primary approver. The limit is snapshotted when approval
+  is requested, so later Company changes do not reroute a pending request.
+- `Payment Request.base_grand_total` is the requested amount in company currency.
+  It equals `grand_total` for company-currency requests and otherwise uses the
+  reference document's `conversion_rate`.
 - After 24 calendar hours, the secondary executive is added as an approver. The
-  original primary remains eligible; low-value payments also remain eligible for
+  original primary remains eligible; low-value requests also remain eligible for
   the accounting approver. The first approval or rejection completes the shared
-  Workflow Action.
-- Self-approval is disabled and revalidated server-side. The creator is immutable,
-  the 24-hour deadline is server-owned, and the low-value threshold is revalidated
-  before approval so changing document data cannot bypass the required approver.
-  Payment approver roles do not grant the Accounts role required to submit Receive
-  or Internal Transfer entries. Standard Payment Entry cancellation remains
-  available; cancelled documents move to the workflow's `Payment Cancelled`
-  docstatus-2 state.
-- The workflow, custom roles, profiles, fields, and Custom DocPerm records are
-  managed in `connect_diagnostics_core/setup/payment_approval.py`. The scheduler in
-  `connect_diagnostics_core/api/erpnext/payment_approval.py` checks escalation
-  deadlines every five minutes.
+  Workflow Action. Self-approval is disabled; creator, deadline, base amount, and
+  limit snapshot are protected and revalidated server-side.
+- Every submitted `Payment Entry.payment_type = "Pay"` must allocate its complete
+  amount to one or more submitted, approved Outward Payment Requests whose company,
+  party, and reference match. Requests are locked in sorted order and allocation is
+  aggregated per request, allowing partial payments and multiple requests without
+  concurrent overpayment. Pay entries without such references are rejected.
+- The workflow, custom roles, profiles, fields, Custom DocPerm records, submit gate,
+  and scheduler are managed in `connect_diagnostics_core/setup/payment_approval.py`
+  and `connect_diagnostics_core/api/erpnext/payment_approval.py`. The scheduler
+  checks escalation deadlines every five minutes.
 - Setup and migration append the approved payment profile when a User already uses
   Role Profiles. For a User with no Role Profiles they add only the profile's roles
   directly so existing direct roles are not erased. Missing or disabled approver

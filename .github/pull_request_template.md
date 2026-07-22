@@ -1,6 +1,7 @@
 <!--
   Workflow: we MERGE FIRST and TEST on `developments`.
-  Use `Refs #` (not `Closes #`) so issues stay open until their manual tests pass.
+  When related issues exist, use `Refs #` (not `Closes #`) so they stay open
+  until their manual tests pass. If no related issue exists, write `None`.
   See .github/WORKFLOW.md
 -->
 
@@ -10,9 +11,10 @@
 
 ## Related issues
 
-Refs #<!-- issue number -->
+None
 
-<!-- add more: Refs #x, Refs #y if this PR covers several related issues -->
+<!-- Replace None with Refs #x (one per related issue). Never create an issue
+solely to populate this section, and never use Closes #. -->
 
 ## Type of change
 
@@ -23,7 +25,8 @@ Refs #<!-- issue number -->
 
 ## Manual test checklist (run on the DEV site after merge)
 
-<!-- Copy the test steps from the linked issue(s); tester ticks these on the issue. -->
+<!-- Copy test steps from linked issues when present. For an issue-less PR,
+document the verification steps directly here. -->
 
 | Test step | Expected result | Pass |
 | --------- | --------------- | :--: |
@@ -34,5 +37,5 @@ Refs #<!-- issue number -->
 
 - [ ] CI is green (`Server`, `Frappe Linter`)
 - [ ] Self-reviewed the diff
-- [ ] Uses `Refs #` (not `Closes #`) so the issue stays open for testing
+- [ ] Related issues use `Refs #` (not `Closes #`), or the section says `None`
 - [ ] Target branch is `developments`
