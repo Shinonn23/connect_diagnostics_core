@@ -16,10 +16,22 @@ from connect_diagnostics_core.setup import payment_approval
 
 
 class TestInstallPaymentApprovalWorkflow(UnitTestCase):
+    def test_custom_fields_target_company_and_payment_request(self) -> None:
+        self.assertEqual(
+            set(payment_approval.CUSTOM_FIELDS),
+            {
+                payment_approval.COMPANY_DOCTYPE,
+                payment_approval.PAYMENT_REQUEST_DOCTYPE,
+            },
+        )
+        company_limit = payment_approval.CUSTOM_FIELDS[payment_approval.COMPANY_DOCTYPE][0]
+        self.assertEqual(company_limit["fieldname"], payment_approval.LOW_VALUE_PAYMENT_APPROVAL_LIMIT_FIELD)
+        self.assertNotIn("default", company_limit)
+
     def test_approval_deadline_is_indexed_for_scheduler_query(self) -> None:
         approval_due_at = next(
             field
-            for field in payment_approval.CUSTOM_FIELDS[payment_approval.PAYMENT_ENTRY_DOCTYPE]
+            for field in payment_approval.CUSTOM_FIELDS[payment_approval.PAYMENT_REQUEST_DOCTYPE]
             if field["fieldname"] == payment_approval.APPROVAL_DUE_AT_FIELD
         )
 
@@ -29,7 +41,7 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
     @patch.object(patch_module, "assign_payment_approvers")
     @patch.object(patch_module, "ensure_configuration")
     @patch.object(patch_module, "create_custom_fields")
-    def test_execute_creates_fields_before_configuration_and_assignment(
+    def test_install_creates_fields_before_configuration_and_assignment(
         self,
         mocked_create_fields: MagicMock,
         mocked_ensure_configuration: MagicMock,
@@ -110,14 +122,13 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
         )
 
         user.append.assert_called_once_with(
-            "role_profiles", {"role_profile": payment_approval.SECONDARY_APPROVER_PROFILE}
+            "role_profiles",
+            {"role_profile": payment_approval.SECONDARY_APPROVER_PROFILE},
         )
         user.save.assert_called_once_with(ignore_permissions=True)
 
     @patch.object(payment_approval, "_get_enabled_user")
-    def test_primary_without_profiles_preserves_roles_and_receives_direct_roles(
-        self, mocked_get_user: MagicMock
-    ) -> None:
+    def test_primary_without_profiles_preserves_existing_roles(self, mocked_get_user: MagicMock) -> None:
         retained_role = MagicMock(role="Employee")
         user = MagicMock()
         user.get.side_effect = lambda fieldname, default=None: {
@@ -144,7 +155,7 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
     @patch.object(payment_approval, "assign_payment_approvers")
     @patch.object(payment_approval, "ensure_workflow")
     @patch.object(payment_approval, "ensure_workflow_masters")
-    @patch.object(payment_approval, "ensure_payment_entry_permissions")
+    @patch.object(payment_approval, "ensure_payment_request_permissions")
     @patch.object(payment_approval, "ensure_role_profiles")
     @patch.object(payment_approval, "ensure_roles")
     def test_fresh_install_configuration_assigns_available_approvers(
@@ -177,19 +188,19 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
 
     @patch.object(payment_approval, "_ensure_permission_copy_marker")
     @patch.object(payment_approval, "setup_custom_perms", return_value=True)
-    def test_fresh_permission_setup_records_standard_permission_copy(
+    def test_payment_request_permission_setup_records_standard_copy(
         self,
         _mocked_setup_custom_perms: MagicMock,
         mocked_ensure_marker: MagicMock,
     ) -> None:
-        with patch.object(payment_approval, "PAYMENT_ENTRY_PERMISSIONS", {}):
-            payment_approval.ensure_payment_entry_permissions()
+        with patch.object(payment_approval, "PAYMENT_REQUEST_PERMISSIONS", {}):
+            payment_approval.ensure_payment_request_permissions()
 
         mocked_ensure_marker.assert_called_once_with()
 
     @patch.object(payment_approval.frappe, "get_doc")
     @patch.object(payment_approval.frappe.db, "exists", return_value=False)
-    def test_permission_copy_marker_has_no_payment_entry_access(
+    def test_permission_copy_marker_has_no_payment_request_access(
         self,
         _mocked_exists: MagicMock,
         mocked_get_doc: MagicMock,
@@ -200,52 +211,12 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
         payment_approval._ensure_permission_copy_marker()
 
         marker_values = mocked_get_doc.call_args.args[0]
+        self.assertEqual(marker_values["parent"], payment_approval.PAYMENT_REQUEST_DOCTYPE)
         self.assertEqual(
             {fieldname: marker_values[fieldname] for fieldname in payment_approval.PERMISSION_FIELDS},
             {fieldname: 0 for fieldname in payment_approval.PERMISSION_FIELDS},
         )
         marker.insert.assert_called_once_with(ignore_permissions=True)
-
-    @patch.object(payment_approval, "reset_perms")
-    @patch.object(payment_approval.frappe.db, "exists", return_value=True)
-    def test_rollback_resets_permissions_when_setup_copied_standard_rows(
-        self,
-        _mocked_exists: MagicMock,
-        mocked_reset_perms: MagicMock,
-    ) -> None:
-        payment_approval._remove_payment_entry_permissions()
-
-        mocked_reset_perms.assert_called_once_with(payment_approval.PAYMENT_ENTRY_DOCTYPE)
-
-    @patch.object(payment_approval, "reset_perms")
-    @patch.object(payment_approval.frappe, "delete_doc")
-    @patch.object(payment_approval.frappe, "get_all", return_value=["MANAGED-PERM-1"])
-    @patch.object(payment_approval.frappe.db, "exists", return_value=False)
-    def test_rollback_preserves_preexisting_custom_permissions(
-        self,
-        _mocked_exists: MagicMock,
-        mocked_get_all: MagicMock,
-        mocked_delete_doc: MagicMock,
-        mocked_reset_perms: MagicMock,
-    ) -> None:
-        payment_approval._remove_payment_entry_permissions()
-
-        mocked_reset_perms.assert_not_called()
-        mocked_get_all.assert_called_once_with(
-            "Custom DocPerm",
-            filters={
-                "parent": payment_approval.PAYMENT_ENTRY_DOCTYPE,
-                "role": ["in", tuple(payment_approval.PAYMENT_ENTRY_PERMISSIONS)],
-                "permlevel": 0,
-            },
-            pluck="name",
-        )
-        mocked_delete_doc.assert_called_once_with(
-            "Custom DocPerm",
-            "MANAGED-PERM-1",
-            force=True,
-            ignore_permissions=True,
-        )
 
     def test_rollback_removes_only_managed_user_rows(self) -> None:
         managed_profile = frappe._dict(role_profile=payment_approval.PRIMARY_APPROVER_PROFILE)
@@ -301,27 +272,31 @@ class TestInstallPaymentApprovalWorkflow(UnitTestCase):
 
     @patch.object(rollback_module.frappe, "delete_doc")
     @patch.object(rollback_module.frappe.db, "exists", return_value=True)
-    @patch.object(rollback_module.frappe, "get_all", return_value=["ACTION-1", "ACTION-2"])
-    def test_rollback_deletes_actions_for_all_managed_states(
+    @patch.object(rollback_module.frappe, "get_all")
+    def test_rollback_deletes_current_and_legacy_workflow_actions(
         self,
         mocked_get_all: MagicMock,
         _mocked_exists: MagicMock,
         mocked_delete_doc: MagicMock,
     ) -> None:
+        mocked_get_all.side_effect = [["PR-ACTION"], ["PE-ACTION"]]
+
         rollback_module._delete_managed_workflow_actions()
 
-        mocked_get_all.assert_called_once_with(
-            "Workflow Action",
-            filters={
-                "reference_doctype": payment_approval.PAYMENT_ENTRY_DOCTYPE,
-                "workflow_state": ["in", tuple(payment_approval.WORKFLOW_STATE_STYLES)],
-            },
-            pluck="name",
+        self.assertEqual(
+            [
+                current_call.kwargs["filters"]["reference_doctype"]
+                for current_call in mocked_get_all.call_args_list
+            ],
+            [
+                payment_approval.PAYMENT_REQUEST_DOCTYPE,
+                payment_approval.PAYMENT_ENTRY_DOCTYPE,
+            ],
         )
         self.assertEqual(
             mocked_delete_doc.call_args_list,
             [
-                call("Workflow Action", "ACTION-1", force=True, ignore_permissions=True),
-                call("Workflow Action", "ACTION-2", force=True, ignore_permissions=True),
+                call("Workflow Action", "PR-ACTION", force=True, ignore_permissions=True),
+                call("Workflow Action", "PE-ACTION", force=True, ignore_permissions=True),
             ],
         )
