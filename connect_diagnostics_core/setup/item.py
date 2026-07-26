@@ -3,6 +3,31 @@
 CUSTOM_FIELDS = {
     "Item": [
         {
+            "fieldname": "item_channel",
+            "label": "Item Channel",
+            "fieldtype": "Select",
+            "insert_after": "item_code",
+            "options": "CD\nDKSH\nCD and DKSH",
+            "default": "CD",
+            "reqd": 1,
+            "in_list_view": 1,
+        },
+        {
+            "fieldname": "partner_item_mappings_section",
+            "label": "Partner Item Mappings",
+            "fieldtype": "Section Break",
+            "insert_after": "item_channel",
+            "hidden": 1,
+        },
+        {
+            "fieldname": "partner_item_mappings",
+            "label": "Partner Item Mappings",
+            "fieldtype": "Table",
+            "options": "Partner Item Mapping",
+            "insert_after": "partner_item_mappings_section",
+            "hidden": 1,
+        },
+        {
             "fieldname": "column_break_lhwzh",
             "fieldtype": "Column Break",
             "insert_after": "withholding_tax_type",
@@ -14,9 +39,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Data",
             "insert_after": "item_code",
             "bold": 1,
-            "depends_on": "eval:doc.has_dksh_code",
-            "in_global_search": 1,
-            "read_only_depends_on": "eval:doc.item_code_is_dksh_code",
+            "hidden": 1,
             "unique": 1,
         },
         {
@@ -43,7 +66,7 @@ CUSTOM_FIELDS = {
             "label": "Mat Group Code",
             "fieldtype": "Data",
             "insert_after": "supplier_product_code",
-            "depends_on": "eval:doc.has_dksh_code",
+            "depends_on": "eval:doc.item_channel!='CD'",
             "fetch_from": "item_group.mat_group_code",
         },
         {
@@ -51,7 +74,7 @@ CUSTOM_FIELDS = {
             "label": "Mat Group4 Code",
             "fieldtype": "Data",
             "insert_after": "mat_group_code",
-            "depends_on": "eval:doc.has_dksh_code",
+            "depends_on": "eval:doc.item_channel!='CD'",
             "fetch_from": "item_group.mat_group4_code",
         },
         {
@@ -59,7 +82,7 @@ CUSTOM_FIELDS = {
             "label": "Material Type Code",
             "fieldtype": "Data",
             "insert_after": "mat_group4_code",
-            "depends_on": "eval:doc.has_dksh_code",
+            "depends_on": "eval:doc.item_channel!='CD'",
         },
         {
             "fieldname": "max_storage_days",
@@ -105,7 +128,7 @@ CUSTOM_FIELDS = {
             "label": "Supplier Product Code",
             "fieldtype": "Data",
             "insert_after": "dksh_item_code",
-            "depends_on": "eval:doc.has_dksh_code",
+            "depends_on": "eval:doc.item_channel!='CD'",
         },
         {
             "fieldname": "width",
@@ -161,6 +184,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Check",
             "insert_after": "item_code",
             "default": "0",
+            "hidden": 1,
         },
         {
             "fieldname": "item_code_is_dksh_code",
@@ -168,8 +192,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Check",
             "insert_after": "has_dksh_code",
             "default": "0",
-            "depends_on": "eval:doc.has_dksh_code",
-            "description": "Tick when the item has no CD code and Item Code itself is the DKSH code (e.g. OPTI).",
+            "hidden": 1,
         },
     ],
 }

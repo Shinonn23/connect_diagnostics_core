@@ -9,7 +9,7 @@
  * The default ID filter is hidden (hide_name_filter) — the box covers it.
  * Typing in it searches ACROSS several fields at once — the same set the
  * Customer link search uses (see api/erpnext/customer.py):
- *     name (= CD code / DKSH code), customer_name, DKSH customer code,
+ *     name (= Customer Code), customer_name, DKSH SAP customer code,
  *     and every Customer Alternative Name (child table).
  *
  * Implemented server-side by injecting `or_filters` into the list query via
@@ -19,13 +19,22 @@
 
 const SEARCH_TARGETS = [
 	["Customer", "name"],
+	["Customer", "customer_code"],
 	["Customer", "customer_name"],
+	["Customer", "dksh_sap_customer_code"],
 	["Customer", "dksh_customer_code"],
 	["Customer Alternative Name", "name_value"],
 ];
 
 frappe.listview_settings["Customer"] = {
-	add_fields: ["customer_name", "customer_group"],
+	add_fields: [
+		"customer_name",
+		"customer_group",
+		"customer_channel",
+		"customer_onboarding_state",
+		"tax_invoice_readiness",
+		"delivery_readiness",
+	],
 
 	hide_name_filter: true, // replaced by the single search box below
 
@@ -40,7 +49,7 @@ frappe.listview_settings["Customer"] = {
 			fieldtype: "Data",
 			fieldname: "cd_customer_search",
 			label: __("Search"),
-			placeholder: __("Customer ID, name, alt name, DKSH code…"),
+			placeholder: __("Customer Code, name, alt name, DKSH SAP code…"),
 			onchange() {
 				apply_search(this.get_value());
 			},

@@ -54,6 +54,7 @@ class TestImportCustomerDocumentPreferences(IntegrationTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Customer",
+                "customer_code": name,
                 "customer_name": name,
                 "customer_type": "Company",
                 "customer_group": self.group,

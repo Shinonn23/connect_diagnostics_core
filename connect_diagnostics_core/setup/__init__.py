@@ -12,7 +12,10 @@ from connect_diagnostics_core.setup import (
     contact,
     currency_exchange,
     customer,
+    customer_onboarding,
     delivery_note,
+    dksh_item_mapping,
+    dksh_sales,
     employee,
     item,
     item_barcode,
@@ -26,6 +29,7 @@ from connect_diagnostics_core.setup import (
     purchase_taxes_and_charges,
     sales_invoice,
     sales_invoice_item,
+    sales_order,
     sales_order_item,
     sales_taxes_and_charges,
     supplier,
@@ -39,6 +43,9 @@ _MODULES = (
     contact,
     currency_exchange,
     customer,
+    customer_onboarding,
+    dksh_sales,
+    dksh_item_mapping,
     delivery_note,
     employee,
     item,
@@ -53,6 +60,7 @@ _MODULES = (
     purchase_taxes_and_charges,
     sales_invoice,
     sales_invoice_item,
+    sales_order,
     sales_order_item,
     sales_taxes_and_charges,
     supplier,
@@ -79,6 +87,9 @@ def apply_all() -> None:
                     validate_fields_for_doctype=False,
                 )
     payment_approval.ensure_configuration()
+    customer_onboarding.ensure_configuration()
+    dksh_sales.ensure_configuration()
+    dksh_item_mapping.ensure_configuration()
 
 
 def after_install() -> None:

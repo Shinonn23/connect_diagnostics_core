@@ -1,19 +1,11 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Shared DKSH-code naming logic for Customer and Supplier.
+"""Legacy DKSH-code naming logic retained for Supplier only.
 
-Mirrors the Item DKSH-code model (see ``api/erpnext/item.py``):
-
-* ``has_dksh_code``                 — the party has a DKSH code.
-* ``<party>_code_is_dksh_code``     — the DKSH code is used as the party ID
-  (no CD code yet). Analogous to Item's ``item_code_is_dksh_code``.
-* ``dksh_<party>_code``             — the DKSH code stored separately once the
-  party has a CD code (auto naming-series number) as its primary ID.
-
-The CD code (naming-series number) is always the primary ID used on documents.
-A DKSH-only party can later be issued a CD code by unticking the flag and
-saving — the record is renamed and the DKSH code is preserved in the field.
+Customer naming is now controlled by the Customer Code and Customer Channel
+model in ``naming.customer``. Supplier behavior remains unchanged for backward
+compatibility.
 """
 
 from __future__ import annotations
@@ -24,18 +16,20 @@ import frappe
 from frappe import _
 from frappe.model.naming import make_autoname, revert_series_if_last
 
-_DKSH_FIELD = {"Customer": "dksh_customer_code", "Supplier": "dksh_supplier_code"}
-_IS_DKSH_FLAG = {"Customer": "customer_code_is_dksh_code", "Supplier": "supplier_code_is_dksh_code"}
+_DKSH_FIELD = {"Supplier": "dksh_supplier_code"}
+_IS_DKSH_FLAG = {"Supplier": "supplier_code_is_dksh_code"}
 
 
 def set_name_from_dksh_code(doc: Any, method: str | None = None) -> None:
-    """autoname hook: when the DKSH code is the party ID, use it as ``name``.
+    """Autoname hook: when a Supplier DKSH code is its ID, use it as ``name``.
 
     Runs after the controller's naming-series autoname (``Document.run_method``
     composes hooked handlers after the controller method), so it overrides the
     series-assigned name and reverts the just-consumed series counter to avoid
     burning a CD-code number.
     """
+    if doc.doctype != "Supplier":
+        return
     field = _DKSH_FIELD[doc.doctype]
     flag = _IS_DKSH_FLAG[doc.doctype]
     if not (doc.get("has_dksh_code") and doc.get(flag)):
@@ -51,12 +45,14 @@ def set_name_from_dksh_code(doc: Any, method: str | None = None) -> None:
 
 
 def validate(doc: Any, method: str | None = None) -> None:
-    """validate hook: enforce / clean the DKSH-code fields (mirrors item.validate).
+    """Validate Supplier legacy DKSH fields (mirrors item.validate).
 
     Also detects a DKSH-only → CD conversion (the ``*_code_is_dksh_code`` flag was
     unticked while ``has_dksh_code`` stays on) and preserves the DKSH value so
     ``issue_cd_code_on_update`` can rename the record to a fresh CD code.
     """
+    if doc.doctype != "Supplier":
+        return
     field = _DKSH_FIELD[doc.doctype]
     flag = _IS_DKSH_FLAG[doc.doctype]
 
@@ -81,7 +77,9 @@ def validate(doc: Any, method: str | None = None) -> None:
 
 
 def issue_cd_code_on_update(doc: Any, method: str | None = None) -> None:
-    """on_update hook: finish a DKSH-only → CD conversion by renaming to a CD code."""
+    """Finish a Supplier DKSH-only → CD conversion by renaming its record."""
+    if doc.doctype != "Supplier":
+        return
     if not doc.flags.get("cd_issue_from_dksh"):
         return
     doc.flags.cd_issue_from_dksh = False
@@ -92,8 +90,4 @@ def issue_cd_code_on_update(doc: Any, method: str | None = None) -> None:
 
 
 def _cd_series(doc: Any) -> str:
-    if doc.doctype == "Customer":
-        from connect_diagnostics_core.naming.customer import series_for_customer
-
-        return series_for_customer(doc)
     return doc.get("naming_series") or "5B.###"
