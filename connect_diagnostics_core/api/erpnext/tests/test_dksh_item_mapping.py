@@ -503,9 +503,7 @@ class TestDKSHSalesSetup(UnitTestCase):
         )
         price_list.db_insert.assert_called_once_with()
         price_list.save.assert_not_called()
-        mocked_cache.hdel.assert_called_once_with(
-            "price_list_details", DKSH_STANDARD_SELLING_PRICE_LIST
-        )
+        mocked_cache.hdel.assert_called_once_with("price_list_details", DKSH_STANDARD_SELLING_PRICE_LIST)
         mocked_clear_cache.assert_called_once_with(doctype="Price List")
 
     @patch.object(dksh_sales.frappe, "clear_cache")

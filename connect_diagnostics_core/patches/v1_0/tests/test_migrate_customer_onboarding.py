@@ -7,9 +7,9 @@ from unittest.mock import MagicMock, call, patch
 
 from frappe.tests import UnitTestCase
 
+from connect_diagnostics_core.config.dksh import DKSH_COMPANY
 from connect_diagnostics_core.patches.v1_0 import migrate_customer_onboarding as patch_module
 from connect_diagnostics_core.patches.v1_0 import rollback_migrate_customer_onboarding as rollback_module
-from connect_diagnostics_core.config.dksh import DKSH_COMPANY
 from connect_diagnostics_core.setup import customer, customer_onboarding, item
 
 
