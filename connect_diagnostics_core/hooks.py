@@ -45,6 +45,7 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
+    "Customer": "public/js/custom/customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
@@ -158,10 +159,27 @@ naming_series_variables = {
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
-        "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
-        "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
+        "before_naming": "connect_diagnostics_core.naming.customer.prepare_customer_naming",
+        "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
+        "autoname": "connect_diagnostics_core.naming.customer.set_customer_code",
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
         "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
+    },
+    "Customer Credit Request": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
+        "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
+        "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
+    },
+    "Address": {
+        "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
+        "on_update": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
+        "after_delete": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
+    },
+    "Contact": {
+        "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
+        "on_update": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
+        "after_delete": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
     },
     "Supplier": {
         "autoname": "connect_diagnostics_core.naming.party_dksh.set_name_from_dksh_code",
@@ -190,6 +208,17 @@ doc_events = {
     },
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
+    },
+    "DKSH Item Mapping": {
+        "autoname": "connect_diagnostics_core.api.erpnext.dksh_item_mapping.autoname",
+        "before_validate": "connect_diagnostics_core.api.erpnext.dksh_item_mapping.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.dksh_item_mapping.validate",
+        "on_update": "connect_diagnostics_core.api.erpnext.dksh_item_mapping.on_update",
+    },
+    "Sales Order": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.sales_order.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.sales_order.validate",
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.sales_order.before_update_after_submit",
     },
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
@@ -228,8 +257,9 @@ before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# }
+override_whitelisted_methods = {
+    "frappe.desk.search.search_link": "connect_diagnostics_core.api.frappe.search.search_link",
+}
 
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
