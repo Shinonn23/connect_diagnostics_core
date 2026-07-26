@@ -14,3 +14,5 @@ docs
 # internal AI working directories (project knowledge caches)
 .claude/knowledge/
 .codex/knowledge/
+
+tmp/
