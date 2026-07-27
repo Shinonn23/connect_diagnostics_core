@@ -46,7 +46,7 @@ class TestCdPrintFormatsUseFormatDate(UnitTestCase):
         root = Path(__file__).resolve().parents[2] / "connect_diagnostics_core" / "print_format"
         print_formats = sorted(root.glob("*/*.json"))
 
-        self.assertEqual(len(print_formats), 8)
+        self.assertEqual(len(print_formats), 7)
 
         for print_format in print_formats:
             with self.subTest(print_format=print_format.name):

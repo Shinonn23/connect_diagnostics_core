@@ -16,6 +16,14 @@ APP_MODULES = frozenset(
         "Connect Diagnostics Accounting",
     }
 )
+ERPNEXT_THAILAND_MODULES = frozenset(
+    {
+        "Thai Tax",
+        "Thai Billing",
+        "Thai Deposit",
+        "Petty Cash",
+    }
+)
 REMOVED_PRINT_FORMATS = frozenset({"Sales Invoice Print"})
 
 
@@ -29,7 +37,7 @@ def remove_non_app_print_formats() -> None:
 
     for print_format in print_formats:
         if (
-            print_format.get("module") in APP_MODULES
+            print_format.get("module") in APP_MODULES | ERPNEXT_THAILAND_MODULES
             and print_format.get("name") not in REMOVED_PRINT_FORMATS
         ):
             continue

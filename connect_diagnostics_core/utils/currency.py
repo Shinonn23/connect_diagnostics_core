@@ -1,7 +1,21 @@
-from frappe.utils import fmt_money
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from __future__ import annotations
+
+from frappe.utils import flt, fmt_money
 
 
-def print_currency(amount, currency=None):
+def format_money(amount: float | int | str | None, blank_zero: bool = False) -> str:
+    """Format an amount with a thousands separator and two decimal places."""
+    value = flt(amount)
+    if blank_zero and value == 0:
+        return ""
+
+    return f"{value:,.2f}"
+
+
+def print_currency(amount: float | int | str | None, currency: str | None = None) -> str:
     """
     Convert a number to a formatted currency string.
 
