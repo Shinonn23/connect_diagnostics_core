@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from frappe import _dict
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import rollback_sync_address_linked_tax_values as rollback_module
 from connect_diagnostics_core.patches.v1_0.sync_address_linked_tax_values import AddressTaxSource
 
 
-class TestRollbackSyncAddressLinkedTaxValuesPatch(TestCase):
+class TestRollbackSyncAddressLinkedTaxValuesPatch(UnitTestCase):
     @patch.object(rollback_module, "_get_address_values")
     @patch.object(rollback_module, "_get_linked_address_tax_sources")
     @patch.object(rollback_module, "_get_existing_fields")

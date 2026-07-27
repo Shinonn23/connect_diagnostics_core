@@ -9,10 +9,10 @@ from typing import Any, cast
 
 import frappe
 from frappe.email.doctype.email_template.email_template import EmailTemplate
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 
-class TestLeaveNotificationTemplates(FrappeTestCase):
+class TestLeaveNotificationTemplates(IntegrationTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()

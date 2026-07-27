@@ -90,7 +90,7 @@ repos:
         language: python
         additional_dependencies:
           - ty==0.0.43
-        entry: ty check --python ../../env/bin/python
+        entry: bash -c 'ty check --python "${TY_PYTHON:-../../env/bin/python}"'
         pass_filenames: false
         always_run: true
 

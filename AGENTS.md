@@ -62,8 +62,30 @@ When rules conflict, follow this order:
 ## Roles
 
 - **Tester / UAT certifier:** GitHub `newyodsapad` (Yodsapad Junta). Only his
-  `/test-pass` on a test task counts as certification to promote.
-- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off.
+  target-qualified `/test-pass — all steps verified on <environment> @ <full
+  SHA>` matching the task's current Test target counts as certification to
+  promote; a bare, stale, or target-mismatched marker does not. The owner may
+  explicitly bypass the UAT manual-test gate with
+  `$promote-uat --bypass-test "<reason>"`; a bypass is not certification and must
+  not change test results. A later `/test-fail` reopens the source issue and
+  invalidates its earlier UAT approval. Deferred certification must name the exact
+  deployed environment and commit tested. Each bypassed source issue carries an
+  owner-authored `/test-bypass` marker linked to the matching UAT PR audit entry.
+- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off
+  must be newer than the latest `/test-fail` on each source issue; a generic marker
+  on a shared test task blocks promotion until its failing source issues are
+  identified. Production deployment does not close bypassed or otherwise
+  uncertified source issues, regardless of the Test Status enum. Failed or active
+  re-test issues normally block production promotion. An unresolved failure on an
+  already-PROD issue globally
+  blocks unrelated production batches until it passes and receives newer approval.
+  A remediation-only batch may deploy a fix when every included developments PR
+  directly `Refs` an actively held source; the hold remains until that new PROD
+  target passes. Any source without either target-matched certification or a
+  matching bypass audit is a production blocker, even if Test Status says Passed.
+  Each current source must use the UAT promotion PR that introduced its latest
+  included developments PR; cumulative PROD batches may map sources to different
+  UAT promotions.
 
 ## Branch & environment topology
 
@@ -76,6 +98,31 @@ All three long-lived branches are protected (required checks `Server` +
 `Frappe Linter`, 1 review). We **merge first, then test on the DEV site** — code
 review + CI are the pre-merge gate; manual functional testing happens after merge
 on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
+
+## Automated DEV and UAT deployment
+
+- `.github/workflows/deploy.yml` deploys every push to `developments` to GitHub
+  Environment `DEV` (`34.143.156.218`) and every push to
+  `user-acceptance-testing` to `UAT` (`136.110.8.47`). It does not deploy PROD.
+- `workflow_dispatch` supports an explicit `DEV` or `UAT` target for retrying or
+  manually starting the same deployment flow.
+- Both GitHub Environments require an Environment secret named `BENCH_PATH`,
+  initially `/home/erp/frappe`; it is the Frappe Bench root, not the CLI path.
+  Repository secret `SSH_PRIVATE_KEY` contains the passphrase-free
+  `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified host-key entries
+  for both servers. Never print these values in workflow logs.
+- Deployment connects as `erp`, validates the directory and `flock`, prepends
+  `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, initializes
+  `$HOME/.nvm/nvm.sh`, selects Node.js 24, and validates executable `node`, `npm`,
+  `yarn`, and `bench` commands before running `bench update --reset` from
+  `BENCH_PATH`. Jobs have a 120-minute timeout; the remote lock waits up to 60
+  minutes before failing. Do not source interactive shell configuration such as
+  `.zshrc` in deployment automation.
+- DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
+  Never cancel a running deployment or enable cancellation mid-deploy. GitHub
+  preserves the running job and retains only the newest pending job per environment.
+- The remote `flock` coordinates GitHub workflow deployments only. Anyone running
+  `bench update` manually must wait for the workflow deployment to finish.
 
 ## Branch naming rule
 
@@ -115,18 +162,21 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 ## Issue ↔ PR rule
 
 - 1 issue → 1 PR (default); 1 PR → many related issues (allowed when tightly related).
-- Reference issues with **`Refs #<n>`**, never `Closes #<n>` — issues stay open
-  through testing and are closed only after `newyodsapad` certifies the tests pass.
+- A PR may have no issue when no related issue exists. Record `None` in the PR
+  template; never create an issue solely to satisfy the template or a skill.
+- When related issues exist, reference them with **`Refs #<n>`**, never
+  `Closes #<n>` — issues stay open through testing and are closed only after
+  `newyodsapad` certifies the tests pass.
 
 ## Ship & promote — use the skills
 
 | Skill                                            | What it does                                                                                                |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `$ship-pr`                                       | from a work branch → ready-to-merge PR into `developments`; dispatch testing only after DEV deployment      |
-| `$dispatch-test <PR#>`                           | (re)create / assign the manual-test task for a PR                                                           |
-| `$test-result <PR#\|issue#> pass\|fail [reason]` | tester records the result + certifies                                                                       |
-| `$promote-uat`                                   | gate: every test task certified `/test-pass` by `newyodsapad` → PR `developments → user-acceptance-testing` |
-| `$promote-prod`                                  | gate: UAT sign-off (`/uat-approve` by owner) → PR `user-acceptance-testing → production`                    |
+| `$dispatch-test <PR#>`                           | bind a manual-test task to the exact deployed environment and commit                                          |
+| `$test-result <PR#\|issue#> pass\|fail [reason]` | record revision-bound results; map failures and create post-PROD holds                                         |
+| `$promote-uat [--bypass-test "<reason>"]`        | gate tests; record matching PR and source-issue bypass audit markers                                           |
+| `$promote-prod`                                  | map UAT batches; enforce holds, approvals, audits, and remediation-only releases                            |
 
 ## Board #6 reference (for skills using `gh project`)
 
@@ -147,6 +197,8 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Never introduce new dependencies without explicit approval
 - No placeholder/TODO code — all code must be complete and functional
 - Run `pre-commit run --all-files` before considering any code change done
+- The local `ty-check` hook uses `../../env/bin/python` by default. CI must set
+  `TY_PYTHON` to its bench interpreter and run the hook only after bench installation.
 - Copyright header on all Python files:
   ```python
   # Copyright (c) 2026, Siwat Sroisuwan and contributors
@@ -217,6 +269,16 @@ If context is discovered to be insufficient mid-implementation:
 3. Request clarification before continuing
 
 Do not "fill in" missing information to complete the task.
+
+### Long-Running Commands
+
+- Any command expected to run longer than 60 seconds must use a supervised session that can yield output; never start it as an unmonitored blocking call.
+- Poll the session and report progress to the user at least once every 60 seconds while it is running.
+- Apply a hard timeout to tests, pre-commit, code review, and other potentially long-running commands. The default maximum is 20 minutes.
+- If a command produces no new output for 5 minutes, inspect its process state, CPU activity, and available logs instead of continuing to wait blindly.
+- Stop the process when its timeout is reached and report what it was doing, the last useful output, and what remains incomplete.
+- Do not rerun a timed-out or stalled command unchanged until the previous failure has been diagnosed.
+- A command may exceed the 20-minute default only when its expected duration and a new explicit timeout are stated to the user before it starts.
 
 ### Task Completion
 
@@ -373,6 +435,95 @@ return {"data": <payload>, "message": <str>}
 - Do not fixture the complete HR Settings Single DocType. Select both templates
   in HR Settings per site so unrelated environment-specific HR configuration is not overwritten.
 
+### Payment Request Approval
+
+- The code-managed Frappe Workflow `Payment Request Approval` applies only to
+  `Payment Request.payment_request_type = "Outward"`. Inward requests use the
+  standard submit path. Payment Entry Receive and Internal Transfer behavior is
+  unchanged.
+- `Company.low_value_payment_approval_limit` is expressed in company currency.
+  Blank or zero sends every Outward request to the primary approver. With a
+  positive limit, amounts below the limit use the low-value approver; amounts equal
+  to or above it use the primary approver. The limit is snapshotted when approval
+  is requested, so later Company changes do not reroute a pending request.
+- `Payment Request.base_grand_total` is the requested amount in company currency.
+  It equals `grand_total` for company-currency requests and otherwise uses the
+  reference document's `conversion_rate`.
+- After 24 calendar hours, the secondary executive is added as an approver. The
+  original primary remains eligible; low-value requests also remain eligible for
+  the accounting approver. The first approval or rejection completes the shared
+  Workflow Action. Self-approval is disabled; creator, deadline, base amount, and
+  limit snapshot are protected and revalidated server-side.
+- Every submitted `Payment Entry.payment_type = "Pay"` must allocate its complete
+  amount to one or more submitted, approved Outward Payment Requests whose company,
+  party, and reference match. Requests are locked in sorted order and allocation is
+  aggregated per request, allowing partial payments and multiple requests without
+  concurrent overpayment. Pay entries without such references are rejected.
+- The workflow, custom roles, profiles, fields, Custom DocPerm records, submit gate,
+  and scheduler are managed in `connect_diagnostics_core/setup/payment_approval.py`
+  and `connect_diagnostics_core/api/erpnext/payment_approval.py`. The scheduler
+  checks escalation deadlines every five minutes.
+- Setup and migration append the approved payment profile when a User already uses
+  Role Profiles. For a User with no Role Profiles they add only the profile's roles
+  directly so existing direct roles are not erased. Missing or disabled approver
+  Users do not block a fresh installation; later migrations retry the assignment.
+  Arirat receives primary plus low-value access, Sopha receives low-value access,
+  and Sasin receives the secondary direct role until his later Role Profile migration.
+- Workflow Actions work without email, but email delivery requires a configured
+  Default Outgoing Email Account on each site.
+
+### Customer Onboarding and Partner Master Data
+
+- A Customer's document name is its required manual `Customer Code`; do not restore
+  the Customer naming series. `Customer Channel` is `CD`, `DKSH`, or `CD and DKSH`.
+  A DKSH-only Customer can be converted to CD/Both only through the controlled
+  reviewer action; it must not be renamed by a general form edit after activation.
+- `Customer Onboarding` keeps new Customers disabled from Customer Request through
+  duplicate verification, accounting/credit review, and (for DKSH/Both) DKSH SAP
+  setup. Active is the sole transaction-eligible state. Workflow Actions provide
+  internal role notifications; the Customer workflow does not send email.
+- A reviewer must save `Correction Reason` before selecting Return for correction.
+  The reason remains visible to Sales and is cleared when the Customer is sent for
+  duplicate verification again, so a later return requires a newly documented reason.
+- Activation requires tax-invoice readiness plus delivery readiness (or a documented
+  no-delivery reason). Tax readiness requires one active primary Billing Address
+  whose Thai address, tax ID, and branch code match Customer; delivery readiness
+  requires one active preferred Shipping Address and one primary Contact with a
+  name and mobile/phone. These readiness fields are informational for documents,
+  but are an Active gate.
+- Later `Customer Credit Request` is limited to CD/Both active Customers and is
+  approved by the Customer Credit Approver. `GOV. HOSPITAL` credit is set by the
+  accounting reviewer during onboarding; other CD Customers start on Cash terms.
+- Item Channel uses the same CD/DKSH/Both model. `DKSH Item Mapping` is the DKSH-only
+  master and lifecycle record; its document name is the internal Item Code. A DKSH-only
+  request starts as `DKSH-PENDING-#####`, creates a disabled Item when the coordinator
+  sends it to DKSH, then atomically renames both Item and Mapping to the final DKSH code
+  on activation. The legacy child `Partner Item Mapping` remains hidden history only.
+  Keep legacy DKSH fields only for historical data/search, hidden from normal entry.
+- `DKSH Item Mapping Workflow` is Draft → Pending DKSH Coordinator Review → Awaiting
+  DKSH Code → Active, with Returned for Correction and Rejected paths. Sales submits;
+  `DKSH Item Coordinator` returns/rejects with a documented reason, updates Item master
+  data before sending, and activates the received code. Existing CD Items become Both on
+  submission but cannot be sold to DKSH until their Mapping is Active. DKSH-only Sales
+  requests require Item Name, Item Group, Stock UOM, Mat Group, Mat Group4, Material Type,
+  and Supplier Product Code.
+- The DKSH sales Company is intentionally hard-coded as
+  `บริษัท ดีเคเอสเอช (ประเทศไทย) จำกัด`. This is an approved exception to the
+  configuration-over-hardcoding rule. `DKSH Standard Selling` is an app-owned Price
+  List; setup keeps it Selling, THB, and enabled without modifying Item Prices.
+- Sales Order sends its Company to the Item link query. For the fixed DKSH Company,
+  its Items grid shows `DKSH Item Mapping` as Item Code (DKSH external code only)
+  plus Item Name, Quantity, UOM, Rate, and Amount; the internal `item_code` is hidden
+  and resolved server-side from an Active Mapping. It also fixes Selling Price List to
+  `DKSH Standard Selling` and `Skip Delivery Note` to enabled. Changing Company requires
+  an empty Items table. Other transaction types and Companies retain the standard Item
+  behavior.
+- A DKSH Sales Order saved as a Draft receives SAP Order Status `Pending`. After it is
+  submitted, a user with Sales Order Write permission can record its SAP Order No. once
+  and subsequently correct it only with a reason. Both API actions lock the document and
+  save it normally so Version history records the change. Submitted legacy orders with no
+  SAP status remain untouched and expose no SAP action.
+
 ### Custom Fields
 
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
@@ -490,7 +641,10 @@ If a change is truly needed, document the exact reason and get explicit approval
 - Test method names must use `test_<expected_behavior>` pattern (e.g., `test_validates_registration_uniqueness`)
 - Test documents created during tests must use descriptive prefixes (e.g., `_Test Registration`) for easy identification and cleanup
 - Tests must clean up after themselves — no leftover test data on the site
-- Use `FrappeTestCase` for all tests; never use bare `unittest.TestCase`
+- Import test bases from `frappe.tests`: use `UnitTestCase` for isolated or fully
+  mocked tests and `IntegrationTestCase` for tests that require a site, database,
+  DocType metadata, or real Documents. Never use legacy `FrappeTestCase` or bare
+  `unittest.TestCase`; every test must be categorized by the Frappe v16 runner.
 - Test edge cases: empty inputs, boundary values, Thai-specific logic where applicable:
   - Thai address format validation
   - THB currency rounding (2 decimal places, banker's rounding)

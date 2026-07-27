@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.commands.employee_series_counter import (
     EmployeeSeriesCounterResult,
@@ -14,7 +14,7 @@ from connect_diagnostics_core.commands.employee_series_counter import (
 )
 
 
-class TestEmployeeSeriesCounterCommand(TestCase):
+class TestEmployeeSeriesCounterCommand(UnitTestCase):
     def test_get_employee_counter_uses_suffix_length_from_naming_series(self) -> None:
         self.assertEqual(_get_employee_counter("6807009", "YY-BE.MM.###"), ("6807", 9))
         self.assertEqual(_get_employee_counter("C6807009", "C.YY-BE.MM.###"), ("C6807", 9))

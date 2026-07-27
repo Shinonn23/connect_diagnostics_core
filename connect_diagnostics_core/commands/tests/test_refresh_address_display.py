@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.commands.refresh_address_display import refresh_address_display
 from connect_diagnostics_core.utils.address import RefreshAddressDisplayResult
 
 
-class TestRefreshAddressDisplayCommand(TestCase):
+class TestRefreshAddressDisplayCommand(UnitTestCase):
     @patch("connect_diagnostics_core.commands.refresh_address_display.refresh_address_display_values")
     @patch("connect_diagnostics_core.commands.refresh_address_display.frappe")
     def test_preview_does_not_commit(self, frappe: Mock, refresh_address_display_values: Mock) -> None:

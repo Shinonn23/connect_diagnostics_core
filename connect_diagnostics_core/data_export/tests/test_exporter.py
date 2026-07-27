@@ -10,9 +10,9 @@ from io import BytesIO
 from pathlib import Path
 from types import ModuleType
 from typing import Any
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from frappe.tests import UnitTestCase
 from openpyxl import Workbook, load_workbook
 
 from connect_diagnostics_core.data_export import exporter
@@ -52,7 +52,7 @@ def _make_catalog_xlsx(rows: list[list[str]], path: Path) -> None:
     wb.save(path)
 
 
-class TestClassifyDoctype(TestCase):
+class TestClassifyDoctype(UnitTestCase):
     def test_single_doctype_is_setup(self) -> None:
         self.assertEqual(classify_doctype(issingle=True, is_submittable=False), "Setup")
 
@@ -66,7 +66,7 @@ class TestClassifyDoctype(TestCase):
         self.assertEqual(classify_doctype(issingle=True, is_submittable=True), "Setup")
 
 
-class TestUniqueSheetName(TestCase):
+class TestUniqueSheetName(UnitTestCase):
     def test_returns_doctype_name_when_unused(self) -> None:
         used: set[str] = set()
         self.assertEqual(_unique_sheet_name("Account", used), "Account")
@@ -92,7 +92,7 @@ class TestUniqueSheetName(TestCase):
         self.assertNotEqual(first, second)
 
 
-class TestSanitizeExcelValue(TestCase):
+class TestSanitizeExcelValue(UnitTestCase):
     def test_formula_prefix_equals_is_escaped(self) -> None:
         self.assertEqual(_sanitize_excel_value("=SUM(A1)"), "'=SUM(A1)")
 
@@ -122,7 +122,7 @@ class TestSanitizeExcelValue(TestCase):
         self.assertEqual(_sanitize_excel_value("hello"), "hello")
 
 
-class TestWorkbookBytesToRows(TestCase):
+class TestWorkbookBytesToRows(UnitTestCase):
     def test_converts_xlsx_bytes_to_nested_list(self) -> None:
         expected = [["Header1", "Header2"], ["val1", "val2"]]
         rows = _workbook_bytes_to_rows(_xlsx_bytes(expected), "Test DocType")
@@ -134,7 +134,7 @@ class TestWorkbookBytesToRows(TestCase):
             _workbook_bytes_to_rows(b"not an xlsx", "Bad DocType")
 
 
-class TestLoadCatalog(TestCase):
+class TestLoadCatalog(UnitTestCase):
     def test_override_wins_over_suggested_category(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "catalog.xlsx"
@@ -200,7 +200,7 @@ class TestLoadCatalog(TestCase):
                 load_catalog(path)
 
 
-class TestListTargetDoctypes(TestCase):
+class TestListTargetDoctypes(UnitTestCase):
     @patch.object(exporter, "frappe")
     def test_groups_by_module_with_category(self, frappe: Mock) -> None:
         frappe.get_all.return_value = [
@@ -320,7 +320,7 @@ class TestListTargetDoctypes(TestCase):
         self.assertEqual(grouped["Accounts"][0]["category"], "Transaction")
 
 
-class TestFrappeClientExportDataWorkbook(TestCase):
+class TestFrappeClientExportDataWorkbook(UnitTestCase):
     def _make_client(self, session: Mock) -> FrappeClient:
         with patch.object(exporter.requests, "Session", return_value=session):
             return FrappeClient("https://example.test", "key", "secret")
@@ -405,7 +405,7 @@ class TestFrappeClientExportDataWorkbook(TestCase):
             client.export_data_workbook("Account")
 
 
-class TestExportDoctypeRows(TestCase):
+class TestExportDoctypeRows(UnitTestCase):
     def test_local_export_keeps_structure_when_frappe_stops_empty_export(self) -> None:
         module_name = "frappe.core.doctype.data_export.exporter"
         fake_module = ModuleType(module_name)
@@ -447,7 +447,7 @@ class TestExportDoctypeRows(TestCase):
         self.assertEqual(rows[1], ["name", "account_name"])
 
 
-class TestBuildModuleWorkbook(TestCase):
+class TestBuildModuleWorkbook(UnitTestCase):
     @patch.object(exporter, "frappe")
     @patch.object(exporter, "export_doctype_rows")
     def test_workbook_has_index_and_doctype_sheets(self, export_doctype_rows: Mock, frappe: Mock) -> None:

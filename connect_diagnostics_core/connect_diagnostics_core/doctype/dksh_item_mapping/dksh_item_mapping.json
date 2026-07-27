@@ -1,0 +1,214 @@
+{
+	"actions": [],
+	"allow_bulk_edit": 1,
+	"creation": "2026-07-24 20:48:44.047266",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"item",
+		"item_channel",
+		"dksh_item_code",
+		"active",
+		"mapping_state",
+		"correction_reason",
+		"rejection_reason",
+		"request_tracking_section",
+		"request_sent_on",
+		"request_sent_by",
+		"dksh_response_reference",
+		"item_snapshot_section",
+		"item_name",
+		"item_group",
+		"stock_uom",
+		"mat_group_code",
+		"mat_group4_code",
+		"material_type_code",
+		"supplier_product_code"
+	],
+	"fields": [
+		{
+			"fieldname": "item",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Item",
+			"options": "Item"
+		},
+		{
+			"default": "CD and DKSH",
+			"fieldname": "item_channel",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"label": "Item Channel",
+			"options": "CD and DKSH\nDKSH",
+			"reqd": 1
+		},
+		{
+			"fieldname": "dksh_item_code",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "DKSH Item Code",
+			"search_index": 1
+		},
+		{
+			"default": "0",
+			"fieldname": "active",
+			"fieldtype": "Check",
+			"in_list_view": 1,
+			"label": "Active",
+			"no_copy": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "mapping_state",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Status",
+			"no_copy": 1,
+			"options": "Workflow State",
+			"read_only": 1
+		},
+		{
+			"fieldname": "correction_reason",
+			"fieldtype": "Small Text",
+			"label": "Correction Reason"
+		},
+		{
+			"fieldname": "rejection_reason",
+			"fieldtype": "Small Text",
+			"label": "Rejection Reason"
+		},
+		{
+			"fieldname": "request_tracking_section",
+			"fieldtype": "Section Break",
+			"label": "DKSH Request Tracking"
+		},
+		{
+			"fieldname": "request_sent_on",
+			"fieldtype": "Datetime",
+			"label": "Request Sent On",
+			"no_copy": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "request_sent_by",
+			"fieldtype": "Link",
+			"label": "Request Sent By",
+			"no_copy": 1,
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "dksh_response_reference",
+			"fieldtype": "Data",
+			"label": "DKSH Response Reference"
+		},
+		{
+			"fieldname": "item_snapshot_section",
+			"fieldtype": "Section Break",
+			"label": "Item Snapshot"
+		},
+		{
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"label": "Item Name"
+		},
+		{
+			"fieldname": "item_group",
+			"fieldtype": "Link",
+			"label": "Item Group",
+			"options": "Item Group"
+		},
+		{
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"label": "Stock UOM",
+			"options": "UOM"
+		},
+		{
+			"fieldname": "mat_group_code",
+			"fieldtype": "Data",
+			"label": "Mat Group Code"
+		},
+		{
+			"fieldname": "mat_group4_code",
+			"fieldtype": "Data",
+			"label": "Mat Group4 Code"
+		},
+		{
+			"fieldname": "material_type_code",
+			"fieldtype": "Data",
+			"label": "Material Type Code"
+		},
+		{
+			"fieldname": "supplier_product_code",
+			"fieldtype": "Data",
+			"label": "Supplier Product Code"
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2026-07-24 21:09:40.710703",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Core",
+	"name": "DKSH Item Mapping",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales User",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "DKSH Item Coordinator",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"rows_threshold_for_grid_search": 20,
+	"search_fields": "dksh_item_code,item,item_name",
+	"show_title_field_in_link": 1,
+	"sort_field": "creation",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "dksh_item_code",
+	"track_changes": 1
+}

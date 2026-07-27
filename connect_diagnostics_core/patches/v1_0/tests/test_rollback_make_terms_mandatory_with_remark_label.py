@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from unittest import TestCase
 from unittest.mock import call, patch
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import (
     rollback_make_terms_mandatory_with_remark_label as rollback_module,
 )
 
 
-class TestRollbackMakeTermsMandatoryWithRemarkLabelPatch(TestCase):
+class TestRollbackMakeTermsMandatoryWithRemarkLabelPatch(UnitTestCase):
     @patch.object(rollback_module, "frappe")
     def test_execute_deletes_property_setters_and_clears_cache(self, frappe) -> None:
         frappe.db.exists.side_effect = (

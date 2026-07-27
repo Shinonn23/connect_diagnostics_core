@@ -3,12 +3,13 @@ from __future__ import annotations
 import json
 from datetime import date, datetime
 from pathlib import Path
-from unittest import TestCase
+
+from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.utils.date import format_date
 
 
-class TestFormatDate(TestCase):
+class TestFormatDate(UnitTestCase):
     def test_formats_date_as_dd_mm_yyyy(self) -> None:
         self.assertEqual(format_date(date(2026, 7, 3)), "03-07-2026")
 
@@ -28,7 +29,7 @@ class TestFormatDate(TestCase):
         self.assertEqual(format_date(""), "")
 
 
-class TestCdPrintFormatsUseFormatDate(TestCase):
+class TestCdPrintFormatsUseFormatDate(UnitTestCase):
     """Guard: every print format renders dates through the shared format_date
     Jinja method — never a per-format macro or an inline era/format conversion.
     """
