@@ -132,9 +132,7 @@ def get_retirement_preview() -> dict[str, Any]:
             "Custom Field",
             filters={"dt": doctype, "fieldname": ["in", fieldnames]},
         )
-        retired_columns += sum(
-            int(frappe.db.has_column(doctype, fieldname)) for fieldname in fieldnames
-        )
+        retired_columns += sum(int(frappe.db.has_column(doctype, fieldname)) for fieldname in fieldnames)
 
     mapping_records = {
         doctype: frappe.db.count(doctype) if frappe.db.table_exists(doctype) else 0
@@ -178,8 +176,7 @@ def get_retirement_preview() -> dict[str, Any]:
                 for name in DKSH_WORKFLOW_ACTION_MASTERS
             ),
             "states": sum(
-                int(bool(frappe.db.exists("Workflow State", name)))
-                for name in DKSH_WORKFLOW_STATES
+                int(bool(frappe.db.exists("Workflow State", name))) for name in DKSH_WORKFLOW_STATES
             ),
         },
         "permission_records_to_delete": {
@@ -230,9 +227,7 @@ def execute() -> None:
 
 def _ensure_item_dksh_code_field() -> None:
     field = next(
-        field
-        for field in item_setup.CUSTOM_FIELDS["Item"]
-        if field.get("fieldname") == "dksh_item_code"
+        field for field in item_setup.CUSTOM_FIELDS["Item"] if field.get("fieldname") == "dksh_item_code"
     )
     create_custom_fields({"Item": [field]}, ignore_validate=True)
 
@@ -269,11 +264,7 @@ def _plan_item_dksh_code_updates() -> tuple[dict[str, str], list[str]]:
     )
     current_by_item = {str(row["name"]): _text(row.get("dksh_item_code")) for row in items}
     eligible_item_names = (
-        {
-            str(row["name"])
-            for row in items
-            if _text(row.get("item_channel")) in {CHANNEL_CD, CHANNEL_BOTH}
-        }
+        {str(row["name"]) for row in items if _text(row.get("item_channel")) in {CHANNEL_CD, CHANNEL_BOTH}}
         if has_item_channel
         else None
     )
@@ -288,9 +279,7 @@ def _plan_item_dksh_code_updates() -> tuple[dict[str, str], list[str]]:
         code_key = code.casefold()
         claimed = claimed_codes.get(code_key)
         if claimed and claimed[0] != item_name:
-            conflicts.append(
-                f"DKSH Item Code {code} belongs to both Item {claimed[0]} and Item {item_name}"
-            )
+            conflicts.append(f"DKSH Item Code {code} belongs to both Item {claimed[0]} and Item {item_name}")
             continue
         claimed_codes[code_key] = (item_name, code)
 
@@ -312,9 +301,7 @@ def _plan_item_dksh_code_updates() -> tuple[dict[str, str], list[str]]:
         code_key, code = next(iter(candidate_codes.items()))
         claimed = claimed_codes.get(code_key)
         if claimed and claimed[0] != item_name:
-            conflicts.append(
-                f"DKSH Item Code {code} belongs to both Item {claimed[0]} and Item {item_name}"
-            )
+            conflicts.append(f"DKSH Item Code {code} belongs to both Item {claimed[0]} and Item {item_name}")
             continue
 
         planned_updates[item_name] = code
@@ -520,9 +507,7 @@ def _delete_doc_if_exists(doctype: str, name: str) -> None:
 def _drop_column_if_exists(doctype: str, fieldname: str) -> None:
     if not frappe.db.has_column(doctype, fieldname):
         return
-    frappe.db.sql_ddl(
-        f"ALTER TABLE `tab{_ident(doctype)}` DROP COLUMN `{_ident(fieldname)}`"
-    )
+    frappe.db.sql_ddl(f"ALTER TABLE `tab{_ident(doctype)}` DROP COLUMN `{_ident(fieldname)}`")
 
 
 def _drop_table_if_exists(doctype: str) -> None:

@@ -196,7 +196,8 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Follow all existing project configs (`pyproject.toml`, `.eslintrc`, `.prettierrc`, `.editorconfig`)
 - Never introduce new dependencies without explicit approval
 - No placeholder/TODO code — all code must be complete and functional
-- Run `pre-commit run --all-files` before considering any code change done
+- Run `uvx --from pre-commit==4.6.1 pre-commit run --all-files` before considering
+  any code change done. CI installs the same pinned runner version.
 - The local `ty-check` hook uses `../../env/bin/python` by default. CI must set
   `TY_PYTHON` to its bench interpreter and run the hook only after bench installation.
 - Copyright header on all Python files:
@@ -284,7 +285,7 @@ Do not "fill in" missing information to complete the task.
 
 A task is considered done when **all** of the following are met:
 
-- `pre-commit run --all-files` passes with no errors
+- `uvx --from pre-commit==4.6.1 pre-commit run --all-files` passes with no errors
 - A final Codex review (`codex review --uncommitted` or `$review`) has no unresolved issues
 - Tests pass (or explicitly waived in written task description)
 - Change proposal is fulfilled (all listed files changed, nothing extra)

@@ -36,9 +36,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             mocked_configuration = stack.enter_context(
                 patch.object(customer_onboarding, "ensure_configuration")
             )
-            mocked_clear_cache = stack.enter_context(
-                patch.object(patch_module.frappe, "clear_cache")
-            )
+            mocked_clear_cache = stack.enter_context(patch.object(patch_module.frappe, "clear_cache"))
             patch_module.execute()
             patch_module.execute()
 
@@ -213,9 +211,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             set(patch_module.RETIRED_CUSTOM_FIELDS["Sales Order Item"]),
             {"dksh_item_mapping", "custom_dksh_item_mapping"},
         )
-        item_fields = {
-            field["fieldname"]: field for field in item.CUSTOM_FIELDS["Item"]
-        }
+        item_fields = {field["fieldname"]: field for field in item.CUSTOM_FIELDS["Item"]}
         sales_order_item_fields = {
             field["fieldname"] for field in sales_order_item.CUSTOM_FIELDS["Sales Order Item"]
         }
@@ -246,9 +242,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
         ):
             patch_module._remove_retired_doctypes()
 
-        mocked_delete.assert_called_once_with(
-            "Singles", {"doctype": patch_module.DKSH_SETTINGS_DOCTYPE}
-        )
+        mocked_delete.assert_called_once_with("Singles", {"doctype": patch_module.DKSH_SETTINGS_DOCTYPE})
         expected_doctypes = (
             patch_module.DKSH_MAPPING_DOCTYPE,
             patch_module.PARTNER_MAPPING_DOCTYPE,
