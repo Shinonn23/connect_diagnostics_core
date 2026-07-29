@@ -116,8 +116,9 @@ the batch currently on UAT has been signed off. Roles are in `AGENTS.md`.
      --title "chore: release to production (<YYYY-MM-DD>)" \
      --body "<release notes: included PRs + issues>"
    ```
-   (Base is `production`, so `auto-version` does not bump. The released version is
-   whatever `__version__` already is on the branch.)
+   Release Please runs only on `developments`, so this promotion does not bump.
+   The production version and changelog must be the artifacts already published
+   by the governing Release Please PR and carried through UAT.
 7. **After the PR merges & PROD deploys:** move every source issue →
    **PROD Deploy** (`dba9dd7f`). Close an issue only when its Test Status is
    **Passed** and its manual-test task has valid target-matched certification by

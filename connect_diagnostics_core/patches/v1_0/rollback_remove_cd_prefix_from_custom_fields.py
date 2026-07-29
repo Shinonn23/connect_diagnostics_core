@@ -27,7 +27,7 @@ OLD_DEFS: dict[str, list[dict[str, str | int]]] = {
             "fieldname": "cd_document_preferences_section",
             "label": "Document / Print Preferences",
             "fieldtype": "Section Break",
-            "insert_after": "dksh_customer_code",
+            "insert_after": "customer_code",
         },
         {
             "fieldname": "cd_use_quotation",

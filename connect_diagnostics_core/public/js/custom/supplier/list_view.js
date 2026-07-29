@@ -9,8 +9,8 @@
  * The default ID filter is hidden (hide_name_filter) — the box covers it.
  * Typing in it searches ACROSS several fields at once — the same set the
  * Supplier link search uses (see api/erpnext/supplier.py):
- *     name (= CD code / DKSH code), supplier_name, DKSH supplier code,
- *     and every Supplier Alternative Name (child table).
+ *     name (= Supplier ID), supplier_name, and every Supplier Alternative Name
+ *     (child table).
  *
  * Implemented server-side by injecting `or_filters` into the list query via
  * get_args(), so paging/counting stay correct. `distinct` collapses the
@@ -20,7 +20,6 @@
 const SEARCH_TARGETS = [
 	["Supplier", "name"],
 	["Supplier", "supplier_name"],
-	["Supplier", "dksh_supplier_code"],
 	["Supplier Alternative Name", "name_value"],
 ];
 
@@ -40,7 +39,7 @@ frappe.listview_settings["Supplier"] = {
 			fieldtype: "Data",
 			fieldname: "cd_supplier_search",
 			label: __("Search"),
-			placeholder: __("Supplier ID, name, alt name, DKSH code…"),
+			placeholder: __("Supplier ID, name, alternative name…"),
 			onchange() {
 				apply_search(this.get_value());
 			},

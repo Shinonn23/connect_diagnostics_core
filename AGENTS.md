@@ -134,30 +134,41 @@ on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
   Examples: `feat/general-ledger-th`, `fix/employee-be-naming-series`, `chore/281-bump-deps`.
 - ❌ Never use the `codex/` prefix. ❌ Do not use `feature/` — use `feat/`.
 - Do not create branches off anything but the intended base (default base = `developments`).
+- Release Please's generated `release-please--*` branch is the sole automated
+  exception to the work-branch naming rule.
 
-## Commit & PR title rule (drives versioning)
+## Commit & PR title rule
 
 - **Conventional Commits**: `<type>: <summary>` (same type set as branches).
   Commits must be atomic — one logical change per commit.
-- The PR **title** type is what `auto-version.yml` reads on PRs into `developments`,
-  so it must match the nature of the change.
+- PR titles must use the same format and match the nature of the change.
+- Release Please calculates the next version from Conventional Commits merged
+  into `developments`; it does not use the PR title as its versioning input.
 
 ## Version bump rule
 
 Single source of truth: `connect_diagnostics_core/__init__.py` → `__version__`,
 SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-stable).
 
-| PR title type (merged into `developments`)                         | Bump                                                         |
-| ------------------------------------------------------------------ | ------------------------------------------------------------ |
-| `feat`                                                             | **+1 MINOR**, PATCH → 0                                      |
-| `fix` `refactor` `chore` `style` `test` `docs` `perf` `build` `ci` | **+1 PATCH**                                                 |
-| `revert` / unrecognized                                            | **skipped** — bump manually (inverse of the reverted change) |
+| Merged commit type                                                 | Bump                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------- |
+| `feat`                                                             | **+1 MINOR**, PATCH → 0                                 |
+| `fix` `refactor` `chore` `style` `test` `docs` `perf` `build` `ci` | **+1 PATCH**                                            |
+| Breaking change while `<1.0.0`                                    | **+1 MINOR**, PATCH → 0                                 |
+| `revert` / unrecognized                                            | **skipped** unless the commit supplies `Release-As:`    |
 
-- Bumping is **automatic** via `auto-version.yml` — it runs only on PRs targeting
-  `developments` (promotion PRs to UAT/PROD never double-bump) and is idempotent.
-  The bump commit is the last commit on the PR branch: `chore: bump version to X.Y.Z`.
-- **Do not hand-edit `__version__`** and never bump on `developments` directly. The
-  only exception is a `revert` PR: edit `__version__` on the PR branch before merge.
+- `.github/workflows/release-please.yml` runs on pushes to `developments` and
+  maintains a cumulative Release PR. The PR updates `CHANGELOG.md`,
+  `connect_diagnostics_core/__init__.py`, and `.release-please-manifest.json`.
+- Merge the Release PR after its DEV batch is tested and before promoting that
+  batch to UAT. Merging it creates a `vX.Y.Z` tag and published GitHub Release
+  from `developments`; promotion PRs never double-bump.
+- Release Please uses the `RELEASE_PLEASE_TOKEN` Actions secret so its PR triggers
+  the protected-branch checks. The token must have write access to Contents,
+  Pull requests, and Issues (for Release PR labels).
+- **Do not hand-edit `__version__` or the release manifest.** For a revert whose
+  inverse version cannot be inferred safely, put `Release-As: X.Y.Z` in the
+  Conventional Commit body and let Release Please update the version files.
 
 ## Issue ↔ PR rule
 
@@ -196,7 +207,8 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - Follow all existing project configs (`pyproject.toml`, `.eslintrc`, `.prettierrc`, `.editorconfig`)
 - Never introduce new dependencies without explicit approval
 - No placeholder/TODO code — all code must be complete and functional
-- Run `pre-commit run --all-files` before considering any code change done
+- Run `uvx --from pre-commit==4.6.1 pre-commit run --all-files` before considering
+  any code change done. CI installs the same pinned runner version.
 - The local `ty-check` hook uses `../../env/bin/python` by default. CI must set
   `TY_PYTHON` to its bench interpreter and run the hook only after bench installation.
 - Copyright header on all Python files:
@@ -284,7 +296,7 @@ Do not "fill in" missing information to complete the task.
 
 A task is considered done when **all** of the following are met:
 
-- `pre-commit run --all-files` passes with no errors
+- `uvx --from pre-commit==4.6.1 pre-commit run --all-files` passes with no errors
 - A final Codex review (`codex review --uncommitted` or `$review`) has no unresolved issues
 - Tests pass (or explicitly waived in written task description)
 - Change proposal is fulfilled (all listed files changed, nothing extra)
@@ -472,16 +484,15 @@ return {"data": <payload>, "message": <str>}
 - Workflow Actions work without email, but email delivery requires a configured
   Default Outgoing Email Account on each site.
 
-### Customer Onboarding and Partner Master Data
+### Customer Onboarding and Master Data
 
 - A Customer's document name is its required manual `Customer Code`; do not restore
-  the Customer naming series. `Customer Channel` is `CD`, `DKSH`, or `CD and DKSH`.
-  A DKSH-only Customer can be converted to CD/Both only through the controlled
-  reviewer action; it must not be renamed by a general form edit after activation.
+  the Customer naming series. Customer Code cannot be changed after activation.
 - `Customer Onboarding` keeps new Customers disabled from Customer Request through
-  duplicate verification, accounting/credit review, and (for DKSH/Both) DKSH SAP
-  setup. Active is the sole transaction-eligible state. Workflow Actions provide
-  internal role notifications; the Customer workflow does not send email.
+  duplicate verification and accounting/credit review. The accounting reviewer
+  activates a ready Customer directly; there is no external-system setup state.
+  Active is the sole transaction-eligible state. Workflow Actions provide internal
+  role notifications; the Customer workflow does not send email.
 - A reviewer must save `Correction Reason` before selecting Return for correction.
   The reason remains visible to Sales and is cleared when the Customer is sent for
   duplicate verification again, so a later return requires a newly documented reason.
@@ -491,38 +502,26 @@ return {"data": <payload>, "message": <str>}
   requires one active preferred Shipping Address and one primary Contact with a
   name and mobile/phone. These readiness fields are informational for documents,
   but are an Active gate.
-- Later `Customer Credit Request` is limited to CD/Both active Customers and is
-  approved by the Customer Credit Approver. `GOV. HOSPITAL` credit is set by the
-  accounting reviewer during onboarding; other CD Customers start on Cash terms.
-- Item Channel uses the same CD/DKSH/Both model. `DKSH Item Mapping` is the DKSH-only
-  master and lifecycle record; its document name is the internal Item Code. A DKSH-only
-  request starts as `DKSH-PENDING-#####`, creates a disabled Item when the coordinator
-  sends it to DKSH, then atomically renames both Item and Mapping to the final DKSH code
-  on activation. The legacy child `Partner Item Mapping` remains hidden history only.
-  Keep legacy DKSH fields only for historical data/search, hidden from normal entry.
-- `DKSH Item Mapping Workflow` is Draft → Pending DKSH Coordinator Review → Awaiting
-  DKSH Code → Active, with Returned for Correction and Rejected paths. Sales submits;
-  `DKSH Item Coordinator` returns/rejects with a documented reason, updates Item master
-  data before sending, and activates the received code. Existing CD Items become Both on
-  submission but cannot be sold to DKSH until their Mapping is Active. DKSH-only Sales
-  requests require Item Name, Item Group, Stock UOM, Mat Group, Mat Group4, Material Type,
-  and Supplier Product Code.
-- The DKSH sales Company is intentionally hard-coded as
-  `บริษัท ดีเคเอสเอช (ประเทศไทย) จำกัด`. This is an approved exception to the
-  configuration-over-hardcoding rule. `DKSH Standard Selling` is an app-owned Price
-  List; setup keeps it Selling, THB, and enabled without modifying Item Prices.
-- Sales Order sends its Company to the Item link query. For the fixed DKSH Company,
-  its Items grid shows `DKSH Item Mapping` as Item Code (DKSH external code only)
-  plus Item Name, Quantity, UOM, Rate, and Amount; the internal `item_code` is hidden
-  and resolved server-side from an Active Mapping. It also fixes Selling Price List to
-  `DKSH Standard Selling` and `Skip Delivery Note` to enabled. Changing Company requires
-  an empty Items table. Other transaction types and Companies retain the standard Item
-  behavior.
-- A DKSH Sales Order saved as a Draft receives SAP Order Status `Pending`. After it is
-  submitted, a user with Sales Order Write permission can record its SAP Order No. once
-  and subsequently correct it only with a reason. Both API actions lock the document and
-  save it normally so Version history records the change. Submitted legacy orders with no
-  SAP status remain untouched and expose no SAP action.
+- Later `Customer Credit Request` is available to every active Customer and is
+  approved by the Customer Credit Approver; it does not depend on a channel field.
+  `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;
+  other Customers start on Cash terms.
+- Customer, Item, and Supplier keep their current document names and codes. Do not
+  add conversion flags or automatically rename these masters. `Item.dksh_item_code`
+  and the DKSH reference fields `supplier_product_code`, `mat_group_code`,
+  `mat_group4_code`, and `material_type_code` are grouped on the Item's DKSH tab.
+  They are optional reference data only and must not control Item lifecycle or
+  transaction eligibility.
+- Sales Order uses the standard `item_code` grid and standard ERPNext behavior for
+  every Company. Do not force a selling Price List, Skip Delivery Note, external
+  order status, or Company-specific Item link query.
+- The retired mapping doctypes, workflow, roles, Sales Order fields, and dedicated
+  selling Price List must not be recreated. Retirement migrations may delete only
+  those explicitly retired records and fields; they must not rename or delete
+  Customer, Item, Supplier, Asset, or historical transactions.
+- The retired DKSH APIs and hooks are explicitly exempt from the usual one-release
+  deprecation period because this domain was removed before go-live. Do not restore
+  compatibility stubs for them.
 
 ### Custom Fields
 

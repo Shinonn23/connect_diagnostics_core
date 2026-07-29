@@ -12,11 +12,7 @@ from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core import hooks
-from connect_diagnostics_core.api.erpnext import customer, customer_credit_request, dksh_item_mapping, item
-from connect_diagnostics_core.config.dksh import DKSH_COMPANY
-from connect_diagnostics_core.connect_diagnostics_core.doctype.partner_item_mapping import (
-    partner_item_mapping,
-)
+from connect_diagnostics_core.api.erpnext import customer, customer_credit_request, item
 from connect_diagnostics_core.naming import customer as customer_naming
 from connect_diagnostics_core.setup import customer_onboarding
 
@@ -148,14 +144,14 @@ class TestCustomerOnboardingValidation(UnitTestCase):
         mocked_refresh: MagicMock,
     ) -> None:
         doc = FakeDocument(
-            {"name": "DKSH-001", "customer_name": "Example Hospital"},
+            {"name": "CD-OLD-001", "customer_name": "Example Hospital"},
         )
         doc.flags = frappe._dict(customer_code_rename_to="CD-001")
 
         customer.on_update(cast(Document, doc))
 
         mocked_rename_doc.assert_called_once_with(
-            "Customer", "DKSH-001", "CD-001", force=True, show_alert=False
+            "Customer", "CD-OLD-001", "CD-001", force=True, show_alert=False
         )
         mocked_set_value.assert_called_once_with(
             "Customer", "CD-001", "customer_name", "Example Hospital", update_modified=False
@@ -163,14 +159,14 @@ class TestCustomerOnboardingValidation(UnitTestCase):
         mocked_refresh.assert_called_once_with("CD-001")
 
     def test_manual_customer_code_becomes_document_name(self) -> None:
-        doc = FakeDocument({"customer_code": "  DKSH-0001  ", "naming_series": "", "name": ""})
+        doc = FakeDocument({"customer_code": "  CD-0001  ", "naming_series": "", "name": ""})
 
         customer_naming.prepare_customer_naming(doc)
 
         customer_naming.set_customer_code(doc)
 
-        self.assertEqual(doc.customer_code, "DKSH-0001")
-        self.assertEqual(doc.name, "DKSH-0001")
+        self.assertEqual(doc.customer_code, "CD-0001")
+        self.assertEqual(doc.name, "CD-0001")
         self.assertEqual(doc.naming_series, "")
 
     def test_legacy_customer_series_function_is_retained_during_deprecation(self) -> None:
@@ -180,32 +176,6 @@ class TestCustomerOnboardingValidation(UnitTestCase):
             ),
             "4H.###",
         )
-
-    def test_draft_dksh_customer_code_can_change_before_rename(self) -> None:
-        doc = FakeDocument(
-            {
-                "customer_channel": customer.CHANNEL_DKSH,
-                "customer_code": "DKSH-NEW",
-                "dksh_sap_customer_code": "",
-                "name": "DKSH-OLD",
-            }
-        )
-
-        customer._validate_customer_channel(cast(Document, doc))
-
-        self.assertEqual(doc.customer_code, "DKSH-NEW")
-
-    def test_cd_customer_does_not_keep_a_dksh_sap_customer_code(self) -> None:
-        doc = FakeDocument(
-            {
-                "customer_channel": customer.CHANNEL_CD,
-                "dksh_sap_customer_code": "SAP-OLD",
-            }
-        )
-
-        customer._validate_customer_channel(cast(Document, doc))
-
-        self.assertIsNone(doc.dksh_sap_customer_code)
 
     @patch.object(customer.frappe, "get_list", return_value=[])
     def test_customer_link_search_returns_only_active_customers(self, mocked_get_list: MagicMock) -> None:
@@ -270,33 +240,6 @@ class TestCustomerOnboardingValidation(UnitTestCase):
 
         self.assertIsNone(doc.correction_reason)
 
-    @patch.object(customer, "_validate_dksh_sap_setup")
-    def test_dksh_admin_can_return_missing_sap_customer_code_for_correction(
-        self, mocked_setup: MagicMock
-    ) -> None:
-        previous = FakeDocument(
-            {
-                "customer_onboarding_state": customer_onboarding.PENDING_DKSH_SAP_STATE,
-                "correction_reason": "Earlier reason",
-            }
-        )
-        doc = FakeDocument(
-            {
-                "customer_onboarding_state": customer_onboarding.CUSTOMER_REQUEST_STATE,
-                "correction_reason": "SAP code is not available",
-            },
-            before=previous,
-        )
-
-        customer._validate_onboarding_transition(
-            cast(Document, doc),
-            cast(Document, previous),
-            {"tax_invoice_readiness": customer.READY, "delivery_readiness": customer.READY},
-        )
-
-        mocked_setup.assert_not_called()
-        self.assertEqual(doc.disabled, 1)
-
     def test_activation_is_blocked_until_tax_and_delivery_are_ready(self) -> None:
         doc = FakeDocument(
             {"customer_onboarding_state": customer_onboarding.CUSTOMER_ACTIVE_STATE},
@@ -311,70 +254,48 @@ class TestCustomerOnboardingValidation(UnitTestCase):
             )
 
 
-class TestPartnerItemMappingValidation(UnitTestCase):
-    @patch.object(partner_item_mapping.frappe.db, "add_unique")
-    def test_partner_mapping_doctype_has_a_database_unique_constraint(
-        self, mocked_add_unique: MagicMock
+class TestItemSearch(UnitTestCase):
+    @patch.object(item.frappe.db, "sql", return_value=[("CD-ITEM-001", "CD Item", 4)])
+    def test_item_search_matches_the_retained_item_code_without_mapping_tables(
+        self, mocked_sql: MagicMock
     ) -> None:
-        partner_item_mapping.on_doctype_update()
-
-        mocked_add_unique.assert_called_once_with(
-            "Partner Item Mapping",
-            ["parenttype", "partner_company", "external_item_code"],
-            constraint_name="unique_partner_item_mapping_code",
-        )
-
-    def test_dksh_item_channel_is_allowed_while_its_master_mapping_is_pending(self) -> None:
-        doc = FakeDocument(
-            {
-                "item_channel": item.CHANNEL_DKSH,
-                "item_code": "DKSH-ITEM-001",
-                "stock_uom": "Nos",
-            }
-        )
-
-        item.validate(cast(Document, doc))
-
-        self.assertEqual(doc.has_dksh_code, 1)
-        self.assertEqual(doc.item_code_is_dksh_code, 1)
-
-    @patch.object(item.frappe.db, "sql", return_value=[("DKSH-ITEM-001", "DKSH Item", 4)])
-    def test_item_search_uses_exists_for_master_code_searches(self, mocked_sql: MagicMock) -> None:
         with patch.object(item.frappe, "has_permission"):
-            result = item.get_item_with_stock("Item", "DKSH-ITEM", "name", 0, 20)
+            result = item.get_item_with_stock("Item", "EXT-ITEM", "name", 0, 20)
 
         query, params = _item_search_sql_call(mocked_sql)
-        self.assertEqual(result, [("DKSH-ITEM-001", "DKSH Item", "4 QTY.")])
+        self.assertEqual(result, [("CD-ITEM-001", "CD Item", "4 QTY.")])
+        self.assertIn("i.dksh_item_code LIKE %(txt)s", query)
         self.assertIn("EXISTS (", query)
-        self.assertIn("`tabDKSH Item Mapping`", query)
         self.assertNotIn("`tabPartner Item Mapping`", query)
-        self.assertEqual(params["dksh_company"], "")
-
-    @patch.object(item.frappe.db, "sql", return_value=[("DKSH-ITEM-001", "DKSH Item", 4)])
-    def test_dksh_company_item_search_requires_an_active_dksh_mapping(self, mocked_sql: MagicMock) -> None:
-        with patch.object(item.frappe, "has_permission"):
-            result = item.get_item_with_stock(
-                "Item", "DKSH-ITEM", "name", 0, 20, filters={"company": DKSH_COMPANY}
-            )
-
-        query, params = _item_search_sql_call(mocked_sql)
-        self.assertEqual(result, [("DKSH-ITEM-001", "DKSH Item", "4 QTY.")])
-        self.assertIn("mapping.mapping_state = %(active_mapping_state)s", query)
-        self.assertIn("IFNULL(mapping.active, 0) = 1", query)
-        self.assertEqual(params["dksh_company"], DKSH_COMPANY)
+        self.assertNotIn("Item Mapping`", query)
+        self.assertNotIn("company", params)
 
     @patch.object(item.frappe.db, "sql")
-    def test_non_dksh_company_item_search_keeps_standard_item_results(self, mocked_sql: MagicMock) -> None:
-        mocked_sql.side_effect = [[("Item",)], []]
+    def test_company_filter_does_not_change_standard_item_results(self, mocked_sql: MagicMock) -> None:
+        mocked_sql.return_value = [("CD-ITEM-001", "CD Item", 4)]
 
         with patch.object(item.frappe, "has_permission"):
             item.get_item_with_stock("Item", "CD-ITEM", "name", 0, 20, filters={"company": "CD Company"})
 
         _query, params = _item_search_sql_call(mocked_sql)
-        self.assertEqual(params["dksh_company"], "")
+        self.assertNotIn("company", params)
 
 
 class TestCustomerCreditLimit(UnitTestCase):
+    def test_active_customer_is_eligible_without_a_channel_field(self) -> None:
+        customer_doc = FakeDocument(
+            {
+                "name": "CD-0001",
+                "customer_onboarding_state": customer_onboarding.CUSTOMER_ACTIVE_STATE,
+            }
+        )
+
+        result = customer_credit_request._get_eligible_customer(
+            "CD-0001", customer=cast(Document, customer_doc)
+        )
+
+        self.assertIs(result, customer_doc)
+
     def test_approved_credit_request_updates_the_cd_company_limit(self) -> None:
         customer_doc = FakeDocument(
             {"credit_limits": [FakeDocument({"company": "CD Company", "credit_limit": 1000})]}
