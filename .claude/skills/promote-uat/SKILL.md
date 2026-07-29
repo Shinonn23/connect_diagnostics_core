@@ -27,12 +27,22 @@ non-empty reason in the user's instruction.
    git log --oneline origin/user-acceptance-testing..origin/developments
    ```
    Collect the complete set of **merged PRs** with
-   `gh pr list --base developments --state merged --limit 1000 --json number,title,body,url,mergeCommit,mergedAt`
+   `gh pr list --base developments --state merged --limit 1000 --json number,title,body,url,mergeCommit,mergedAt,headRefName,labels`
    and retain PRs whose merge commit is in the Git range. Verify that every
    non-promotion commit in the range maps to a PR; if any commit is unaccounted
    for, STOP and report it rather than silently excluding it. From every included
    PR body, collect the `Refs #` **source issues**.
-2. **Find each PR's test task** (`🧪 Test: PR #<n>`, label `manual-test`). Parse
+   Classify a PR as Release Please metadata only when its head starts with
+   `release-please--branches--developments` and it has the
+   `autorelease: tagged` label. Exclude these PRs from source-issue and manual-test
+   requirements, but keep them in the batch audit. Require the newest Release
+   Please PR to be after every non-release PR in the range. Verify that its
+   `connect_diagnostics_core/__init__.py` version equals the root value in
+   `.release-please-manifest.json`, `CHANGELOG.md` contains that version, and the
+   published GitHub Release `v<version>` targets the Release PR merge commit.
+   STOP if the batch has unreleased commits, mismatched release metadata, or no
+   matching published release.
+2. **Find each non-release PR's test task** (`🧪 Test: PR #<n>`, label `manual-test`). Parse
    its single `Test target: <environment> (<branch> @ <full SHA>)`; missing or
    ambiguous target metadata fails the manual-test gate.
 3. **Gate — every item must satisfy ALL of:**
@@ -71,7 +81,9 @@ non-empty reason in the user's instruction.
    `/test-bypass — UAT promotion PR #<n>; owner Shinonn23; reason: <reason>`.
    The source comment and matching PR-body entry are durable audit evidence only;
    neither is a test result.
-   (Base is `user-acceptance-testing`, so `auto-version` does not bump.)
+   Include the verified Release Please version and tag in the promotion PR body.
+   Release Please runs only on `developments`, so this promotion copies the
+   released version without another bump.
 6. **Preserve bypassed test records.** Do not tick test steps, post `/test-pass`,
    change Test Status or Tested By, or close test tasks or source issues. A bypass
    is an authorization to promote, not a test result. Run later tasks and results
@@ -88,9 +100,10 @@ non-empty reason in the user's instruction.
 
 ## Output
 
-Return either the blocking table (nothing promoted) or the promotion PR URL with
-separate certified and bypassed lists. For a bypass, also report the authenticated
-owner, reason, and source issues carrying `/test-bypass` audit markers. Report
-board movement as pending until merge and UAT deployment are verified; only then
-report the issues moved to UAT Deploy and any existing PROD Deploy status
-preserved. Never auto-merge — branch protection + review apply.
+Return either the blocking table (nothing promoted) or the promotion PR URL,
+verified Release Please version/tag, and separate certified and bypassed lists.
+For a bypass, also report the authenticated owner, reason, and source issues
+carrying `/test-bypass` audit markers. Report board movement as pending until
+merge and UAT deployment are verified; only then report the issues moved to UAT
+Deploy and any existing PROD Deploy status preserved. Never auto-merge — branch
+protection + review apply.
