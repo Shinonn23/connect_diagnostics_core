@@ -538,8 +538,10 @@ return {"data": <payload>, "message": <str>}
   records from other modules.
 - Print Format Jinja must be ordered as comment, derived variables, pagination, then HTML.
   Use a namespaced root class, scope CSS beneath that root, keep CSS out of the HTML field,
-  and prefer semantic `header`, `section`, `table`, and `footer` elements. Use A4 dimensions
-  in `mm`; app-owned Print Formats must not use a background image.
+  and prefer semantic `header`, `section`, `table`, and `footer` elements. Use physical
+  dimensions in `mm`; app-owned Print Formats must not use a background image. `Shipment Box
+  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
+  and recipient details, and shows the recipient Customer's Territory only when present.
 - Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
   amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
   do not define local money-formatting macros in Print Formats.
