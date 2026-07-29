@@ -21,7 +21,7 @@
  *    get_args(), so paging/counting stay correct. `distinct` collapses the
  *    duplicate parent rows that the child-table join would otherwise produce.
  *
- * 3. "HAS DKSH CODE" FILTER:
+ * 3. "HAS DKSH ITEM CODE" FILTER:
  *    A checkbox in the filter bar — when ticked, only items with a DKSH item
  *    code are listed (dksh_item_code custom field, setup/item.py).
  */
@@ -119,21 +119,21 @@ frappe.listview_settings["Item"] = {
 		// The control keeps working via the `field` reference above.
 		delete listview.page.fields_dict["cd_item_search"];
 
-		// --- 3. "Has DKSH Code" filter ------------------------------------------
+		// --- 3. "Has DKSH Item Code" filter -------------------------------------
 		const dksh_field = listview.page.add_field({
 			fieldtype: "Check",
-			fieldname: "has_dksh_code",
-			label: __("Has DKSH Code"),
+			fieldname: "has_dksh_item_code",
+			label: __("Has DKSH Item Code"),
 			onchange() {
-				listview._cd_has_dksh_code = this.get_value();
+				listview._cd_has_dksh_item_code = this.get_value();
 				listview.start = 0;
 				listview.refresh();
 			},
 		});
 		$(dksh_field.wrapper).appendTo(listview.page.page_form.find(".standard-filter-section"));
-		// Synthetic like the search box — has_dksh_code is not a real Item field;
+		// Synthetic like the search box — has_dksh_item_code is not a real Item field;
 		// the actual condition is injected in get_args() below.
-		delete listview.page.fields_dict["has_dksh_code"];
+		delete listview.page.fields_dict["has_dksh_item_code"];
 
 		// Inject the cross-field OR search into the list query on every refresh.
 		const get_args = listview.get_args.bind(listview);
@@ -145,7 +145,7 @@ frappe.listview_settings["Item"] = {
 				args.or_filters = SEARCH_TARGETS.map(([dt, fn]) => [dt, fn, "like", like]);
 				args.distinct = 1;
 			}
-			if (listview._cd_has_dksh_code) {
+			if (listview._cd_has_dksh_item_code) {
 				args.filters = args.filters || [];
 				args.filters.push(["Item", "dksh_item_code", "is", "set"]);
 			}
