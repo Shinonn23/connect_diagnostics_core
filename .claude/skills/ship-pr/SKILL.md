@@ -26,8 +26,10 @@ and prepare its post-deployment manual testing for `newyodsapad`. Follows the pr
    its **Manual test steps** (`- [ ]` task-list). You aggregate these into the PR
    and the test task — this is the "Claude helps look at the relevant test cases" part.
 3. **Decide the PR title type** = the branch `<type>` (Conventional Commits).
-   This drives the auto-version bump (see CLAUDE.md). For `revert`, warn the user
-   that the version must be bumped manually.
+   Ensure every commit also follows Conventional Commits because Release Please
+   calculates the cumulative release from merged commit messages, not the PR
+   title. For `revert`, warn the user that an inverse version requires a
+   `Release-As: X.Y.Z` commit-body trailer.
 4. **Push** the branch: `git push -u origin <branch>`.
 5. **Open the PR into `developments`** with `gh pr create --base developments`:
    - Title: `<type>: <summary>`

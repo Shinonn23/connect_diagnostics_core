@@ -134,30 +134,41 @@ on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
   Examples: `feat/general-ledger-th`, `fix/employee-be-naming-series`, `chore/281-bump-deps`.
 - ❌ Never use the `codex/` prefix. ❌ Do not use `feature/` — use `feat/`.
 - Do not create branches off anything but the intended base (default base = `developments`).
+- Release Please's generated `release-please--*` branch is the sole automated
+  exception to the work-branch naming rule.
 
-## Commit & PR title rule (drives versioning)
+## Commit & PR title rule
 
 - **Conventional Commits**: `<type>: <summary>` (same type set as branches).
   Commits must be atomic — one logical change per commit.
-- The PR **title** type is what `auto-version.yml` reads on PRs into `developments`,
-  so it must match the nature of the change.
+- PR titles must use the same format and match the nature of the change.
+- Release Please calculates the next version from Conventional Commits merged
+  into `developments`; it does not use the PR title as its versioning input.
 
 ## Version bump rule
 
 Single source of truth: `connect_diagnostics_core/__init__.py` → `__version__`,
 SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-stable).
 
-| PR title type (merged into `developments`)                         | Bump                                                         |
-| ------------------------------------------------------------------ | ------------------------------------------------------------ |
-| `feat`                                                             | **+1 MINOR**, PATCH → 0                                      |
-| `fix` `refactor` `chore` `style` `test` `docs` `perf` `build` `ci` | **+1 PATCH**                                                 |
-| `revert` / unrecognized                                            | **skipped** — bump manually (inverse of the reverted change) |
+| Merged commit type                                                 | Bump                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------- |
+| `feat`                                                             | **+1 MINOR**, PATCH → 0                                 |
+| `fix` `refactor` `chore` `style` `test` `docs` `perf` `build` `ci` | **+1 PATCH**                                            |
+| Breaking change while `<1.0.0`                                    | **+1 MINOR**, PATCH → 0                                 |
+| `revert` / unrecognized                                            | **skipped** unless the commit supplies `Release-As:`    |
 
-- Bumping is **automatic** via `auto-version.yml` — it runs only on PRs targeting
-  `developments` (promotion PRs to UAT/PROD never double-bump) and is idempotent.
-  The bump commit is the last commit on the PR branch: `chore: bump version to X.Y.Z`.
-- **Do not hand-edit `__version__`** and never bump on `developments` directly. The
-  only exception is a `revert` PR: edit `__version__` on the PR branch before merge.
+- `.github/workflows/release-please.yml` runs on pushes to `developments` and
+  maintains a cumulative Release PR. The PR updates `CHANGELOG.md`,
+  `connect_diagnostics_core/__init__.py`, and `.release-please-manifest.json`.
+- Merge the Release PR after its DEV batch is tested and before promoting that
+  batch to UAT. Merging it creates a `vX.Y.Z` tag and published GitHub Release
+  from `developments`; promotion PRs never double-bump.
+- Release Please uses the `RELEASE_PLEASE_TOKEN` Actions secret so its PR triggers
+  the protected-branch checks. The token must have write access to Contents,
+  Pull requests, and Issues (for Release PR labels).
+- **Do not hand-edit `__version__` or the release manifest.** For a revert whose
+  inverse version cannot be inferred safely, put `Release-As: X.Y.Z` in the
+  Conventional Commit body and let Release Please update the version files.
 
 ## Issue ↔ PR rule
 

@@ -23,8 +23,10 @@ feature/* ──PR──▶ developments ──PR──▶ user-acceptance-testi
 
 - CI (`ci.yml` → **Server**, `linter.yml` → **Frappe Linter**) runs on every PR
   into `developments`, `user-acceptance-testing`, and `production`.
-- `auto-version.yml` bumps `__version__` **only** on PRs into `developments`
-  (feature `+1 MINOR`, fix/chore `+1 PATCH`). Promotion PRs never double-bump.
+- `release-please.yml` maintains a cumulative Release PR into `developments`
+  from merged Conventional Commits. Merging that PR updates `__version__` and
+  `CHANGELOG.md`, then publishes the `vX.Y.Z` tag and GitHub Release. Promotion
+  PRs never double-bump.
 - `deploy.yml` deploys `developments` to DEV and `user-acceptance-testing` to
   UAT after each push to those branches. Production deployment remains manual.
 - All three long-lived branches are **protected**: required checks
@@ -85,8 +87,8 @@ Two extra board fields support testing:
 
 ### 4.2 Merge & test (on DEV)
 
-4. Merge to `developments`. `auto-version` bumps the version. The issue stays
-   **open**; card → **Test In progress**, **Test Status = Testing**.
+4. Merge to `developments`. Release Please updates the cumulative Release PR.
+   The issue stays **open**; card → **Test In progress**, **Test Status = Testing**.
 5. Deploy `developments` to the DEV site. Run the issue's **test-step checklist**
    (the `- [ ]` task list in the issue body), ticking each step.
 6. **Pass** → tick all steps, set **Test Status = Passed**, fill **Tested By**,
@@ -97,9 +99,12 @@ Two extra board fields support testing:
 
 ### 4.3 Promote to UAT
 
-7. When every issue in the release batch is **Test Status = Passed**, open a
-   promotion PR **`developments → user-acceptance-testing`** (CI re-runs, no
-   version bump). Merge & deploy the UAT site.
+7. When every issue in the release batch is **Test Status = Passed**, merge the
+   current Release Please PR first. Its protected-branch checks must pass, and the
+   resulting `vX.Y.Z` tag and published GitHub Release must point to its merge
+   commit. Wait for the resulting DEV deployment, then open the promotion PR
+   **`developments → user-acceptance-testing`**. The promotion copies the released
+   version; it does not calculate another bump. Merge & deploy the UAT site.
    - **Owner-only exception:** `Shinonn23` may explicitly invoke
      `$promote-uat --bypass-test "<reason>"`. The promotion process must inspect
      the complete batch, verify the authenticated GitHub login, and record the
@@ -159,7 +164,7 @@ Two extra board fields support testing:
 | Promotion                                  | Gate                                                |
 | ------------------------------------------ | --------------------------------------------------- |
 | `feature/*` → `developments`               | CI green **+** 1 review                             |
-| `developments` → `user-acceptance-testing` | every batched issue Passed, or an audited owner-only manual-test bypass |
+| `developments` → `user-acceptance-testing` | batch released by Release Please; every batched issue Passed, or an audited owner-only manual-test bypass |
 | `user-acceptance-testing` → `production`   | certified or audited per-source evidence; no unrelated PROD hold, except an audited remediation-only batch |
 
 ---
