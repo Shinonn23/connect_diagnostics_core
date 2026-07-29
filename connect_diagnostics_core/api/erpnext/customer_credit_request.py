@@ -13,8 +13,6 @@ from frappe.utils import now_datetime
 
 from connect_diagnostics_core.setup import customer_onboarding
 
-CHANNEL_CD = "CD"
-CHANNEL_BOTH = "CD and DKSH"
 GOVERNMENT_HOSPITAL_GROUP = "GOV. HOSPITAL"
 
 
@@ -27,7 +25,7 @@ def before_validate(doc: Document, method: str | None = None) -> None:
 
 
 def validate(doc: Document, method: str | None = None) -> None:
-    """Keep credit requests scoped to CD and protected after review starts."""
+    """Keep credit requests scoped to active Customers and protected after review starts."""
     if doc.get("company") != _default_company():
         frappe.throw(_("Customer Credit Requests are limited to the default CD Company."))
     if float(doc.get("requested_credit_limit") or 0) <= 0:
@@ -95,8 +93,6 @@ def _get_eligible_customer(customer_name: str, *, customer: Document | None = No
     customer = customer or cast(Document, frappe.get_doc("Customer", customer_name))
     if customer.get("customer_onboarding_state") != customer_onboarding.CUSTOMER_ACTIVE_STATE:
         frappe.throw(_("Customer must be active before requesting credit."))
-    if customer.get("customer_channel") not in {CHANNEL_CD, CHANNEL_BOTH}:
-        frappe.throw(_("DKSH-only Customers use SAP credit controls and cannot request CD credit."))
     return customer
 
 

@@ -3,14 +3,6 @@
 CUSTOM_FIELDS = {
     "Sales Order Item": [
         {
-            "fieldname": "dksh_item_mapping",
-            "label": "Item Code",
-            "fieldtype": "Link",
-            "options": "DKSH Item Mapping",
-            "insert_after": "item_code",
-            "in_list_view": 1,
-        },
-        {
             "fieldname": "department",
             "label": "Department",
             "fieldtype": "Link",

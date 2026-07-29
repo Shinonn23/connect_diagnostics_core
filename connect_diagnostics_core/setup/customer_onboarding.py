@@ -23,7 +23,6 @@ CREDIT_REQUEST_WORKFLOW_STATE_FIELD = "credit_request_state"
 CUSTOMER_REQUEST_STATE = "Customer Request"
 PENDING_DUPLICATE_STATE = "Customer Pending Duplicate Verification"
 PENDING_ACCOUNTING_STATE = "Customer Pending Accounting & Credit Review"
-PENDING_DKSH_SAP_STATE = "Customer Pending DKSH SAP Customer Setup"
 CUSTOMER_ACTIVE_STATE = "Customer Active"
 
 CREDIT_REQUEST_DRAFT_STATE = "Customer Credit Request Draft"
@@ -34,7 +33,6 @@ CREDIT_REQUEST_REJECTED_STATE = "Customer Credit Request Rejected"
 DUPLICATE_VERIFIER_ROLE = "Customer Duplicate Verifier"
 ACCOUNTING_REVIEWER_ROLE = "Customer Accounting Reviewer"
 CREDIT_APPROVER_ROLE = "Customer Credit Approver"
-DKSH_ORDER_ADMIN_ROLE = "DKSH Order Admin"
 
 DUPLICATE_VERIFIER_PROFILE = "Customer Duplicate Verifier Add-on"
 ACCOUNTING_REVIEWER_PROFILE = "Customer Accounting Reviewer Add-on"
@@ -48,7 +46,6 @@ MANAGED_ROLES = (
     DUPLICATE_VERIFIER_ROLE,
     ACCOUNTING_REVIEWER_ROLE,
     CREDIT_APPROVER_ROLE,
-    DKSH_ORDER_ADMIN_ROLE,
 )
 
 ROLE_PROFILES = {
@@ -85,7 +82,6 @@ CUSTOMER_PERMISSIONS: dict[str, dict[str, int]] = {
     DUPLICATE_VERIFIER_ROLE: {"read": 1, "write": 1},
     ACCOUNTING_REVIEWER_ROLE: {"read": 1, "write": 1},
     CREDIT_APPROVER_ROLE: {"read": 1},
-    DKSH_ORDER_ADMIN_ROLE: {"read": 1, "write": 1},
 }
 
 CUSTOMER_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
@@ -101,12 +97,6 @@ CUSTOMER_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
         "state": PENDING_ACCOUNTING_STATE,
         "doc_status": "0",
         "allow_edit": ACCOUNTING_REVIEWER_ROLE,
-        "send_email": 0,
-    },
-    {
-        "state": PENDING_DKSH_SAP_STATE,
-        "doc_status": "0",
-        "allow_edit": DKSH_ORDER_ADMIN_ROLE,
         "send_email": 0,
     },
     {"state": CUSTOMER_ACTIVE_STATE, "doc_status": "0", "allow_edit": "Sales User", "send_email": 0},
@@ -217,32 +207,12 @@ CUSTOMER_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
         "Activate customer",
         CUSTOMER_ACTIVE_STATE,
         ACCOUNTING_REVIEWER_ROLE,
-        condition='doc.customer_channel == "CD"',
-    ),
-    _transition(
-        PENDING_ACCOUNTING_STATE,
-        "Send for DKSH SAP customer setup",
-        PENDING_DKSH_SAP_STATE,
-        ACCOUNTING_REVIEWER_ROLE,
-        condition='doc.customer_channel in ("DKSH", "CD and DKSH")',
     ),
     _transition(
         PENDING_ACCOUNTING_STATE,
         "Return for correction",
         CUSTOMER_REQUEST_STATE,
         ACCOUNTING_REVIEWER_ROLE,
-    ),
-    _transition(
-        PENDING_DKSH_SAP_STATE,
-        "Activate customer",
-        CUSTOMER_ACTIVE_STATE,
-        DKSH_ORDER_ADMIN_ROLE,
-    ),
-    _transition(
-        PENDING_DKSH_SAP_STATE,
-        "Return for correction",
-        CUSTOMER_REQUEST_STATE,
-        DKSH_ORDER_ADMIN_ROLE,
     ),
 )
 
@@ -286,7 +256,6 @@ WORKFLOW_STATE_STYLES = {
     CUSTOMER_REQUEST_STATE: "",
     PENDING_DUPLICATE_STATE: "Warning",
     PENDING_ACCOUNTING_STATE: "Warning",
-    PENDING_DKSH_SAP_STATE: "Warning",
     CUSTOMER_ACTIVE_STATE: "Success",
     CREDIT_REQUEST_DRAFT_STATE: "",
     PENDING_CREDIT_APPROVAL_STATE: "Warning",
