@@ -93,6 +93,7 @@ jinja = {
         "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.currency.print_currency",
         "connect_diagnostics_core.utils.date.format_date",
+        "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
@@ -169,6 +170,9 @@ doc_events = {
         "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
         "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
+    },
+    "Quotation": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.quotation.before_validate",
     },
     "Address": {
         "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",

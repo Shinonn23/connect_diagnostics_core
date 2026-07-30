@@ -502,6 +502,30 @@ return {"data": <payload>, "message": <str>}
   requires one active preferred Shipping Address and one primary Contact with a
   name and mobile/phone. These readiness fields are informational for documents,
   but are an Active gate.
+- Customer Onboarding State, Correction Reason, document-readiness fields, and
+  no-delivery controls belong in the dedicated Customer Onboarding tab, not Details.
+- Customer `Document / Print Preferences` uses fixed sections for Quotation,
+  Tax Invoice, Delivery Note, Invoice, Abbreviated Tax Invoice, and Receipt.
+  New Customers enable every document, show its date, use Thai, and default to
+  one original plus zero copies. Disabling a document hides but retains its settings.
+  A source Purchase Order copy is a separate attachment preference with one copy
+  by default. The legacy global `print_date` remains editable until Print Formats
+  consume the per-document settings.
+- Customer Quotation defaults also store Form Preset, signatory type, validity
+  mode, optional custom validity text, and required Delivery Terms when Use
+  Quotation is enabled. Form 01 is the default: show the date, use the first Sales
+  Team Sales Person, and express validity from Valid Till.
+- The Quotation `Print Configuration` tab snapshots the selected Customer's print
+  defaults whenever the Customer changes in Draft. Presets 01–04 fill date,
+  signatory, and validity choices but do not lock them; later edits mark the preset
+  Custom. Sales Representative
+  signatories must link through Sales Person to Employee. Managing Director
+  signatories use `Company.quotation_authorized_signatory_employee`. The single
+  Quotation Print Format renders Thai, English, or Thai / English and produces the
+  configured original and copy pages. Delivery Terms are a required editable
+  snapshot on every Quotation and print in the delivery commitment line. Print
+  configuration remains editable after submission, and Quotation change tracking
+  provides the Version audit.
 - Later `Customer Credit Request` is available to every active Customer and is
   approved by the Customer Credit Approver; it does not depend on a channel field.
   `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;

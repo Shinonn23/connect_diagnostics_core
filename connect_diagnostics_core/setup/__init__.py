@@ -9,6 +9,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
+    company,
     contact,
     currency_exchange,
     customer,
@@ -25,6 +26,7 @@ from connect_diagnostics_core.setup import (
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
+    quotation,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
@@ -36,6 +38,7 @@ from connect_diagnostics_core.setup.print_format import remove_non_app_print_for
 
 _MODULES = (
     account,
+    company,
     contact,
     currency_exchange,
     customer,
@@ -52,6 +55,7 @@ _MODULES = (
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
+    quotation,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,

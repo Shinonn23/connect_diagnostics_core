@@ -14,6 +14,7 @@ from frappe.tests import UnitTestCase
 from connect_diagnostics_core import hooks
 from connect_diagnostics_core.api.erpnext import customer, customer_credit_request, item
 from connect_diagnostics_core.naming import customer as customer_naming
+from connect_diagnostics_core.setup import customer as customer_setup
 from connect_diagnostics_core.setup import customer_onboarding
 
 
@@ -54,6 +55,102 @@ def _item_search_sql_call(mocked_sql: MagicMock) -> tuple[str, dict[str, Any]]:
 
 
 class TestCustomerReadiness(UnitTestCase):
+    def test_onboarding_fields_are_grouped_in_dedicated_tab(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
+        onboarding_layout = [
+            ("customer_onboarding_section", "portal_users", "Tab Break"),
+            ("customer_onboarding_state", "customer_onboarding_section", "Link"),
+            ("correction_reason", "customer_onboarding_state", "Small Text"),
+            ("readiness_section", "correction_reason", "Section Break"),
+            ("quotation_readiness", "readiness_section", "Select"),
+            ("delivery_readiness", "quotation_readiness", "Select"),
+            ("tax_invoice_readiness", "delivery_readiness", "Select"),
+            ("email_readiness", "tax_invoice_readiness", "Select"),
+            ("customer_readiness_summary", "email_readiness", "Small Text"),
+            ("no_delivery_required", "customer_readiness_summary", "Check"),
+            ("no_delivery_reason", "no_delivery_required", "Small Text"),
+            ("document_preferences_section", "no_delivery_reason", "Tab Break"),
+        ]
+
+        for fieldname, insert_after, fieldtype in onboarding_layout:
+            with self.subTest(fieldname=fieldname):
+                self.assertEqual(fields[fieldname]["insert_after"], insert_after)
+                self.assertEqual(fields[fieldname]["fieldtype"], fieldtype)
+
+    def test_document_preferences_have_fixed_per_document_defaults(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
+        insert_after = "document_preferences_section"
+
+        for prefix, label, use_fieldname in customer_setup.DOCUMENT_PREFERENCES:
+            section_fieldname = f"{prefix}_document_preferences_section"
+            show_date_fieldname = f"show_{prefix}_date"
+            language_fieldname = f"{prefix}_language"
+            column_fieldname = f"{prefix}_document_preferences_column"
+            original_count_fieldname = f"{prefix}_original_count"
+            copy_count_fieldname = f"{prefix}_copy_count"
+            depends_on = f"eval:doc.{use_fieldname}"
+
+            with self.subTest(prefix=prefix):
+                self.assertEqual(fields[section_fieldname]["label"], label)
+                self.assertEqual(fields[section_fieldname]["insert_after"], insert_after)
+                self.assertEqual(fields[use_fieldname]["default"], "1")
+                self.assertEqual(fields[show_date_fieldname]["default"], "1")
+                self.assertEqual(fields[show_date_fieldname]["depends_on"], depends_on)
+                self.assertEqual(fields[language_fieldname]["options"], "Thai\nEnglish\nThai / English")
+                self.assertEqual(fields[language_fieldname]["default"], "Thai")
+                self.assertEqual(fields[language_fieldname]["depends_on"], depends_on)
+                self.assertEqual(fields[column_fieldname]["depends_on"], depends_on)
+                self.assertEqual(fields[original_count_fieldname]["default"], "1")
+                self.assertEqual(fields[original_count_fieldname]["non_negative"], 1)
+                self.assertEqual(fields[original_count_fieldname]["depends_on"], depends_on)
+                self.assertEqual(fields[copy_count_fieldname]["default"], "0")
+                self.assertEqual(fields[copy_count_fieldname]["non_negative"], 1)
+                self.assertEqual(fields[copy_count_fieldname]["depends_on"], depends_on)
+
+            insert_after = copy_count_fieldname
+
+        self.assertEqual(
+            fields["purchase_order_copy_preferences_section"]["insert_after"],
+            insert_after,
+        )
+        self.assertEqual(fields["use_customer_po"]["default"], "1")
+        self.assertEqual(fields["purchase_order_copy_count"]["default"], "1")
+        self.assertEqual(fields["purchase_order_copy_count"]["non_negative"], 1)
+        self.assertEqual(
+            fields["purchase_order_copy_count"]["depends_on"],
+            "eval:doc.use_customer_po",
+        )
+        self.assertEqual(
+            fields["print_date"]["label"],
+            "Legacy Global Print Date (Current Print Formats)",
+        )
+
+    def test_quotation_customer_defaults_match_form_01(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
+
+        self.assertEqual(fields["quotation_form_preset"]["default"], "Form 01")
+        self.assertEqual(fields["show_quotation_date"]["label"], "Show Quotation Date")
+        self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
+        self.assertEqual(fields["quotation_validity_mode"]["default"], "Valid Till")
+        self.assertEqual(
+            fields["quotation_delivery_terms"]["mandatory_depends_on"],
+            "eval:doc.use_quotation",
+        )
+        self.assertEqual(
+            fields["quotation_custom_validity_text"]["depends_on"],
+            "eval:doc.use_quotation && doc.quotation_validity_mode=='Custom Text'",
+        )
+
+    def test_quotation_delivery_terms_are_required_when_quotation_is_enabled(self) -> None:
+        with self.assertRaises(frappe.ValidationError):
+            customer._validate_quotation_delivery_terms(
+                cast(Document, FakeDocument({"use_quotation": 1, "quotation_delivery_terms": ""}))
+            )
+
+        customer._validate_quotation_delivery_terms(
+            cast(Document, FakeDocument({"use_quotation": 0, "quotation_delivery_terms": ""}))
+        )
+
     def test_tax_and_delivery_readiness_requires_matching_tax_address_and_contact(self) -> None:
         readiness = customer.build_readiness_values(
             customer={

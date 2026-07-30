@@ -62,6 +62,28 @@ class TestPrintFormats(UnitTestCase):
             self.assertIn("<section", html, print_format["name"])
             self.assertIn("<footer", html, print_format["name"])
 
+    def test_quotation_uses_snapshot_configuration_in_one_bilingual_format(self) -> None:
+        path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
+        print_format = json.loads(path.read_text())
+        html = print_format["html"]
+
+        self.assertEqual(print_format["name"], "Quotation")
+        self.assertIn("get_quotation_print_context(doc)", html)
+        self.assertIn("for copy in print_context.copies", html)
+        self.assertIn("print_context.show_thai", html)
+        self.assertIn("print_context.show_english", html)
+        self.assertIn("print_context.show_date", html)
+        self.assertIn("print_context.validity_text", html)
+        self.assertIn("print_context.delivery_terms", html)
+        self.assertIn("print_context.sales_contact", html)
+        self.assertIn("print_context.signatory.name", html)
+        self.assertIn("copy.label", html)
+        self.assertIn('label("ใบเสนอราคา", "Quotation")', html)
+        self.assertIn('label("กำหนดส่งมอบสินค้า", "Delivery Terms")', html)
+        self.assertIn(".cdq-bilingual .cdq-company", print_format["css"])
+        self.assertNotIn("ฟอร์มรูปแบบ", html)
+        Environment().parse(html)
+
     def test_shipment_box_label_metadata_and_layout(self) -> None:
         print_format = self._load_shipment_box_label()
         content = f"{print_format['html']}\n{print_format['css']}"
