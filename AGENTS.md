@@ -530,10 +530,21 @@ return {"data": <payload>, "message": <str>}
   `after_migrate` — do not create fields ad hoc via desk or console
 - Print Formats are app-owned only: `after_sync` and `after_migrate` remove every
   `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
-  `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`). Retired formats are
+  `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`) or an ERPNext Thailand
+  module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or `Petty Cash`). Retired formats are
   removed explicitly; `Sales Invoice Print` is retired and Sales Invoice defaults to
-  `Tax Invoice Delivery Note and Invoice`. Do not add a Print Format fixture that restores
+  `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is owned by ERPNext Thailand;
+  do not add a duplicate app-owned Print Format. Do not add a Print Format fixture that restores
   records from other modules.
+- Print Format Jinja must be ordered as comment, derived variables, pagination, then HTML.
+  Use a namespaced root class, scope CSS beneath that root, keep CSS out of the HTML field,
+  and prefer semantic `header`, `section`, `table`, and `footer` elements. Use physical
+  dimensions in `mm`; app-owned Print Formats must not use a background image. `Shipment Box
+  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
+  and recipient details, and shows the recipient Customer's Territory only when present.
+- Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
+  amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
+  do not define local money-formatting macros in Print Formats.
 - **Naming is important** — no prefix; the fieldname must describe the data it holds
   (e.g., `print_date`, `product_group`, `dksh_item_code`). Do not add `cd_`, `custom_`,
   or any other namespace prefix

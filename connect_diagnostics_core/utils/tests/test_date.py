@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, datetime
 from pathlib import Path
 
@@ -30,15 +31,17 @@ class TestFormatDate(UnitTestCase):
 
 
 class TestCdPrintFormatsUseFormatDate(UnitTestCase):
-    """Guard: every print format renders dates through the shared format_date
-    Jinja method — never a per-format macro or an inline era/format conversion.
+    """Guard: dated print formats use the shared format_date Jinja method,
+    never a per-format macro or an inline era/format conversion.
     """
 
+    DATE_FIELD_PATTERN = re.compile(r"""(?:\b[a-z_]+\.[a-z_]*date\b|["'][a-z_]*date["'])""")
     FORBIDDEN = ("be_date", "thai_date", "frappe.format_date", "+ 543", "thmonths")
 
     def _assert_uses_format_date(self, print_format: Path) -> None:
         html = json.loads(print_format.read_text())["html"]
-        self.assertIn("format_date(", html)
+        if self.DATE_FIELD_PATTERN.search(html):
+            self.assertIn("format_date(", html)
         for token in self.FORBIDDEN:
             self.assertNotIn(token, html)
 

@@ -90,6 +90,7 @@ doctype_list_js = {
 jinja = {
     "methods": [
         "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
+        "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.currency.print_currency",
         "connect_diagnostics_core.utils.date.format_date",
     ],
