@@ -15,11 +15,6 @@ from frappe.model.document import Document
 from connect_diagnostics_core.naming.customer import normalise_customer_code
 from connect_diagnostics_core.setup import customer_onboarding
 
-CHANNEL_CD = "CD"
-CHANNEL_DKSH = "DKSH"
-CHANNEL_BOTH = "CD and DKSH"
-VALID_CHANNELS = {CHANNEL_CD, CHANNEL_DKSH, CHANNEL_BOTH}
-
 READY = "Ready"
 MISSING = "Missing information"
 NOT_APPLICABLE = "Not applicable"
@@ -71,9 +66,8 @@ def before_validate(doc: Document, method: str | None = None) -> None:
 
 
 def validate(doc: Document, method: str | None = None) -> None:
-    """Enforce Customer Code, channel, readiness, and onboarding invariants."""
+    """Enforce Customer Code, readiness, and onboarding invariants."""
     previous_doc = doc.get_doc_before_save()
-    _validate_customer_channel(doc)
     _validate_customer_code_change(doc, previous_doc)
     _validate_financial_data_access(doc, previous_doc)
 
@@ -376,43 +370,9 @@ def _linked_customer_names_from_document(doc: Document) -> set[str]:
     }
 
 
-def _validate_customer_channel(doc: Document) -> None:
-    channel = _text(doc.get("customer_channel"))
-    if channel not in VALID_CHANNELS:
-        frappe.throw(_("Customer Channel must be CD, DKSH, or CD and DKSH."))
-
-    if channel != CHANNEL_BOTH:
-        doc.set("dksh_sap_customer_code", None)
-    dksh_sap_code = _text(doc.get("dksh_sap_customer_code"))
-    if channel == CHANNEL_BOTH and not dksh_sap_code:
-        previous_state = _text(doc.get("customer_onboarding_state"))
-        if previous_state in {
-            customer_onboarding.PENDING_DKSH_SAP_STATE,
-            customer_onboarding.CUSTOMER_ACTIVE_STATE,
-        }:
-            frappe.throw(_("DKSH SAP Customer Code is required before the Customer can be activated."))
-    # Keep legacy fields available for historical data and legacy search only.
-    doc.set("has_dksh_code", int(channel != CHANNEL_CD))
-    doc.set("customer_code_is_dksh_code", int(channel == CHANNEL_DKSH))
-    doc.set("dksh_customer_code", dksh_sap_code if channel == CHANNEL_BOTH else None)
-    # A draft DKSH Customer may still have its Customer Code corrected.  The
-    # on-update hook renames the document after this validation completes, so
-    # comparing the pending code to the current document name here would reject
-    # an otherwise valid draft correction.
-
-
 def _validate_customer_code_change(doc: Document, previous_doc: Document | None) -> None:
     if not previous_doc:
         return
-    previous_channel = _text(previous_doc.get("customer_channel"))
-    current_channel = _text(doc.get("customer_channel"))
-    controlled_conversion = bool(doc.flags.get("allow_controlled_dksh_conversion"))
-    if (
-        previous_channel != current_channel
-        and _text(previous_doc.get("customer_onboarding_state")) == customer_onboarding.CUSTOMER_ACTIVE_STATE
-        and not controlled_conversion
-    ):
-        frappe.throw(_("Customer Channel cannot be changed after activation."))
 
     old_code = normalise_customer_code(previous_doc.get("customer_code"))
     new_code = normalise_customer_code(doc.get("customer_code"))
@@ -420,7 +380,7 @@ def _validate_customer_code_change(doc: Document, previous_doc: Document | None)
         return
 
     state = _text(previous_doc.get("customer_onboarding_state"))
-    if state == customer_onboarding.CUSTOMER_ACTIVE_STATE and not controlled_conversion:
+    if state == customer_onboarding.CUSTOMER_ACTIVE_STATE:
         frappe.throw(_("Customer Code cannot be changed after activation."))
     if frappe.db.exists("Customer", new_code):
         frappe.throw(_("Customer Code {0} already exists.").format(frappe.bold(new_code)))
@@ -483,12 +443,6 @@ def _validate_onboarding_transition(
             and state != customer_onboarding.CUSTOMER_REQUEST_STATE
         ):
             _validate_accounting_review(doc)
-        if (
-            previous_state == customer_onboarding.PENDING_DKSH_SAP_STATE
-            and state != customer_onboarding.CUSTOMER_REQUEST_STATE
-        ):
-            _validate_dksh_sap_setup(doc)
-
     if state == customer_onboarding.CUSTOMER_ACTIVE_STATE:
         if previous_state != customer_onboarding.CUSTOMER_ACTIVE_STATE:
             _validate_activation_readiness(readiness_values)
@@ -513,9 +467,6 @@ def _validate_active_it_ub_duplicate_verifier() -> None:
 
 
 def _validate_accounting_review(doc: Document) -> None:
-    channel = _text(doc.get("customer_channel"))
-    if channel not in {CHANNEL_CD, CHANNEL_BOTH}:
-        return
     if _text(doc.get("customer_group")) == "GOV. HOSPITAL":
         if not _text(doc.get("payment_terms")):
             frappe.throw(_("Payment Terms are required for GOV. HOSPITAL Customers."))
@@ -527,15 +478,6 @@ def _validate_accounting_review(doc: Document) -> None:
         frappe.throw(_("Payment Terms Template Cash is required for Customer onboarding."))
     doc.set("payment_terms", "Cash")
     doc.set("credit_limits", [])
-
-
-def _validate_dksh_sap_setup(doc: Document) -> None:
-    channel = _text(doc.get("customer_channel"))
-    if channel == CHANNEL_DKSH:
-        return
-    if channel == CHANNEL_BOTH and _text(doc.get("dksh_sap_customer_code")):
-        return
-    frappe.throw(_("DKSH SAP Customer Code is required before the Customer can be activated."))
 
 
 def _credit_limit_for_default_company(doc: Document) -> float:
@@ -572,50 +514,6 @@ def get_customer_readiness(customer: str) -> dict[str, Any]:
 
 
 @frappe.whitelist()
-def convert_dksh_customer(
-    customer: str,
-    new_customer_code: str,
-    new_customer_channel: str,
-) -> dict[str, Any]:
-    """Convert an active DKSH-only Customer to CD or CD and DKSH under reviewer control."""
-    if customer_onboarding.ACCOUNTING_REVIEWER_ROLE not in set(frappe.get_roles()):
-        frappe.throw(
-            _("Only a Customer Accounting Reviewer can convert a DKSH Customer."), frappe.PermissionError
-        )
-    frappe.has_permission("Customer", "write", customer, throw=True)
-
-    new_customer_code = normalise_customer_code(new_customer_code)
-    if new_customer_channel not in {CHANNEL_CD, CHANNEL_BOTH}:
-        frappe.throw(_("DKSH Customer conversion target must be CD or CD and DKSH."))
-    if frappe.db.exists("Customer", new_customer_code):
-        frappe.throw(_("Customer Code {0} already exists.").format(frappe.bold(new_customer_code)))
-
-    frappe.db.get_value("Customer", customer, "name", for_update=True)
-    customer_doc = cast(Document, frappe.get_doc("Customer", customer))
-    if _text(customer_doc.get("customer_onboarding_state")) != customer_onboarding.CUSTOMER_ACTIVE_STATE:
-        frappe.throw(_("Only an active DKSH Customer can be converted."))
-    if _text(customer_doc.get("customer_channel")) != CHANNEL_DKSH:
-        frappe.throw(_("Only a DKSH-only Customer can be converted with this action."))
-
-    dksh_sap_code = _text(customer_doc.get("customer_code"))
-    customer_doc.set("customer_code", new_customer_code)
-    customer_doc.set("customer_channel", new_customer_channel)
-    customer_doc.set("dksh_sap_customer_code", dksh_sap_code)
-    customer_doc.flags.allow_controlled_dksh_conversion = True
-    customer_doc.save()
-
-    return {
-        "data": {
-            "customer": customer_doc.name,
-            "customer_code": new_customer_code,
-            "customer_channel": new_customer_channel,
-            "dksh_sap_customer_code": dksh_sap_code if new_customer_channel == CHANNEL_BOTH else None,
-        },
-        "message": _("DKSH Customer converted successfully."),
-    }
-
-
-@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def customer_query(
     doctype: str,
@@ -625,7 +523,7 @@ def customer_query(
     page_len: int,
     filters: dict[str, Any] | list[list[Any]] | None = None,
 ) -> list[tuple[Any, ...]]:
-    """Return only transaction-eligible Customers matched by code, name, or SAP code."""
+    """Return only transaction-eligible Customers matched by code, name, or alternative name."""
     frappe.has_permission("Customer", throw=True)
     like = f"%{txt}%"
     return frappe.get_list(
@@ -635,8 +533,6 @@ def customer_query(
             ["Customer", "name", "like", like],
             ["Customer", "customer_code", "like", like],
             ["Customer", "customer_name", "like", like],
-            ["Customer", "dksh_sap_customer_code", "like", like],
-            ["Customer", "dksh_customer_code", "like", like],
             ["Customer Alternative Name", "name_value", "like", like],
         ],
         fields=["name", "customer_name"],

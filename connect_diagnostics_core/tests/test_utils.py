@@ -28,6 +28,7 @@ class TestPrintFormatCleanup(UnitTestCase):
         frappe_mock.get_all.return_value = [
             {"name": "Core Invoice", "module": "Connect Diagnostics Core"},
             {"name": "Accounting Invoice", "module": "Connect Diagnostics Accounting"},
+            {"name": "Withholding Tax Cert", "module": "Thai Tax"},
             {"name": "ERPNext Invoice", "module": "Accounts"},
             {"name": "User Format", "module": None},
             {"name": "Sales Invoice Print", "module": "Connect Diagnostics Accounting"},

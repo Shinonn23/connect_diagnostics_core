@@ -1,14 +1,13 @@
 """Drop the ``custom_`` prefix from the app's custom fields.
 
 The field definitions now live in ``connect_diagnostics_core/setup`` under their
-stripped names (e.g. ``custom_dksh_item_code`` -> ``dksh_item_code``;
-``custom_lenght`` -> ``length``, fixing the typo). This patch migrates existing
-data on an upgrading site: it creates the new field, copies the old column's data
-across, then removes the old Custom Field / column.
+stripped names (for example, ``custom_dksh_item_code`` becomes the retained
+``dksh_item_code`` and ``custom_lenght`` becomes ``length``). This patch migrates
+existing data on an upgrading site: it creates the new field, copies the old
+column's data across, then removes the old Custom Field / column.
 
-It is idempotent and a no-op on fresh installs (the old columns never exist there;
-``after_install`` creates the stripped fields directly). Runs after the DKSH backfill
-patches so their flags are set before the rename.
+It is idempotent and a no-op on fresh installs because ``after_install`` creates
+the stripped fields directly.
 """
 
 import re
@@ -28,7 +27,6 @@ RENAMES = [
     ("Currency Exchange", "custom_remark", "remark"),
     ("Customer", "custom_cd_customer_code", "cd_customer_code"),
     ("Customer", "custom_customer_name_th", "customer_name_th"),
-    ("Customer", "custom_dksh_customer_code", "dksh_customer_code"),
     ("Employee", "custom_first_name_en", "first_name_en"),
     ("Employee", "custom_last_name_en", "last_name_en"),
     ("Item", "custom_dksh_item_code", "dksh_item_code"),
@@ -44,16 +42,12 @@ RENAMES = [
     ("Item", "custom_regulation_class", "regulation_class"),
     ("Item", "custom_storage_condition", "storage_condition"),
     ("Item", "custom_supplier_product_code", "supplier_product_code"),
-    ("Item", "custom_has_dksh_code", "has_dksh_code"),
-    ("Item", "custom_item_code_is_dksh_code", "item_code_is_dksh_code"),
     ("Item", "custom_alternative_names", "alternative_names"),  # Table field
     ("Item Group", "custom_mat_group_code", "mat_group_code"),
     ("Item Group", "custom_mat_group_desc", "mat_group_desc"),
     ("Item Group", "custom_mat_group4_code", "mat_group4_code"),
     ("Supplier", "custom_cd_supplier_code", "cd_supplier_code"),
-    ("Supplier", "custom_dksh_supplier_code", "dksh_supplier_code"),
     ("UOM", "custom_abbr", "abbr"),
-    ("Warehouse", "custom_dksh_sloc_code", "dksh_sloc_code"),
 ]
 
 

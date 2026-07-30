@@ -137,7 +137,7 @@
  */
 
 frappe.listview_settings["Sales Order"] = {
-	add_fields: ["name", "customer_name", "status", "sap_order_no", "sap_order_status"],
+	add_fields: ["name", "customer_name", "status"],
 
 	hide_name_column: true,
 

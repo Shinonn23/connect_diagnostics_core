@@ -109,19 +109,29 @@ Every PR should:
 
 Version is tracked in `connect_diagnostics_core/__init__.py` as `__version__`.
 
-**Scheme**: SemVer `0.MINOR.PATCH`
+**Scheme**: SemVer `0.MINOR.PATCH`, managed by Release Please from Conventional
+Commits merged into `developments`.
 
-| PR type                                                        | Bump                         | Example           |
-| -------------------------------------------------------------- | ---------------------------- | ----------------- |
-| `feat:` / `feat(...)`                                          | `+1 MINOR`, PATCH → `0`      | `0.7.1` → `0.8.0` |
-| `fix:` / `refactor:` / `chore:` / `style:` / `test:` / `docs:` | `+1 PATCH`                   | `0.7.0` → `0.7.1` |
-| Revert PR                                                      | Inverse of what was reverted | —                 |
+| Commit type                                                              | Bump                    | Example           |
+| ------------------------------------------------------------------------ | ----------------------- | ----------------- |
+| `feat:` / `feat(...)`                                                    | `+1 MINOR`, PATCH → `0` | `0.7.1` → `0.8.0` |
+| `fix:` / `refactor:` / `chore:` / `style:` / `test:` / `docs:` / `perf:` / `build:` / `ci:` | `+1 PATCH` | `0.7.0` → `0.7.1` |
+| Breaking change while `<1.0.0`                                          | `+1 MINOR`, PATCH → `0` | `0.7.1` → `0.8.0` |
+| `revert:` / unrecognized                                                 | No inferred bump        | —                 |
 
 **Rules:**
 
-- Include the version bump as the **last commit on the PR branch** before merge
-- Commit format: `chore: bump version to X.Y.Z`
-- Never bump on `developments` directly — only through a PR
+- Do not edit `__version__`, `.release-please-manifest.json`, or `CHANGELOG.md`
+  manually; Release Please changes them together in its cumulative Release PR.
+- Merge the Release PR after the DEV batch passes testing and before promotion to
+  UAT. Merging it publishes the `vX.Y.Z` tag and GitHub Release.
+- The repository Actions secret `RELEASE_PLEASE_TOKEN` must have Contents,
+  Pull requests, and Issues write access so the bot PR triggers required checks
+  and its lifecycle labels can be maintained.
+- For a revert that requires an inverse version, add `Release-As: X.Y.Z` to the
+  Conventional Commit body instead of editing version files.
+- The generated `release-please--*` branch is the only exception to the normal
+  work-branch naming rule.
 - MAJOR stays `0` until the project owner declares the app production-stable
 
 ---
