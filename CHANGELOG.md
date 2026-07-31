@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.28.0...v0.29.0) (2026-07-31)
+
+
+### Features
+
+* **quotation:** add configurable customer print preferences ([135147e](https://github.com/Shinonn23/connect_diagnostics_core/commit/135147e7349f7221d42164f25bbbb1dde36b1bf0))
+
 ## [0.28.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.27.2...v0.28.0) (2026-07-30)
 
 
