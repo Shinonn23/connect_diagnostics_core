@@ -9,28 +9,37 @@ import frappe
 from frappe.model.document import Document
 
 from connect_diagnostics_core.setup.payment_approval import (
-    LEGACY_WORKFLOW_STATE_STYLES,
-    LOW_VALUE_APPROVER_PROFILE,
     MANAGED_ROLES,
     PAYMENT_ENTRY_DOCTYPE,
     PAYMENT_REQUEST_DOCTYPE,
-    PRIMARY_APPROVER_PROFILE,
-    SECONDARY_APPROVER_PROFILE,
-    WORKFLOW_STATE_STYLES,
-    remove_configuration,
 )
 
-MANAGED_PROFILES = (
-    PRIMARY_APPROVER_PROFILE,
-    SECONDARY_APPROVER_PROFILE,
-    LOW_VALUE_APPROVER_PROFILE,
+MANAGED_PROFILES = ("Executive P2P Approver Add-on", "P2P Finance Verifier Add-on")
+WORKFLOW_STATES = (
+    "Payment Request Draft",
+    "Payment Request Submitted",
+    "Pending Payment Request AP Review",
+    "Pending Executive Payment Request Approval",
+    "Payment Request Approved",
+    "Payment Request Rejected",
+    "Payment Request Cancelled",
+)
+LEGACY_WORKFLOW_STATES = (
+    "Payment Draft",
+    "Payment Submitted",
+    "Pending Low-Value Payment Approval",
+    "Pending Primary Payment Approval",
+    "Escalated Low-Value Payment Approval",
+    "Escalated Payment Approval",
+    "Payment Approved",
+    "Payment Rejected",
+    "Payment Cancelled",
 )
 
 
 def execute() -> None:
     remove_payment_approver_assignments()
     _delete_managed_workflow_actions()
-    remove_configuration()
     frappe.clear_cache()
 
 
@@ -82,8 +91,8 @@ def _remove_user_child_rows(
 def _delete_managed_workflow_actions() -> None:
     workflow_action_names: list[str] = []
     for reference_doctype, workflow_states in (
-        (PAYMENT_REQUEST_DOCTYPE, WORKFLOW_STATE_STYLES),
-        (PAYMENT_ENTRY_DOCTYPE, LEGACY_WORKFLOW_STATE_STYLES),
+        (PAYMENT_REQUEST_DOCTYPE, WORKFLOW_STATES),
+        (PAYMENT_ENTRY_DOCTYPE, LEGACY_WORKFLOW_STATES),
     ):
         workflow_action_names.extend(
             frappe.get_all(

@@ -8,17 +8,26 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from connect_diagnostics_core.setup.payment_approval import (
     CUSTOM_FIELDS,
-    LEGACY_WORKFLOW_STATE_STYLES,
     PAYMENT_ENTRY_DOCTYPE,
     assign_payment_approvers,
     ensure_configuration,
-    remove_legacy_payment_entry_configuration,
+)
+
+LEGACY_PAYMENT_ENTRY_STATES = (
+    "Payment Draft",
+    "Payment Submitted",
+    "Pending Low-Value Payment Approval",
+    "Pending Primary Payment Approval",
+    "Escalated Low-Value Payment Approval",
+    "Escalated Payment Approval",
+    "Payment Approved",
+    "Payment Rejected",
+    "Payment Cancelled",
 )
 
 
 def execute() -> None:
     _delete_legacy_workflow_actions()
-    remove_legacy_payment_entry_configuration()
     create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
     ensure_configuration()
     assign_payment_approvers()
@@ -30,7 +39,7 @@ def _delete_legacy_workflow_actions() -> None:
         "Workflow Action",
         filters={
             "reference_doctype": PAYMENT_ENTRY_DOCTYPE,
-            "workflow_state": ["in", tuple(LEGACY_WORKFLOW_STATE_STYLES)],
+            "workflow_state": ["in", LEGACY_PAYMENT_ENTRY_STATES],
         },
         pluck="name",
     )

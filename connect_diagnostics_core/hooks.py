@@ -90,10 +90,8 @@ doctype_list_js = {
 jinja = {
     "methods": [
         "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
-        "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.currency.print_currency",
         "connect_diagnostics_core.utils.date.format_date",
-        "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
@@ -159,20 +157,10 @@ naming_series_variables = {
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
-        "before_naming": "connect_diagnostics_core.naming.customer.prepare_customer_naming",
-        "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
+        "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
         "autoname": "connect_diagnostics_core.naming.customer.set_customer_code",
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
         "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
-    },
-    "Customer Credit Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
-        "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
-        "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
-    },
-    "Quotation": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.quotation.before_validate",
     },
     "Address": {
         "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
@@ -184,6 +172,10 @@ doc_events = {
         "on_update": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
         "after_delete": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
     },
+    "Supplier": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+    },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
@@ -192,6 +184,35 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_entry_before_submit"
         ),
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
+    },
+    "Bank Account": {
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
+    },
+    "Supplier Bank Change Request": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate_bank_change_request",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
+        "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
+    },
+    "Material Request": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
+        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+    },
+    "Purchase Order": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_order",
+        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+    },
+    "Purchase Receipt": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_receipt",
+        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+    },
+    "Purchase Invoice": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_invoice",
+        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
     },
     "Payment Request": {
         "before_save": [
@@ -203,6 +224,9 @@ doc_events = {
         "before_submit": (
             "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_request_before_submit"
         ),
+    },
+    "Item": {
+        "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
@@ -223,9 +247,6 @@ company_data_to_be_ignored = ["Accounting Department"]
 
 scheduler_events = {
     "cron": {
-        "*/5 * * * *": [
-            "connect_diagnostics_core.api.erpnext.payment_approval.escalate_due_payment_approvals"
-        ],
         # Runs hourly; the handler self-throttles to Backup Settings.backup_interval_hours.
         "0 * * * *": [
             "connect_diagnostics_core.connect_diagnostics_core.doctype.backup_settings.backup_settings.run_scheduled_backup"
@@ -237,6 +258,12 @@ scheduler_events = {
 # -------
 
 before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
+
+# Overriding Methods
+# ------------------------------
+#
+# override_whitelisted_methods = {
+# }
 
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -308,6 +335,114 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
+    {
+        "doctype": "Workflow",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Payment Request Approval",
+                    "Supplier Onboarding",
+                    "Supplier Bank Change Approval",
+                    "Material Request Approval",
+                    "Purchase Order Approval",
+                    "Purchase Receipt Inspection",
+                    "Purchase Invoice Verification",
+                ],
+            ]
+        ],
+    },
+    {
+        "doctype": "Workflow State",
+        "filters": [
+            [
+                "workflow_state_name",
+                "in",
+                [
+                    "Payment Request Draft",
+                    "Payment Request Submitted",
+                    "Pending Payment Request AP Review",
+                    "Pending Executive Payment Request Approval",
+                    "Payment Request Approved",
+                    "Payment Request Rejected",
+                    "Payment Request Cancelled",
+                    "Supplier Draft",
+                    "Pending Supplier Verification",
+                    "Pending Supplier Activation",
+                    "Supplier Active",
+                    "Supplier Active (Legacy)",
+                    "Supplier Bank Change Draft",
+                    "Pending Supplier Bank Verification",
+                    "Pending Supplier Bank Approval",
+                    "Supplier Bank Verified",
+                    "Supplier Bank Change Rejected",
+                    "Material Request Draft",
+                    "Pending Material Request Approval",
+                    "Material Request Approved",
+                    "Material Request Rejected",
+                    "Purchase Order Draft",
+                    "Pending Purchase Order Finance Review",
+                    "Pending Purchase Order Exception Approval",
+                    "Purchase Order Approved",
+                    "Purchase Order Rejected",
+                    "Purchase Receipt Draft",
+                    "Pending Goods Inspection",
+                    "Purchase Receipt Accepted",
+                    "Purchase Invoice Draft",
+                    "Pending Purchase Invoice Verification",
+                    "Pending Purchase Invoice Exception Approval",
+                    "Purchase Invoice Verified",
+                    "Purchase Invoice Rejected",
+                ],
+            ]
+        ],
+    },
+    {
+        "doctype": "Workflow Action Master",
+        "filters": [
+            [
+                "workflow_action_name",
+                "in",
+                [
+                    "Request Payment Approval",
+                    "Complete Payment Request AP Review",
+                    "Approve Payment Request",
+                    "Reject Payment Request",
+                    "Revise Payment Request",
+                    "Submit Payment Request",
+                    "Request supplier verification",
+                    "Verify supplier",
+                    "Activate supplier",
+                    "Request bank verification",
+                    "Verify bank details",
+                    "Approve bank change",
+                    "Request approval",
+                    "Approve material request",
+                    "Request finance review",
+                    "Approve purchase order",
+                    "Request goods inspection",
+                    "Accept goods",
+                    "Request AP verification",
+                    "Verify purchase invoice",
+                    "Return supplier",
+                    "Return bank change",
+                    "Reject bank change",
+                    "Reject material request",
+                    "Revise material request",
+                    "Request exception approval",
+                    "Approve purchase order exception",
+                    "Reject purchase order",
+                    "Revise purchase order",
+                    "Return receipt",
+                    "Request invoice exception approval",
+                    "Approve purchase invoice exception",
+                    "Reject purchase invoice",
+                    "Revise purchase invoice",
+                ],
+            ]
+        ],
+    },
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},

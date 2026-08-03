@@ -23,6 +23,7 @@ from connect_diagnostics_core.setup import (
     journal_entry_account,
     packed_item,
     payment_approval,
+    procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -52,6 +53,7 @@ _MODULES = (
     journal_entry_account,
     packed_item,
     payment_approval,
+    procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -82,6 +84,7 @@ def apply_all() -> None:
                     for_doctype=fieldname is None,
                     validate_fields_for_doctype=False,
                 )
+    procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     customer_onboarding.ensure_configuration()
 

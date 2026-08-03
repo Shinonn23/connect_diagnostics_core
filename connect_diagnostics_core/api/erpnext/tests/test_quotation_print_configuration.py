@@ -29,9 +29,7 @@ class FakeQuotation(dict[str, Any]):
 
 class TestQuotationPrintConfiguration(UnitTestCase):
     def test_setup_fields_are_audited_and_editable_after_submit(self) -> None:
-        fields = {
-            field["fieldname"]: field for field in quotation_setup.CUSTOM_FIELDS["Quotation"]
-        }
+        fields = {field["fieldname"]: field for field in quotation_setup.CUSTOM_FIELDS["Quotation"]}
 
         self.assertEqual(
             fields["quotation_print_configuration_section"]["fieldtype"],
@@ -42,7 +40,9 @@ class TestQuotationPrintConfiguration(UnitTestCase):
                 self.assertNotIn("default", fields[fieldname])
                 self.assertEqual(fields[fieldname]["allow_on_submit"], 1)
 
-        self.assertEqual(quotation_setup.PROPERTY_SETTERS["Quotation"], [(None, "track_changes", "1", "Check")])
+        self.assertEqual(
+            quotation_setup.PROPERTY_SETTERS["Quotation"], [(None, "track_changes", "1", "Check")]
+        )
         company_field = company_setup.CUSTOM_FIELDS["Company"][0]
         self.assertEqual(company_field["options"], "Employee")
 
