@@ -108,6 +108,13 @@ def on_submit_bank_change_request(doc: Document, _method: str | None = None) -> 
         {"supplier_bank_verification_status": "Verified", "supplier_bank_change_request": doc.name},
         update_modified=False,
     )
+    frappe.db.set_value(
+        "Supplier",
+        doc.get("supplier"),
+        "default_bank_account",
+        doc.get("bank_account"),
+        update_modified=False,
+    )
 
 
 def on_cancel_bank_change_request(doc: Document, _method: str | None = None) -> None:
