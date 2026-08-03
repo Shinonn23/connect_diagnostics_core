@@ -191,6 +191,9 @@ doc_events = {
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
+    "Employee": {
+        "validate": "connect_diagnostics_core.api.erpnext.employee.validate_employee_identity",
+    },
     "Payment Entry": {
         "before_submit": (
             "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_entry_before_submit"

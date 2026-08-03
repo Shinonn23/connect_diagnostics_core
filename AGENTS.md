@@ -441,6 +441,34 @@ return {"data": <payload>, "message": <str>}
 - Never return raw strings, bare lists, or inconsistent shapes.
 - Existing API response structures are immutable — do not change the shape of an existing endpoint unless explicitly approved
 
+### Employee Identity and Payroll Policy
+
+- `Employee.national_id` and `Employee.tax_id` are separate masked, no-copy,
+  unique Data fields. Normalize Unicode decimal digits, hyphens, and whitespace,
+  then require exactly 13 digits and a valid Thai identity checksum. Never copy
+  one field into the other or expose complete values in logs, Version records,
+  manifests, or import reports.
+- Setting, changing, or clearing either identity field requires Employee Mask
+  permission. HR Manager receives only the missing Mask capability through a
+  code-managed Custom DocPerm; normal Employee audit history remains enabled when
+  identity fields are unchanged.
+- Social-security defaults are stored on Company and snapshotted into Salary
+  Structure Assignment. The snapshot includes employee/employer rates and wage
+  ceiling; membership and the employee-specific provident-fund rate are also held
+  on the assignment. Old assignments must not change when Company defaults change.
+- Approved component formulas use `BS = base`, contribution bases `BS + RETRO`,
+  the assignment's SSO ceiling/rates/member flag, and one PVD rate for equal
+  employee/employer contributions. Contribution base components are statistical.
+  Preserve two-decimal results and do not introduce integer rounding.
+- Bonus, retroactive salary, travel, MBO, overtime, allowance, incentive, tax,
+  student-loan repayment, and advance repayment remain monthly Additional Salary
+  inputs. TAX is not a variable-tax component and does not require an Income Tax
+  Slab. Employee Welfare Fund remains inactive until separately approved.
+- `setup/payroll.py` version-controls the approved formula definitions, but
+  `after_install` and `after_migrate` create only custom fields. Applying formulas
+  to Salary Component masters is an explicit, environment-scoped operation that
+  must stop when an existing Salary Structure would be changed implicitly.
+
 ### Leave Notifications
 
 - `Leave Approval Notification` emails an open Leave Application to its leave approver;

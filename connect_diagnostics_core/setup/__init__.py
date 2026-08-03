@@ -23,6 +23,7 @@ from connect_diagnostics_core.setup import (
     journal_entry_account,
     packed_item,
     payment_approval,
+    payroll,
     procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
@@ -54,6 +55,7 @@ _MODULES = (
     packed_item,
     payment_approval,
     procure_to_pay,
+    payroll,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -87,6 +89,7 @@ def apply_all() -> None:
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     customer_onboarding.ensure_configuration()
+    employee.ensure_employee_mask_permission()
 
 
 def after_install() -> None:

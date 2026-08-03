@@ -1,4 +1,15 @@
-"""Custom field / property setter definitions for Employee."""
+"""Custom field, property setter, and permission definitions for Employee."""
+
+from __future__ import annotations
+
+from typing import cast
+
+import frappe
+from frappe.model.document import Document
+from frappe.permissions import setup_custom_perms
+
+EMPLOYEE_DOCTYPE = "Employee"
+HR_MANAGER_ROLE = "HR Manager"
 
 CUSTOM_FIELDS = {
     "Employee": [
@@ -124,8 +135,79 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
             "options": "User",
         },
+        {
+            "fieldname": "national_id",
+            "label": "National ID",
+            "fieldtype": "Data",
+            "insert_after": "attendance_device_id",
+            "mask": 1,
+            "no_copy": 1,
+            "unique": 1,
+        },
+        {
+            "fieldname": "tax_id",
+            "label": "Tax ID",
+            "fieldtype": "Data",
+            "insert_after": "national_id",
+            "mask": 1,
+            "no_copy": 1,
+            "unique": 1,
+        },
     ],
 }
+
+
+def ensure_employee_mask_permission() -> None:
+    """Grant HR Manager only the mask capability missing from standard Employee permissions."""
+    setup_custom_perms(EMPLOYEE_DOCTYPE)
+    permission_names = frappe.get_all(
+        "Custom DocPerm",
+        filters={
+            "parent": EMPLOYEE_DOCTYPE,
+            "role": HR_MANAGER_ROLE,
+            "permlevel": 0,
+            "if_owner": 0,
+        },
+        pluck="name",
+    )
+    if not permission_names:
+        permission = cast(
+            Document,
+            frappe.get_doc(
+                {
+                    "doctype": "Custom DocPerm",
+                    "parent": EMPLOYEE_DOCTYPE,
+                    "role": HR_MANAGER_ROLE,
+                    "permlevel": 0,
+                    "if_owner": 0,
+                    "select": 0,
+                    "read": 0,
+                    "write": 0,
+                    "create": 0,
+                    "delete": 0,
+                    "submit": 0,
+                    "cancel": 0,
+                    "amend": 0,
+                    "mask": 1,
+                    "report": 0,
+                    "export": 0,
+                    "import": 0,
+                    "share": 0,
+                    "print": 0,
+                    "email": 0,
+                }
+            ),
+        )
+        permission.insert(ignore_permissions=True)
+        return
+
+    for permission_name in permission_names:
+        permission = cast(Document, frappe.get_doc("Custom DocPerm", permission_name))
+        if permission.get("mask"):
+            continue
+        permission.set("mask", 1)
+        permission.save(ignore_permissions=True)
+
 
 # (fieldname or None for DocType-level, property, value, property_type)
 PROPERTY_SETTERS = {
