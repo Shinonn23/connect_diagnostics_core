@@ -70,8 +70,6 @@ def validate(doc: Document, method: str | None = None) -> None:
     previous_doc = doc.get_doc_before_save()
     _validate_customer_code_change(doc, previous_doc)
     _validate_financial_data_access(doc, previous_doc)
-    _validate_quotation_delivery_terms(doc)
-
     readiness_values = build_readiness_values(
         customer=doc.as_dict(),
         addresses=_get_customer_addresses(doc.name) if doc.name else (),
@@ -570,8 +568,3 @@ def _text(value: object) -> str:
 
 def _truthy(value: object) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes"}
-
-
-def _validate_quotation_delivery_terms(doc: Document) -> None:
-    if _truthy(doc.get("use_quotation")) and not _text(doc.get("quotation_delivery_terms")):
-        frappe.throw(_("Quotation Delivery Terms are required when Use Quotation is enabled."))

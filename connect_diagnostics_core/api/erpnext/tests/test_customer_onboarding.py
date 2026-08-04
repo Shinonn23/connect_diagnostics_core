@@ -99,6 +99,7 @@ class TestCustomerReadiness(UnitTestCase):
                 self.assertEqual(fields[language_fieldname]["options"], "Thai\nEnglish\nThai / English")
                 self.assertEqual(fields[language_fieldname]["default"], "Thai")
                 self.assertEqual(fields[language_fieldname]["depends_on"], depends_on)
+                self.assertEqual(fields[language_fieldname].get("hidden", 0), int(prefix == "tax_invoice"))
                 self.assertEqual(fields[column_fieldname]["depends_on"], depends_on)
                 self.assertEqual(fields[original_count_fieldname]["default"], "1")
                 self.assertEqual(fields[original_count_fieldname]["non_negative"], 1)
@@ -125,31 +126,28 @@ class TestCustomerReadiness(UnitTestCase):
             "Legacy Global Print Date (Current Print Formats)",
         )
 
-    def test_quotation_customer_defaults_match_form_01(self) -> None:
+    def test_quotation_customer_defaults_expose_full_configuration(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        self.assertEqual(fields["quotation_form_preset"]["default"], "Form 01")
+        self.assertNotIn("quotation_form_preset", fields)
         self.assertEqual(fields["show_quotation_date"]["label"], "Show Quotation Date")
         self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
-        self.assertEqual(fields["quotation_validity_mode"]["default"], "Valid Till")
+        self.assertEqual(fields["override_quotation_validity_text"]["fieldtype"], "Check")
         self.assertEqual(
             fields["quotation_delivery_terms"]["mandatory_depends_on"],
             "eval:doc.use_quotation",
         )
         self.assertEqual(
             fields["quotation_custom_validity_text"]["depends_on"],
-            "eval:doc.use_quotation && doc.quotation_validity_mode=='Custom Text'",
+            "eval:doc.use_quotation && doc.override_quotation_validity_text",
         )
 
-    def test_quotation_delivery_terms_are_required_when_quotation_is_enabled(self) -> None:
-        with self.assertRaises(frappe.ValidationError):
-            customer._validate_quotation_delivery_terms(
-                cast(Document, FakeDocument({"use_quotation": 1, "quotation_delivery_terms": ""}))
-            )
+    def test_customer_stores_a_template_link_and_print_name_default(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        customer._validate_quotation_delivery_terms(
-            cast(Document, FakeDocument({"use_quotation": 0, "quotation_delivery_terms": ""}))
-        )
+        self.assertEqual(fields["print_configuration_template"]["fieldtype"], "Link")
+        self.assertEqual(fields["print_configuration_template"]["options"], "Print Configuration Template")
+        self.assertEqual(fields["customer_print_name"]["fieldtype"], "Data")
 
     def test_tax_and_delivery_readiness_requires_matching_tax_address_and_contact(self) -> None:
         readiness = customer.build_readiness_values(

@@ -20,7 +20,7 @@
 	"margin_left": 15,
 	"margin_right": 15,
 	"margin_top": 15,
-	"modified": "2026-07-03 15:30:00.000000",
+	"modified": "2026-08-04 23:30:00.000000",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Core",
 	"name": "Sales Order",
@@ -33,5 +33,5 @@
 	"print_format_type": "Jinja",
 	"raw_printing": 0,
 	"show_section_headings": 0,
-	"standard": "Yes"
+	"standard": "No"
 }

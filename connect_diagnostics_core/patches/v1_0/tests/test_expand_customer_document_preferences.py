@@ -28,9 +28,9 @@ class TestExpandCustomerDocumentPreferences(UnitTestCase):
         self.assertEqual(values["use_delivery_note"], 0)
         self.assertEqual(values["use_invoice"], 0)
         self.assertEqual(values["purchase_order_copy_count"], 1)
-        self.assertEqual(values["quotation_form_preset"], "Form 02")
+        self.assertNotIn("quotation_form_preset", values)
         self.assertEqual(values["quotation_signatory_type"], "Sales Representative")
-        self.assertEqual(values["quotation_validity_mode"], "Valid Till")
+        self.assertEqual(values["override_quotation_validity_text"], 0)
         for prefix, _label, _use_fieldname in customer_setup.DOCUMENT_PREFERENCES:
             with self.subTest(prefix=prefix):
                 self.assertEqual(values[f"show_{prefix}_date"], 0)

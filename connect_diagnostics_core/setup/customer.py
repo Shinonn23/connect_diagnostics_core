@@ -51,20 +51,6 @@ def _document_preference_fields() -> list[dict[str, object]]:
                 "default": "1",
             }
         )
-        if prefix == "quotation":
-            fields.append(
-                {
-                    "fieldname": "quotation_form_preset",
-                    "label": "Quotation Form Preset",
-                    "fieldtype": "Select",
-                    "options": "\n".join(quotation_setup.FORM_PRESETS),
-                    "insert_after": use_fieldname,
-                    "default": quotation_setup.FORM_PRESET_01,
-                    "depends_on": enabled_depends_on,
-                }
-            )
-            show_date_insert_after = "quotation_form_preset"
-
         fields.extend(
             [
                 {
@@ -83,11 +69,52 @@ def _document_preference_fields() -> list[dict[str, object]]:
                     "insert_after": show_date_fieldname,
                     "default": "Thai",
                     "depends_on": enabled_depends_on,
+                    "hidden": 1 if prefix == "tax_invoice" else 0,
                 },
             ]
         )
 
         column_insert_after = language_fieldname
+        if prefix == "tax_invoice":
+            tax_invoice_selection_fields = (
+                (
+                    "show_tax_invoice_batch_serial",
+                    "Show Batch / Serial Number",
+                    language_fieldname,
+                ),
+                (
+                    "print_tax_invoice_original",
+                    "Print Original (Customer)",
+                    "show_tax_invoice_batch_serial",
+                ),
+                (
+                    "print_tax_invoice_customer_copy",
+                    "Print Copy (Customer)",
+                    "print_tax_invoice_original",
+                ),
+                (
+                    "print_tax_invoice_accounting_copy",
+                    "Print Copy (Accounting)",
+                    "print_tax_invoice_customer_copy",
+                ),
+                (
+                    "print_tax_invoice_sales_copy",
+                    "Print Copy (Sales)",
+                    "print_tax_invoice_accounting_copy",
+                ),
+            )
+            fields.extend(
+                {
+                    "fieldname": fieldname,
+                    "label": label,
+                    "fieldtype": "Check",
+                    "insert_after": insert_after_fieldname,
+                    "default": "1",
+                    "depends_on": enabled_depends_on,
+                }
+                for fieldname, label, insert_after_fieldname in tax_invoice_selection_fields
+            )
+            column_insert_after = "print_tax_invoice_sales_copy"
         if prefix == "quotation":
             fields.extend(
                 [
@@ -101,23 +128,19 @@ def _document_preference_fields() -> list[dict[str, object]]:
                         "depends_on": enabled_depends_on,
                     },
                     {
-                        "fieldname": "quotation_validity_mode",
-                        "label": "Quotation Validity Mode",
-                        "fieldtype": "Select",
-                        "options": "\n".join(quotation_setup.VALIDITY_MODES),
+                        "fieldname": "override_quotation_validity_text",
+                        "label": "Override validity text",
+                        "fieldtype": "Check",
                         "insert_after": "quotation_signatory_type",
-                        "default": quotation_setup.VALIDITY_VALID_TILL,
                         "depends_on": enabled_depends_on,
+                        "description": "Use custom text instead of the Quotation Valid Till date.",
                     },
                     {
                         "fieldname": "quotation_custom_validity_text",
                         "label": "Quotation Custom Validity Text",
                         "fieldtype": "Small Text",
-                        "insert_after": "quotation_validity_mode",
-                        "depends_on": (
-                            "eval:doc.use_quotation"
-                            f" && doc.quotation_validity_mode=='{quotation_setup.VALIDITY_CUSTOM_TEXT}'"
-                        ),
+                        "insert_after": "override_quotation_validity_text",
+                        "depends_on": "eval:doc.use_quotation && doc.override_quotation_validity_text",
                     },
                     {
                         "fieldname": "quotation_delivery_terms",
@@ -150,6 +173,7 @@ def _document_preference_fields() -> list[dict[str, object]]:
                     "default": "1",
                     "non_negative": 1,
                     "depends_on": enabled_depends_on,
+                    "hidden": 1 if prefix == "tax_invoice" else 0,
                 },
                 {
                     "fieldname": copy_count_fieldname,
@@ -159,6 +183,7 @@ def _document_preference_fields() -> list[dict[str, object]]:
                     "default": "0",
                     "non_negative": 1,
                     "depends_on": enabled_depends_on,
+                    "hidden": 1 if prefix == "tax_invoice" else 0,
                 },
             ]
         )
@@ -340,9 +365,23 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "document_preferences_section",
-            "label": "Document / Print Preferences",
+            "label": "Document / Print Configuration",
             "fieldtype": "Tab Break",
             "insert_after": "no_delivery_reason",
+        },
+        {
+            "fieldname": "print_configuration_template",
+            "label": "Print Configuration Template",
+            "fieldtype": "Link",
+            "options": "Print Configuration Template",
+            "insert_after": "document_preferences_section",
+        },
+        {
+            "fieldname": "customer_print_name",
+            "label": "Customer Print Name",
+            "fieldtype": "Data",
+            "insert_after": "print_configuration_template",
+            "description": "Default customer name used only on printed documents.",
         },
         *_document_preference_fields(),
     ],

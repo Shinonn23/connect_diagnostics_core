@@ -422,7 +422,10 @@ If a bug or issue is discovered during implementation (outside the current task 
   - `<system>` = `erpnext` for ERPNext doctypes, `frappe` for Frappe core doctypes
   - `<doctype_name>` = lowercase, spaces → underscores
 - **APIs**: expose via `@frappe.whitelist()` with `frappe.has_permission()` checks; validate all inputs server-side
-- **DocTypes**: never hand-edit JSON files — use Frappe desk
+- **DocTypes**: standard DocTypes owned by this app are code-managed. Define their
+  JSON, controller, tests, and schema migrations in the repository; do not create
+  ad hoc site-local schema through Desk or console. Existing or third-party
+  DocTypes remain managed through their documented Frappe mechanism.
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
 
 ### API Response Shape
@@ -504,28 +507,42 @@ return {"data": <payload>, "message": <str>}
   but are an Active gate.
 - Customer Onboarding State, Correction Reason, document-readiness fields, and
   no-delivery controls belong in the dedicated Customer Onboarding tab, not Details.
-- Customer `Document / Print Preferences` uses fixed sections for Quotation,
-  Tax Invoice, Delivery Note, Invoice, Abbreviated Tax Invoice, and Receipt.
-  New Customers enable every document, show its date, use Thai, and default to
-  one original plus zero copies. Disabling a document hides but retains its settings.
-  A source Purchase Order copy is a separate attachment preference with one copy
-  by default. The legacy global `print_date` remains editable until Print Formats
-  consume the per-document settings.
-- Customer Quotation defaults also store Form Preset, signatory type, validity
-  mode, optional custom validity text, and required Delivery Terms when Use
-  Quotation is enabled. Form 01 is the default: show the date, use the first Sales
-  Team Sales Person, and express validity from Valid Till.
-- The Quotation `Print Configuration` tab snapshots the selected Customer's print
-  defaults whenever the Customer changes in Draft. Presets 01–04 fill date,
-  signatory, and validity choices but do not lock them; later edits mark the preset
-  Custom. Sales Representative
-  signatories must link through Sales Person to Employee. Managing Director
-  signatories use `Company.quotation_authorized_signatory_employee`. The single
-  Quotation Print Format renders Thai, English, or Thai / English and produces the
-  configured original and copy pages. Delivery Terms are a required editable
-  snapshot on every Quotation and print in the delivery commitment line. Print
-  configuration remains editable after submission, and Quotation change tracking
-  provides the Version audit.
+- `Print Configuration Template` is the reusable master for the six fixed sections:
+  Quotation, Tax Invoice, Delivery Note, Invoice, Abbreviated Tax Invoice, and
+  Receipt. It holds document enablement, date visibility, language, original/copy
+  counts, source Purchase Order copy settings, Customer Print Name, and Quotation
+  signatory/validity/Delivery Terms defaults. It deliberately has no Form Preset:
+  every Quotation option is configured independently. Valid Till is the standard
+  validity source; `Override validity text` reveals custom text only when required.
+- Customer `Document / Print Configuration` links one Template. Selecting it, or
+  using `Fetch Configuration`, copies Template values into Customer fields; those
+  Customer values are independent defaults and Template changes never propagate
+  until the next fetch. Existing Customer values are preserved during migration.
+- The Print sidebar loads only the active format's Customer fields and sends them
+  as request-only `settings` overrides. Overrides affect preview, print, and PDF
+  for that request only; they never save Customer or the source document. Missing
+  fields during a code-before-migration rollout fall back to system defaults.
+- Sales Invoice uses named transient selections for Original, Customer Copy,
+  Accounting Copy, and Sales Copy, plus a Batch / Serial visibility option. The
+  default configuration selects all four copies; sidebar changes apply only to
+  the current print request. Sales Invoice is Thai-only; its legacy language
+  field remains hidden for compatibility and is ignored by the print context.
+- The combined Sales Invoice format resolves Batch and Serial values from both
+  direct item fields and `Serial and Batch Bundle`, renders one traceability
+  line per record without ellipsis, then paginates whole item blocks before
+  rendering. Each page repeats the invoice summary and resets the current-page /
+  total-pages value within each selected copy set; only the final overall page
+  omits the page break after it.
+- Purchase Order keeps supplier and order header data in separate boxes, adds
+  the company's Ship To address and supplier Contact, shows ETA from the
+  standard `schedule_date` field plus Incoterm and Currency, and uses Item Code,
+  Description, QTY, UOM, Unit Price, and Amount columns without warehouse or
+  item-level discount columns.
+- Quotation has no Print Configuration fields or snapshot. Its context resolves
+  Customer defaults plus sidebar overrides; Sales Representative resolves from the
+  Customer Sales Team through `Sales Person.employee`, while Managing Director uses
+  `Company.quotation_authorized_signatory_employee`. The single Quotation format
+  renders Thai, English, or Thai / English and configured original/copy pages.
 - Later `Customer Credit Request` is available to every active Customer and is
   approved by the Customer Credit Approver; it does not depend on a channel field.
   `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;
@@ -552,7 +569,8 @@ return {"data": <payload>, "message": <str>}
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
   (`CUSTOM_FIELDS` / `PROPERTY_SETTERS`), applied idempotently on `after_install` and
   `after_migrate` — do not create fields ad hoc via desk or console
-- Print Formats are app-owned only: `after_sync` and `after_migrate` remove every
+- Print Formats are app-owned and editable through Desk (`standard = "No"`): `after_sync` and
+  `after_migrate` remove every
   `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
   `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`) or an ERPNext Thailand
   module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or `Petty Cash`). Retired formats are
@@ -566,6 +584,11 @@ return {"data": <payload>, "message": <str>}
   dimensions in `mm`; app-owned Print Formats must not use a background image. `Shipment Box
   Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
   and recipient details, and shows the recipient Customer's Territory only when present.
+- When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
+  time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
+  leaves the deployed format stale after `bench migrate`. The Sales Invoice format also has an
+  explicit `sync_sales_invoice_print_format` migration so sites that already ran an earlier
+  configuration migration receive the current HTML/CSS.
 - Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
   amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
   do not define local money-formatting macros in Print Formats.
