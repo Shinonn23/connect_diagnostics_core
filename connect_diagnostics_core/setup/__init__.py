@@ -9,6 +9,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
+    company,
     contact,
     currency_exchange,
     customer,
@@ -22,6 +23,7 @@ from connect_diagnostics_core.setup import (
     journal_entry_account,
     packed_item,
     payment_approval,
+    procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -36,6 +38,7 @@ from connect_diagnostics_core.setup.print_format import remove_non_app_print_for
 
 _MODULES = (
     account,
+    company,
     contact,
     currency_exchange,
     customer,
@@ -49,6 +52,7 @@ _MODULES = (
     journal_entry_account,
     packed_item,
     payment_approval,
+    procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -78,12 +82,14 @@ def apply_all() -> None:
                     for_doctype=fieldname is None,
                     validate_fields_for_doctype=False,
                 )
+    procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     customer_onboarding.ensure_configuration()
 
 
 def after_install() -> None:
     apply_all()
+    _ensure_default_print_configuration_template()
 
 
 def after_sync() -> None:
@@ -92,4 +98,14 @@ def after_sync() -> None:
 
 def after_migrate() -> None:
     apply_all()
+    _ensure_default_print_configuration_template()
     remove_non_app_print_formats()
+
+
+def _ensure_default_print_configuration_template() -> None:
+    """Create the reusable default after the standard DocType has synchronized."""
+    from connect_diagnostics_core.patches.v1_0.migrate_print_configuration_templates import (
+        _ensure_default_template,
+    )
+
+    _ensure_default_template()

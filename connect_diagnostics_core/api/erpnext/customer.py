@@ -70,7 +70,6 @@ def validate(doc: Document, method: str | None = None) -> None:
     previous_doc = doc.get_doc_before_save()
     _validate_customer_code_change(doc, previous_doc)
     _validate_financial_data_access(doc, previous_doc)
-
     readiness_values = build_readiness_values(
         customer=doc.as_dict(),
         addresses=_get_customer_addresses(doc.name) if doc.name else (),
