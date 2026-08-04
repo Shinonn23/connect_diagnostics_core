@@ -59,6 +59,8 @@ class TestImportCustomerDocumentPreferences(IntegrationTestCase):
                 "customer_type": "Company",
                 "customer_group": self.group,
                 "territory": self.territory,
+                "quotation_delivery_terms": "Test delivery terms",
+                "customer_onboarding_state": "Customer Request",
             }
         )
         doc.insert(ignore_permissions=True)

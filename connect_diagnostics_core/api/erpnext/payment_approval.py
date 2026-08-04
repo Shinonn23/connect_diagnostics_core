@@ -8,77 +8,44 @@ from typing import Any, cast
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, flt, get_datetime, now_datetime
-from frappe.workflow.doctype.workflow_action.workflow_action import process_workflow_actions
+from frappe.utils import flt
 
 from connect_diagnostics_core.setup.payment_approval import (
-    APPROVAL_DUE_AT_FIELD,
+    AP_REVIEWER_ROLE,
     APPROVED_STATE,
     BASE_GRAND_TOTAL_FIELD,
     CANCELLED_STATE,
-    ESCALATED_LOW_VALUE_STATE,
-    ESCALATED_PRIMARY_STATE,
-    ESCALATION_ROLE,
-    LOW_VALUE_APPROVER_ROLE,
-    LOW_VALUE_PAYMENT_APPROVAL_LIMIT_FIELD,
-    PAYMENT_APPROVAL_LIMIT_FIELD,
+    EXECUTIVE_APPROVER_ROLE,
     PAYMENT_REQUEST_DOCTYPE,
-    PENDING_LOW_VALUE_STATE,
-    PENDING_PRIMARY_STATE,
-    PRIMARY_APPROVER_ROLE,
+    PENDING_AP_REVIEW_STATE,
+    PENDING_EXECUTIVE_APPROVAL_STATE,
     REJECTED_STATE,
-    SECONDARY_APPROVER_ROLE,
     WORKFLOW_STATE_FIELD,
 )
 
-PENDING_ESCALATION_STATES = (PENDING_LOW_VALUE_STATE, PENDING_PRIMARY_STATE)
 ACCOUNTING_ROLES = frozenset({"Accounts User", "Accounts Manager"})
 PAYMENT_APPROVER_ROLES = frozenset(
     {
-        PRIMARY_APPROVER_ROLE,
-        SECONDARY_APPROVER_ROLE,
-        LOW_VALUE_APPROVER_ROLE,
+        EXECUTIVE_APPROVER_ROLE,
+        AP_REVIEWER_ROLE,
     }
 )
 ACTIONABLE_WORKFLOW_STATES = frozenset(
     {
-        PENDING_LOW_VALUE_STATE,
-        PENDING_PRIMARY_STATE,
-        ESCALATED_LOW_VALUE_STATE,
-        ESCALATED_PRIMARY_STATE,
+        PENDING_AP_REVIEW_STATE,
+        PENDING_EXECUTIVE_APPROVAL_STATE,
         REJECTED_STATE,
     }
 )
-ESCALATED_STATE_BY_PENDING_STATE = {
-    PENDING_LOW_VALUE_STATE: ESCALATED_LOW_VALUE_STATE,
-    PENDING_PRIMARY_STATE: ESCALATED_PRIMARY_STATE,
-}
-ESCALATION_BATCH_SIZE = 100
 APPROVAL_DECISION_STATES = frozenset(
     {
-        PENDING_LOW_VALUE_STATE,
-        PENDING_PRIMARY_STATE,
-        ESCALATED_LOW_VALUE_STATE,
-        ESCALATED_PRIMARY_STATE,
-    }
-)
-LOW_VALUE_APPROVAL_STATES = frozenset(
-    {
-        PENDING_LOW_VALUE_STATE,
-        ESCALATED_LOW_VALUE_STATE,
-    }
-)
-PRIMARY_APPROVAL_STATES = frozenset(
-    {
-        PENDING_PRIMARY_STATE,
-        ESCALATED_PRIMARY_STATE,
+        PENDING_AP_REVIEW_STATE,
+        PENDING_EXECUTIVE_APPROVAL_STATE,
     }
 )
 APPROVAL_EDIT_ROLES_BY_STATE = {
-    PENDING_LOW_VALUE_STATE: frozenset({LOW_VALUE_APPROVER_ROLE}),
-    PENDING_PRIMARY_STATE: frozenset({PRIMARY_APPROVER_ROLE}),
-    ESCALATED_LOW_VALUE_STATE: frozenset({LOW_VALUE_APPROVER_ROLE, SECONDARY_APPROVER_ROLE}),
-    ESCALATED_PRIMARY_STATE: frozenset({PRIMARY_APPROVER_ROLE, SECONDARY_APPROVER_ROLE}),
+    PENDING_AP_REVIEW_STATE: frozenset({AP_REVIEWER_ROLE}),
+    PENDING_EXECUTIVE_APPROVAL_STATE: frozenset({EXECUTIVE_APPROVER_ROLE}),
 }
 
 PAYMENT_REQUEST_LOCK_FIELDS = (
@@ -112,6 +79,7 @@ def validate_payment_request_before_submit(doc: Document, _method: str) -> None:
             ),
             title=_("Payment approval required"),
         )
+    _validate_verified_supplier_bank(doc)
 
 
 def validate_payment_request_transition(doc: Document, _method: str) -> None:
@@ -121,6 +89,13 @@ def validate_payment_request_transition(doc: Document, _method: str) -> None:
 def validate_payment_entry_before_submit(doc: Document, _method: str) -> None:
     if doc.get("payment_type") != "Pay":
         return
+    if not doc.get("reference_no") or not doc.get("reference_date"):
+        frappe.throw(_("Outgoing Payment Entry requires a reference number and reference date."))
+    if not frappe.db.exists(
+        "File",
+        {"attached_to_doctype": "Payment Entry", "attached_to_name": doc.name},
+    ):
+        frappe.throw(_("Outgoing Payment Entry requires payment evidence as an attachment."))
 
     allocated_rows = _get_allocated_reference_rows(doc)
     if not allocated_rows:
@@ -221,9 +196,6 @@ def _validate_payment_request_fields(doc: Document, previous_doc: Document | Non
     _validate_creator_unchanged(doc, previous_doc)
     _maintain_base_grand_total(doc, previous_doc)
     _validate_workflow_state_write_access(doc, previous_doc)
-    _maintain_approval_snapshot(doc, previous_doc)
-    _maintain_approval_deadline(doc, previous_doc)
-    _validate_approval_route(doc)
     _validate_approval_decision(doc, previous_doc)
 
 
@@ -331,36 +303,6 @@ def _calculate_base_grand_total(doc: Document) -> float:
     return flt(flt(doc.get("grand_total")) * conversion_rate, precision)
 
 
-def _maintain_approval_snapshot(doc: Document, previous_doc: Document | None) -> None:
-    next_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "") if previous_doc else ""
-
-    if next_state in PENDING_ESCALATION_STATES and previous_state != next_state:
-        limit = frappe.db.get_value(
-            "Company",
-            doc.get("company"),
-            LOW_VALUE_PAYMENT_APPROVAL_LIMIT_FIELD,
-        )
-        doc.set(
-            PAYMENT_APPROVAL_LIMIT_FIELD,
-            flt(limit, doc.precision(PAYMENT_APPROVAL_LIMIT_FIELD)),
-        )
-        return
-
-    if not previous_doc:
-        doc.set(PAYMENT_APPROVAL_LIMIT_FIELD, None)
-        return
-
-    current_limit = doc.get(PAYMENT_APPROVAL_LIMIT_FIELD)
-    previous_limit = previous_doc.get(PAYMENT_APPROVAL_LIMIT_FIELD)
-    if _same_currency(current_limit, previous_limit, doc.precision(PAYMENT_APPROVAL_LIMIT_FIELD)):
-        return
-    frappe.throw(
-        _("The payment approval limit snapshot is managed by the system and cannot be changed."),
-        title=_("Payment approval limit cannot be changed"),
-    )
-
-
 def _validate_approval_decision(doc: Document, previous_doc: Document | None) -> None:
     next_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
     if next_state not in {APPROVED_STATE, REJECTED_STATE}:
@@ -374,12 +316,6 @@ def _validate_approval_decision(doc: Document, previous_doc: Document | None) ->
             _("Payment approval decisions are only allowed from a pending approval state."),
             title=_("Invalid payment approval transition"),
         )
-    if not _state_matches_snapshot(doc, previous_state):
-        frappe.throw(
-            _("Payment Request amount does not match its approval limit snapshot."),
-            title=_("Invalid payment approval route"),
-        )
-
     if frappe.session.user != "Administrator" and doc.get("owner") == frappe.session.user:
         frappe.throw(
             _("You cannot approve or reject a Payment Request that you created."),
@@ -411,7 +347,7 @@ def _validate_workflow_state_write_access(doc: Document, previous_doc: Document 
     allowed_roles = set(APPROVAL_EDIT_ROLES_BY_STATE.get(previous_state, ()))
 
     if previous_state in APPROVAL_DECISION_STATES:
-        if doc.get("payment_request_type") != "Outward" or not _state_matches_snapshot(doc, previous_state):
+        if doc.get("payment_request_type") != "Outward":
             allowed_roles.clear()
 
         if allowed_roles.intersection(roles):
@@ -426,63 +362,6 @@ def _validate_workflow_state_write_access(doc: Document, previous_doc: Document 
             _("Payment approver roles do not grant general Payment Request editing access."),
             title=_("Accounts role required"),
         )
-
-
-def _maintain_approval_deadline(doc: Document, previous_doc: Document | None) -> None:
-    next_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "") if previous_doc else ""
-
-    if next_state in PENDING_ESCALATION_STATES and previous_state != next_state:
-        doc.set(APPROVAL_DUE_AT_FIELD, add_to_date(now_datetime(), hours=24))
-        return
-
-    if not previous_doc:
-        doc.set(APPROVAL_DUE_AT_FIELD, None)
-        return
-
-    current_due_at = doc.get(APPROVAL_DUE_AT_FIELD)
-    previous_due_at = previous_doc.get(APPROVAL_DUE_AT_FIELD)
-    if _same_datetime(current_due_at, previous_due_at):
-        return
-    frappe.throw(
-        _("The payment approval deadline is managed by the system and cannot be changed."),
-        title=_("Payment approval deadline cannot be changed"),
-    )
-
-
-def _validate_approval_route(doc: Document) -> None:
-    state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    if state not in APPROVAL_DECISION_STATES:
-        return
-    if doc.get("payment_request_type") != "Outward" or not _state_matches_snapshot(doc, state):
-        frappe.throw(
-            _("Payment Request approval state does not match its approval limit snapshot."),
-            title=_("Invalid payment approval route"),
-        )
-
-
-def _state_matches_snapshot(doc: Document, state: str) -> bool:
-    precision = doc.precision(BASE_GRAND_TOTAL_FIELD)
-    base_grand_total = flt(doc.get(BASE_GRAND_TOTAL_FIELD), precision)
-    payment_approval_limit = flt(doc.get(PAYMENT_APPROVAL_LIMIT_FIELD), precision)
-    is_low_value = payment_approval_limit > 0 and base_grand_total < payment_approval_limit
-    return (state in LOW_VALUE_APPROVAL_STATES and is_low_value) or (
-        state in PRIMARY_APPROVAL_STATES and not is_low_value
-    )
-
-
-def _same_datetime(first: Any, second: Any) -> bool:
-    if not first and not second:
-        return True
-    if not first or not second:
-        return False
-    return get_datetime(first) == get_datetime(second)
-
-
-def _same_currency(first: Any, second: Any, precision: int | None) -> bool:
-    if not first and not second:
-        return True
-    return flt(first, precision) == flt(second, precision)
 
 
 def _validate_inward_submitter() -> None:
@@ -554,6 +433,24 @@ def _validate_payment_request_matches_reference(
             )
 
 
+def _validate_verified_supplier_bank(doc: Document) -> None:
+    if doc.get("party_type") != "Supplier":
+        return
+    bank_account = cast(str, doc.get("bank_account") or "")
+    if not bank_account:
+        frappe.throw(_("Outward Supplier Payment Request requires a verified Bank Account."))
+    bank = frappe.db.get_value(
+        "Bank Account",
+        bank_account,
+        ["party_type", "party", "disabled", "supplier_bank_verification_status"],
+        as_dict=True,
+    )
+    if not bank or bank.get("party_type") != "Supplier" or bank.get("party") != doc.get("party"):
+        frappe.throw(_("Payment Request Bank Account must belong to its Supplier."))
+    if bank.get("disabled") or bank.get("supplier_bank_verification_status") != "Verified":
+        frappe.throw(_("Payment Request Bank Account must be verified before approval."))
+
+
 def _throw_reference_mismatch(
     reference_row: Document,
     payment_request_name: str,
@@ -566,110 +463,6 @@ def _throw_reference_mismatch(
             reason,
         ),
         title=_("Invalid Payment Request"),
-    )
-
-
-def escalate_due_payment_approvals() -> None:
-    due_requests = frappe.get_all(
-        PAYMENT_REQUEST_DOCTYPE,
-        filters={
-            "docstatus": 0,
-            "payment_request_type": "Outward",
-            WORKFLOW_STATE_FIELD: ["in", PENDING_ESCALATION_STATES],
-            APPROVAL_DUE_AT_FIELD: ["<=", now_datetime()],
-        },
-        pluck="name",
-        order_by=f"{APPROVAL_DUE_AT_FIELD} asc, name asc",
-        limit=ESCALATION_BATCH_SIZE,
-    )
-
-    escalated_count = 0
-    failures: list[tuple[str, str]] = []
-    for index, payment_request_name in enumerate(due_requests, start=1):
-        savepoint = f"payment_approval_escalation_{index}"
-        frappe.db.savepoint(savepoint)
-        try:
-            if escalate_payment_approval(payment_request_name):
-                escalated_count += 1
-        except Exception as exc:
-            frappe.db.rollback(save_point=savepoint)
-            failures.append((payment_request_name, f"{type(exc).__name__}: {exc}"))
-        finally:
-            frappe.db.release_savepoint(savepoint)
-
-    if escalated_count:
-        frappe.logger(__name__).info("Escalated %s overdue Payment Requests", escalated_count)
-    if failures:
-        failure_details = "; ".join(f"{name} ({error})" for name, error in failures)
-        frappe.logger(__name__).error(
-            "Failed to escalate %s overdue Payment Requests: %s",
-            len(failures),
-            failure_details,
-        )
-
-
-def escalate_payment_approval(payment_request_name: str) -> bool:
-    locked_request = frappe.db.get_value(
-        PAYMENT_REQUEST_DOCTYPE,
-        payment_request_name,
-        ["docstatus", "payment_request_type", WORKFLOW_STATE_FIELD, APPROVAL_DUE_AT_FIELD],
-        as_dict=True,
-        for_update=True,
-    )
-    if not locked_request or not _is_due_for_escalation(locked_request):
-        return False
-
-    previous_state = cast(str, locked_request.get(WORKFLOW_STATE_FIELD))
-    expected_state = ESCALATED_STATE_BY_PENDING_STATE[previous_state]
-    _delete_completed_workflow_actions(payment_request_name, expected_state)
-    frappe.db.set_value(
-        PAYMENT_REQUEST_DOCTYPE,
-        payment_request_name,
-        WORKFLOW_STATE_FIELD,
-        expected_state,
-        modified_by="Administrator",
-    )
-    escalated_request = cast(Document, frappe.get_doc(PAYMENT_REQUEST_DOCTYPE, payment_request_name))
-    _complete_previous_workflow_action(payment_request_name, previous_state)
-    process_workflow_actions(escalated_request, "on_update")
-    escalated_request.add_comment(
-        "Workflow",
-        _("Automatically escalated after the payment approval deadline."),
-        comment_email="Administrator",
-        comment_by=_("System"),
-    )
-    escalated_request.notify_update()
-
-    return True
-
-
-def _is_due_for_escalation(payment_request: Any) -> bool:
-    if int(payment_request.get("docstatus") or 0) != 0:
-        return False
-    if payment_request.get("payment_request_type") != "Outward":
-        return False
-    if payment_request.get(WORKFLOW_STATE_FIELD) not in PENDING_ESCALATION_STATES:
-        return False
-
-    approval_due_at = payment_request.get(APPROVAL_DUE_AT_FIELD)
-    approval_due_datetime = get_datetime(approval_due_at) if approval_due_at else None
-    return bool(approval_due_datetime and approval_due_datetime <= now_datetime())
-
-
-def _complete_previous_workflow_action(payment_request_name: str, previous_state: str) -> None:
-    frappe.db.set_value(
-        "Workflow Action",
-        {
-            "reference_doctype": PAYMENT_REQUEST_DOCTYPE,
-            "reference_name": payment_request_name,
-            "workflow_state": previous_state,
-            "status": "Open",
-        },
-        {
-            "status": "Completed",
-            "completed_by": "Administrator",
-            "completed_by_role": ESCALATION_ROLE,
-        },
     )
 
 

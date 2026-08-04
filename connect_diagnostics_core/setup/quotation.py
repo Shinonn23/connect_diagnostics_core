@@ -113,9 +113,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Link",
             "options": "Sales Person",
             "insert_after": "quotation_signatory_type",
-            "depends_on": (
-                f"eval:doc.quotation_signatory_type=='{SIGNATORY_SALES_REPRESENTATIVE}'"
-            ),
+            "depends_on": (f"eval:doc.quotation_signatory_type=='{SIGNATORY_SALES_REPRESENTATIVE}'"),
             "mandatory_depends_on": (
                 f"eval:doc.quotation_signatory_type=='{SIGNATORY_SALES_REPRESENTATIVE}'"
             ),
@@ -140,9 +138,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Small Text",
             "insert_after": "quotation_validity_mode",
             "depends_on": f"eval:doc.quotation_validity_mode=='{VALIDITY_CUSTOM_TEXT}'",
-            "mandatory_depends_on": (
-                f"eval:doc.quotation_validity_mode=='{VALIDITY_CUSTOM_TEXT}'"
-            ),
+            "mandatory_depends_on": (f"eval:doc.quotation_validity_mode=='{VALIDITY_CUSTOM_TEXT}'"),
             "allow_on_submit": 1,
         },
         {

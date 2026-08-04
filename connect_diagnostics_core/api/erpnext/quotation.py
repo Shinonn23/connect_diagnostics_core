@@ -71,8 +71,8 @@ def get_print_configuration_defaults(
             if customer_values.get(fieldname) is not None
         }
     )
-    configuration["quotation_sales_representative"] = (
-        _text(sales_person) or _first_customer_sales_person(customer)
+    configuration["quotation_sales_representative"] = _text(sales_person) or _first_customer_sales_person(
+        customer
     )
 
     return {
@@ -130,10 +130,8 @@ def _mark_modified_preset_as_custom(doc: Document) -> None:
 
 
 def _default_sales_representative(doc: Document) -> None:
-    if (
-        _text(doc.get("quotation_signatory_type"))
-        != quotation_setup.SIGNATORY_SALES_REPRESENTATIVE
-        or _text(doc.get("quotation_sales_representative"))
+    if _text(doc.get("quotation_signatory_type")) != quotation_setup.SIGNATORY_SALES_REPRESENTATIVE or _text(
+        doc.get("quotation_sales_representative")
     ):
         return
 
@@ -146,9 +144,8 @@ def _default_sales_representative(doc: Document) -> None:
 
 
 def _validate_custom_validity(doc: Document) -> None:
-    if (
-        _text(doc.get("quotation_validity_mode")) == quotation_setup.VALIDITY_CUSTOM_TEXT
-        and not _text(doc.get("quotation_custom_validity_text"))
+    if _text(doc.get("quotation_validity_mode")) == quotation_setup.VALIDITY_CUSTOM_TEXT and not _text(
+        doc.get("quotation_custom_validity_text")
     ):
         frappe.throw(_("Custom Validity Text is required when Validity Mode is Custom Text."))
 
@@ -166,9 +163,7 @@ def _validate_signatory_source(doc: Document) -> None:
             frappe.throw(_("Sales Representative is required for this Quotation form."))
         if not frappe.db.get_value("Sales Person", sales_person, "employee"):
             frappe.throw(
-                _("Sales Person {0} must be linked to an Employee.").format(
-                    frappe.bold(sales_person)
-                )
+                _("Sales Person {0} must be linked to an Employee.").format(frappe.bold(sales_person))
             )
     elif signatory_type == quotation_setup.SIGNATORY_MANAGING_DIRECTOR:
         company = _text(doc.get("company"))
@@ -179,9 +174,9 @@ def _validate_signatory_source(doc: Document) -> None:
         )
         if not employee:
             frappe.throw(
-                _(
-                    "Quotation Authorized Signatory Employee must be configured on Company {0}."
-                ).format(frappe.bold(company))
+                _("Quotation Authorized Signatory Employee must be configured on Company {0}.").format(
+                    frappe.bold(company)
+                )
             )
 
 
@@ -224,9 +219,7 @@ def _signatory_details(doc: Document | Mapping[str, Any]) -> dict[str, str]:
         employee = _text(frappe.db.get_value("Sales Person", sales_person, "employee"))
     elif signatory_type == quotation_setup.SIGNATORY_MANAGING_DIRECTOR:
         company = _text(doc.get("company"))
-        employee = _text(
-            frappe.db.get_value("Company", company, "quotation_authorized_signatory_employee")
-        )
+        employee = _text(frappe.db.get_value("Company", company, "quotation_authorized_signatory_employee"))
 
     if not employee:
         return {"employee": "", "name": "", "designation": "", "phone": ""}
