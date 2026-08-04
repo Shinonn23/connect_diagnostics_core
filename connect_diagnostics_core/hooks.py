@@ -91,7 +91,9 @@ jinja = {
     "methods": [
         "connect_diagnostics_core.utils.thai_words.number_to_thai_currency",
         "connect_diagnostics_core.utils.currency.print_currency",
+        "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.date.format_date",
+        "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
@@ -157,10 +159,17 @@ naming_series_variables = {
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
     "Customer": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
         "autoname": "connect_diagnostics_core.naming.customer.set_customer_code",
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
         "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
+    },
+    "Customer Credit Request": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
+        "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
+        "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
     },
     "Address": {
         "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
