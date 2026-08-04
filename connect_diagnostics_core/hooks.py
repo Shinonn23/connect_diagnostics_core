@@ -40,11 +40,12 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {"print": "public/js/custom/print/doctype.js"}
 
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
+    "Customer": "public/js/custom/customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
@@ -93,6 +94,8 @@ jinja = {
         "connect_diagnostics_core.utils.currency.print_currency",
         "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.date.format_date",
+        "connect_diagnostics_core.api.erpnext.print_configuration.get_document_print_context",
+        "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"

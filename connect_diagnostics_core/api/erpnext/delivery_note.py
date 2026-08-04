@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 import frappe
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+from connect_diagnostics_core.api.erpnext.stock_traceability import get_item_traceability
 
 
 @frappe.whitelist()
@@ -28,7 +29,7 @@ def get_serial_no_summary(delivery_note: str) -> list[dict]:
 
     summary = []
     for row in rows:
-        serial_nos = _resolve_serial_nos(row)
+        serial_nos = get_item_traceability(row)["serial_nos"]
 
         has_serial_no = frappe.get_cached_value("Item", row.item_code, "has_serial_no")
         if not has_serial_no and not serial_nos:
@@ -44,19 +45,3 @@ def get_serial_no_summary(delivery_note: str) -> list[dict]:
         )
 
     return summary
-
-
-def _resolve_serial_nos(row) -> list[str]:
-    if row.serial_no:
-        return get_serial_nos(row.serial_no)
-
-    if row.serial_and_batch_bundle:
-        serial_nos = frappe.db.get_all(
-            "Serial and Batch Entry",
-            filters={"parent": row.serial_and_batch_bundle},
-            pluck="serial_no",
-            order_by="idx asc",
-        )
-        return [sn for sn in serial_nos if sn]
-
-    return []

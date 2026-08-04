@@ -38,6 +38,24 @@ class TestPrintFormats(UnitTestCase):
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
+    def test_app_owned_print_formats_are_editable_through_desk(self) -> None:
+        for print_format in load_print_formats():
+            with self.subTest(name=print_format["name"]):
+                self.assertEqual(print_format["standard"], "No")
+
+    def test_configuration_print_formats_are_newer_than_their_pre_configuration_versions(self) -> None:
+        previous_timestamps = {
+            "Quotation": "2026-07-30 22:50:00.000000",
+            "Tax Invoice Delivery Note and Invoice": "2026-07-13 02:55:13.159262",
+            "Abbreviated Tax Invoice And Receipt": "2026-07-15 01:06:43.299275",
+            "Receipt": "2026-07-03 15:30:00.000000",
+        }
+
+        formats = {print_format["name"]: print_format for print_format in load_print_formats()}
+        for name, previous in previous_timestamps.items():
+            with self.subTest(name=name):
+                self.assertGreater(formats[name]["modified"], previous)
+
     def test_templates_do_not_define_money_macros(self) -> None:
         for print_format in load_print_formats():
             html = print_format["html"]
@@ -62,13 +80,14 @@ class TestPrintFormats(UnitTestCase):
             self.assertIn("<section", html, print_format["name"])
             self.assertIn("<footer", html, print_format["name"])
 
-    def test_quotation_uses_snapshot_configuration_in_one_bilingual_format(self) -> None:
+    def test_quotation_uses_customer_configuration_in_one_bilingual_format(self) -> None:
         path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
         print_format = json.loads(path.read_text())
         html = print_format["html"]
 
         self.assertEqual(print_format["name"], "Quotation")
         self.assertIn("get_quotation_print_context(doc)", html)
+        self.assertIn("print_context.customer_name", html)
         self.assertIn("for copy in print_context.copies", html)
         self.assertIn("print_context.show_thai", html)
         self.assertIn("print_context.show_english", html)
@@ -82,6 +101,80 @@ class TestPrintFormats(UnitTestCase):
         self.assertIn('label("กำหนดส่งมอบสินค้า", "Delivery Terms")', html)
         self.assertIn(".cdq-bilingual .cdq-company", print_format["css"])
         self.assertNotIn("ฟอร์มรูปแบบ", html)
+        Environment().parse(html)
+
+    def test_non_quotation_customer_formats_use_the_shared_print_context(self) -> None:
+        expected_contexts = {
+            "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json": "tax_invoice",
+            "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json": "abbreviated_tax_invoice",
+            "receipt/receipt.json": "receipt",
+        }
+
+        for relative_path, configuration in expected_contexts.items():
+            with self.subTest(relative_path=relative_path):
+                html = json.loads((PRINT_FORMAT_ROOT / relative_path).read_text())["html"]
+                if configuration == "tax_invoice":
+                    self.assertIn("get_sales_invoice_print_context(doc)", html)
+                else:
+                    self.assertIn(f'get_document_print_context(doc, "{configuration}")', html)
+                self.assertIn("print_context.customer_name", html)
+                self.assertIn("print_context.show_date", html)
+                self.assertIn("for copy in print_context.copies", html)
+                self.assertIn("copy.label", html)
+                Environment().parse(html)
+
+                if configuration != "tax_invoice":
+                    self.assertIn("print_context.show_thai", html)
+                    self.assertIn("print_context.show_english", html)
+
+        sales_invoice = json.loads(
+            (
+                PRINT_FORMAT_ROOT
+                / "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json"
+            ).read_text()
+        )
+        self.assertIn("copy-{{ copy.kind }}", sales_invoice["html"])
+        self.assertIn("traceability-line", sales_invoice["html"])
+        self.assertNotIn("batch(7)", sales_invoice["html"])
+        self.assertIn("current_print_page }}/{{ total_print_pages", sales_invoice["html"])
+        self.assertIn("{% set total_print_pages = item_page_count %}", sales_invoice["html"])
+        self.assertIn("{% set current_print_page = page_loop.index %}", sales_invoice["html"])
+        self.assertIn("copy_loop.last and page_loop.last", sales_invoice["html"])
+        self.assertNotIn("copy_loop.index - 1", sales_invoice["html"])
+        self.assertIn('frappe.utils.format_time(doc.modified, "HH:mm:ss")', sales_invoice["html"])
+        self.assertNotIn("frappe.utils.nowtime()", sales_invoice["html"])
+        self.assertIn("{% if doc.docstatus == 1 %}", sales_invoice["html"])
+        self.assertIn("copy-accounting", sales_invoice["css"])
+        self.assertIn("overflow-wrap: anywhere", sales_invoice["css"])
+        self.assertNotIn("text-overflow: ellipsis", sales_invoice["css"])
+        self.assertNotIn("show_thai", sales_invoice["html"])
+        self.assertNotIn("show_english", sales_invoice["html"])
+        self.assertNotIn('class="en"', sales_invoice["html"])
+        self.assertNotIn("cd-language-", sales_invoice["css"])
+
+    def test_purchase_order_header_and_item_columns_match_current_layout(self) -> None:
+        print_format = json.loads((PRINT_FORMAT_ROOT / "purchase_order/purchase_order.json").read_text())
+        html = print_format["html"]
+        css = print_format["css"]
+
+        self.assertIn("shipping_address_display", html)
+        self.assertIn("supplier_contact", html)
+        self.assertIn("Contact:", html)
+        self.assertNotIn("Reference", html)
+        self.assertIn("eta_date", html)
+        self.assertIn("ETA", html)
+        self.assertIn("Incoterm", html)
+        self.assertIn("Currency:", html)
+        self.assertIn("col-item-code", html)
+        self.assertIn("col-uom", html)
+        self.assertNotIn("col-location", html)
+        self.assertNotIn("col-discount", html)
+        self.assertNotIn("line-location", html)
+        self.assertNotIn("line-discount", html)
+        self.assertNotIn("col-location", css)
+        self.assertNotIn("col-discount", css)
+        self.assertNotIn("line-location", css)
+        self.assertNotIn("line-discount", css)
         Environment().parse(html)
 
     def test_shipment_box_label_metadata_and_layout(self) -> None:

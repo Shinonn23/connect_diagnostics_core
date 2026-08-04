@@ -12,7 +12,6 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from connect_diagnostics_core.setup import customer as customer_setup
-from connect_diagnostics_core.setup import quotation as quotation_setup
 
 LEGACY_FIELDS = (
     "name",
@@ -26,15 +25,12 @@ def build_preference_values(customer: Mapping[str, Any]) -> dict[str, int | str]
     use_tax_invoice = int(customer.get("use_tax_invoice") or 0)
     print_date_value = customer.get("print_date")
     show_date = int(print_date_value if print_date_value is not None else 1)
-    quotation_preset = quotation_setup.FORM_PRESET_01 if show_date else quotation_setup.FORM_PRESET_02
-
     values: dict[str, int | str] = {
         "use_delivery_note": use_tax_invoice,
         "use_invoice": use_tax_invoice,
         "purchase_order_copy_count": 1,
-        "quotation_form_preset": quotation_preset,
-        "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
-        "quotation_validity_mode": quotation_setup.VALIDITY_VALID_TILL,
+        "quotation_signatory_type": "Sales Representative",
+        "override_quotation_validity_text": 0,
     }
     for prefix, _label, _use_fieldname in customer_setup.DOCUMENT_PREFERENCES:
         values.update(

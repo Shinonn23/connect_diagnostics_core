@@ -27,7 +27,6 @@ from connect_diagnostics_core.setup import (
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
-    quotation,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
@@ -57,7 +56,6 @@ _MODULES = (
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
-    quotation,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
@@ -91,6 +89,7 @@ def apply_all() -> None:
 
 def after_install() -> None:
     apply_all()
+    _ensure_default_print_configuration_template()
 
 
 def after_sync() -> None:
@@ -99,4 +98,14 @@ def after_sync() -> None:
 
 def after_migrate() -> None:
     apply_all()
+    _ensure_default_print_configuration_template()
     remove_non_app_print_formats()
+
+
+def _ensure_default_print_configuration_template() -> None:
+    """Create the reusable default after the standard DocType has synchronized."""
+    from connect_diagnostics_core.patches.v1_0.migrate_print_configuration_templates import (
+        _ensure_default_template,
+    )
+
+    _ensure_default_template()
