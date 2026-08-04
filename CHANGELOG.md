@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.29.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.28.0...v0.29.0) (2026-08-04)
+
+
+### Features
+
+* manage procure-to-pay workflows with fixtures ([839f9f0](https://github.com/Shinonn23/connect_diagnostics_core/commit/839f9f06cfd7155ff42547dc761596b3c106c74d))
+* manage procure-to-pay workflows with fixtures ([b1055a1](https://github.com/Shinonn23/connect_diagnostics_core/commit/b1055a1caa9aa028e8f4de9ec8eff1c6304146b8))
+* manage procure-to-pay workflows with fixtures ([dc07861](https://github.com/Shinonn23/connect_diagnostics_core/commit/dc07861a99322d3b702075f702ab163257762f28))
+* **quotation:** add configurable customer print preferences ([135147e](https://github.com/Shinonn23/connect_diagnostics_core/commit/135147e7349f7221d42164f25bbbb1dde36b1bf0))
+
+
+### Bug Fixes
+
+* remove draft procure-to-pay documents during cutover ([7daa2ed](https://github.com/Shinonn23/connect_diagnostics_core/commit/7daa2ed7ee563114a648ba5cedda1741fc22a517))
+
 ## [0.28.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.27.2...v0.28.0) (2026-07-30)
 
 
