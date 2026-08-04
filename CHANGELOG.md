@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.30.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.29.0...v0.30.0) (2026-08-04)
+
+
+### Features
+
+* configure document print formats ([6629196](https://github.com/Shinonn23/connect_diagnostics_core/commit/6629196fc549baee41d6320c038c14df6adfa777))
+* configure document print formats ([093060d](https://github.com/Shinonn23/connect_diagnostics_core/commit/093060d9ca8505b4641447c8cd16c344ec20e08e))
+
 ## [0.29.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.28.0...v0.29.0) (2026-08-04)
 
 
