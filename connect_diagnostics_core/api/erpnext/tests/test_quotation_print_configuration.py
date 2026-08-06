@@ -174,6 +174,41 @@ class TestQuotationPrintConfiguration(UnitTestCase):
         self.assertTrue(context["show_english"])
 
     @patch.object(quotation, "get_document_print_context")
+    @patch.object(quotation.frappe.db, "get_value")
+    def test_managing_director_uses_quotation_authorized_signatory_employee_override(
+        self, mocked_get_value: MagicMock, mocked_configuration: MagicMock
+    ) -> None:
+        mocked_configuration.return_value = {
+            "language": "English",
+            "original_count": 1,
+            "copy_count": 0,
+            "copies": [{"kind": "original", "label": "Original"}],
+            "override_quotation_validity_text": 0,
+            "quotation_delivery_terms": "",
+            "quotation_signatory_type": "Managing Director",
+            "quotation_authorized_signatory_employee": "EMP-OVERRIDE",
+        }
+        mocked_get_value.return_value = {
+            "employee_name": "Override Signatory",
+            "designation": "Acting Director",
+            "cell_number": "08-999-9999",
+        }
+        doc = FakeQuotation(
+            {
+                "company": "Connect Diagnostics",
+                "quotation_signatory_type": "Managing Director",
+                "quotation_authorized_signatory_employee": "EMP-OVERRIDE",
+            }
+        )
+
+        context = quotation.get_quotation_print_context(cast(Document, doc))
+
+        self.assertEqual(context["signatory"]["name"], "Override Signatory")
+        mocked_get_value.assert_any_call(
+            "Employee", "EMP-OVERRIDE", ["employee_name", "designation", "cell_number"], as_dict=True
+        )
+
+    @patch.object(quotation, "get_document_print_context")
     @patch.object(quotation.frappe, "get_all", return_value=[])
     def test_sales_representative_requires_customer_sales_team(
         self, _mocked_get_all: MagicMock, mocked_configuration: MagicMock

@@ -91,10 +91,16 @@ def _signatory_details(
                 _("Sales Person must be linked to an Employee for a Sales Representative signatory.")
             )
     elif signatory_type == quotation_setup.SIGNATORY_MANAGING_DIRECTOR:
-        company = _text(doc.get("company"))
-        if not company:
-            frappe.throw(_("Company is required for a Managing Director signatory."))
-        employee = _text(frappe.db.get_value("Company", company, "quotation_authorized_signatory_employee"))
+        employee = _text(context.get("quotation_authorized_signatory_employee")) or _text(
+            doc.get("quotation_authorized_signatory_employee")
+        )
+        if not employee:
+            company = _text(doc.get("company"))
+            if not company:
+                frappe.throw(_("Company is required for a Managing Director signatory."))
+            employee = _text(
+                frappe.db.get_value("Company", company, "quotation_authorized_signatory_employee")
+            )
         if not employee:
             frappe.throw(_("Company must have a quotation authorized signatory Employee."))
     else:
