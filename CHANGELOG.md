@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.30.0...v0.31.0) (2026-08-06)
+
+
+### Features
+
+* configure quotation signatory defaults and print overrides ([82f516c](https://github.com/Shinonn23/connect_diagnostics_core/commit/82f516cc9dfbc69d735aa3b6c5492eba022461a9))
+* configure quotation signatory defaults and print overrides ([4692163](https://github.com/Shinonn23/connect_diagnostics_core/commit/469216383584fb545f6b0082417ff50cb08febd5))
+
 ## [0.30.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.29.0...v0.30.0) (2026-08-04)
 
 
