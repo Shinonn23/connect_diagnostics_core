@@ -39,7 +39,7 @@
 			if (configurationResult.status === "fulfilled") {
 				this.add_customer_print_settings(configurationResult.value);
 			} else {
-				console.error("Could not load Customer print options.", configurationResult.reason);
+				frappe.msgprint(__("Could not load Customer print options."), configurationResult.reason);
 			}
 			this.preview();
 		});
