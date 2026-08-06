@@ -19,7 +19,11 @@ def before_validate(doc: Document, _method: str | None = None) -> None:
         doc.set("disabled", 1)
 
 
+<<<<<<< HEAD
 def validate_supplier_onboarding(doc: Document, _method: str | None = None) -> None:
+=======
+def validate(doc: Document, _method: str | None = None) -> None:
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     previous = doc.get_doc_before_save()
     state = cast(str, doc.get("supplier_onboarding_state") or "")
     if not state:
@@ -108,6 +112,7 @@ def on_submit_bank_change_request(doc: Document, _method: str | None = None) -> 
         {"supplier_bank_verification_status": "Verified", "supplier_bank_change_request": doc.name},
         update_modified=False,
     )
+<<<<<<< HEAD
     frappe.db.set_value(
         "Supplier",
         doc.get("supplier"),
@@ -133,6 +138,8 @@ def on_cancel_bank_change_request(doc: Document, _method: str | None = None) -> 
             {"supplier_bank_verification_status": "Unverified", "supplier_bank_change_request": None},
             update_modified=False,
         )
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 
 
 def _has_verified_bank_account(supplier: str | None) -> bool:
@@ -152,10 +159,13 @@ def _has_verified_bank_account(supplier: str | None) -> bool:
 def _require_user(user: str, action: str) -> None:
     if frappe.session.user not in {"Administrator", user}:
         frappe.throw(_("Only {0} can {1}.").format(user, action))
+<<<<<<< HEAD
 
 
 def validate(doc: Any, method: str | None = None) -> None:
     validate_supplier_onboarding(cast(Document, doc), method)
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 
 
 @frappe.whitelist()

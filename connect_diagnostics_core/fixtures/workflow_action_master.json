@@ -1,4 +1,5 @@
 [
+<<<<<<< HEAD
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
@@ -224,3 +225,146 @@
 		"workflow_action_name": "Revise purchase invoice"
 	}
 ]
+=======
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-07-22 08:43:08.267410",
+  "name": "Request Payment Approval",
+  "workflow_action_name": "Request Payment Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-07-22 08:43:08.271499",
+  "name": "Approve Payment Request",
+  "workflow_action_name": "Approve Payment Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-07-22 08:43:08.274504",
+  "name": "Reject Payment Request",
+  "workflow_action_name": "Reject Payment Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-07-22 08:43:08.280628",
+  "name": "Revise Payment Request",
+  "workflow_action_name": "Revise Payment Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-07-22 08:43:08.286060",
+  "name": "Submit Payment Request",
+  "workflow_action_name": "Submit Payment Request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.400954",
+  "name": "Verify purchase invoice",
+  "workflow_action_name": "Verify purchase invoice"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.402168",
+  "name": "Request finance review",
+  "workflow_action_name": "Request finance review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.403194",
+  "name": "Approve material request",
+  "workflow_action_name": "Approve material request"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.406319",
+  "name": "Verify bank details",
+  "workflow_action_name": "Verify bank details"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.407286",
+  "name": "Request approval",
+  "workflow_action_name": "Request approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.408301",
+  "name": "Accept goods",
+  "workflow_action_name": "Accept goods"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.409282",
+  "name": "Approve bank change",
+  "workflow_action_name": "Approve bank change"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.410294",
+  "name": "Request goods inspection",
+  "workflow_action_name": "Request goods inspection"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.413286",
+  "name": "Request bank verification",
+  "workflow_action_name": "Request bank verification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.414302",
+  "name": "Activate supplier",
+  "workflow_action_name": "Activate supplier"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.419262",
+  "name": "Request AP verification",
+  "workflow_action_name": "Request AP verification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.420282",
+  "name": "Verify supplier",
+  "workflow_action_name": "Verify supplier"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.421255",
+  "name": "Approve purchase order",
+  "workflow_action_name": "Approve purchase order"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.423278",
+  "name": "Request supplier verification",
+  "workflow_action_name": "Request supplier verification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "modified": "2026-08-03 23:04:06.681062",
+  "name": "Complete Payment Request AP Review",
+  "workflow_action_name": "Complete Payment Request AP Review"
+ }
+]
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)

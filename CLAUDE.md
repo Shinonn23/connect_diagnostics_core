@@ -484,36 +484,36 @@ return {"data": <payload>, "message": <str>}
   `Payment Request.payment_request_type = "Outward"`. Inward requests use the
   standard submit path. Payment Entry Receive and Internal Transfer behavior is
   unchanged.
-- `Company.low_value_payment_approval_limit` is expressed in company currency.
-  Blank or zero sends every Outward request to the primary approver. With a
-  positive limit, amounts below the limit use the low-value approver; amounts equal
-  to or above it use the primary approver. The limit is snapshotted when approval
-  is requested, so later Company changes do not reroute a pending request.
+- Every Outward request is reviewed by Kiattisak and then approved by either Sasin
+  or Arirat. It does not use an amount threshold or a time-based escalation.
 - `Payment Request.base_grand_total` is the requested amount in company currency.
   It equals `grand_total` for company-currency requests and otherwise uses the
   reference document's `conversion_rate`.
-- After 24 calendar hours, the secondary executive is added as an approver. The
-  original primary remains eligible; low-value requests also remain eligible for
-  the accounting approver. The first approval or rejection completes the shared
-  Workflow Action. Self-approval is disabled; creator, deadline, base amount, and
-  limit snapshot are protected and revalidated server-side.
+- The first executive approval or rejection completes the shared Workflow Action.
+  Self-approval is disabled; creator and base amount are protected and revalidated
+  server-side.
 - Every submitted `Payment Entry.payment_type = "Pay"` must allocate its complete
   amount to one or more submitted, approved Outward Payment Requests whose company,
   party, and reference match. Requests are locked in sorted order and allocation is
   aggregated per request, allowing partial payments and multiple requests without
   concurrent overpayment. Pay entries without such references are rejected.
-- The workflow, custom roles, profiles, fields, Custom DocPerm records, submit gate,
-  and scheduler are managed in `connect_diagnostics_core/setup/payment_approval.py`
-  and `connect_diagnostics_core/api/erpnext/payment_approval.py`. The scheduler
-  checks escalation deadlines every five minutes.
+- The workflow, custom roles, profiles, fields, Custom DocPerm records, and submit
+  gate are managed in `connect_diagnostics_core/setup/payment_approval.py` and
+  `connect_diagnostics_core/api/erpnext/payment_approval.py`.
 - Setup and migration append the approved payment profile when a User already uses
   Role Profiles. For a User with no Role Profiles they add only the profile's roles
   directly so existing direct roles are not erased. Missing or disabled approver
   Users do not block a fresh installation; later migrations retry the assignment.
-  Arirat receives primary plus low-value access, Sopha receives low-value access,
-  and Sasin receives the secondary direct role until his later Role Profile migration.
+  Arirat and Sasin receive executive access; Kiattisak receives AP-review access.
 - Workflow Actions work without email, but email delivery requires a configured
   Default Outgoing Email Account on each site.
+
+### Supplier and Procure-to-Pay Approval
+
+- New Suppliers remain disabled until Kiattisak verifies their data and Sasin activates them. A Supplier must have a verified Supplier Bank Account before activation.
+- Supplier Bank Change Request is the sole approval path for a Supplier bank account. Kiattisak verifies it independently; Sasin approves it; only verified accounts can be used for an Outward Payment Request.
+- Material Requests require one approval from Sasin or Arirat. Purchase Orders are reviewed by Kiattisak, with an executive exception for missing approved Material Requests. Purchase Receipts use Stock User → Stock Manager. Purchase Invoices are verified by Kiattisak, with Sasin or Arirat approving exceptions.
+- Procure-to-Pay migration refuses to run while cutover DocTypes contain drafts. Users must cancel and recreate drafts; submitted and cancelled history is preserved.
 
 ### Customer Onboarding and Master Data
 

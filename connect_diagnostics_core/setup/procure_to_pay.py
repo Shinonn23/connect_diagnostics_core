@@ -9,6 +9,10 @@ import frappe
 from frappe.model.document import Document
 from frappe.permissions import setup_custom_perms
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 SUPPLIER = "Supplier"
 BANK_ACCOUNT = "Bank Account"
 BANK_CHANGE_REQUEST = "Supplier Bank Change Request"
@@ -198,8 +202,11 @@ _PROFILES = {
     VERIFIER_PROFILE: (P2P_VERIFIER_ROLE,),
     ACTIVATOR_PROFILE: (SUPPLIER_ACTIVATOR_ROLE,),
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 def ensure_configuration() -> None:
     ensure_roles()
     ensure_role_profiles()
@@ -217,9 +224,13 @@ def ensure_roles() -> None:
                 role.update({"disabled": 0, "desk_access": 1, "is_custom": 1})
                 role.save(ignore_permissions=True)
             continue
+<<<<<<< HEAD
         frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1, "is_custom": 1}).insert(
             ignore_permissions=True
         )
+=======
+        frappe.get_doc({"doctype": "Role", "role_name": role_name, "desk_access": 1, "is_custom": 1}).insert(ignore_permissions=True)
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 
 
 def ensure_role_profiles() -> None:
@@ -231,6 +242,7 @@ def ensure_role_profiles() -> None:
             profile.set("roles", [{"role": role} for role in roles])
             profile.save(ignore_permissions=True)
             continue
+<<<<<<< HEAD
         frappe.get_doc(
             {
                 "doctype": "Role Profile",
@@ -251,6 +263,15 @@ def assign_role_holders() -> None:
     for user in frappe.get_all(
         "Employee", filters={"status": "Active", "user_id": ["is", "set"]}, pluck="user_id"
     ):
+=======
+        frappe.get_doc({"doctype": "Role Profile", "role_profile": profile_name, "roles": [{"role": role} for role in roles]}).insert(ignore_permissions=True)
+
+
+def assign_role_holders() -> None:
+    for user, profile in ((SASIN_USER, ACTIVATOR_PROFILE), (KIATTISAK_USER, VERIFIER_PROFILE), (SASIN_USER, EXECUTIVE_PROFILE), (ARIRAT_USER, EXECUTIVE_PROFILE)):
+        _assign_profile(user, profile)
+    for user in frappe.get_all("Employee", filters={"status": "Active", "user_id": ["is", "set"]}, pluck="user_id"):
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
         _assign_role(cast(str, user), PURCHASE_REQUESTER_ROLE)
 
 

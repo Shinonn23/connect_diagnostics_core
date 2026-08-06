@@ -6,10 +6,15 @@ from __future__ import annotations
 from typing import Any, cast
 
 import frappe
+<<<<<<< HEAD
+=======
+from frappe import _
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from connect_diagnostics_core.setup import procure_to_pay
 
+<<<<<<< HEAD
 _CUTOVER_DOCTYPES = (
     "Material Request",
     "Purchase Order",
@@ -17,6 +22,9 @@ _CUTOVER_DOCTYPES = (
     "Purchase Invoice",
     "Payment Request",
 )
+=======
+_CUTOVER_DOCTYPES = ("Material Request", "Purchase Order", "Purchase Receipt", "Purchase Invoice", "Payment Request")
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 _RETIRED_CUSTOM_FIELDS = {
     "Company": ("low_value_payment_approval_limit",),
     "Payment Request": ("approval_due_at", "payment_approval_limit"),
@@ -28,7 +36,11 @@ _RETIRED_PAYMENT_STATES = (
 
 
 def execute() -> None:
+<<<<<<< HEAD
     _delete_drafts_for_cutover()
+=======
+    _assert_no_drafts()
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     create_custom_fields(procure_to_pay.CUSTOM_FIELDS, ignore_validate=True)
     _remove_retired_payment_approval_configuration()
     _backfill_legacy_suppliers()
@@ -53,10 +65,22 @@ def _remove_retired_payment_approval_configuration() -> None:
         )
 
 
+<<<<<<< HEAD
 def _delete_drafts_for_cutover() -> None:
     for doctype in _CUTOVER_DOCTYPES:
         for name in frappe.get_all(doctype, filters={"docstatus": 0}, pluck="name"):
             frappe.delete_doc(doctype, name, force=True, ignore_permissions=True)
+=======
+def _assert_no_drafts() -> None:
+    drafts = {doctype: frappe.db.count(doctype, {"docstatus": 0}) for doctype in _CUTOVER_DOCTYPES}
+    remaining = {doctype: count for doctype, count in drafts.items() if count}
+    if remaining:
+        details = ", ".join(f"{doctype}: {count}" for doctype, count in remaining.items())
+        frappe.throw(
+            _("Procure-to-Pay cutover is blocked. Cancel and recreate these draft documents: {0}.").format(details),
+            title=_("Procure-to-Pay cutover blocked"),
+        )
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
 
 
 def _backfill_legacy_suppliers() -> None:
@@ -66,6 +90,7 @@ def _backfill_legacy_suppliers() -> None:
         for row in suppliers
         if not row.get("disabled")
     }
+<<<<<<< HEAD
     updates.update(
         {
             row["name"]: {"supplier_onboarding_state": procure_to_pay.SUPPLIER_DRAFT}
@@ -73,5 +98,7 @@ def _backfill_legacy_suppliers() -> None:
             if row.get("disabled")
         }
     )
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     if updates:
         frappe.db.bulk_update("Supplier", updates, update_modified=False)

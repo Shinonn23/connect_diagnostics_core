@@ -200,6 +200,13 @@ doc_events = {
         ),
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
+<<<<<<< HEAD
+=======
+    "Supplier": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+    },
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     "Bank Account": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
     },
@@ -207,7 +214,10 @@ doc_events = {
         "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate_bank_change_request",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
         "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
+<<<<<<< HEAD
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     },
     "Material Request": {
         "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
@@ -440,6 +450,7 @@ fixtures = [
                     "Accept goods",
                     "Request AP verification",
                     "Verify purchase invoice",
+<<<<<<< HEAD
                     "Return supplier",
                     "Return bank change",
                     "Reject bank change",
@@ -454,6 +465,8 @@ fixtures = [
                     "Approve purchase invoice exception",
                     "Reject purchase invoice",
                     "Revise purchase invoice",
+=======
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
                 ],
             ]
         ],

@@ -25,6 +25,11 @@ def build_preference_values(customer: Mapping[str, Any]) -> dict[str, int | str]
     use_tax_invoice = int(customer.get("use_tax_invoice") or 0)
     print_date_value = customer.get("print_date")
     show_date = int(print_date_value if print_date_value is not None else 1)
+<<<<<<< HEAD
+=======
+    quotation_preset = quotation_setup.FORM_PRESET_01 if show_date else quotation_setup.FORM_PRESET_02
+
+>>>>>>> 4543b3b (feat: Add workflow action master and state fixtures for procure-to-pay workflow)
     values: dict[str, int | str] = {
         "use_delivery_note": use_tax_invoice,
         "use_invoice": use_tax_invoice,
