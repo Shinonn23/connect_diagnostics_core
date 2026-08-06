@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.32.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.31.0...v0.32.0) (2026-08-06)
+
+
+### Features
+
+* add Thai employee identity and payroll configuration ([99cfacb](https://github.com/Shinonn23/connect_diagnostics_core/commit/99cfacbccbba11d932ec693c75fd7d1bdc00400b))
+* Add workflow action master and state fixtures for procure-to-pay workflow ([5b2ba15](https://github.com/Shinonn23/connect_diagnostics_core/commit/5b2ba15ede168bf06f9c82682b8d146961a3ca64))
+
 ## [0.31.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.30.0...v0.31.0) (2026-08-06)
 
 
