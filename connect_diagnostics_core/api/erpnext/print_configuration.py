@@ -76,6 +76,7 @@ TAX_INVOICE_COPY_DEFINITIONS = (
 
 QUOTATION_CONFIGURATION_FIELDS = (
     "quotation_signatory_type",
+    "quotation_authorized_signatory_employee",
     "override_quotation_validity_text",
     "quotation_custom_validity_text",
     "quotation_delivery_terms",
@@ -98,6 +99,7 @@ def get_default_configuration() -> dict[str, Any]:
         "use_customer_po": 1,
         "purchase_order_copy_count": 1,
         "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+        "quotation_authorized_signatory_employee": "",
         "override_quotation_validity_text": 0,
         "quotation_custom_validity_text": "",
         "quotation_delivery_terms": "",
@@ -185,7 +187,7 @@ def get_sidebar_configuration(
 
 
 def get_document_configuration(doc: Document | Mapping[str, Any], configuration: str) -> dict[str, Any]:
-    """Merge fallback defaults, Customer defaults, and request-only print overrides."""
+    """Merge fallback defaults, Customer defaults, document overrides, and request-only print overrides."""
     values = get_default_configuration()
     customer = _customer_from_document(doc)
     if customer:
@@ -205,6 +207,14 @@ def get_document_configuration(doc: Document | Mapping[str, Any], configuration:
         )
         if customer_values:
             values.update({key: value for key, value in customer_values.items() if value is not None})
+
+    if configuration == "quotation":
+        doc_signatory_type = _text(doc.get("quotation_signatory_type"))
+        if doc_signatory_type:
+            values["quotation_signatory_type"] = doc_signatory_type
+        doc_auth_employee = _text(doc.get("quotation_authorized_signatory_employee"))
+        if doc_auth_employee:
+            values["quotation_authorized_signatory_employee"] = doc_auth_employee
 
     print_settings = _print_settings(doc)
     for fieldname in _configuration_fields(configuration):
@@ -313,12 +323,6 @@ def _sidebar_fields(configuration: str) -> list[dict[str, Any]]:
 
     return [
         *fields,
-        {
-            "fieldname": "quotation_signatory_type",
-            "label": _("Signatory Type"),
-            "fieldtype": "Select",
-            "options": "\n".join(quotation_setup.SIGNATORY_TYPES),
-        },
         {
             "fieldname": "override_quotation_validity_text",
             "label": _("Override validity text"),

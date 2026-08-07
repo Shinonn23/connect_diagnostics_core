@@ -86,6 +86,7 @@ class BackupSettings(Document):
             job_id="gcs-mirror-full",
             deduplicate=True,
             force=True,
+            enqueue_after_commit=True,
         )
         return {"data": None, "message": _("Full file mirror has been queued.")}
 

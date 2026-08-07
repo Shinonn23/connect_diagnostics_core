@@ -310,6 +310,7 @@ def ensure_configuration() -> None:
         states=CUSTOMER_WORKFLOW_STATES,
         transitions=CUSTOMER_WORKFLOW_TRANSITIONS,
         send_email_alert=0,
+        is_active=0,
     )
     ensure_workflow(
         workflow_name=CREDIT_REQUEST_WORKFLOW_NAME,
@@ -318,6 +319,7 @@ def ensure_configuration() -> None:
         states=CREDIT_REQUEST_WORKFLOW_STATES,
         transitions=CREDIT_REQUEST_WORKFLOW_TRANSITIONS,
         send_email_alert=1,
+        is_active=0,
     )
     assign_customer_role_holders(require_users=False)
     frappe.clear_cache(doctype=CUSTOMER_DOCTYPE)
@@ -535,20 +537,22 @@ def ensure_workflow(
     states: Sequence[dict[str, Any]],
     transitions: Sequence[dict[str, Any]],
     send_email_alert: int,
+    is_active: int,
 ) -> None:
-    conflicting_workflows = frappe.get_all(
-        "Workflow",
-        filters={"document_type": document_type, "is_active": 1, "name": ["!=", workflow_name]},
-        pluck="name",
-    )
-    if conflicting_workflows:
-        frappe.throw(
-            _("Cannot activate {0}; {1} is already active for {2}.").format(
-                workflow_name,
-                ", ".join(conflicting_workflows),
-                document_type,
-            )
+    if is_active:
+        conflicting_workflows = frappe.get_all(
+            "Workflow",
+            filters={"document_type": document_type, "is_active": 1, "name": ["!=", workflow_name]},
+            pluck="name",
         )
+        if conflicting_workflows:
+            frappe.throw(
+                _("Cannot activate {0}; {1} is already active for {2}.").format(
+                    workflow_name,
+                    ", ".join(conflicting_workflows),
+                    document_type,
+                )
+            )
 
     if frappe.db.exists("Workflow", workflow_name):
         workflow = cast(Document, frappe.get_doc("Workflow", workflow_name))
@@ -567,7 +571,7 @@ def ensure_workflow(
     changed = workflow.is_new()
     scalar_values = {
         "document_type": document_type,
-        "is_active": 1,
+        "is_active": is_active,
         "override_status": 0,
         "send_email_alert": send_email_alert,
         "enable_action_confirmation": 1,
