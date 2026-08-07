@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.31.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.31.0...v0.31.1) (2026-08-07)
+
+
+### Miscellaneous Chores
+
+* disable all Frappe workflows ([eb6cec9](https://github.com/Shinonn23/connect_diagnostics_core/commit/eb6cec9e8dbfede436bb7ba6bce8317f59e5af5e))
+* disable all Frappe workflows ([07df717](https://github.com/Shinonn23/connect_diagnostics_core/commit/07df7175bf8f87ab35f575d2edea6420dce0a7f0))
+
 ## [0.31.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.30.0...v0.31.0) (2026-08-06)
 
 
