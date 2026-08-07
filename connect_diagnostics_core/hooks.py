@@ -97,6 +97,7 @@ jinja = {
         "connect_diagnostics_core.api.erpnext.print_configuration.get_document_print_context",
         "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
+        "connect_diagnostics_core.api.frappe.print_log.register_print",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
@@ -274,8 +275,13 @@ before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# }
+# The PDF download is the one print channel Frappe routes through /api/method,
+# so wrapping it here records every downloaded document without the client being
+# able to skip it. The Print button uses the /printview route instead and is
+# recorded from the template by api.frappe.print_log.register_print.
+override_whitelisted_methods = {
+    "frappe.utils.print_format.download_pdf": ("connect_diagnostics_core.api.frappe.print_log.download_pdf"),
+}
 
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

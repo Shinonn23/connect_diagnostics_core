@@ -507,26 +507,35 @@ return {"data": <payload>, "message": <str>}
   but are an Active gate.
 - Customer Onboarding State, Correction Reason, document-readiness fields, and
   no-delivery controls belong in the dedicated Customer Onboarding tab, not Details.
-- `Print Configuration Template` is the reusable master for the six fixed sections:
-  Quotation, Tax Invoice, Delivery Note, Invoice, Abbreviated Tax Invoice, and
-  Receipt. It holds document enablement, date visibility, language, original/copy
-  counts, source Purchase Order copy settings, Customer Print Name, and Quotation
-  signatory/validity/Delivery Terms defaults. It deliberately has no Form Preset:
-  every Quotation option is configured independently. Valid Till is the standard
-  validity source; `Override validity text` reveals custom text only when required.
-- Customer `Document / Print Configuration` links one Template. Selecting it, or
-  using `Fetch Configuration`, copies Template values into Customer fields; those
-  Customer values are independent defaults and Template changes never propagate
-  until the next fetch. Existing Customer values are preserved during migration.
-- The Print sidebar loads only the active format's Customer fields and sends them
-  as request-only `settings` overrides. Overrides affect preview, print, and PDF
-  for that request only; they never save Customer or the source document. Missing
-  fields during a code-before-migration rollout fall back to system defaults.
-- Sales Invoice uses named transient selections for Original, Customer Copy,
-  Accounting Copy, and Sales Copy, plus a Batch / Serial visibility option. The
-  default configuration selects all four copies; sidebar changes apply only to
-  the current print request. Sales Invoice is Thai-only; its legacy language
-  field remains hidden for compatibility and is ignored by the print context.
+- `Print Configuration Template` is shared print policy: a `Documents` table with one
+  row per registered document, and a `Copies` table of named page sets. It holds no
+  per-customer scalars. Every Customer linked to it follows those rows **live** —
+  editing a Template changes what its Customers print immediately, with no fetch step.
+- Customer `Document / Print Configuration` links one Template and carries only its
+  own values: Customer Print Name, Quotation signatory / validity / Delivery Terms,
+  and the source Purchase Order copy settings. Its `Documents` and `Copies` tables are
+  overrides: no row means inherit the Template for that document; a row wins wholesale.
+- `connect_diagnostics_core/setup/print_documents.py` is the single source of truth for
+  which documents exist (Quotation, Tax Invoice, Abbreviated Tax Invoice, Receipt),
+  their named copies, whether language is selectable, and whether Batch / Serial
+  applies. Doctype rows, sidebar controls, and the print context all derive from it —
+  adding a document type is a change there and nowhere else. The retired `invoice` and
+  `delivery_note` configurations must not be reintroduced; no print format consumed them.
+- Values resolve in four stages, later winning: registry defaults, Template rows,
+  Customer scalars and override rows, then request-only `flags.print_settings`. A blank
+  Customer text value inherits rather than blanking the resolved value. The resolver
+  also reports the source of each value, which the Print sidebar shows under each
+  control alongside a Reset to default action.
+- The Print sidebar loads only the active format's controls and sends them as
+  request-only `settings` overrides. Overrides affect preview, print, and PDF for that
+  request only; they never save Customer or the source document. Missing fields during
+  a code-before-migration rollout fall back to registry defaults.
+- Sales Invoice prints the named copies Original, Customer Copy, Accounting Copy, and
+  Sales Copy, plus a Batch / Serial visibility option. All four default to one page set
+  each. Sales Invoice is Thai-only: the registry fixes its language and any row value
+  is ignored. Named copies are available to every document, not only Sales Invoice.
+- `Customer.print_date` is deliberately kept outside the registry: the Sales Order print
+  format reads it directly and has no Customer print configuration of its own.
 - The combined Sales Invoice format resolves Batch and Serial values from both
   direct item fields and `Serial and Batch Bundle`, renders one traceability
   line per record without ellipsis, then paginates whole item blocks before
@@ -569,19 +578,32 @@ return {"data": <payload>, "message": <str>}
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
   (`CUSTOM_FIELDS` / `PROPERTY_SETTERS`), applied idempotently on `after_install` and
   `after_migrate` — do not create fields ad hoc via desk or console
+- Print lives in its own module. App-owned Print Formats, `Print Configuration Template`,
+  the two configuration child tables, and `Print Log` all belong to
+  `Connect Diagnostics Print` under `connect_diagnostics_core/connect_diagnostics_print/`.
 - Print Formats are app-owned and editable through Desk (`standard = "No"`): `after_sync` and
   `after_migrate` remove every
   `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
-  `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`) or an ERPNext Thailand
-  module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or `Petty Cash`). Retired formats are
-  removed explicitly; `Sales Invoice Print` is retired and Sales Invoice defaults to
-  `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is owned by ERPNext Thailand;
-  do not add a duplicate app-owned Print Format. Do not add a Print Format fixture that restores
-  records from other modules.
+  `Connect Diagnostics Stock`, `Connect Diagnostics Accounting`, or `Connect Diagnostics
+  Print`) or an ERPNext Thailand module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or
+  `Petty Cash`). Retired formats are removed explicitly; `Sales Invoice Print` is retired and
+  Sales Invoice defaults to `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is
+  owned by ERPNext Thailand; the app-owned Thai WHT certificate is the separately named
+  `Withholding Tax Cert CD`, so the two coexist and neither overwrites the other. Do not add a
+  Print Format fixture that restores records from other modules.
+- The `css` field is appended verbatim; only `html` is rendered through Jinja. A `{{ ... }}`
+  left in `css` is emitted literally and silently breaks whatever it built, so asset paths in
+  `css` must be relative (`/assets/...`), never built with `frappe.utils.get_url()`.
+- Dates in print formats come from the shared `format_date` Jinja method, which renders
+  DD-MM-YYYY in the **Buddhist era**. The `+ 543` conversion lives only in
+  `connect_diagnostics_core/utils/date.py`; a template must never convert the era itself.
 - Print Format Jinja must be ordered as comment, derived variables, pagination, then HTML.
   Use a namespaced root class, scope CSS beneath that root, keep CSS out of the HTML field,
   and prefer semantic `header`, `section`, `table`, and `footer` elements. Use physical
-  dimensions in `mm`; app-owned Print Formats must not use a background image. `Shipment Box
+  dimensions in `mm`; app-owned Print Formats must not use a background image, except formats
+  that overlay an official government form scan — `Withholding Tax Cert CD` positions its fields
+  over the Revenue Department form image from `erpnext_thailand`, so the background-image and
+  semantic-sectioning rules do not apply to it. `Shipment Box
   Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
   and recipient details, and shows the recipient Customer's Territory only when present.
 - When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
@@ -599,6 +621,27 @@ return {"data": <payload>, "message": <str>}
   `connect_diagnostics_core/patches/` (see `remove_cd_prefix_from_custom_fields.py`)
 - To reference a custom field in code, declare the `# ty: ignore` with the source
   `setup/*.py` file
+
+### Print Audit Log
+
+- Every real print and every PDF download is recorded as a `Print Log` row. Rows are
+  insert-only: no role has write or delete permission, the DocType is `in_create`, and
+  there is no auto-purge — retention is a legal concern, not housekeeping.
+- The two channels are hooked differently because Frappe exposes them differently.
+  PDF goes through `/api/method/frappe.utils.print_format.download_pdf`, so
+  `override_whitelisted_methods` wraps it and the client cannot skip it; the wrapper must
+  keep the original signature **and** `allow_guest=True`. The Print button loads the
+  `/printview` route instead and cannot be overridden, so it is detected server-side from
+  `frappe.form_dict.trigger_print` while the template renders.
+- Coverage is every app-owned Print Format. The four configuration-driven formats record
+  themselves through the print context; the rest call `{{ register_print(doc) }}`. That call
+  must sit **outside** any leading `{# ... #}` comment, or it is silently swallowed.
+- Previews are deliberately not recorded, and neither are emailed PDFs.
+- **Two deliberate deviations from the general rules, both required by the feature.** A print
+  render is a GET that Frappe does not commit, so the insert calls `frappe.db.commit()` inside
+  a read request; enqueuing was rejected because an audit trail must not disappear when
+  workers are down. And logging is fail-open: failures go to `frappe.log_error` with full
+  context and never block printing. Do not "fix" either without changing this rule first.
 
 ### Multi-Tenancy
 

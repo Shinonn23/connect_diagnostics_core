@@ -7,238 +7,125 @@ from __future__ import annotations
 
 from connect_diagnostics_core.setup import quotation as quotation_setup
 
-DOCUMENT_LANGUAGE_OPTIONS = "Thai\nEnglish\nThai / English"
 
-DOCUMENT_PREFERENCES = (
-    ("quotation", "Quotation", "use_quotation"),
-    ("tax_invoice", "Tax Invoice", "use_tax_invoice"),
-    ("delivery_note", "Delivery Note", "use_delivery_note"),
-    ("invoice", "Invoice", "use_invoice"),
-    ("abbreviated_tax_invoice", "Abbreviated Tax Invoice", "use_abbreviated_tax_invoice"),
-    ("receipt", "Receipt", "use_receipt"),
-)
+def _print_configuration_fields() -> list[dict[str, object]]:
+    """Build the Customer-side print configuration overrides.
 
-
-def _document_preference_fields() -> list[dict[str, object]]:
-    """Build fixed Customer print-preference sections in display order."""
-    fields: list[dict[str, object]] = []
-    insert_after = "document_preferences_section"
-
-    for prefix, label, use_fieldname in DOCUMENT_PREFERENCES:
-        section_fieldname = f"{prefix}_document_preferences_section"
-        show_date_fieldname = f"show_{prefix}_date"
-        language_fieldname = f"{prefix}_language"
-        column_fieldname = f"{prefix}_document_preferences_column"
-        original_count_fieldname = f"{prefix}_original_count"
-        copy_count_fieldname = f"{prefix}_copy_count"
-        enabled_depends_on = f"eval:doc.{use_fieldname}"
-        show_date_insert_after = use_fieldname
-
-        fields.append(
-            {
-                "fieldname": section_fieldname,
-                "label": label,
-                "fieldtype": "Section Break",
-                "insert_after": insert_after,
-            }
-        )
-        fields.append(
-            {
-                "fieldname": use_fieldname,
-                "label": f"Use {label}",
-                "fieldtype": "Check",
-                "insert_after": section_fieldname,
-                "default": "1",
-            }
-        )
-        fields.extend(
-            [
-                {
-                    "fieldname": show_date_fieldname,
-                    "label": "Show Quotation Date" if prefix == "quotation" else "Show Date",
-                    "fieldtype": "Check",
-                    "insert_after": show_date_insert_after,
-                    "default": "1",
-                    "depends_on": enabled_depends_on,
-                },
-                {
-                    "fieldname": language_fieldname,
-                    "label": "Language",
-                    "fieldtype": "Select",
-                    "options": DOCUMENT_LANGUAGE_OPTIONS,
-                    "insert_after": show_date_fieldname,
-                    "default": "Thai",
-                    "depends_on": enabled_depends_on,
-                    "hidden": 1 if prefix == "tax_invoice" else 0,
-                },
-            ]
-        )
-
-        column_insert_after = language_fieldname
-        if prefix == "tax_invoice":
-            tax_invoice_selection_fields = (
-                (
-                    "show_tax_invoice_batch_serial",
-                    "Show Batch / Serial Number",
-                    language_fieldname,
-                ),
-                (
-                    "print_tax_invoice_original",
-                    "Print Original (Customer)",
-                    "show_tax_invoice_batch_serial",
-                ),
-                (
-                    "print_tax_invoice_customer_copy",
-                    "Print Copy (Customer)",
-                    "print_tax_invoice_original",
-                ),
-                (
-                    "print_tax_invoice_accounting_copy",
-                    "Print Copy (Accounting)",
-                    "print_tax_invoice_customer_copy",
-                ),
-                (
-                    "print_tax_invoice_sales_copy",
-                    "Print Copy (Sales)",
-                    "print_tax_invoice_accounting_copy",
-                ),
-            )
-            fields.extend(
-                {
-                    "fieldname": fieldname,
-                    "label": label,
-                    "fieldtype": "Check",
-                    "insert_after": insert_after_fieldname,
-                    "default": "1",
-                    "depends_on": enabled_depends_on,
-                }
-                for fieldname, label, insert_after_fieldname in tax_invoice_selection_fields
-            )
-            column_insert_after = "print_tax_invoice_sales_copy"
-        if prefix == "quotation":
-            fields.extend(
-                [
-                    {
-                        "fieldname": "quotation_signatory_type",
-                        "label": "Quotation Signatory Type",
-                        "fieldtype": "Select",
-                        "options": "\n".join(quotation_setup.SIGNATORY_TYPES),
-                        "insert_after": language_fieldname,
-                        "default": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
-                        "depends_on": enabled_depends_on,
-                    },
-                    {
-                        "fieldname": "override_quotation_validity_text",
-                        "label": "Override validity text",
-                        "fieldtype": "Check",
-                        "insert_after": "quotation_signatory_type",
-                        "depends_on": enabled_depends_on,
-                        "description": "Use custom text instead of the Quotation Valid Till date.",
-                    },
-                    {
-                        "fieldname": "quotation_custom_validity_text",
-                        "label": "Quotation Custom Validity Text",
-                        "fieldtype": "Small Text",
-                        "insert_after": "override_quotation_validity_text",
-                        "depends_on": "eval:doc.use_quotation && doc.override_quotation_validity_text",
-                    },
-                    {
-                        "fieldname": "quotation_delivery_terms",
-                        "label": "Quotation Delivery Terms",
-                        "fieldtype": "Small Text",
-                        "insert_after": "quotation_custom_validity_text",
-                        "depends_on": enabled_depends_on,
-                        "mandatory_depends_on": enabled_depends_on,
-                        "description": (
-                            "Default delivery commitment copied to each new Quotation for this Customer."
-                        ),
-                    },
-                ]
-            )
-            column_insert_after = "quotation_delivery_terms"
-
-        fields.extend(
-            [
-                {
-                    "fieldname": column_fieldname,
-                    "fieldtype": "Column Break",
-                    "insert_after": column_insert_after,
-                    "depends_on": enabled_depends_on,
-                },
-                {
-                    "fieldname": original_count_fieldname,
-                    "label": "Original Count",
-                    "fieldtype": "Int",
-                    "insert_after": column_fieldname,
-                    "default": "1",
-                    "non_negative": 1,
-                    "depends_on": enabled_depends_on,
-                    "hidden": 1 if prefix == "tax_invoice" else 0,
-                },
-                {
-                    "fieldname": copy_count_fieldname,
-                    "label": "Copy Count",
-                    "fieldtype": "Int",
-                    "insert_after": original_count_fieldname,
-                    "default": "0",
-                    "non_negative": 1,
-                    "depends_on": enabled_depends_on,
-                    "hidden": 1 if prefix == "tax_invoice" else 0,
-                },
-            ]
-        )
-        insert_after = copy_count_fieldname
-
-    fields.extend(
-        [
-            {
-                "fieldname": "purchase_order_copy_preferences_section",
-                "label": "Source Purchase Order Copy",
-                "fieldtype": "Section Break",
-                "insert_after": insert_after,
-            },
-            {
-                "fieldname": "use_customer_po",
-                "label": "Attach Source Purchase Order Copy",
-                "fieldtype": "Check",
-                "insert_after": "purchase_order_copy_preferences_section",
-                "default": "1",
-                "description": (
-                    "Attach a copy of the source Purchase Order to confirm the origin "
-                    "of the products sold to this customer."
-                ),
-            },
-            {
-                "fieldname": "purchase_order_copy_count",
-                "label": "Copy Count",
-                "fieldtype": "Int",
-                "insert_after": "use_customer_po",
-                "default": "1",
-                "non_negative": 1,
-                "depends_on": "eval:doc.use_customer_po",
-            },
-            {
-                "fieldname": "legacy_print_preferences_section",
-                "label": "Legacy Print Behavior",
-                "fieldtype": "Section Break",
-                "insert_after": "purchase_order_copy_count",
-                "collapsible": 1,
-            },
-            {
-                "fieldname": "print_date",
-                "label": "Legacy Global Print Date (Current Print Formats)",
-                "fieldtype": "Check",
-                "insert_after": "legacy_print_preferences_section",
-                "default": "1",
-                "description": (
-                    "Currently controls date display in the Quotation, Sales Order, "
-                    "and Receipt Print Formats. It remains editable until those formats "
-                    "use the per-document preferences."
-                ),
-            },
-        ]
-    )
-    return fields
+    Per-document settings live in the two child tables, which stay empty while a
+    Customer simply inherits its Template. Adding a row overrides that document
+    for this Customer only.
+    """
+    return [
+        {
+            "fieldname": "print_documents_section",
+            "label": "Document Overrides",
+            "fieldtype": "Section Break",
+            "insert_after": "customer_print_name",
+            "description": (
+                "Leave empty to inherit every document setting from the selected "
+                "Print Configuration Template."
+            ),
+        },
+        {
+            "fieldname": "print_documents",
+            "label": "Documents",
+            "fieldtype": "Table",
+            "options": "Print Document Configuration",
+            "insert_after": "print_documents_section",
+        },
+        {
+            "fieldname": "print_copies_section",
+            "label": "Copy Overrides",
+            "fieldtype": "Section Break",
+            "insert_after": "print_documents",
+        },
+        {
+            "fieldname": "print_copies",
+            "label": "Copies",
+            "fieldtype": "Table",
+            "options": "Print Copy Configuration",
+            "insert_after": "print_copies_section",
+        },
+        {
+            "fieldname": "quotation_print_section",
+            "label": "Quotation",
+            "fieldtype": "Section Break",
+            "insert_after": "print_copies",
+        },
+        {
+            "fieldname": "quotation_signatory_type",
+            "label": "Quotation Signatory Type",
+            "fieldtype": "Select",
+            "options": "\n".join(quotation_setup.SIGNATORY_TYPES),
+            "insert_after": "quotation_print_section",
+            "default": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+        },
+        {
+            "fieldname": "override_quotation_validity_text",
+            "label": "Override validity text",
+            "fieldtype": "Check",
+            "insert_after": "quotation_signatory_type",
+            "description": "Use custom text instead of the Quotation Valid Till date.",
+        },
+        {
+            "fieldname": "quotation_custom_validity_text",
+            "label": "Quotation Custom Validity Text",
+            "fieldtype": "Small Text",
+            "insert_after": "override_quotation_validity_text",
+            "depends_on": "eval:doc.override_quotation_validity_text",
+        },
+        {
+            "fieldname": "quotation_delivery_terms",
+            "label": "Quotation Delivery Terms",
+            "fieldtype": "Small Text",
+            "insert_after": "quotation_custom_validity_text",
+            "description": ("Default delivery commitment copied to each new Quotation for this Customer."),
+        },
+        {
+            "fieldname": "purchase_order_copy_preferences_section",
+            "label": "Source Purchase Order Copy",
+            "fieldtype": "Section Break",
+            "insert_after": "quotation_delivery_terms",
+        },
+        {
+            "fieldname": "use_customer_po",
+            "label": "Attach Source Purchase Order Copy",
+            "fieldtype": "Check",
+            "insert_after": "purchase_order_copy_preferences_section",
+            "default": "1",
+            "description": (
+                "Attach a copy of the source Purchase Order to confirm the origin "
+                "of the products sold to this customer."
+            ),
+        },
+        {
+            "fieldname": "purchase_order_copy_count",
+            "label": "Copy Count",
+            "fieldtype": "Int",
+            "insert_after": "use_customer_po",
+            "default": "1",
+            "non_negative": 1,
+            "depends_on": "eval:doc.use_customer_po",
+        },
+        {
+            "fieldname": "legacy_print_preferences_section",
+            "label": "Legacy Print Behavior",
+            "fieldtype": "Section Break",
+            "insert_after": "purchase_order_copy_count",
+            "collapsible": 1,
+        },
+        {
+            "fieldname": "print_date",
+            "label": "Legacy Global Print Date (Current Print Formats)",
+            "fieldtype": "Check",
+            "insert_after": "legacy_print_preferences_section",
+            "default": "1",
+            "description": (
+                "Read directly by the Sales Order Print Format, which has no "
+                "Customer print configuration of its own."
+            ),
+        },
+    ]
 
 
 CUSTOM_FIELDS = {
@@ -383,7 +270,7 @@ CUSTOM_FIELDS = {
             "insert_after": "print_configuration_template",
             "description": "Default customer name used only on printed documents.",
         },
-        *_document_preference_fields(),
+        *_print_configuration_fields(),
     ],
 }
 

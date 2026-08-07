@@ -77,43 +77,34 @@ class TestCustomerReadiness(UnitTestCase):
                 self.assertEqual(fields[fieldname]["insert_after"], insert_after)
                 self.assertEqual(fields[fieldname]["fieldtype"], fieldtype)
 
-    def test_document_preferences_have_fixed_per_document_defaults(self) -> None:
+    def test_print_configuration_tab_holds_override_tables_not_flat_fields(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
-        insert_after = "document_preferences_section"
 
-        for prefix, label, use_fieldname in customer_setup.DOCUMENT_PREFERENCES:
-            section_fieldname = f"{prefix}_document_preferences_section"
-            show_date_fieldname = f"show_{prefix}_date"
-            language_fieldname = f"{prefix}_language"
-            column_fieldname = f"{prefix}_document_preferences_column"
-            original_count_fieldname = f"{prefix}_original_count"
-            copy_count_fieldname = f"{prefix}_copy_count"
-            depends_on = f"eval:doc.{use_fieldname}"
+        self.assertEqual(fields["print_documents"]["fieldtype"], "Table")
+        self.assertEqual(fields["print_documents"]["options"], "Print Document Configuration")
+        self.assertEqual(fields["print_copies"]["fieldtype"], "Table")
+        self.assertEqual(fields["print_copies"]["options"], "Print Copy Configuration")
+        self.assertEqual(fields["print_documents_section"]["insert_after"], "customer_print_name")
 
-            with self.subTest(prefix=prefix):
-                self.assertEqual(fields[section_fieldname]["label"], label)
-                self.assertEqual(fields[section_fieldname]["insert_after"], insert_after)
-                self.assertEqual(fields[use_fieldname]["default"], "1")
-                self.assertEqual(fields[show_date_fieldname]["default"], "1")
-                self.assertEqual(fields[show_date_fieldname]["depends_on"], depends_on)
-                self.assertEqual(fields[language_fieldname]["options"], "Thai\nEnglish\nThai / English")
-                self.assertEqual(fields[language_fieldname]["default"], "Thai")
-                self.assertEqual(fields[language_fieldname]["depends_on"], depends_on)
-                self.assertEqual(fields[language_fieldname].get("hidden", 0), int(prefix == "tax_invoice"))
-                self.assertEqual(fields[column_fieldname]["depends_on"], depends_on)
-                self.assertEqual(fields[original_count_fieldname]["default"], "1")
-                self.assertEqual(fields[original_count_fieldname]["non_negative"], 1)
-                self.assertEqual(fields[original_count_fieldname]["depends_on"], depends_on)
-                self.assertEqual(fields[copy_count_fieldname]["default"], "0")
-                self.assertEqual(fields[copy_count_fieldname]["non_negative"], 1)
-                self.assertEqual(fields[copy_count_fieldname]["depends_on"], depends_on)
+        for retired in (
+            "use_quotation",
+            "use_tax_invoice",
+            "use_delivery_note",
+            "use_invoice",
+            "use_abbreviated_tax_invoice",
+            "use_receipt",
+            "show_tax_invoice_date",
+            "tax_invoice_language",
+            "tax_invoice_original_count",
+            "print_tax_invoice_original",
+            "show_tax_invoice_batch_serial",
+        ):
+            with self.subTest(fieldname=retired):
+                self.assertNotIn(retired, fields)
 
-            insert_after = copy_count_fieldname
+    def test_customer_keeps_its_own_scalar_print_defaults(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        self.assertEqual(
-            fields["purchase_order_copy_preferences_section"]["insert_after"],
-            insert_after,
-        )
         self.assertEqual(fields["use_customer_po"]["default"], "1")
         self.assertEqual(fields["purchase_order_copy_count"]["default"], "1")
         self.assertEqual(fields["purchase_order_copy_count"]["non_negative"], 1)
@@ -121,26 +112,22 @@ class TestCustomerReadiness(UnitTestCase):
             fields["purchase_order_copy_count"]["depends_on"],
             "eval:doc.use_customer_po",
         )
+        self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
+        self.assertEqual(fields["override_quotation_validity_text"]["fieldtype"], "Check")
+        self.assertEqual(
+            fields["quotation_custom_validity_text"]["depends_on"],
+            "eval:doc.override_quotation_validity_text",
+        )
+        self.assertEqual(fields["quotation_delivery_terms"]["fieldtype"], "Small Text")
+
+    def test_sales_order_legacy_print_date_field_is_retained(self) -> None:
+        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
+
         self.assertEqual(
             fields["print_date"]["label"],
             "Legacy Global Print Date (Current Print Formats)",
         )
-
-    def test_quotation_customer_defaults_expose_full_configuration(self) -> None:
-        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
-
-        self.assertNotIn("quotation_form_preset", fields)
-        self.assertEqual(fields["show_quotation_date"]["label"], "Show Quotation Date")
-        self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
-        self.assertEqual(fields["override_quotation_validity_text"]["fieldtype"], "Check")
-        self.assertEqual(
-            fields["quotation_delivery_terms"]["mandatory_depends_on"],
-            "eval:doc.use_quotation",
-        )
-        self.assertEqual(
-            fields["quotation_custom_validity_text"]["depends_on"],
-            "eval:doc.use_quotation && doc.override_quotation_validity_text",
-        )
+        self.assertEqual(fields["print_date"]["default"], "1")
 
     def test_customer_stores_a_template_link_and_print_name_default(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
