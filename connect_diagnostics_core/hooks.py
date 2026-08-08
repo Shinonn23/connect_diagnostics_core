@@ -46,6 +46,7 @@ page_js = {"print": "public/js/custom/print/doctype.js"}
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
     "Customer": "public/js/custom/customer/doctype.js",
+    "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
@@ -168,6 +169,7 @@ doc_events = {
         "autoname": "connect_diagnostics_core.naming.customer.set_customer_code",
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
         "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
+        "after_insert": "connect_diagnostics_core.api.erpnext.customer.link_source_dksh_customer",
     },
     "Customer Credit Request": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
@@ -285,6 +287,7 @@ override_whitelisted_methods = {
 # along with any modifications made in other Frappe apps
 override_doctype_dashboards = {
     "Item": "connect_diagnostics_core.api.erpnext.item.get_item_dashboard_data",
+    "Customer": "connect_diagnostics_core.api.erpnext.customer.get_customer_dashboard_data",
 }
 
 # exempt linked doctypes from being automatically cancelled

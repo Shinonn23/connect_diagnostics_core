@@ -29,6 +29,7 @@ import frappe.defaults
 from frappe import _
 from frappe.model.document import Document
 
+from connect_diagnostics_core.connect_diagnostics_dksh import reference
 from connect_diagnostics_core.naming.customer import normalise_customer_code
 from connect_diagnostics_core.setup import customer_onboarding
 
@@ -106,6 +107,119 @@ def on_update(doc: Document, method: str | None = None) -> None:
         frappe.db.set_value(
             "Customer", new_customer_code, "customer_name", customer_name, update_modified=False
         )
+
+
+def get_customer_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
+    """Surface the linked DKSH Customer under the Customer form's Connections."""
+    return reference.inject_connection(
+        data,
+        reference_doctype="DKSH Customer",
+        link_field="customer",
+        group_label=_("Reference"),
+    )
+
+
+def link_source_dksh_customer(doc: Document, method: str | None = None) -> None:
+    """Link a freshly created Customer back to the DKSH Customer it was converted from.
+
+    ``source_dksh_customer`` is prefilled by the Convert to CD Customer action. Under a
+    row lock, the DKSH Customer's ``customer`` is filled only when still empty, so a
+    re-run — or a DKSH Customer already claimed by someone else — is a no-op. When the
+    DKSH Customer carries an address and the new Customer has none, a primary Billing
+    Address is created from it so the tax-invoice readiness gate can pass.
+    """
+    source = _text(doc.get("source_dksh_customer"))
+    if not source or not frappe.db.exists("DKSH Customer", source):
+        return
+
+    linked = frappe.db.get_value("DKSH Customer", source, "customer", for_update=True)
+    if linked:
+        return
+
+    frappe.db.set_value("DKSH Customer", source, "customer", doc.name)
+    _create_billing_address_from_dksh(cast(str, doc.name), source)
+
+
+def _create_billing_address_from_dksh(customer_name: str, source_dksh_customer: str) -> None:
+    """Create a primary Billing Address from the DKSH Customer's address, fail-open.
+
+    Only runs when the DKSH Customer has the mandatory address fields and the Customer
+    has no primary Billing Address yet. A failure is logged and swallowed: a bad DKSH
+    address must never abort the Customer it was converted into.
+    """
+    dksh = cast(
+        dict[str, Any] | None,
+        frappe.db.get_value(
+            "DKSH Customer",
+            source_dksh_customer,
+            [
+                "tax_id",
+                "branch_code",
+                "address_line1",
+                "address_line2",
+                "city",
+                "county",
+                "state",
+                "pincode",
+                "country",
+                "phone",
+                "email_id",
+            ],
+            as_dict=True,
+        ),
+    )
+    if not dksh or not (_text(dksh.get("address_line1")) and _text(dksh.get("city"))):
+        return
+    if _has_primary_billing_address(customer_name):
+        return
+
+    try:
+        address = frappe.get_doc(
+            {
+                "doctype": "Address",
+                "address_title": customer_name,
+                "address_type": "Billing",
+                "address_line1": dksh.get("address_line1"),
+                "address_line2": dksh.get("address_line2"),
+                "city": dksh.get("city"),
+                "county": dksh.get("county"),
+                "state": dksh.get("state"),
+                "pincode": dksh.get("pincode"),
+                "country": _text(dksh.get("country")) or "Thailand",
+                "phone": dksh.get("phone"),
+                "email_id": dksh.get("email_id"),
+                "tax_id": dksh.get("tax_id"),
+                "branch_code": _text(dksh.get("branch_code")) or "00000",
+                "is_primary_address": 1,
+                "links": [{"link_doctype": "Customer", "link_name": customer_name}],
+            }
+        )
+        address.insert(ignore_permissions=True)
+    except Exception:
+        frappe.log_error(
+            title="DKSH Customer address creation failed",
+            message=(
+                f"Customer {customer_name} converted from DKSH Customer {source_dksh_customer}: "
+                f"{frappe.get_traceback()}"
+            ),
+        )
+
+
+def _has_primary_billing_address(customer_name: str) -> bool:
+    address_names = _linked_document_names(customer_name, "Address")
+    if not address_names:
+        return False
+    return bool(
+        frappe.db.exists(
+            "Address",
+            {
+                "name": ["in", address_names],
+                "address_type": "Billing",
+                "is_primary_address": 1,
+                "disabled": 0,
+            },
+        )
+    )
 
 
 def build_readiness_values(

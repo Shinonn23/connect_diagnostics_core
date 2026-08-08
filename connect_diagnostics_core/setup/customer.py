@@ -143,6 +143,19 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
         },
         {
+            "fieldname": "source_dksh_customer",
+            "label": "Source DKSH Customer",
+            "fieldtype": "Link",
+            "options": "DKSH Customer",
+            "insert_after": "customer_code",
+            "read_only": 1,
+            "no_copy": 1,
+            "description": (
+                "The DKSH Customer this Customer was converted from. Set automatically "
+                "by Convert to CD Customer."
+            ),
+        },
+        {
             "fieldname": "alternative_names",
             "label": "Alternative Names",
             "fieldtype": "Table",
