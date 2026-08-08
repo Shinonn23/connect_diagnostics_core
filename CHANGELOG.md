@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.32.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.31.1...v0.32.0) (2026-08-08)
+
+
+### Features
+
+* move the Quotation signatory onto the Quotation ([c3a5501](https://github.com/Shinonn23/connect_diagnostics_core/commit/c3a5501c589620999b36481d06a273ac440deec7))
+* rebuild print configuration on a document registry ([4204b04](https://github.com/Shinonn23/connect_diagnostics_core/commit/4204b043ad7605861725cf620a351c645a2ff32f))
+* rebuild print configuration on a document registry ([a5feb43](https://github.com/Shinonn23/connect_diagnostics_core/commit/a5feb43e10020daed42aba87b630f28dd988ea12))
+
+
+### Bug Fixes
+
+* refresh the module map before the print registry patch reloads ([f672e57](https://github.com/Shinonn23/connect_diagnostics_core/commit/f672e571c19bed3bbdd029cb0732dfd23172dbbd))
+
+
+### Code Refactoring
+
+* group the Quotation signatory fields with their standard fields ([3f64c8c](https://github.com/Shinonn23/connect_diagnostics_core/commit/3f64c8c54440567d95d3a3c967c40a282a3916b0))
+
+
+### Styles
+
+* apply ruff-format to the Quotation signatory patch test ([c8ec7c6](https://github.com/Shinonn23/connect_diagnostics_core/commit/c8ec7c61865477a642cbed9be7fb2cd1322af409))
+
+
+### Tests
+
+* align the leave email and DKSH assertions with this branch ([a25e100](https://github.com/Shinonn23/connect_diagnostics_core/commit/a25e100bb59494c5063d71bd7a7cc117d6f13bca))
+
 ## [0.31.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.31.0...v0.31.1) (2026-08-07)
 
 
