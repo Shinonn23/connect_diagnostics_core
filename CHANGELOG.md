@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.32.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.32.0...v0.32.1) (2026-08-08)
+
+
+### Miscellaneous Chores
+
+* add Notion Task Tracker skills for picking and updating tasks ([5352d7b](https://github.com/Shinonn23/connect_diagnostics_core/commit/5352d7bc23c2a1279f015530c83a1b317794fa3b))
+* add Notion Task Tracker skills for picking and updating tasks ([bc85c78](https://github.com/Shinonn23/connect_diagnostics_core/commit/bc85c7848c099e4013905b69166e03923e04919b))
+
 ## [0.32.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.31.1...v0.32.0) (2026-08-08)
 
 
