@@ -30,8 +30,13 @@ CONFIGURATION_PRINT_FORMATS = (
     "Abbreviated Tax Invoice And Receipt",
     "Quotation",
     "Receipt",
+    "Sales Order",
     "Tax Invoice Delivery Note and Invoice",
 )
+
+# Configuration formats whose language the sidebar can switch; the rest are fixed
+# to one language and never emit the bilingual toggles.
+LANGUAGE_SELECTABLE_CONFIGURATIONS = ("receipt", "abbreviated_tax_invoice")
 
 # Formats that overlay an official government form image. The layout is absolute
 # positioning over that scan, so semantic sectioning and the no-background-image
@@ -180,6 +185,7 @@ class TestPrintFormats(UnitTestCase):
             "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json": "tax_invoice",
             "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json": "abbreviated_tax_invoice",
             "receipt/receipt.json": "receipt",
+            "sales_order/sales_order.json": "sales_order",
         }
 
         for relative_path, configuration in expected_contexts.items():
@@ -195,7 +201,7 @@ class TestPrintFormats(UnitTestCase):
                 self.assertIn("copy.label", html)
                 Environment().parse(html)
 
-                if configuration != "tax_invoice":
+                if configuration in LANGUAGE_SELECTABLE_CONFIGURATIONS:
                     self.assertIn("print_context.show_thai", html)
                     self.assertIn("print_context.show_english", html)
 

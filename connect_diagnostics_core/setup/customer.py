@@ -114,24 +114,6 @@ def _print_configuration_fields() -> list[dict[str, object]]:
             "non_negative": 1,
             "depends_on": "eval:doc.source_purchase_order_copy_required",
         },
-        {
-            "fieldname": "legacy_print_preferences_section",
-            "label": "Legacy Print Behavior",
-            "fieldtype": "Section Break",
-            "insert_after": "purchase_order_copy_count",
-            "collapsible": 1,
-        },
-        {
-            "fieldname": "print_date",
-            "label": "Legacy Global Print Date (Current Print Formats)",
-            "fieldtype": "Check",
-            "insert_after": "legacy_print_preferences_section",
-            "default": "1",
-            "description": (
-                "Read directly by the Sales Order Print Format, which has no "
-                "Customer print configuration of its own."
-            ),
-        },
     ]
 
 
@@ -147,8 +129,10 @@ CUSTOM_FIELDS = {
             "in_global_search": 1,
             "search_index": 1,
             "unique": 1,
-            "read_only_depends_on": "eval:doc.customer_onboarding_state=='Customer Active'",
-            "description": "Manual ERPNext Customer ID. It cannot be changed after activation.",
+            "description": (
+                "Manual ERPNext Customer ID. It can be corrected until the Customer has "
+                "its first quotation, order, invoice, or delivery note."
+            ),
         },
         {
             "fieldname": "branch_code",
@@ -157,98 +141,6 @@ CUSTOM_FIELDS = {
             "insert_after": "tax_id",
             "default": "00000",
             "is_system_generated": 1,
-        },
-        {
-            "fieldname": "customer_onboarding_section",
-            "label": "Customer Onboarding",
-            "fieldtype": "Tab Break",
-            "insert_after": "portal_users",
-        },
-        {
-            "fieldname": "customer_onboarding_state",
-            "label": "Customer Onboarding State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "insert_after": "customer_onboarding_section",
-            "read_only": 1,
-            "in_list_view": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "correction_reason",
-            "label": "Correction Reason",
-            "fieldtype": "Small Text",
-            "insert_after": "customer_onboarding_state",
-            "no_copy": 1,
-            "description": "The reviewer must save this reason before choosing Return for correction. It is cleared when Sales sends the Customer for duplicate verification again.",
-        },
-        {
-            "fieldname": "readiness_section",
-            "label": "Document Readiness",
-            "fieldtype": "Section Break",
-            "insert_after": "correction_reason",
-        },
-        {
-            "fieldname": "quotation_readiness",
-            "label": "Quotation Readiness",
-            "fieldtype": "Select",
-            "options": "Ready\nMissing information\nNot applicable",
-            "insert_after": "readiness_section",
-            "read_only": 1,
-            "in_list_view": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "delivery_readiness",
-            "label": "Delivery Readiness",
-            "fieldtype": "Select",
-            "options": "Ready\nMissing information\nNot applicable",
-            "insert_after": "quotation_readiness",
-            "read_only": 1,
-            "in_list_view": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "tax_invoice_readiness",
-            "label": "Tax Invoice Readiness",
-            "fieldtype": "Select",
-            "options": "Ready\nMissing information\nNot applicable",
-            "insert_after": "delivery_readiness",
-            "read_only": 1,
-            "in_list_view": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "email_readiness",
-            "label": "Email Readiness",
-            "fieldtype": "Select",
-            "options": "Ready\nMissing information\nNot applicable",
-            "insert_after": "tax_invoice_readiness",
-            "read_only": 1,
-            "in_list_view": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "customer_readiness_summary",
-            "label": "Readiness Summary",
-            "fieldtype": "Small Text",
-            "insert_after": "email_readiness",
-            "read_only": 1,
-            "no_copy": 1,
-        },
-        {
-            "fieldname": "no_delivery_required",
-            "label": "No Delivery Required",
-            "fieldtype": "Check",
-            "insert_after": "customer_readiness_summary",
-            "default": "0",
-        },
-        {
-            "fieldname": "no_delivery_reason",
-            "label": "No Delivery Reason",
-            "fieldtype": "Small Text",
-            "insert_after": "no_delivery_required",
-            "depends_on": "eval:doc.no_delivery_required",
         },
         {
             "fieldname": "alternative_names",
@@ -261,7 +153,7 @@ CUSTOM_FIELDS = {
             "fieldname": "document_preferences_section",
             "label": "Document / Print Configuration",
             "fieldtype": "Tab Break",
-            "insert_after": "no_delivery_reason",
+            "insert_after": "portal_users",
         },
         {
             "fieldname": "print_configuration_template",

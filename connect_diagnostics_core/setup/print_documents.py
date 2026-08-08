@@ -153,6 +153,16 @@ PRINT_DOCUMENTS: tuple[PrintDocument, ...] = (
         document_fields=QUOTATION_DOCUMENT_FIELDS,
     ),
     PrintDocument(
+        key="sales_order",
+        label="Sales Order",
+        print_formats=("Sales Order",),
+        doctypes=("Sales Order",),
+        language_selectable=False,
+        offers_batch_serial=False,
+        copies=GENERIC_COPIES,
+        fixed_language=LANGUAGE_THAI,
+    ),
+    PrintDocument(
         key="tax_invoice",
         label="Tax Invoice",
         print_formats=("Tax Invoice Delivery Note and Invoice",),
@@ -206,10 +216,6 @@ SCALAR_DEFAULTS: dict[str, object] = {
     "quotation_custom_validity_text": "",
     "quotation_delivery_terms": "",
 }
-
-# Read directly by the Sales Order print format; deliberately outside the
-# registry because no Customer print configuration controls it.
-LEGACY_CUSTOMER_FIELDS = ("print_date",)
 
 
 def get_document(key: str) -> PrintDocument | None:
