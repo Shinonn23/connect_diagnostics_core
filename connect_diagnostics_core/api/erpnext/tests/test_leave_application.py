@@ -86,7 +86,8 @@ class TestLeaveNotificationTemplates(IntegrationTestCase):
         self.assertIn("ข้อมูลพนักงาน", response)
         self.assertIn("รายละเอียดการลา", response)
         self.assertIn("ครึ่งวัน", response)
-        self.assertIn("20-07-2026", response)
+        # The templates share the print formats' `format_date`, so dates carry พ.ศ.
+        self.assertIn("20-07-2569", response)
         self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", response)
         self.assertIn("เหตุผล &lt;b&gt;สำคัญ&lt;/b&gt;<br>บรรทัดถัดไป", response)
         self.assertIn("/desk/leave-application/LAP.83-BE.07-14.0001", response)
