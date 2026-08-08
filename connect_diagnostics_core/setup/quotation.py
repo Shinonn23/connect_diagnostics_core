@@ -31,7 +31,7 @@ CUSTOM_FIELDS = {
             "label": "Quotation Signatory Type",
             "fieldtype": "Select",
             "options": "\n".join(SIGNATORY_TYPES),
-            "insert_after": "valid_till",
+            "insert_after": "company",
             "description": "Default pulled from Customer. Determines who signs the quotation.",
         },
         {
@@ -49,7 +49,7 @@ CUSTOM_FIELDS = {
             "fieldname": "override_quotation_validity_text",
             "label": "Override validity text",
             "fieldtype": "Check",
-            "insert_after": "sales_representative_employee",
+            "insert_after": "valid_till",
             "description": "Use custom text instead of the Valid Till date.",
         },
         {
