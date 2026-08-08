@@ -2,3 +2,4 @@ Connect Diagnostics Core
 Connect Diagnostics Stock
 Connect Diagnostics Accounting
 Connect Diagnostics Print
+Connect Diagnostics DKSH

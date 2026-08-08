@@ -31,16 +31,6 @@ frappe.ui.form.on("Quotation", {
 		set_sales_representative_default(frm);
 	},
 
-	refresh(frm) {
-		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
-			const row = frappe.get_doc(cdt, cdn);
-			return {
-				query: "connect_diagnostics_core.api.erpnext.item.get_item_with_stock",
-				filters: { warehouse: row.warehouse || "" },
-			};
-		});
-	},
-
 	party_name(frm) {
 		set_customer_quotation_defaults(frm);
 	},

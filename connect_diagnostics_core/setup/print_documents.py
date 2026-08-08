@@ -153,6 +153,16 @@ PRINT_DOCUMENTS: tuple[PrintDocument, ...] = (
         document_fields=QUOTATION_DOCUMENT_FIELDS,
     ),
     PrintDocument(
+        key="sales_order",
+        label="Sales Order",
+        print_formats=("Sales Order",),
+        doctypes=("Sales Order",),
+        language_selectable=False,
+        offers_batch_serial=False,
+        copies=GENERIC_COPIES,
+        fixed_language=LANGUAGE_THAI,
+    ),
+    PrintDocument(
         key="tax_invoice",
         label="Tax Invoice",
         print_formats=("Tax Invoice Delivery Note and Invoice",),
@@ -190,7 +200,7 @@ DOCUMENT_BY_KEY: dict[str, PrintDocument] = {document.key: document for document
 # linked Customer follows immediately.
 SCALAR_FIELDS = (
     "customer_print_name",
-    "use_customer_po",
+    "source_purchase_order_copy_required",
     "purchase_order_copy_count",
     *QUOTATION_CUSTOMER_FIELDS,
 )
@@ -199,17 +209,13 @@ SCALAR_FIELDS = (
 # that only the document itself carries.
 SCALAR_DEFAULTS: dict[str, object] = {
     "customer_print_name": "",
-    "use_customer_po": 1,
+    "source_purchase_order_copy_required": 0,
     "purchase_order_copy_count": 1,
     "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
     "override_quotation_validity_text": 0,
     "quotation_custom_validity_text": "",
     "quotation_delivery_terms": "",
 }
-
-# Read directly by the Sales Order print format; deliberately outside the
-# registry because no Customer print configuration controls it.
-LEGACY_CUSTOMER_FIELDS = ("print_date",)
 
 
 def get_document(key: str) -> PrintDocument | None:

@@ -15,6 +15,7 @@ APP_MODULES = frozenset(
         "Connect Diagnostics Stock",
         "Connect Diagnostics Accounting",
         "Connect Diagnostics Print",
+        "Connect Diagnostics DKSH",
     }
 )
 ERPNEXT_THAILAND_MODULES = frozenset(

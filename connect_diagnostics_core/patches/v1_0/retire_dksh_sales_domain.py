@@ -17,14 +17,12 @@ from typing import Any, cast
 
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.workflow.doctype.workflow_action.workflow_action import (
     clear_workflow_actions,
     process_workflow_actions,
 )
 
 from connect_diagnostics_core.setup import customer_onboarding
-from connect_diagnostics_core.setup import item as item_setup
 
 _IDENT_RE = re.compile(r"^[A-Za-z0-9_ ]+$")
 
@@ -120,6 +118,9 @@ RETIRED_CUSTOM_FIELDS: dict[str, tuple[str, ...]] = {
         "custom_dksh_item_mapping",
     ),
 }
+
+# Inlined: this patch predates the retirement of the Customer Onboarding workflow.
+PENDING_ACCOUNTING_STATE = "Customer Pending Accounting & Credit Review"
 
 
 def get_retirement_preview() -> dict[str, Any]:
@@ -226,15 +227,26 @@ def execute() -> None:
 
 
 def _ensure_item_dksh_code_field() -> None:
-    field = next(
-        field for field in item_setup.CUSTOM_FIELDS["Item"] if field.get("fieldname") == "dksh_item_code"
-    )
-    create_custom_fields({"Item": [field]}, ignore_validate=True)
+    """DKSH codes now live in the code-managed ``DKSH Item`` DocType, synced by
+    migrate, so there is no Item field to ensure. Kept as a step so the retirement
+    sequence and its idempotency test stay stable."""
+    return
 
 
 def _backfill_item_dksh_codes() -> None:
     for item_name, code in _item_dksh_code_updates().items():
-        frappe.db.set_value("Item", item_name, "dksh_item_code", code, update_modified=False)
+        _upsert_dksh_item(item_name, code)
+
+
+def _upsert_dksh_item(item_name: str, code: str) -> None:
+    """Preserve a DKSH code as a ``DKSH Item`` record linked to its Item."""
+    existing = frappe.db.get_value("DKSH Item", {"dksh_item_code": code}, "name")
+    if existing:
+        frappe.db.set_value("DKSH Item", existing, "item", item_name, update_modified=False)
+        return
+    frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": code, "item": item_name}).insert(
+        ignore_permissions=True
+    )
 
 
 def _item_dksh_code_updates() -> dict[str, str]:
@@ -378,7 +390,7 @@ def _migrate_pending_customers() -> None:
             "Customer",
             customer_name,
             "customer_onboarding_state",
-            customer_onboarding.PENDING_ACCOUNTING_STATE,
+            PENDING_ACCOUNTING_STATE,
             update_modified=False,
         )
         customer = frappe.get_doc("Customer", customer_name)

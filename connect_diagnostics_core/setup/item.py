@@ -3,48 +3,6 @@
 CUSTOM_FIELDS = {
     "Item": [
         {
-            "fieldname": "dksh_tab",
-            "label": "DKSH",
-            "fieldtype": "Tab Break",
-            "insert_after": "description",
-        },
-        {
-            "fieldname": "dksh_item_code",
-            "label": "DKSH Item Code",
-            "fieldtype": "Data",
-            "insert_after": "dksh_tab",
-            "bold": 1,
-            "in_global_search": 1,
-            "search_index": 1,
-            "unique": 1,
-        },
-        {
-            "fieldname": "supplier_product_code",
-            "label": "Supplier Product Code",
-            "fieldtype": "Data",
-            "insert_after": "dksh_item_code",
-        },
-        {
-            "fieldname": "mat_group_code",
-            "label": "Mat Group Code",
-            "fieldtype": "Data",
-            "insert_after": "supplier_product_code",
-            "fetch_from": "item_group.mat_group_code",
-        },
-        {
-            "fieldname": "mat_group4_code",
-            "label": "Mat Group4 Code",
-            "fieldtype": "Data",
-            "insert_after": "mat_group_code",
-            "fetch_from": "item_group.mat_group4_code",
-        },
-        {
-            "fieldname": "material_type_code",
-            "label": "Material Type Code",
-            "fieldtype": "Data",
-            "insert_after": "mat_group4_code",
-        },
-        {
             "fieldname": "column_break_lhwzh",
             "fieldtype": "Column Break",
             "insert_after": "withholding_tax_type",

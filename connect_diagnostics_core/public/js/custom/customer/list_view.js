@@ -25,13 +25,7 @@ const SEARCH_TARGETS = [
 ];
 
 frappe.listview_settings["Customer"] = {
-	add_fields: [
-		"customer_name",
-		"customer_group",
-		"customer_onboarding_state",
-		"tax_invoice_readiness",
-		"delivery_readiness",
-	],
+	add_fields: ["customer_name", "customer_group"],
 
 	hide_name_filter: true, // replaced by the single search box below
 

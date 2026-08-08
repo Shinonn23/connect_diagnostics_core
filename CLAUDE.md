@@ -521,23 +521,24 @@ return {"data": <payload>, "message": <str>}
 ### Customer Onboarding and Master Data
 
 - A Customer's document name is its required manual `Customer Code`; do not restore
-  the Customer naming series. Customer Code cannot be changed after activation.
-- `Customer Onboarding` keeps new Customers disabled from Customer Request through
-  duplicate verification and accounting/credit review. The accounting reviewer
-  activates a ready Customer directly; there is no external-system setup state.
-  Active is the sole transaction-eligible state. Workflow Actions provide internal
-  role notifications; the Customer workflow does not send email.
-- A reviewer must save `Correction Reason` before selecting Return for correction.
-  The reason remains visible to Sales and is cleared when the Customer is sent for
-  duplicate verification again, so a later return requires a newly documented reason.
-- Activation requires tax-invoice readiness plus delivery readiness (or a documented
-  no-delivery reason). Tax readiness requires one active primary Billing Address
-  whose Thai address, tax ID, and branch code match Customer; delivery readiness
-  requires one active preferred Shipping Address and one primary Contact with a
-  name and mobile/phone. These readiness fields are informational for documents,
-  but are an Active gate.
-- Customer Onboarding State, Correction Reason, document-readiness fields, and
-  no-delivery controls belong in the dedicated Customer Onboarding tab, not Details.
+  the Customer naming series. The code can be corrected until the Customer has its
+  first Quotation, Sales Order, Sales Invoice, or Delivery Note, after which a rename
+  would rewrite documents that have already gone out.
+- **There is no Customer onboarding workflow.** Sales saves a Customer and can raise
+  an order against it in the same breath. The previous queue — Customer Request →
+  duplicate verification by IT-UB → accounting activation, with the Customer
+  `disabled` throughout — cost more than it caught and is retired along with the
+  `Customer Duplicate Verifier` role. Do not reintroduce an activation state.
+- Master data is required where it is used, not before a sale can start:
+  `sales_invoice.validate_tax_invoice_readiness` blocks **submitting** a Sales Invoice
+  until tax readiness passes — one active primary Billing Address whose Thai address,
+  tax ID, and branch code match Customer. Nothing blocks the order.
+- Readiness is **calculated, never stored**. `customer.build_readiness_values` is the
+  single place that decides what a Customer is missing; the invoice gate and the
+  Customer form both read it live through `get_customer_readiness`. The four readiness
+  Select fields, their summary, `customer_onboarding_state`, `correction_reason`, and
+  the no-delivery controls were dropped with the workflow, together with the Address
+  and Contact hooks that rewrote them on every save.
 - `Print Configuration Template` is shared print policy: a `Documents` table with one
   row per registered document, and a `Copies` table of named page sets. It holds no
   per-customer scalars. Every Customer linked to it follows those rows **live** —
@@ -565,8 +566,10 @@ return {"data": <payload>, "message": <str>}
   Sales Copy, plus a Batch / Serial visibility option. All four default to one page set
   each. Sales Invoice is Thai-only: the registry fixes its language and any row value
   is ignored. Named copies are available to every document, not only Sales Invoice.
-- `Customer.print_date` is deliberately kept outside the registry: the Sales Order print
-  format reads it directly and has no Customer print configuration of its own.
+- Sales Order is a registered print document like the others: its date is the per-document
+  `show_date`, resolved live from the Customer and overridable per print request on
+  `/app/print/Sales Order/<name>`. The retired `Customer.print_date` flag and the Sales
+  Order format's direct read of it must not be reintroduced.
 - The combined Sales Invoice format resolves Batch and Serial values from both
   direct item fields and `Serial and Batch Bundle`, renders one traceability
   line per record without ellipsis, then paginates whole item blocks before
@@ -598,26 +601,123 @@ return {"data": <payload>, "message": <str>}
 - The single Quotation format renders Thai, English, or Thai / English and configured
   original/copy pages. `show_date` off and a custom validity text are ordinary
   configuration, not separate formats.
-- Later `Customer Credit Request` is available to every active Customer and is
-  approved by the Customer Credit Approver; it does not depend on a channel field.
-  `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;
-  other Customers start on Cash terms.
+- `Customer Credit Request` is the only route to payment terms and a credit limit,
+  for **every** Customer including `GOV. HOSPITAL`, and is approved by the Customer
+  Credit Approver. It does not depend on a channel field. Customers start on whatever
+  terms they are created with; `Customer.validate` still blocks anyone without the
+  Customer Accounting Reviewer role from editing terms or limits directly.
 - Customer, Item, and Supplier keep their current document names and codes. Do not
-  add conversion flags or automatically rename these masters. `Item.dksh_item_code`
-  and the DKSH reference fields `supplier_product_code`, `mat_group_code`,
-  `mat_group4_code`, and `material_type_code` are grouped on the Item's DKSH tab.
-  They are optional reference data only and must not control Item lifecycle or
-  transaction eligibility.
-- Sales Order uses the standard `item_code` grid and standard ERPNext behavior for
-  every Company. Do not force a selling Price List, Skip Delivery Note, external
-  order status, or Company-specific Item link query.
-- The retired mapping doctypes, workflow, roles, Sales Order fields, and dedicated
-  selling Price List must not be recreated. Retirement migrations may delete only
-  those explicitly retired records and fields; they must not rename or delete
-  Customer, Item, Supplier, Asset, or historical transactions.
+  add conversion flags or automatically rename these masters. The DKSH reference codes
+  `dksh_item_code`, `supplier_product_code`, `mat_group_code`, `mat_group4_code`, and
+  `material_type_code` live on the standalone `DKSH Item` DocType (autonamed by
+  `dksh_item_code`) with an **optional** `item` link — blank means a DKSH stand-alone
+  product with no CD Item. They are optional reference data only, with no workflow and no
+  roles of their own, and must not control Item lifecycle or transaction eligibility. The
+  link surfaces on the Item form's Connections via `override_doctype_dashboards`
+  (`api/erpnext/item.py`). `DKSH Item` and every other DKSH reference master live in the
+  `Connect Diagnostics DKSH` module (see the *DKSH module* section below), not in Core. The
+  earlier design that grouped these as five Custom Fields on an Item DKSH tab, plus the Item
+  list view and the stock-showing `get_item_with_stock` link query that searched them, were
+  removed; do not reintroduce them.
+- Sales Order uses the standard `item_code` grid and otherwise standard ERPNext
+  behavior for every Company. Do not force a selling Price List, Skip Delivery Note,
+  external order status, or Company-specific Item link query. The sales document
+  requirement gate below is the one deliberate exception and is driven by Customer
+  data, not by Company.
+
+### Customer Sales Document Requirements
+
+- A Customer states what it needs before a sale proceeds, in the *Sales Document
+  Requirements* section of its Document / Print Configuration tab. These are process
+  gates, not print settings: they say what must exist, while the print configuration
+  says how the resulting documents print.
+- `quotation_required` rejects a Sales Order with no `Sales Order Item.prevdoc_docname`,
+  the standard ERPNext link to the Quotation a line was mapped from.
+  `source_purchase_order_copy_required` rejects a Sales Invoice whose
+  `source_purchase_orders` table has no row naming either a `purchase_order` or a
+  `purchase_order_file`.
+- `use_customer_po` was renamed to `source_purchase_order_copy_required`. It never held
+  the Customer's own purchase order — it asks whether the Customer wants a copy of the
+  Purchase Order **we** placed with our supplier — and the old name collided with the
+  standard `Sales Order.po_no` ("Customer's Purchase Order"). Its default also flipped
+  from 1 to 0; only a handful of Customers actually ask for the copy. Do not reintroduce
+  the old name.
+- `connect_diagnostics_core/api/erpnext/sales_requirements.py` owns the rules and the
+  `validate` hook for both DocTypes. Every evaluator accepts a `Document` or a plain
+  mapping so one form and a whole report page share the same logic; the whitelisted
+  `get_transaction_requirements` takes the form's document rather than a name, so an
+  unsaved order shows the requirement while it can still be met.
+- A holder of the `Sales Requirement Override` role proceeds by writing
+  `requirement_override_reason`, which stays on the document as the audit trail. The
+  role alone does not bypass the gate, and the reason is cleared once the gap closes.
+- The source Purchase Order copy is **concatenated as extra PDF pages, never rendered
+  inside the tax invoice format**. Nesting fails for two reasons: the `Purchase Order`
+  format's CSS sets `@page`, `html, body` and `.print-format` globally and would rewrite
+  the invoice's page geometry, and its template calls `register_print`, which would log a
+  Purchase Order print to a supplier every time a Customer's invoice printed. The join
+  therefore happens in the `download_pdf` override using `pypdf`, which frappe already
+  depends on. The `source_purchase_orders` table carries one row per Purchase Order, each
+  appended in table order `copies` times (a blank row count falls back to
+  `Customer.purchase_order_copy_count`). This covers the PDF channel only — the Print
+  button hands HTML to the browser, so the Sales Invoice form offers one print button per
+  source row.
+- Rendering the Purchase Order deliberately sets `frappe.flags.ignore_print_permissions`.
+  The copy is a page the Customer is meant to receive, so anyone allowed to print the
+  invoice may produce it; requiring Purchase Order print rights would stop sales staff
+  from downloading their own invoices. Like the print audit, the join is fail-open: a
+  failure is logged with context and the invoice PDF is returned unchanged.
+- `setup/print_configuration_template.py` also creates three document policy Templates —
+  `Tax Invoice Only`, `Tax Invoice and Receipt`, `Tax Invoice and Abbreviated Receipt` —
+  named after what they print rather than after a Customer Group, because more than one
+  group follows each. They are initial contents only: an existing Template is never
+  overwritten, since a Template is user data once created.
+- The retired mapping doctypes (`DKSH Item Mapping`, `Partner Item Mapping`), workflow,
+  roles, Sales Order fields, and dedicated selling Price List must not be recreated. The
+  new `DKSH Item` reference master is a distinct, allowed DocType, not one of those.
+  Retirement migrations may delete only those explicitly retired records and fields; they
+  must not rename or delete Customer, Item, Supplier, Asset, or historical transactions.
 - The retired DKSH APIs and hooks are explicitly exempt from the usual one-release
   deprecation period because this domain was removed before go-live. Do not restore
   compatibility stubs for them.
+
+### DKSH module
+
+- `Connect Diagnostics DKSH` (in `modules.txt`, folder
+  `connect_diagnostics_core/connect_diagnostics_dksh/`) is the single home for the DKSH
+  domain: the DKSH reference masters and the deferred DKSH daily sales import / analysis.
+  It is registered in `setup/print_format.py::APP_MODULES` so any future DKSH Print Format
+  is not purged. `DKSH Item` lives here (moved from Core by
+  `patches/v1_0/move_dksh_item_to_dksh_module.py`, which repoints `DocType.module` and
+  reloads from the new folder — records are untouched).
+- **DKSH reference master convention.** Each one is a standalone DocType autonamed by its
+  DKSH code (`autoname: field:<code>`), carrying an **optional** `Link` to the CD master it
+  references (blank = a DKSH stand-alone record). It is reference data only — no workflow,
+  no roles, no control over the CD master's lifecycle or transaction eligibility — and may
+  offer a Convert-to-CD action. Two shared behaviours live in
+  `connect_diagnostics_dksh/reference.py`, so every master is built the same way:
+  `validate_reference(doc, *, code_fields, link_field, master_doctype)` trims the codes and
+  rejects a second reference pointing at the same CD master; `inject_connection(data, *,
+  reference_doctype, link_field, group_label)` is the generic `override_doctype_dashboards`
+  helper that surfaces the master under the CD form's Connections. `DKSH Item` and
+  `api/erpnext/item.py::get_item_dashboard_data` both delegate here.
+- `DKSH Customer` is the reference master for customers that carry a 9-digit DKSH code
+  differing from their CD Customer Code. It follows the convention above (autoname
+  `field:dksh_customer_code`, optional `customer` link, surfaced under the Customer form's
+  Connections via `api/erpnext/customer.py::get_customer_dashboard_data`) and additionally
+  stores DKSH's own `customer_name` plus a contact/tax block (`tax_id`, `branch_code`,
+  address fields, `phone`, `email_id`) for the Convert flow.
+- **Convert to CD Customer.** When a `DKSH Customer` has no `customer`, the form
+  (`public/js/custom/dksh_customer/doctype.js`) offers **Convert to CD Customer**, which
+  opens a **prefilled New Customer form** (name, tax id, branch code, and the read-only
+  provenance field `source_dksh_customer` from `setup/customer.py`); the user types the CD
+  Customer Code (the document name) and saves. Customer `after_insert`
+  (`link_source_dksh_customer`) then links the DKSH Customer back under a row lock — only
+  when it is still unclaimed, so it is idempotent — and, when the DKSH Customer carries an
+  address and the new Customer has none, creates a primary Billing Address from it (with the
+  matching `tax_id`/`branch_code`) so the tax-invoice readiness gate can pass. That address
+  creation is fail-open: a failure is logged and never aborts the Customer. Phone→Contact
+  creation is a deferred follow-up. When `customer` is already set the form offers **Go to
+  Customer** instead.
 
 ### Custom Fields
 

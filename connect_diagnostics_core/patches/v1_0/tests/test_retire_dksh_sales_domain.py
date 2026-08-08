@@ -68,17 +68,11 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             ),
             patch.object(patch_module, "_collect_master_mapping_candidates", side_effect=collect_master),
             patch.object(patch_module, "_collect_partner_mapping_candidates"),
-            patch.object(patch_module.frappe.db, "set_value") as mocked_set_value,
+            patch.object(patch_module, "_upsert_dksh_item") as mocked_upsert,
         ):
             patch_module._backfill_item_dksh_codes()
 
-        mocked_set_value.assert_called_once_with(
-            "Item",
-            "CD-ITEM-001",
-            "dksh_item_code",
-            "EXT-001",
-            update_modified=False,
-        )
+        mocked_upsert.assert_called_once_with("CD-ITEM-001", "EXT-001")
 
     def test_item_code_conflict_blocks_retirement_before_any_backfill_write(self) -> None:
         def collect_master(
@@ -108,7 +102,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             ),
             patch.object(patch_module, "_collect_master_mapping_candidates", side_effect=collect_master),
             patch.object(patch_module, "_collect_partner_mapping_candidates"),
-            patch.object(patch_module.frappe.db, "set_value") as mocked_set_value,
+            patch.object(patch_module, "_upsert_dksh_item") as mocked_upsert,
             patch.object(
                 patch_module.frappe,
                 "throw",
@@ -118,7 +112,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             with self.assertRaises(frappe.ValidationError):
                 patch_module._backfill_item_dksh_codes()
 
-        mocked_set_value.assert_not_called()
+        mocked_upsert.assert_not_called()
         self.assertIn("EXT-001, EXT-002", mocked_throw.call_args.args[0])
 
     def test_item_code_backfill_skips_dksh_only_items(self) -> None:
@@ -144,11 +138,11 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             ),
             patch.object(patch_module, "_collect_master_mapping_candidates", side_effect=collect_master),
             patch.object(patch_module, "_collect_partner_mapping_candidates"),
-            patch.object(patch_module.frappe.db, "set_value") as mocked_set_value,
+            patch.object(patch_module, "_upsert_dksh_item") as mocked_upsert,
         ):
             patch_module._backfill_item_dksh_codes()
 
-        mocked_set_value.assert_not_called()
+        mocked_upsert.assert_not_called()
 
     def test_conflict_aborts_execute_before_destructive_retirement(self) -> None:
         conflict = frappe.ValidationError("Preservation conflict")
@@ -183,7 +177,7 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             "Customer",
             "CD-0001",
             "customer_onboarding_state",
-            customer_onboarding.PENDING_ACCOUNTING_STATE,
+            patch_module.PENDING_ACCOUNTING_STATE,
             update_modified=False,
         )
         mocked_process_actions.assert_called_once_with(customer_doc, "on_update")
@@ -216,21 +210,27 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
             field["fieldname"] for field in sales_order_item.CUSTOM_FIELDS["Sales Order Item"]
         }
 
-        self.assertIn("dksh_item_code", item_fields)
-        self.assertEqual(item_fields["dksh_tab"]["fieldtype"], "Tab Break")
-        self.assertEqual(item_fields["dksh_tab"]["label"], "DKSH")
-        self.assertEqual(item_fields["dksh_item_code"]["insert_after"], "dksh_tab")
-        self.assertEqual(
-            item_fields["supplier_product_code"]["insert_after"],
+        # The five DKSH fields moved off Item into the DKSH Item DocType, so they
+        # are neither Item custom fields nor part of the retirement allowlist; the
+        # move patch removes the columns and preservation lands in DKSH Item.
+        for fieldname in (
+            "dksh_tab",
             "dksh_item_code",
-        )
-        self.assertEqual(item_fields["mat_group_code"]["insert_after"], "supplier_product_code")
-        self.assertEqual(item_fields["mat_group4_code"]["insert_after"], "mat_group_code")
-        self.assertEqual(item_fields["material_type_code"]["insert_after"], "mat_group4_code")
+            "supplier_product_code",
+            "mat_group_code",
+            "mat_group4_code",
+            "material_type_code",
+        ):
+            self.assertNotIn(fieldname, item_fields)
         self.assertNotIn("item_channel", item_fields)
         self.assertNotIn("dksh_item_mapping", sales_order_item_fields)
-        self.assertNotIn("Sales Order", hooks.doc_events)
-        self.assertNotIn("Sales Order", hooks.doctype_js)
+        # Sales Order carries hooks again for the Customer requirement gate. What
+        # had to go was the DKSH domain, so assert on that rather than on Sales
+        # Order being untouched.
+        self.assertTrue(
+            all("dksh" not in target for target in hooks.doc_events.get("Sales Order", {}).values())
+        )
+        self.assertNotIn("dksh", hooks.doctype_js.get("Sales Order", ""))
         # Unrelated overrides are allowed; only the DKSH ones had to go.
         overrides = getattr(hooks, "override_whitelisted_methods", {})
         self.assertTrue(all("dksh" not in target for target in overrides.values()))

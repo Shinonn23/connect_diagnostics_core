@@ -63,7 +63,6 @@ class TestPrintDocumentRegistry(UnitTestCase):
         self.assertEqual(print_documents.resolve_document_key("Quotation"), "quotation")
 
     def test_resolve_document_key_returns_empty_for_unregistered_input(self) -> None:
-        self.assertEqual(print_documents.resolve_document_key("Sales Order"), "")
         self.assertEqual(print_documents.resolve_document_key("Delivery Note"), "")
         self.assertEqual(print_documents.resolve_document_key("Purchase Order", "Purchase Order"), "")
 

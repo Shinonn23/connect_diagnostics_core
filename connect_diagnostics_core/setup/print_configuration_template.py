@@ -14,6 +14,53 @@ from connect_diagnostics_core.setup import print_documents
 
 DEFAULT_TEMPLATE = "Default"
 
+# The three document policies the Customer base actually uses, named after what
+# they print rather than after a Customer Group, because more than one group
+# follows each. Values are the initial contents only: a Template is user data
+# from then on, so an edit is never overwritten.
+POLICY_TEMPLATES: dict[str, dict[str, dict[str, Any]]] = {
+    "Tax Invoice Only": {
+        "receipt": {"enabled": 0},
+        "abbreviated_tax_invoice": {"enabled": 0},
+        "__all__": {"show_date": 1},
+    },
+    "Tax Invoice and Receipt": {
+        "receipt": {"enabled": 1},
+        "abbreviated_tax_invoice": {"enabled": 0},
+        "__all__": {"show_date": 0},
+    },
+    "Tax Invoice and Abbreviated Receipt": {
+        "receipt": {"enabled": 0},
+        "abbreviated_tax_invoice": {"enabled": 1},
+        "__all__": {"show_date": 1},
+    },
+}
+
+EVERY_DOCUMENT = "__all__"
+
+
+def ensure_policy_templates() -> None:
+    """Create the document policy Templates, leaving existing ones untouched."""
+    for template_name, policy in POLICY_TEMPLATES.items():
+        if frappe.db.exists("Print Configuration Template", template_name):
+            continue
+
+        template = frappe.new_doc("Print Configuration Template")
+        template.update({"template_name": template_name})
+        seed_registry_rows(template)
+        _apply_policy(template, policy)
+        template.insert(ignore_permissions=True)
+
+
+def _apply_policy(template: Document, policy: dict[str, dict[str, Any]]) -> None:
+    """Set the policy's values on the freshly seeded document rows."""
+    shared = policy.get(EVERY_DOCUMENT, {})
+    for row in template.get("print_documents") or []:
+        for fieldname, value in shared.items():
+            row.set(fieldname, value)
+        for fieldname, value in policy.get(str(row.get("document_key")), {}).items():
+            row.set(fieldname, value)
+
 
 def ensure_default_template() -> None:
     """Create the Default Template, or top it up with newly registered documents."""

@@ -1,9 +1,26 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
+"""Customer rules, kept deliberately thin so Sales can start selling immediately.
+
+A Customer is usable the moment Sales saves it. There is no activation state and
+no approval queue: the master data a sale eventually needs — a Thai billing
+address, a matching tax ID, a delivery address — is checked where it is actually
+needed, when a Sales Invoice is submitted, not before an order can be raised.
+
+What remains here:
+
+* Customer Code is the document name, so a change to it is a rename, and it is
+  frozen once the Customer has transactions pointing at it
+* payment terms and credit limits stay behind the Accounting Reviewer role;
+  everyone else raises a ``Customer Credit Request``
+* readiness is *calculated*, never stored — :func:`build_readiness_values` is the
+  one place that decides what a Customer is still missing, and both the invoice
+  gate and the Customer form read it live
+"""
+
 from __future__ import annotations
 
-from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from typing import Any, cast
 
@@ -12,12 +29,17 @@ import frappe.defaults
 from frappe import _
 from frappe.model.document import Document
 
+from connect_diagnostics_core.connect_diagnostics_dksh import reference
 from connect_diagnostics_core.naming.customer import normalise_customer_code
 from connect_diagnostics_core.setup import customer_onboarding
 
 READY = "Ready"
 MISSING = "Missing information"
 NOT_APPLICABLE = "Not applicable"
+
+# Documents that make a Customer Code permanent: renaming it once these exist
+# would rewrite history that has already been sent out or filed.
+TRANSACTION_DOCTYPES = ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note")
 
 _CUSTOMER_READINESS_FIELDS = (
     "name",
@@ -28,8 +50,6 @@ _CUSTOMER_READINESS_FIELDS = (
     "tax_id",
     "branch_code",
     "email_id",
-    "no_delivery_required",
-    "no_delivery_reason",
 )
 _ADDRESS_READINESS_FIELDS = (
     "name",
@@ -58,145 +78,148 @@ _CONTACT_READINESS_FIELDS = (
 
 
 def before_validate(doc: Document, method: str | None = None) -> None:
-    """Set server-owned defaults before Frappe validates the Customer workflow."""
-    if doc.is_new():
-        doc.set("customer_onboarding_state", customer_onboarding.CUSTOMER_REQUEST_STATE)
-        doc.set("disabled", 1)
+    """Normalise the Customer Code before Frappe validates or names the record."""
     doc.set("customer_code", normalise_customer_code(doc.get("customer_code")))
 
 
 def validate(doc: Document, method: str | None = None) -> None:
-    """Enforce Customer Code, readiness, and onboarding invariants."""
+    """Enforce the two invariants a Customer still has."""
     previous_doc = doc.get_doc_before_save()
     _validate_customer_code_change(doc, previous_doc)
     _validate_financial_data_access(doc, previous_doc)
-    readiness_values = build_readiness_values(
-        customer=doc.as_dict(),
-        addresses=_get_customer_addresses(doc.name) if doc.name else (),
-        contacts=_get_customer_contacts(doc.name) if doc.name else (),
-    )
-    doc.update(readiness_values)
-    _validate_onboarding_transition(doc, previous_doc, readiness_values)
 
 
 def on_update(doc: Document, method: str | None = None) -> None:
-    """Rename draft/conversion records safely and retain current readiness fields."""
+    """Carry a Customer Code change through as a rename."""
     new_customer_code = cast(str | None, doc.flags.get("customer_code_rename_to"))
-    if new_customer_code and new_customer_code != doc.name:
-        old_name = doc.name
-        customer_name = cast(str, doc.get("customer_name") or "")
-        doc.flags.customer_code_rename_to = None
-        frappe.rename_doc(
-            "Customer",
-            old_name,
-            new_customer_code,
-            force=True,
-            show_alert=False,
+    if not new_customer_code or new_customer_code == doc.name:
+        return
+
+    old_name = doc.name
+    customer_name = cast(str, doc.get("customer_name") or "")
+    doc.flags.customer_code_rename_to = None
+    frappe.rename_doc("Customer", old_name, new_customer_code, force=True, show_alert=False)
+    doc.name = new_customer_code
+    # ERPNext's Customer.after_rename sets Customer Name to the document name
+    # when the site uses the legacy ``Customer Name`` naming preference.
+    # Customer Code naming must never overwrite the business name.
+    if customer_name:
+        frappe.db.set_value(
+            "Customer", new_customer_code, "customer_name", customer_name, update_modified=False
         )
-        doc.name = new_customer_code
-        # ERPNext's Customer.after_rename sets Customer Name to the document name
-        # when the site uses the legacy ``Customer Name`` naming preference.
-        # Customer Code naming must never overwrite the business name.
-        if customer_name:
-            frappe.db.set_value(
-                "Customer",
-                new_customer_code,
-                "customer_name",
-                customer_name,
-                update_modified=False,
-            )
-    refresh_customer_readiness(doc.name or "")
 
 
-def refresh_linked_customer_readiness(doc: Document, method: str | None = None) -> None:
-    """Refresh readiness for every Customer dynamically linked to an Address/Contact."""
-    linked_customers = _linked_customer_names_from_document(doc)
-    previous_doc = doc.get_doc_before_save()
-    if previous_doc:
-        # An Address or Contact can be unlinked without being deleted.  Its
-        # current dynamic links no longer identify the Customer that lost it,
-        # so refresh both the before-save and current link sets.
-        linked_customers.update(_linked_customer_names_from_document(previous_doc))
-    _refresh_customer_readiness_for_names(sorted(linked_customers))
-
-
-def refresh_customer_readiness(customer_name: str) -> dict[str, str]:
-    """Persist readiness without re-saving Customer or triggering workflow side effects."""
-    if not customer_name:
-        return {}
-    return _refresh_customer_readiness_for_names([customer_name]).get(customer_name, {})
-
-
-def _refresh_customer_readiness_for_names(
-    customer_names: Sequence[str],
-) -> dict[str, dict[str, str]]:
-    """Recalculate linked Customer readiness with batched, field-level queries."""
-    names = sorted({name for name in customer_names if name})
-    if not names:
-        return {}
-
-    customers = cast(
-        list[dict[str, Any]],
-        frappe.get_all("Customer", filters={"name": ["in", names]}, fields=list(_CUSTOMER_READINESS_FIELDS)),
+def get_customer_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
+    """Surface the linked DKSH Customer under the Customer form's Connections."""
+    return reference.inject_connection(
+        data,
+        reference_doctype="DKSH Customer",
+        link_field="customer",
+        group_label=_("Reference"),
     )
-    if not customers:
-        return {}
 
-    names = sorted(cast(str, customer_row["name"]) for customer_row in customers)
-    links = cast(
-        list[dict[str, Any]],
-        frappe.get_all(
-            "Dynamic Link",
-            filters={
-                "link_doctype": "Customer",
-                "link_name": ["in", names],
-                "parenttype": ["in", ["Address", "Contact"]],
-            },
-            fields=["parent", "parenttype", "link_name"],
+
+def link_source_dksh_customer(doc: Document, method: str | None = None) -> None:
+    """Link a freshly created Customer back to the DKSH Customer it was converted from.
+
+    ``source_dksh_customer`` is prefilled by the Convert to CD Customer action. Under a
+    row lock, the DKSH Customer's ``customer`` is filled only when still empty, so a
+    re-run — or a DKSH Customer already claimed by someone else — is a no-op. When the
+    DKSH Customer carries an address and the new Customer has none, a primary Billing
+    Address is created from it so the tax-invoice readiness gate can pass.
+    """
+    source = _text(doc.get("source_dksh_customer"))
+    if not source or not frappe.db.exists("DKSH Customer", source):
+        return
+
+    linked = frappe.db.get_value("DKSH Customer", source, "customer", for_update=True)
+    if linked:
+        return
+
+    frappe.db.set_value("DKSH Customer", source, "customer", doc.name)
+    _create_billing_address_from_dksh(cast(str, doc.name), source)
+
+
+def _create_billing_address_from_dksh(customer_name: str, source_dksh_customer: str) -> None:
+    """Create a primary Billing Address from the DKSH Customer's address, fail-open.
+
+    Only runs when the DKSH Customer has the mandatory address fields and the Customer
+    has no primary Billing Address yet. A failure is logged and swallowed: a bad DKSH
+    address must never abort the Customer it was converted into.
+    """
+    dksh = cast(
+        dict[str, Any] | None,
+        frappe.db.get_value(
+            "DKSH Customer",
+            source_dksh_customer,
+            [
+                "tax_id",
+                "branch_code",
+                "address_line1",
+                "address_line2",
+                "city",
+                "county",
+                "state",
+                "pincode",
+                "country",
+                "phone",
+                "email_id",
+            ],
+            as_dict=True,
         ),
     )
-    address_names = sorted(
-        {cast(str, link["parent"]) for link in links if link.get("parenttype") == "Address"}
-    )
-    contact_names = sorted(
-        {cast(str, link["parent"]) for link in links if link.get("parenttype") == "Contact"}
-    )
-    addresses_by_name = _readiness_records_by_name("Address", address_names, _ADDRESS_READINESS_FIELDS)
-    contacts_by_name = _readiness_records_by_name("Contact", contact_names, _CONTACT_READINESS_FIELDS)
-    addresses_by_customer: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    contacts_by_customer: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for link in links:
-        customer_name = cast(str, link["link_name"])
-        linked_name = cast(str, link["parent"])
-        if link.get("parenttype") == "Address" and linked_name in addresses_by_name:
-            addresses_by_customer[customer_name].append(addresses_by_name[linked_name])
-        elif link.get("parenttype") == "Contact" and linked_name in contacts_by_name:
-            contacts_by_customer[customer_name].append(contacts_by_name[linked_name])
+    if not dksh or not (_text(dksh.get("address_line1")) and _text(dksh.get("city"))):
+        return
+    if _has_primary_billing_address(customer_name):
+        return
 
-    values_by_customer = {
-        cast(str, customer_row["name"]): build_readiness_values(
-            customer=customer_row,
-            addresses=addresses_by_customer[cast(str, customer_row["name"])],
-            contacts=contacts_by_customer[cast(str, customer_row["name"])],
+    try:
+        address = frappe.get_doc(
+            {
+                "doctype": "Address",
+                "address_title": customer_name,
+                "address_type": "Billing",
+                "address_line1": dksh.get("address_line1"),
+                "address_line2": dksh.get("address_line2"),
+                "city": dksh.get("city"),
+                "county": dksh.get("county"),
+                "state": dksh.get("state"),
+                "pincode": dksh.get("pincode"),
+                "country": _text(dksh.get("country")) or "Thailand",
+                "phone": dksh.get("phone"),
+                "email_id": dksh.get("email_id"),
+                "tax_id": dksh.get("tax_id"),
+                "branch_code": _text(dksh.get("branch_code")) or "00000",
+                "is_primary_address": 1,
+                "links": [{"link_doctype": "Customer", "link_name": customer_name}],
+            }
         )
-        for customer_row in customers
-    }
-    frappe.db.bulk_update("Customer", values_by_customer, update_modified=False)
-    return values_by_customer
+        address.insert(ignore_permissions=True)
+    except Exception:
+        frappe.log_error(
+            title="DKSH Customer address creation failed",
+            message=(
+                f"Customer {customer_name} converted from DKSH Customer {source_dksh_customer}: "
+                f"{frappe.get_traceback()}"
+            ),
+        )
 
 
-def _readiness_records_by_name(
-    doctype: str,
-    names: Sequence[str],
-    fields: Sequence[str],
-) -> dict[str, dict[str, Any]]:
-    if not names:
-        return {}
-    records = cast(
-        list[dict[str, Any]],
-        frappe.get_all(doctype, filters={"name": ["in", list(names)]}, fields=list(fields)),
+def _has_primary_billing_address(customer_name: str) -> bool:
+    address_names = _linked_document_names(customer_name, "Address")
+    if not address_names:
+        return False
+    return bool(
+        frappe.db.exists(
+            "Address",
+            {
+                "name": ["in", address_names],
+                "address_type": "Billing",
+                "is_primary_address": 1,
+                "disabled": 0,
+            },
+        )
     )
-    return {cast(str, record["name"]): record for record in records}
 
 
 def build_readiness_values(
@@ -205,7 +228,7 @@ def build_readiness_values(
     addresses: Sequence[Mapping[str, Any]],
     contacts: Sequence[Mapping[str, Any]],
 ) -> dict[str, str]:
-    """Calculate informational document readiness from Customer, Address, and Contact data."""
+    """Calculate what a Customer is still missing, without storing anything."""
     quotation_missing = [
         label
         for fieldname, label in (
@@ -216,7 +239,6 @@ def build_readiness_values(
         )
         if not _text(customer.get(fieldname))
     ]
-    quotation_status = READY if not quotation_missing else MISSING
 
     active_addresses = [address for address in addresses if not _truthy(address.get("disabled"))]
     billing_addresses = [
@@ -225,9 +247,7 @@ def build_readiness_values(
         if _truthy(address.get("is_primary_address")) and _text(address.get("address_type")) == "Billing"
     ]
     tax_missing = _tax_readiness_gaps(customer, billing_addresses)
-    tax_status = READY if not tax_missing else MISSING
-
-    delivery_status, delivery_missing = _delivery_readiness(customer, active_addresses, contacts)
+    delivery_status, delivery_missing = _delivery_readiness(active_addresses, contacts)
     email_status, email_missing = _email_readiness(customer, contacts)
 
     summary_parts: list[str] = []
@@ -241,12 +261,29 @@ def build_readiness_values(
         summary_parts.append(_("Email: {0}").format(", ".join(email_missing)))
 
     return {
-        "quotation_readiness": quotation_status,
+        "quotation_readiness": READY if not quotation_missing else MISSING,
         "delivery_readiness": delivery_status,
-        "tax_invoice_readiness": tax_status,
+        "tax_invoice_readiness": READY if not tax_missing else MISSING,
         "email_readiness": email_status,
         "customer_readiness_summary": " | ".join(summary_parts),
     }
+
+
+def get_readiness_for_customer(customer_name: str) -> dict[str, str]:
+    """Calculate one Customer's readiness from its current Address and Contact records."""
+    if not customer_name:
+        return {}
+    customer = cast(
+        dict[str, Any] | None,
+        frappe.db.get_value("Customer", customer_name, list(_CUSTOMER_READINESS_FIELDS), as_dict=True),
+    )
+    if not customer:
+        return {}
+    return build_readiness_values(
+        customer=customer,
+        addresses=_get_customer_addresses(customer_name),
+        contacts=_get_customer_contacts(customer_name),
+    )
 
 
 def _tax_readiness_gaps(
@@ -283,15 +320,9 @@ def _tax_readiness_gaps(
 
 
 def _delivery_readiness(
-    customer: Mapping[str, Any],
     active_addresses: Sequence[Mapping[str, Any]],
     contacts: Sequence[Mapping[str, Any]],
 ) -> tuple[str, list[str]]:
-    if _truthy(customer.get("no_delivery_required")):
-        if _text(customer.get("no_delivery_reason")):
-            return NOT_APPLICABLE, []
-        return MISSING, [_("No Delivery Reason")]
-
     missing: list[str] = []
     shipping_addresses = [
         address for address in active_addresses if _truthy(address.get("is_shipping_address"))
@@ -361,14 +392,6 @@ def _linked_document_names(customer_name: str, parenttype: str) -> list[str]:
     )
 
 
-def _linked_customer_names_from_document(doc: Document) -> set[str]:
-    return {
-        cast(str, link.get("link_name"))
-        for link in doc.get("links", [])
-        if link.get("link_doctype") == "Customer" and link.get("link_name")
-    }
-
-
 def _validate_customer_code_change(doc: Document, previous_doc: Document | None) -> None:
     if not previous_doc:
         return
@@ -378,12 +401,22 @@ def _validate_customer_code_change(doc: Document, previous_doc: Document | None)
     if old_code == new_code:
         return
 
-    state = _text(previous_doc.get("customer_onboarding_state"))
-    if state == customer_onboarding.CUSTOMER_ACTIVE_STATE:
-        frappe.throw(_("Customer Code cannot be changed after activation."))
+    if _has_transactions(cast(str, doc.name)):
+        frappe.throw(_("Customer Code cannot be changed once the Customer has transactions."))
     if frappe.db.exists("Customer", new_code):
         frappe.throw(_("Customer Code {0} already exists.").format(frappe.bold(new_code)))
     doc.flags.customer_code_rename_to = new_code
+
+
+def _has_transactions(customer_name: str) -> bool:
+    """Report whether anything has been raised against this Customer yet."""
+    if not customer_name:
+        return False
+    for doctype in TRANSACTION_DOCTYPES:
+        field = "party_name" if doctype == "Quotation" else "customer"
+        if frappe.db.exists(doctype, {field: customer_name, "docstatus": ["<", 2]}):
+            return True
+    return False
 
 
 def _validate_financial_data_access(doc: Document, previous_doc: Document | None) -> None:
@@ -394,7 +427,12 @@ def _validate_financial_data_access(doc: Document, previous_doc: Document | None
     if not (payment_terms_changed or credit_limits_changed):
         return
     if customer_onboarding.ACCOUNTING_REVIEWER_ROLE not in set(frappe.get_roles()):
-        frappe.throw(_("Only a Customer Accounting Reviewer can change payment terms or credit limits."))
+        frappe.throw(
+            _(
+                "Only a Customer Accounting Reviewer can change payment terms or credit limits. "
+                "Raise a Customer Credit Request instead."
+            )
+        )
 
 
 def _credit_limits_signature(doc: Document) -> tuple[tuple[str, float, int], ...]:
@@ -410,110 +448,14 @@ def _credit_limits_signature(doc: Document) -> tuple[tuple[str, float, int], ...
     return tuple(sorted(rows))
 
 
-def _validate_onboarding_transition(
-    doc: Document,
-    previous_doc: Document | None,
-    readiness_values: Mapping[str, str],
-) -> None:
-    state = _text(doc.get("customer_onboarding_state"))
-    if not state:
-        frappe.throw(_("Customer Onboarding State is required."))
-    if doc.is_new() and state != customer_onboarding.CUSTOMER_REQUEST_STATE:
-        frappe.throw(_("New Customers must start in Customer Request."))
-
-    previous_state = _text(previous_doc.get("customer_onboarding_state")) if previous_doc else ""
-    if previous_doc and previous_state != state:
-        if state == customer_onboarding.CUSTOMER_REQUEST_STATE:
-            correction_reason = _text(doc.get("correction_reason"))
-            if not correction_reason:
-                frappe.throw(_("A Correction Reason is required when returning a Customer for correction."))
-        elif (
-            previous_state == customer_onboarding.CUSTOMER_REQUEST_STATE
-            and state == customer_onboarding.PENDING_DUPLICATE_STATE
-        ):
-            # A reviewer saves the correction reason before using the standard
-            # workflow action. Clear it once Sales sends the corrected record
-            # back so every later return requires a newly documented reason.
-            doc.set("correction_reason", None)
-        if previous_state == customer_onboarding.PENDING_DUPLICATE_STATE:
-            _validate_active_it_ub_duplicate_verifier()
-        if (
-            previous_state == customer_onboarding.PENDING_ACCOUNTING_STATE
-            and state != customer_onboarding.CUSTOMER_REQUEST_STATE
-        ):
-            _validate_accounting_review(doc)
-    if state == customer_onboarding.CUSTOMER_ACTIVE_STATE:
-        if previous_state != customer_onboarding.CUSTOMER_ACTIVE_STATE:
-            _validate_activation_readiness(readiness_values)
-        doc.set("disabled", 0)
-    else:
-        doc.set("disabled", 1)
-
-
-def _validate_active_it_ub_duplicate_verifier() -> None:
-    if customer_onboarding.DUPLICATE_VERIFIER_ROLE not in set(frappe.get_roles()):
-        frappe.throw(_("Only a Customer Duplicate Verifier can complete duplicate verification."))
-    active_employee = frappe.db.exists(
-        "Employee",
-        {
-            "user_id": frappe.session.user,
-            "status": "Active",
-            "department": customer_onboarding.IT_UB_DEPARTMENT,
-        },
-    )
-    if not active_employee:
-        frappe.throw(_("Customer Duplicate Verifier must be an active Employee in IT - UB."))
-
-
-def _validate_accounting_review(doc: Document) -> None:
-    if _text(doc.get("customer_group")) == "GOV. HOSPITAL":
-        if not _text(doc.get("payment_terms")):
-            frappe.throw(_("Payment Terms are required for GOV. HOSPITAL Customers."))
-        if _credit_limit_for_default_company(doc) <= 0:
-            frappe.throw(_("A positive CD credit limit is required for GOV. HOSPITAL Customers."))
-        return
-
-    if not frappe.db.exists("Payment Terms Template", "Cash"):
-        frappe.throw(_("Payment Terms Template Cash is required for Customer onboarding."))
-    doc.set("payment_terms", "Cash")
-    doc.set("credit_limits", [])
-
-
-def _credit_limit_for_default_company(doc: Document) -> float:
-    company = _default_company()
-    for row in doc.get("credit_limits", []):
-        if _text(row.get("company")) == company:
-            return float(row.get("credit_limit") or 0)
-    return 0
-
-
-def _default_company() -> str:
-    company = _text(frappe.defaults.get_global_default("company"))
-    if not company:
-        frappe.throw(_("A default Company is required for Customer credit controls."))
-    return company
-
-
-def _validate_activation_readiness(readiness_values: Mapping[str, str]) -> None:
-    missing: list[str] = []
-    if readiness_values.get("tax_invoice_readiness") != READY:
-        missing.append(_("Tax Invoice readiness"))
-    if readiness_values.get("delivery_readiness") not in {READY, NOT_APPLICABLE}:
-        missing.append(_("Delivery readiness"))
-    if missing:
-        frappe.throw(_("Customer cannot be activated until {0} is complete.").format(", ".join(missing)))
-
-
 @frappe.whitelist()
 def get_customer_readiness(customer: str) -> dict[str, Any]:
-    """Return current readiness values for the Customer form without changing state."""
+    """Return what the Customer is still missing, for the form to show."""
     frappe.has_permission("Customer", "read", customer, throw=True)
-    values = refresh_customer_readiness(customer)
-    return {"data": values, "message": _("Customer readiness refreshed.")}
+    return {"data": get_readiness_for_customer(customer), "message": ""}
 
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def customer_query(
     doctype: str,
     txt: str,
@@ -546,19 +488,12 @@ def customer_query(
 def _active_customer_filters(
     filters: dict[str, Any] | list[list[Any]] | None,
 ) -> dict[str, Any] | list[list[Any]]:
+    """Eligibility is now just "not disabled" — there is no activation state."""
     active_filters: dict[str, Any] | list[list[Any]]
     if isinstance(filters, dict):
-        active_filters = {
-            **filters,
-            "disabled": 0,
-            "customer_onboarding_state": customer_onboarding.CUSTOMER_ACTIVE_STATE,
-        }
+        active_filters = {**filters, "disabled": 0}
     else:
-        active_filters = [
-            *(filters or []),
-            ["Customer", "disabled", "=", 0],
-            ["Customer", "customer_onboarding_state", "=", customer_onboarding.CUSTOMER_ACTIVE_STATE],
-        ]
+        active_filters = [*(filters or []), ["Customer", "disabled", "=", 0]]
     return active_filters
 
 
@@ -567,4 +502,4 @@ def _text(value: object) -> str:
 
 
 def _truthy(value: object) -> bool:
-    return str(value or "").strip().lower() in {"1", "true", "yes"}
+    return bool(value) and str(value) not in {"0", "False"}
