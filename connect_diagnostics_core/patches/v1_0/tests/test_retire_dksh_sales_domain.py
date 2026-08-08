@@ -231,7 +231,9 @@ class TestRetireDKSHSalesDomain(UnitTestCase):
         self.assertNotIn("dksh_item_mapping", sales_order_item_fields)
         self.assertNotIn("Sales Order", hooks.doc_events)
         self.assertNotIn("Sales Order", hooks.doctype_js)
-        self.assertFalse(hasattr(hooks, "override_whitelisted_methods"))
+        # Unrelated overrides are allowed; only the DKSH ones had to go.
+        overrides = getattr(hooks, "override_whitelisted_methods", {})
+        self.assertTrue(all("dksh" not in target for target in overrides.values()))
 
     def test_doctype_retirement_is_limited_to_mapping_and_legacy_settings(self) -> None:
         with (

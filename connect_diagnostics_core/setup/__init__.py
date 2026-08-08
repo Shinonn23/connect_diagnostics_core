@@ -9,7 +9,6 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
-    company,
     contact,
     currency_exchange,
     customer,
@@ -39,7 +38,6 @@ from connect_diagnostics_core.setup.print_format import remove_non_app_print_for
 
 _MODULES = (
     account,
-    company,
     contact,
     currency_exchange,
     customer,
@@ -106,8 +104,6 @@ def after_migrate() -> None:
 
 def _ensure_default_print_configuration_template() -> None:
     """Create the reusable default after the standard DocType has synchronized."""
-    from connect_diagnostics_core.patches.v1_0.migrate_print_configuration_templates import (
-        _ensure_default_template,
-    )
+    from connect_diagnostics_core.setup.print_configuration_template import ensure_default_template
 
-    _ensure_default_template()
+    ensure_default_template()

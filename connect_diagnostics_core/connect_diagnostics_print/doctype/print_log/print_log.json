@@ -1,0 +1,124 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"autoname": "hash",
+	"creation": "2026-08-08 12:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"reference_doctype",
+		"reference_name",
+		"customer",
+		"column_break_request",
+		"print_format",
+		"channel",
+		"language",
+		"copies_section",
+		"copies",
+		"copy_labels"
+	],
+	"fields": [
+		{
+			"fieldname": "reference_doctype",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "Document Type",
+			"options": "DocType",
+			"read_only": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "reference_name",
+			"fieldtype": "Dynamic Link",
+			"in_list_view": 1,
+			"label": "Document",
+			"options": "reference_doctype",
+			"read_only": 1,
+			"reqd": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "Customer",
+			"options": "Customer",
+			"read_only": 1
+		},
+		{
+			"fieldname": "column_break_request",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "print_format",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Print Format",
+			"options": "Print Format",
+			"read_only": 1
+		},
+		{
+			"fieldname": "channel",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Channel",
+			"options": "Print\nPDF",
+			"read_only": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "language",
+			"fieldtype": "Data",
+			"label": "Language",
+			"read_only": 1
+		},
+		{
+			"fieldname": "copies_section",
+			"fieldtype": "Section Break",
+			"label": "Copies"
+		},
+		{
+			"fieldname": "copies",
+			"fieldtype": "Int",
+			"in_list_view": 1,
+			"label": "Copies",
+			"read_only": 1
+		},
+		{
+			"fieldname": "copy_labels",
+			"fieldtype": "Small Text",
+			"label": "Copy Labels",
+			"read_only": 1
+		}
+	],
+	"in_create": 1,
+	"index_web_pages_for_search": 0,
+	"links": [],
+	"modified": "2026-08-08 12:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Print",
+	"name": "Print Log",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"export": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager"
+		},
+		{
+			"export": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Accounts Manager"
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "creation",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "reference_name",
+	"track_changes": 0
+}

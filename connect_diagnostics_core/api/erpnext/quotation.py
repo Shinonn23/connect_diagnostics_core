@@ -18,41 +18,20 @@ from connect_diagnostics_core.setup import quotation as quotation_setup
 
 
 def get_quotation_print_context(doc: Document | Mapping[str, Any]) -> dict[str, Any]:
-    """Build Quotation print values from Customer defaults and print-only overrides."""
+    """Build Quotation print values from the resolved configuration."""
     context = get_document_print_context(doc, "quotation")
     language = _text(context.get("language")) or "Thai"
-    sales_person = _first_customer_sales_person(_customer_from_quotation(doc))
+    sales_representative = _text(context.get("sales_representative_employee"))
 
     return {
         **context,
         "validity_text": _validity_text(doc, context, language),
+        "validity_is_custom": bool(cint(context.get("override_quotation_validity_text"))),
         "delivery_terms": _text(context.get("quotation_delivery_terms")),
-        "signatory": _signatory_details(doc, context, sales_person),
-        "sales_contact": _sales_contact_details(sales_person),
+        "signatory": _signatory_details(context, sales_representative, language),
+        "sales_contact": _employee_details(sales_representative),
         "copies": context["copies"],
     }
-
-
-def _customer_from_quotation(doc: Document | Mapping[str, Any]) -> str:
-    if _text(doc.get("quotation_to")) != "Customer":
-        return ""
-    return _text(doc.get("party_name"))
-
-
-def _first_customer_sales_person(customer: str) -> str:
-    if not customer:
-        return ""
-    sales_people = cast(
-        list[str],
-        frappe.get_all(
-            "Sales Team",
-            filters={"parent": customer, "parenttype": "Customer"},
-            pluck="sales_person",
-            order_by="idx asc",
-            limit_page_length=1,
-        ),
-    )
-    return sales_people[0] if sales_people else ""
 
 
 def _validity_text(doc: Document | Mapping[str, Any], context: Mapping[str, Any], language: str) -> str:
@@ -76,61 +55,53 @@ def _validity_text(doc: Document | Mapping[str, Any], context: Mapping[str, Any]
 
 
 def _signatory_details(
-    doc: Document | Mapping[str, Any], context: Mapping[str, Any], sales_person: str
+    context: Mapping[str, Any], sales_representative: str, language: str
 ) -> dict[str, str]:
+    """Return the name and caption printed under the signature line.
+
+    A Managing Director quotation prints an empty name on purpose: the director
+    signs it and writes the name by hand, so no Employee is resolved.
+    """
     signatory_type = _text(context.get("quotation_signatory_type"))
-    employee = ""
-    if signatory_type == quotation_setup.SIGNATORY_SALES_REPRESENTATIVE:
-        if not sales_person:
-            frappe.throw(
-                _("Customer must have a Sales Team Sales Person for a Sales Representative signatory.")
-            )
-        employee = _text(frappe.db.get_value("Sales Person", sales_person, "employee"))
-        if not employee:
-            frappe.throw(
-                _("Sales Person must be linked to an Employee for a Sales Representative signatory.")
-            )
-    elif signatory_type == quotation_setup.SIGNATORY_MANAGING_DIRECTOR:
-        employee = _text(context.get("quotation_authorized_signatory_employee")) or _text(
-            doc.get("quotation_authorized_signatory_employee")
-        )
-        if not employee:
-            company = _text(doc.get("company"))
-            if not company:
-                frappe.throw(_("Company is required for a Managing Director signatory."))
-            employee = _text(
-                frappe.db.get_value("Company", company, "quotation_authorized_signatory_employee")
-            )
-        if not employee:
-            frappe.throw(_("Company must have a quotation authorized signatory Employee."))
-    else:
+    caption = quotation_setup.SIGNATORY_CAPTIONS.get(signatory_type)
+    if caption is None:
         frappe.throw(_("Quotation signatory type is required."))
+        raise frappe.ValidationError(signatory_type)  # frappe.throw already raised
 
-    return _employee_details(employee)
+    caption_text = _caption_text(caption, language)
+    if signatory_type not in quotation_setup.SIGNATORY_PRINTS_NAME:
+        return {**_employee_details(""), "caption": caption_text}
+
+    if not sales_representative:
+        frappe.throw(_("Sales Representative is required when a Sales Representative signs the quotation."))
+    return {**_employee_details(sales_representative), "caption": caption_text}
 
 
-def _sales_contact_details(sales_person: str) -> dict[str, str]:
-    employee = _text(frappe.db.get_value("Sales Person", sales_person, "employee"))
-    return _employee_details(employee)
+def _caption_text(caption: tuple[str, str], language: str) -> str:
+    thai, english = caption
+    if language == "Thai":
+        return thai
+    if language == "English":
+        return english
+    return f"{thai} / {english}"
 
 
 def _employee_details(employee: str) -> dict[str, str]:
     if not employee:
-        return {"employee": "", "name": "", "designation": "", "phone": ""}
+        return {"employee": "", "name": "", "phone": ""}
 
     details = cast(
         dict[str, Any] | None,
         frappe.db.get_value(
             "Employee",
             employee,
-            ["employee_name", "designation", "cell_number"],
+            ["employee_name", "cell_number"],
             as_dict=True,
         ),
     )
     return {
         "employee": employee,
         "name": _text(details.get("employee_name")) if details else "",
-        "designation": _text(details.get("designation")) if details else "",
         "phone": _text(details.get("cell_number")) if details else "",
     }
 
