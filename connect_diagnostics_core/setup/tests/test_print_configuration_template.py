@@ -26,7 +26,6 @@ class FakeRow(frappe._dict):
 
 def seeded_template(policy_name: str) -> FakeTemplate:
     template = FakeTemplate()
-    # ty: ignore[invalid-argument-type] - FakeTemplate stands in for a Document
     print_configuration_template.seed_registry_rows(cast(Document, template))
     print_configuration_template._apply_policy(
         cast(Document, template), print_configuration_template.POLICY_TEMPLATES[policy_name]
@@ -78,8 +77,7 @@ class TestPolicyTemplates(UnitTestCase):
         template = seeded_template("Tax Invoice and Receipt")
 
         counts = {
-            (str(row["document_key"]), str(row["copy_key"])): row["count"]
-            for row in template["print_copies"]
+            (str(row["document_key"]), str(row["copy_key"])): row["count"] for row in template["print_copies"]
         }
         self.assertEqual(counts[("tax_invoice", "original")], 1)
         self.assertEqual(counts[("quotation", "copy")], 0)
