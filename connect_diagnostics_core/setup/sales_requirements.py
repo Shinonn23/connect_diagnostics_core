@@ -43,31 +43,22 @@ CUSTOM_FIELDS = {
             "insert_after": "po_date",
         },
         {
-            "fieldname": "source_purchase_order",
-            "label": "Source Purchase Order",
-            "fieldtype": "Link",
-            "options": "Purchase Order",
+            "fieldname": "source_purchase_orders",
+            "label": "Source Purchase Orders",
+            "fieldtype": "Table",
+            "options": "Sales Invoice Source Purchase Order",
             "insert_after": "source_purchase_order_section",
             "description": (
-                "The Purchase Order we placed with our supplier for these goods. Its "
-                "copy prints after the tax invoice."
-            ),
-        },
-        {
-            "fieldname": "source_purchase_order_file",
-            "label": "Source Purchase Order File",
-            "fieldtype": "Attach",
-            "insert_after": "source_purchase_order",
-            "description": (
-                "Use this for a Purchase Order raised before ERPNext, which has no "
-                "record to link. An attached file prints separately."
+                "The Purchase Orders we placed with our supplier for these goods. "
+                "Their copies print after the tax invoice, one row per Purchase Order "
+                "with its own copy count."
             ),
         },
         {
             "fieldname": "requirement_override_reason",
             "label": "Requirement Override Reason",
             "fieldtype": "Small Text",
-            "insert_after": "source_purchase_order_file",
+            "insert_after": "source_purchase_orders",
             "no_copy": 1,
             "description": OVERRIDE_REASON_DESCRIPTION,
         },

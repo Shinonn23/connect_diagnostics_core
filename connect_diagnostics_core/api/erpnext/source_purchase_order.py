@@ -5,9 +5,10 @@
 
 Some Customers only accept goods with a copy of the Purchase Order we placed
 with our supplier, which proves where the goods came from. The Customer records
-that in ``source_purchase_order_copy_required``; the Sales Invoice names the
-Purchase Order, either as a link or, for one raised before ERPNext, as an
-attached file.
+that in ``source_purchase_order_copy_required``; the Sales Invoice lists the
+Purchase Orders in its ``source_purchase_orders`` table, one row per order, each
+naming either a linked Purchase Order or, for one raised before ERPNext, an
+attached file, with its own copy count.
 
 **The copy is concatenated as extra PDF pages, never rendered inside the tax
 invoice format.** Nesting was tried and does not work: the ``Purchase Order``
@@ -29,6 +30,7 @@ print rights would instead stop sales staff from downloading their own invoices.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from io import BytesIO
 from typing import Any, cast
 
@@ -58,8 +60,7 @@ def append_source_copy(doctype: str, name: str, print_format: str | None = None)
         frappe.log_error(
             title="Source Purchase Order copy not attached",
             message=(
-                f"doctype={doctype} name={name} print_format={print_format}\n\n"
-                f"{frappe.get_traceback()}"
+                f"doctype={doctype} name={name} print_format={print_format}\n\n{frappe.get_traceback()}"
             ),
         )
 
@@ -77,22 +78,66 @@ def _append_source_copy(doctype: str, name: str, print_format: str | None) -> No
     if not cint(values.get("source_purchase_order_copy_required")):
         return
 
-    copies = max(cint(values.get("purchase_order_copy_count")), 0)
-    source_pdf = _source_pdf(doc) if copies else None
-    if not source_pdf:
+    default_copies = max(cint(values.get("purchase_order_copy_count")), 0)
+    joined = _join_source_copies(doc, invoice_pdf, default_copies)
+    if joined is None:
         return
 
-    frappe.local.response.filecontent = _join(invoice_pdf, source_pdf, copies)
+    frappe.local.response.filecontent = joined
 
 
-def _source_pdf(doc: Document) -> bytes | None:
-    """Return the source copy as PDF bytes, from the linked order or the file."""
-    purchase_order = _text(doc.get("source_purchase_order"))
+def _join_source_copies(doc: Document, invoice_pdf: bytes, default_copies: int) -> bytes | None:
+    """Append every row's source copy to the invoice, in table order.
+
+    A row with a blank copy count falls back to the Customer's default count, so a
+    Customer that always wants the same number of copies need not repeat it per row.
+    Returns the joined PDF, or ``None`` when nothing was appended.
+    """
+    writer = PdfWriter()
+    writer.append(BytesIO(invoice_pdf))
+    appended = False
+
+    for row in cast(Sequence[Any], doc.get("source_purchase_orders") or ()):
+        copies = _row_copies(row, default_copies)
+        if copies <= 0:
+            continue
+        source_pdf = _row_pdf(row)
+        if not source_pdf:
+            continue
+        for _copy in range(copies):
+            writer.append(BytesIO(source_pdf))
+        appended = True
+
+    if not appended:
+        writer.close()
+        return None
+
+    buffer = BytesIO()
+    writer.write(buffer)
+    writer.close()
+    return buffer.getvalue()
+
+
+def _row_copies(row: Any, default_copies: int) -> int:
+    raw = _row_value(row, "copies")
+    if raw in (None, ""):
+        return default_copies
+    return max(cint(raw), 0)
+
+
+def _row_pdf(row: Any) -> bytes | None:
+    """Return one row's source copy as PDF bytes, from its order or its file."""
+    purchase_order = _text(_row_value(row, "purchase_order"))
     if purchase_order:
         return _render_purchase_order(purchase_order)
 
-    attachment = _text(doc.get("source_purchase_order_file"))
+    attachment = _text(_row_value(row, "purchase_order_file"))
     return _attached_pdf(attachment) if attachment else None
+
+
+def _row_value(row: Any, fieldname: str) -> Any:
+    getter = getattr(row, "get", None)
+    return getter(fieldname) if callable(getter) else getattr(row, fieldname, None)
 
 
 def _render_purchase_order(purchase_order: str) -> bytes:

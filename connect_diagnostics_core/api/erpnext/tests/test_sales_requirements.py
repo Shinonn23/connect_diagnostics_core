@@ -44,8 +44,7 @@ def sales_invoice(**overrides: Any) -> FakeDocument:
             "name": "ACC-SINV-0001",
             "customer": CUSTOMER,
             "customer_name": "Bangkok Hospital",
-            "source_purchase_order": "",
-            "source_purchase_order_file": "",
+            "source_purchase_orders": [],
             **overrides,
         }
     )
@@ -120,17 +119,38 @@ class TestSalesInvoiceRequirements(RequirementHarness):
 
         self.assertTrue(sales_requirements.evaluate_sales_invoice(sales_invoice()))
 
-    def test_a_linked_purchase_order_satisfies_the_requirement(self) -> None:
+    def test_a_linked_purchase_order_row_satisfies_the_requirement(self) -> None:
         self.require(source_purchase_order_copy_required=1)
-        doc = sales_invoice(source_purchase_order="PUR-ORD-0001")
+        doc = sales_invoice(
+            source_purchase_orders=[FakeDocument({"purchase_order": "PUR-ORD-0001", "copies": 1})]
+        )
 
         self.assertEqual(sales_requirements.evaluate_sales_invoice(doc), [])
 
-    def test_an_attached_file_satisfies_the_requirement(self) -> None:
+    def test_an_attached_file_row_satisfies_the_requirement(self) -> None:
         self.require(source_purchase_order_copy_required=1)
-        doc = sales_invoice(source_purchase_order_file="/files/legacy-po.pdf")
+        doc = sales_invoice(
+            source_purchase_orders=[FakeDocument({"purchase_order_file": "/files/legacy-po.pdf"})]
+        )
 
         self.assertEqual(sales_requirements.evaluate_sales_invoice(doc), [])
+
+    def test_a_second_purchase_order_row_is_allowed(self) -> None:
+        self.require(source_purchase_order_copy_required=1)
+        doc = sales_invoice(
+            source_purchase_orders=[
+                FakeDocument({"purchase_order": "PUR-ORD-0001", "copies": 2}),
+                FakeDocument({"purchase_order": "PUR-ORD-0002", "copies": 1}),
+            ]
+        )
+
+        self.assertEqual(sales_requirements.evaluate_sales_invoice(doc), [])
+
+    def test_rows_with_neither_an_order_nor_a_file_are_a_gap(self) -> None:
+        self.require(source_purchase_order_copy_required=1)
+        doc = sales_invoice(source_purchase_orders=[FakeDocument({"copies": 1})])
+
+        self.assertTrue(sales_requirements.evaluate_sales_invoice(doc))
 
 
 class TestGate(RequirementHarness):
@@ -206,9 +226,7 @@ class TestRequirementLookup(UnitTestCase):
             ),
             patch.object(sales_requirements.frappe, "get_all", return_value=rows) as mocked_get_all,
         ):
-            requirements = sales_requirements.get_customer_requirements_map(
-                [CUSTOMER, "CUST-0002", CUSTOMER]
-            )
+            requirements = sales_requirements.get_customer_requirements_map([CUSTOMER, "CUST-0002", CUSTOMER])
 
         self.assertEqual(mocked_get_all.call_count, 1)
         self.assertEqual(requirements[CUSTOMER]["quotation_required"], 1)

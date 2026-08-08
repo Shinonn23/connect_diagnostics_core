@@ -12,8 +12,9 @@ A Customer records two process requirements of its own (see
 
 ``source_purchase_order_copy_required``
     the tax invoice must carry a copy of the Purchase Order we placed with our
-    supplier, so a Sales Invoice must either link that Purchase Order or attach
-    the file for one raised before ERPNext
+    supplier, so a Sales Invoice must have at least one ``source_purchase_orders``
+    row that either links a Purchase Order or attaches the file for one raised
+    before ERPNext
 
 Both are gates, not print settings: they say what has to exist, while
 :mod:`connect_diagnostics_core.api.erpnext.print_configuration` says how the
@@ -100,9 +101,18 @@ def evaluate_sales_invoice(
     resolved = requirements if requirements is not None else _requirements_for(doc)
     if not cint(resolved.get("source_purchase_order_copy_required")):
         return []
-    if _text(doc.get("source_purchase_order")) or _text(doc.get("source_purchase_order_file")):
+    if _has_source_purchase_order(doc):
         return []
     return [_("the source Purchase Order, either linked or attached as a file")]
+
+
+def _has_source_purchase_order(doc: Document | Mapping[str, Any]) -> bool:
+    """Report whether any source Purchase Order row names an order or a file."""
+    rows = cast(Sequence[Any], doc.get("source_purchase_orders") or ())
+    return any(
+        _text(_row_value(row, "purchase_order")) or _text(_row_value(row, "purchase_order_file"))
+        for row in rows
+    )
 
 
 def evaluate(doc: Document | Mapping[str, Any]) -> list[str]:
@@ -169,9 +179,7 @@ def get_transaction_requirements(doc: str | dict[str, Any]) -> dict[str, Any]:
             "gaps": gaps,
             "can_override": OVERRIDE_ROLE in frappe.get_roles(),
         },
-        "message": _("{0} requires {1}.").format(_customer_label(values), ", ".join(gaps))
-        if gaps
-        else "",
+        "message": _("{0} requires {1}.").format(_customer_label(values), ", ".join(gaps)) if gaps else "",
     }
 
 
