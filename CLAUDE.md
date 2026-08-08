@@ -512,7 +512,7 @@ return {"data": <payload>, "message": <str>}
   per-customer scalars. Every Customer linked to it follows those rows **live** —
   editing a Template changes what its Customers print immediately, with no fetch step.
 - Customer `Document / Print Configuration` links one Template and carries only its
-  own values: Customer Print Name, Quotation signatory / validity / Delivery Terms,
+  own values: Customer Print Name, Quotation signatory type and Delivery Terms,
   and the source Purchase Order copy settings. Its `Documents` and `Copies` tables are
   overrides: no row means inherit the Template for that document; a row wins wholesale.
 - `connect_diagnostics_core/setup/print_documents.py` is the single source of truth for
@@ -547,11 +547,26 @@ return {"data": <payload>, "message": <str>}
   standard `schedule_date` field plus Incoterm and Currency, and uses Item Code,
   Description, QTY, UOM, Unit Price, and Amount columns without warehouse or
   item-level discount columns.
-- Quotation has no Print Configuration fields or snapshot. Its context resolves
-  Customer defaults plus sidebar overrides; Sales Representative resolves from the
-  Customer Sales Team through `Sales Person.employee`, while Managing Director uses
-  `Company.quotation_authorized_signatory_employee`. The single Quotation format
-  renders Thai, English, or Thai / English and configured original/copy pages.
+- Quotation carries its own signatory: `Quotation.sales_representative_employee` is the
+  Employee who issues that offer, defaulted from the logged-in user. It prints in the
+  contact block on every form and signs the document when the signatory is a Sales
+  Representative. Do not resolve the signatory from the Customer Sales Team — Quotation
+  has no `sales_team` table, and the retired `Sales Person.employee` chain picked an
+  arbitrary first row.
+- The caption under the signature line is a fixed literal per signatory type, held in
+  `setup/quotation.py` as `SIGNATORY_CAPTIONS`; it is never `Employee.designation`. A
+  Managing Director quotation prints an **empty** name by design so the director signs
+  and writes the name by hand, and therefore resolves no Employee at all. The retired
+  `Company.quotation_authorized_signatory_employee` and its Quotation override must not
+  be reintroduced.
+- `override_quotation_validity_text` and `quotation_custom_validity_text` live on
+  Quotation, not Customer: the wording describes one offer. Customer keeps only
+  `quotation_signatory_type` and `quotation_delivery_terms`, copied as defaults to new
+  Quotations. `print_documents.QUOTATION_CUSTOMER_FIELDS` is what Customer stores;
+  `QUOTATION_EXTRA_FIELDS` is what the sidebar may override for one request.
+- The single Quotation format renders Thai, English, or Thai / English and configured
+  original/copy pages. `show_date` off and a custom validity text are ordinary
+  configuration, not separate formats.
 - Later `Customer Credit Request` is available to every active Customer and is
   approved by the Customer Credit Approver; it does not depend on a channel field.
   `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;

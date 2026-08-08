@@ -151,12 +151,29 @@ class TestPrintFormats(UnitTestCase):
         self.assertIn("print_context.delivery_terms", html)
         self.assertIn("print_context.sales_contact", html)
         self.assertIn("print_context.signatory.name", html)
+        self.assertIn("print_context.signatory.caption", html)
+        self.assertIn("print_context.validity_is_custom", html)
         self.assertIn("copy.label", html)
         self.assertIn('label("ใบเสนอราคา", "Quotation")', html)
         self.assertIn('label("กำหนดส่งมอบสินค้า", "Delivery Terms")', html)
         self.assertIn(".cdq-bilingual .cdq-company", print_format["css"])
         self.assertNotIn("ฟอร์มรูปแบบ", html)
         Environment().parse(html)
+
+    def test_quotation_resolves_the_signatory_from_the_print_context_alone(self) -> None:
+        """The Customer Sales Team chain and its template fallbacks are retired."""
+        path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
+        html = json.loads(path.read_text())["html"]
+
+        for retired in (
+            "doc.sales_team",
+            "custom_sales_contact_name",
+            "custom_sales_contact_phone",
+            "signatory.designation",
+            '"90 วัน"',
+        ):
+            with self.subTest(retired=retired):
+                self.assertNotIn(retired, html)
 
     def test_non_quotation_customer_formats_use_the_shared_print_context(self) -> None:
         expected_contexts = {

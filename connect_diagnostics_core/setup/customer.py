@@ -61,24 +61,10 @@ def _print_configuration_fields() -> list[dict[str, object]]:
             "default": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
         },
         {
-            "fieldname": "override_quotation_validity_text",
-            "label": "Override validity text",
-            "fieldtype": "Check",
-            "insert_after": "quotation_signatory_type",
-            "description": "Use custom text instead of the Quotation Valid Till date.",
-        },
-        {
-            "fieldname": "quotation_custom_validity_text",
-            "label": "Quotation Custom Validity Text",
-            "fieldtype": "Small Text",
-            "insert_after": "override_quotation_validity_text",
-            "depends_on": "eval:doc.override_quotation_validity_text",
-        },
-        {
             "fieldname": "quotation_delivery_terms",
             "label": "Quotation Delivery Terms",
             "fieldtype": "Small Text",
-            "insert_after": "quotation_custom_validity_text",
+            "insert_after": "quotation_signatory_type",
             "description": ("Default delivery commitment copied to each new Quotation for this Customer."),
         },
         {

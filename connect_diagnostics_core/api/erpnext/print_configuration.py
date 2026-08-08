@@ -151,6 +151,7 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         if document.offers_batch_serial
         else False,
         "quotation_signatory_type": _text(values.get("quotation_signatory_type")),
+        "sales_representative_employee": _text(values.get("sales_representative_employee")),
         "override_quotation_validity_text": cint(values.get("override_quotation_validity_text")),
         "quotation_custom_validity_text": _text(values.get("quotation_custom_validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),

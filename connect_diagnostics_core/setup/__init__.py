@@ -9,7 +9,6 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
-    company,
     contact,
     currency_exchange,
     customer,
@@ -39,7 +38,6 @@ from connect_diagnostics_core.setup.print_format import remove_non_app_print_for
 
 _MODULES = (
     account,
-    company,
     contact,
     currency_exchange,
     customer,

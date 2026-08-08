@@ -152,9 +152,7 @@ class TestModuleRepointing(UnitTestCase):
             targets,
             set(rebuild_print_configuration.PRINT_FORMATS) | set(rebuild_print_configuration.MOVED_DOCTYPES),
         )
-        self.assertTrue(
-            all(call.args[3] == "Connect Diagnostics Print" for call in set_value.call_args_list)
-        )
+        self.assertTrue(all(call.args[3] == "Connect Diagnostics Print" for call in set_value.call_args_list))
 
     def test_repointing_skips_records_that_do_not_exist(self) -> None:
         set_value = MagicMock()

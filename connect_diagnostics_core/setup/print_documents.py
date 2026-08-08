@@ -115,6 +115,7 @@ TAX_INVOICE_COPIES = (
     ),
 )
 
+# Quotation values the print sidebar may override for one request.
 QUOTATION_EXTRA_FIELDS = (
     "quotation_signatory_type",
     "override_quotation_validity_text",
@@ -122,11 +123,21 @@ QUOTATION_EXTRA_FIELDS = (
     "quotation_delivery_terms",
 )
 
+# The subset Customer stores as its own default for new Quotations. The validity
+# wording is deliberately absent: it describes one offer, not a standing customer
+# policy, so it lives on the Quotation alone.
+QUOTATION_CUSTOMER_FIELDS = (
+    "quotation_signatory_type",
+    "quotation_delivery_terms",
+)
+
 # Set on the transaction itself, not on Customer or Template. A non-empty value
 # on the document wins over the resolved default.
 QUOTATION_DOCUMENT_FIELDS = (
     "quotation_signatory_type",
-    "quotation_authorized_signatory_employee",
+    "sales_representative_employee",
+    "override_quotation_validity_text",
+    "quotation_custom_validity_text",
 )
 
 PRINT_DOCUMENTS: tuple[PrintDocument, ...] = (
@@ -181,9 +192,11 @@ SCALAR_FIELDS = (
     "customer_print_name",
     "use_customer_po",
     "purchase_order_copy_count",
-    *QUOTATION_EXTRA_FIELDS,
+    *QUOTATION_CUSTOMER_FIELDS,
 )
 
+# Registry defaults for every resolved scalar, including the Quotation values
+# that only the document itself carries.
 SCALAR_DEFAULTS: dict[str, object] = {
     "customer_print_name": "",
     "use_customer_po": 1,

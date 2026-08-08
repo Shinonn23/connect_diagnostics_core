@@ -85,9 +85,7 @@ class TestRegisterPrint(RecorderHarness):
         }
 
         print_log.register_print(
-            FakeDocument(
-                {"doctype": "Sales Invoice", "name": "ACC-SINV-0001", "customer": "CUST-0001"}
-            ),
+            FakeDocument({"doctype": "Sales Invoice", "name": "ACC-SINV-0001", "customer": "CUST-0001"}),
             "tax_invoice",
             context,
         )
@@ -101,9 +99,7 @@ class TestRegisterPrint(RecorderHarness):
     def test_register_print_returns_an_empty_string_for_inline_use(self) -> None:
         self.set_request(trigger_print="1")
 
-        result = print_log.register_print(
-            FakeDocument({"doctype": "Sales Order", "name": "SAL-ORD-0001"})
-        )
+        result = print_log.register_print(FakeDocument({"doctype": "Sales Order", "name": "SAL-ORD-0001"}))
 
         self.assertEqual(result, "")
 
@@ -167,9 +163,7 @@ class TestDownloadPdfOverride(UnitTestCase):
 
     def test_the_override_returns_what_frappe_returns_and_records_it(self) -> None:
         with (
-            patch(
-                "frappe.utils.print_format.download_pdf", return_value="pdf-bytes"
-            ) as mocked_download,
+            patch("frappe.utils.print_format.download_pdf", return_value="pdf-bytes") as mocked_download,
             patch.object(print_log, "record_print") as mocked_record,
         ):
             result = print_log.download_pdf("Sales Invoice", "ACC-SINV-0001", format="Receipt")

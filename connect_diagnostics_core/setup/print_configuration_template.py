@@ -36,12 +36,9 @@ def seed_registry_rows(parent: Document) -> bool:
     values while still gaining rows for documents added to the registry later.
     Returns True when anything was added.
     """
-    existing_documents = {
-        _text(row.get("document_key")) for row in _rows(parent, "print_documents")
-    }
+    existing_documents = {_text(row.get("document_key")) for row in _rows(parent, "print_documents")}
     existing_copies = {
-        (_text(row.get("document_key")), _text(row.get("copy_key")))
-        for row in _rows(parent, "print_copies")
+        (_text(row.get("document_key")), _text(row.get("copy_key"))) for row in _rows(parent, "print_copies")
     }
     added = False
 

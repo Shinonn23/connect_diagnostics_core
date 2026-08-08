@@ -113,12 +113,10 @@ class TestCustomerReadiness(UnitTestCase):
             "eval:doc.use_customer_po",
         )
         self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
-        self.assertEqual(fields["override_quotation_validity_text"]["fieldtype"], "Check")
-        self.assertEqual(
-            fields["quotation_custom_validity_text"]["depends_on"],
-            "eval:doc.override_quotation_validity_text",
-        )
         self.assertEqual(fields["quotation_delivery_terms"]["fieldtype"], "Small Text")
+        for per_quotation in ("override_quotation_validity_text", "quotation_custom_validity_text"):
+            with self.subTest(fieldname=per_quotation):
+                self.assertNotIn(per_quotation, fields)
 
     def test_sales_order_legacy_print_date_field_is_retained(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
