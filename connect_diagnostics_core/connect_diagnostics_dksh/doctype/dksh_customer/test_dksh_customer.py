@@ -39,9 +39,9 @@ class TestDKSHCustomer(IntegrationTestCase):
         )
 
         with self.assertRaises(frappe.DuplicateEntryError):
-            frappe.get_doc(
-                {"doctype": "DKSH Customer", "dksh_customer_code": "_Test DKSH Cust Dup"}
-            ).insert(ignore_permissions=True)
+            frappe.get_doc({"doctype": "DKSH Customer", "dksh_customer_code": "_Test DKSH Cust Dup"}).insert(
+                ignore_permissions=True
+            )
 
     def test_second_record_for_the_same_customer_is_rejected(self) -> None:
         customer = _make_customer("_Test DKSH Linked Customer")
