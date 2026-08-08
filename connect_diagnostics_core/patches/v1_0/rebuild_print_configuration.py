@@ -18,6 +18,7 @@ from typing import cast
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields, delete_custom_fields
+from frappe.utils.redis_wrapper import ClientCache, RedisWrapper
 
 from connect_diagnostics_core.setup import customer as customer_setup
 from connect_diagnostics_core.setup.print_configuration_template import (
@@ -68,6 +69,7 @@ RETIRED_TAX_INVOICE_FIELDS = (
 
 def execute() -> None:
     """Move the print records, drop the retired fields, and seed registry rows."""
+    _refresh_module_map()
     _repoint_module()
     frappe.reload_doc(PRINT_MODULE, "doctype", "print_document_configuration", force=True)
     frappe.reload_doc(PRINT_MODULE, "doctype", "print_copy_configuration", force=True)
@@ -99,6 +101,20 @@ def retired_customer_fields() -> tuple[str, ...]:
     fields.extend(RETIRED_TAX_INVOICE_FIELDS)
     fields.append("document_preferences_column")
     return tuple(fields)
+
+
+def _refresh_module_map() -> None:
+    """Rebuild the module map so the new module resolves during this migration.
+
+    ``frappe.local.module_app`` is built once at process init from the cached app
+    module list, and ``frappe.clear_cache()`` does not rebuild it. A migration that
+    runs right after ``Connect Diagnostics Print`` was added to ``modules.txt``
+    therefore still sees the pre-checkout map, and every ``reload_doc`` below fails
+    with ``Module Connect Diagnostics Print not found``.
+    """
+    cast(RedisWrapper, frappe.cache).delete_value("app_modules")
+    cast(ClientCache, frappe.client_cache).delete_value("installed_app_modules")
+    frappe.setup_module_map()
 
 
 def _repoint_module() -> None:

@@ -138,6 +138,40 @@ class TestRetiredFields(UnitTestCase):
                 self.assertNotIn(kept, retired)
 
 
+class TestModuleMapRefresh(UnitTestCase):
+    def test_refresh_drops_the_cached_module_lists_and_rebuilds_the_map(self) -> None:
+        cache = MagicMock()
+        client_cache = MagicMock()
+        setup_module_map = MagicMock()
+        with (
+            patch.object(rebuild_print_configuration.frappe, "cache", cache),
+            patch.object(rebuild_print_configuration.frappe, "client_cache", client_cache),
+            patch.object(rebuild_print_configuration.frappe, "setup_module_map", setup_module_map),
+        ):
+            rebuild_print_configuration._refresh_module_map()
+
+        cache.delete_value.assert_called_once_with("app_modules")
+        client_cache.delete_value.assert_called_once_with("installed_app_modules")
+        setup_module_map.assert_called_once_with()
+
+    def test_execute_refreshes_the_module_map_before_reloading_the_doctypes(self) -> None:
+        recorder = MagicMock()
+        with (
+            patch.object(rebuild_print_configuration, "_refresh_module_map", recorder.refresh),
+            patch.object(rebuild_print_configuration, "_repoint_module", recorder.repoint),
+            patch.object(rebuild_print_configuration.frappe, "reload_doc", recorder.reload_doc),
+            patch.object(rebuild_print_configuration, "create_custom_fields", MagicMock()),
+            patch.object(rebuild_print_configuration, "delete_custom_fields", MagicMock()),
+            patch.object(rebuild_print_configuration, "_seed_templates", MagicMock()),
+            patch.object(rebuild_print_configuration.frappe, "clear_cache", MagicMock()),
+        ):
+            rebuild_print_configuration.execute()
+
+        calls = [call[0] for call in recorder.mock_calls]
+        self.assertEqual(calls[0], "refresh")
+        self.assertLess(calls.index("refresh"), calls.index("reload_doc"))
+
+
 class TestModuleRepointing(UnitTestCase):
     def test_execute_repoints_formats_and_doctypes(self) -> None:
         set_value = MagicMock()
