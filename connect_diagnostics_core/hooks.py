@@ -53,11 +53,9 @@ doctype_js = {
     "Quotation": "public/js/custom/quotation/doctype.js",
     "Sales Invoice": "public/js/custom/sales_invoice/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
-    "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {
     "Customer": "public/js/custom/customer/list_view.js",
-    "Item": "public/js/custom/item/list_view.js",
     "Sales Order": "public/js/custom/sales_order/list_view.js",
     "Supplier": "public/js/custom/supplier/list_view.js",
 }
@@ -177,16 +175,6 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
     },
-    "Address": {
-        "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-        "on_update": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-        "after_delete": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-    },
-    "Contact": {
-        "after_insert": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-        "on_update": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-        "after_delete": "connect_diagnostics_core.api.erpnext.customer.refresh_linked_customer_readiness",
-    },
     "Supplier": {
         "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
@@ -199,6 +187,7 @@ doc_events = {
     },
     "Sales Invoice": {
         "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
+        "before_submit": "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
     },
     "Payment Entry": {
         "before_submit": (
@@ -294,9 +283,9 @@ override_whitelisted_methods = {
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "connect_diagnostics_core.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+    "Item": "connect_diagnostics_core.api.erpnext.item.get_item_dashboard_data",
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

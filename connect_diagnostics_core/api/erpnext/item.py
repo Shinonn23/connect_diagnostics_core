@@ -3,89 +3,29 @@
 
 from __future__ import annotations
 
-import json
-from typing import Any, cast
+from typing import Any
 
-import frappe
+from frappe import _
+
+DKSH_ITEM_DOCTYPE = "DKSH Item"
 
 
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_item_with_stock(
-    doctype: str,
-    txt: str,
-    searchfield: str,
-    start: int,
-    page_len: int,
-    filters: dict[str, Any] | str | None = None,
-) -> list[tuple[Any, ...]]:
-    """Return enabled Item link-search rows with aggregate stock quantities."""
-    frappe.has_permission("Item", throw=True)
-    search_string = f"%{txt}%"
-    if isinstance(filters, str):
-        filters = cast(dict[str, Any], json.loads(filters))
-    query_filters = filters or {}
-    warehouse: str = cast(str, query_filters.get("warehouse", ""))
+def get_item_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
+    """Surface the linked DKSH Item under the Item form's Connections.
 
-    def format_rows(rows: list[tuple[Any, ...]]) -> list[tuple[Any, ...]]:
-        return [(row[0], row[1], f"{row[2]:g} QTY.") for row in rows]
+    ``DKSH Item`` links to Item through its ``item`` field, not the ``item_code``
+    the Item dashboard keys on, so it is registered in ``non_standard_fieldnames``.
+    """
+    non_standard = data.setdefault("non_standard_fieldnames", {})
+    non_standard[DKSH_ITEM_DOCTYPE] = "item"
 
-    params = {
-        "txt": search_string,
-        "start": start,
-        "page_len": page_len,
-    }
-    if warehouse:
-        params["warehouse"] = warehouse
-        rows = frappe.db.sql(
-            """
-            SELECT i.name, i.item_name, IFNULL(SUM(b.actual_qty), 0) AS qty
-            FROM `tabItem` i
-            LEFT JOIN `tabBin` b ON i.name = b.item_code AND b.warehouse = %(warehouse)s
-            WHERE i.disabled = 0
-              AND (
-                i.name LIKE %(txt)s
-                OR i.item_name LIKE %(txt)s
-                OR i.dksh_item_code LIKE %(txt)s
-                OR i.model LIKE %(txt)s
-                OR EXISTS (
-                    SELECT 1
-                    FROM `tabItem Alternative Name` ian
-                    WHERE ian.parent = i.name
-                      AND ian.parenttype = 'Item'
-                      AND ian.parentfield = 'alternative_names'
-                      AND ian.name_value LIKE %(txt)s
-                )
-              )
-            GROUP BY i.name
-            LIMIT %(start)s, %(page_len)s
-            """,
-            params,
-        )
+    transactions = data.setdefault("transactions", [])
+    for group in transactions:
+        if group.get("label") == _("Reference"):
+            if DKSH_ITEM_DOCTYPE not in group["items"]:
+                group["items"].append(DKSH_ITEM_DOCTYPE)
+            break
     else:
-        rows = frappe.db.sql(
-            """
-            SELECT i.name, i.item_name, IFNULL(SUM(b.actual_qty), 0) AS qty
-            FROM `tabItem` i
-            LEFT JOIN `tabBin` b ON i.name = b.item_code
-            WHERE i.disabled = 0
-              AND (
-                i.name LIKE %(txt)s
-                OR i.item_name LIKE %(txt)s
-                OR i.dksh_item_code LIKE %(txt)s
-                OR i.model LIKE %(txt)s
-                OR EXISTS (
-                    SELECT 1
-                    FROM `tabItem Alternative Name` ian
-                    WHERE ian.parent = i.name
-                      AND ian.parenttype = 'Item'
-                      AND ian.parentfield = 'alternative_names'
-                      AND ian.name_value LIKE %(txt)s
-                )
-              )
-            GROUP BY i.name
-            LIMIT %(start)s, %(page_len)s
-            """,
-            params,
-        )
-    return format_rows(rows)
+        transactions.append({"label": _("Reference"), "items": [DKSH_ITEM_DOCTYPE]})
+
+    return data

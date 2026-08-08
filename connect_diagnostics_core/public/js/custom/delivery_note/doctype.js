@@ -3,14 +3,6 @@
 
 frappe.ui.form.on("Delivery Note", {
 	refresh(frm) {
-		frm.set_query("item_code", "items", function (doc, cdt, cdn) {
-			const row = frappe.get_doc(cdt, cdn);
-			return {
-				query: "connect_diagnostics_core.api.erpnext.item.get_item_with_stock",
-				filters: { warehouse: row.warehouse || "" },
-			};
-		});
-
 		render_serial_no_summary(frm);
 	},
 });
