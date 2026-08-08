@@ -7,7 +7,8 @@ session** and is the contract for how we work: behavioral/engineering rules plus
 
 > For procedural guides, use the slash skills:
 > `/ship-pr` `/dispatch-test` `/test-result` `/promote-uat` `/promote-prod`
-> `/commit` `/pr` `/review` and the scaffold/check helpers.
+> `/commit` `/pr` `/review`, the Notion task skills `/next-task` `/take-task`
+> `/update-task`, and the scaffold/check helpers.
 
 ---
 
@@ -27,6 +28,10 @@ session** and is the contract for how we work: behavioral/engineering rules plus
 - Before completing any project change, verify this parity and report any intentional
   platform-specific difference. Do not invent an unsupported setting merely to make
   the files textually identical.
+- **Known exception:** `/next-task`, `/take-task`, and `/update-task` depend on the
+  Notion MCP server, which Codex cannot reach, so they exist only under
+  `.claude/skills/` and have no `.agents/` twin. Everything they do can also be done
+  by hand in Notion. Do not create shell-only stubs for them.
 - The Codex project instruction filename is `AGENTS.md` (plural). Do not create
   `AGENT.md`.
 
@@ -197,6 +202,32 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text)
 - Set a value: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`).
 - An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
+
+## Notion Task Tracker reference (for skills using the Notion MCP)
+
+The client-facing task list. Separate from board #6 and not synchronized with it —
+a Notion task may span several GitHub issues, or none.
+
+- Database **Task Tracker** `4c1c5f86101c46d18557190f96aa9aab`, under the page
+  *ERPNext Connect Diagnostics*; tasks are referred to as `TSK-<Task ID>`
+- Data source `collection://bcd5f7fa-c9c1-43dc-bfd7-c30272a1d100` — use this string
+  as the table name in SQL: `SELECT ... FROM "collection://bcd5f7fa-..."`
+- All Tasks view `view://320d5160-c409-40a4-87e2-b0f6962bf6ae`
+- **Status**: `Not started` · `Backlog` · `In progress` · `In review` · `Done` · `Cancelled`
+- **Priority**: `🔴 Critical` · `🟠 High` · `🟡 Medium` · `🟢 Low`
+- **Work Type**: `Requirement` · `Design` · `Development` · `Configuration` ·
+  `Data Migration` · `Testing` · `Documentation`
+- `Related User Tickets` relates to `collection://e73aded7-efef-4426-b312-0dc4d0e6047a`
+- Write quirks that silently fail if ignored: `Task ID` is `auto_increment_id` and
+  read-only; dates split into `date:<Name>:start` / `:end` / `:is_datetime`;
+  `Assignee` is an array of user IDs; checkboxes use `__YES__` / `__NO__`
+- Tools are the Notion MCP `fetch`, `query-data-sources`, and `update-page`
+  (`command: update_properties`). **Match them by name suffix — the server prefix is
+  a per-install UUID and must never be hardcoded into a skill.**
+- Resolve the current user by calling `fetch` with the literal id `self`
+- Never set a task to `Done` on code evidence alone. Tasks whose Acceptance Criteria
+  require a human step — a real-printer test, a tester's Pass/Fail record — close
+  only when that human has certified them.
 
 ---
 
