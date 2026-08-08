@@ -30,6 +30,7 @@ from connect_diagnostics_core.setup import (
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
+    sales_requirements,
     sales_taxes_and_charges,
     supplier,
     uom,
@@ -59,6 +60,7 @@ _MODULES = (
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
+    sales_requirements,
     sales_taxes_and_charges,
     supplier,
     uom,
@@ -85,6 +87,7 @@ def apply_all() -> None:
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     customer_onboarding.ensure_configuration()
+    sales_requirements.ensure_configuration()
 
 
 def after_install() -> None:
@@ -103,7 +106,11 @@ def after_migrate() -> None:
 
 
 def _ensure_default_print_configuration_template() -> None:
-    """Create the reusable default after the standard DocType has synchronized."""
-    from connect_diagnostics_core.setup.print_configuration_template import ensure_default_template
+    """Create the reusable Templates after the standard DocType has synchronized."""
+    from connect_diagnostics_core.setup.print_configuration_template import (
+        ensure_default_template,
+        ensure_policy_templates,
+    )
 
     ensure_default_template()
+    ensure_policy_templates()

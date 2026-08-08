@@ -190,7 +190,7 @@ DOCUMENT_BY_KEY: dict[str, PrintDocument] = {document.key: document for document
 # linked Customer follows immediately.
 SCALAR_FIELDS = (
     "customer_print_name",
-    "use_customer_po",
+    "source_purchase_order_copy_required",
     "purchase_order_copy_count",
     *QUOTATION_CUSTOMER_FIELDS,
 )
@@ -199,7 +199,7 @@ SCALAR_FIELDS = (
 # that only the document itself carries.
 SCALAR_DEFAULTS: dict[str, object] = {
     "customer_print_name": "",
-    "use_customer_po": 1,
+    "source_purchase_order_copy_required": 0,
     "purchase_order_copy_count": 1,
     "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
     "override_quotation_validity_text": 0,

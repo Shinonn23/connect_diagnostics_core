@@ -17,7 +17,7 @@ it; without a row it follows the Template.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -327,6 +327,60 @@ def _overridable_fields(document: print_documents.PrintDocument) -> tuple[str, .
         *tuple(_copy_field(definition.key) for definition in document.copies),
         *document.extra_fields,
     )
+
+
+def get_document_enabled_map(customers: Sequence[str], configuration: str) -> dict[str, bool]:
+    """Return, for many Customers at once, whether one document is enabled.
+
+    Mirrors stages 1-3 of :func:`resolve_configuration` — registry default, then
+    Template row, then Customer row — for the ``enabled`` flag alone, in three
+    queries rather than three per Customer. A report needs the answer for a whole
+    page at once; request-only overrides do not apply outside a print request.
+    """
+    document = _require_document(configuration)
+    names = sorted({name for name in customers if name})
+    if not names:
+        return {}
+
+    enabled = dict.fromkeys(names, bool(cint(get_default_configuration(document)["enabled"])))
+    linked = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Customer",
+            filters={"name": ["in", names]},
+            fields=["name", "print_configuration_template"],
+        ),
+    )
+    templates = {_text(row.get("print_configuration_template")) for row in linked}
+    templates.discard("")
+
+    by_template = _enabled_rows("Print Configuration Template", sorted(templates), document.key)
+    for row in linked:
+        template = _text(row.get("print_configuration_template"))
+        if template in by_template:
+            enabled[cast(str, row["name"])] = by_template[template]
+
+    enabled.update(_enabled_rows("Customer", names, document.key))
+    return enabled
+
+
+def _enabled_rows(parenttype: str, parents: Sequence[str], document_key: str) -> dict[str, bool]:
+    if not parents:
+        return {}
+    rows = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Print Document Configuration",
+            filters={
+                "parenttype": parenttype,
+                "parent": ["in", list(parents)],
+                "parentfield": "print_documents",
+                "document_key": document_key,
+            },
+            fields=["parent", "enabled"],
+        ),
+    )
+    return {cast(str, row["parent"]): bool(cint(row.get("enabled"))) for row in rows}
 
 
 def _template_rows(template: str, document: print_documents.PrintDocument) -> dict[str, Any] | None:

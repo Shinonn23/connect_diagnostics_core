@@ -68,30 +68,51 @@ def _print_configuration_fields() -> list[dict[str, object]]:
             "description": ("Default delivery commitment copied to each new Quotation for this Customer."),
         },
         {
+            "fieldname": "sales_requirements_section",
+            "label": "Sales Document Requirements",
+            "fieldtype": "Section Break",
+            "insert_after": "quotation_delivery_terms",
+            "description": (
+                "What this Customer requires before a sale can proceed. These are "
+                "process rules, not print settings."
+            ),
+        },
+        {
+            "fieldname": "quotation_required",
+            "label": "Quotation Required Before Sales Order",
+            "fieldtype": "Check",
+            "insert_after": "sales_requirements_section",
+            "default": "0",
+            "description": (
+                "This Customer only accepts an order that was quoted first. A Sales "
+                "Order with no linked Quotation is rejected."
+            ),
+        },
+        {
             "fieldname": "purchase_order_copy_preferences_section",
             "label": "Source Purchase Order Copy",
             "fieldtype": "Section Break",
-            "insert_after": "quotation_delivery_terms",
+            "insert_after": "quotation_required",
         },
         {
-            "fieldname": "use_customer_po",
-            "label": "Attach Source Purchase Order Copy",
+            "fieldname": "source_purchase_order_copy_required",
+            "label": "Source Purchase Order Copy Required",
             "fieldtype": "Check",
             "insert_after": "purchase_order_copy_preferences_section",
-            "default": "1",
+            "default": "0",
             "description": (
-                "Attach a copy of the source Purchase Order to confirm the origin "
-                "of the products sold to this customer."
+                "This Customer requires a copy of the Purchase Order we placed with "
+                "our supplier, to confirm the origin of the products sold."
             ),
         },
         {
             "fieldname": "purchase_order_copy_count",
             "label": "Copy Count",
             "fieldtype": "Int",
-            "insert_after": "use_customer_po",
+            "insert_after": "source_purchase_order_copy_required",
             "default": "1",
             "non_negative": 1,
-            "depends_on": "eval:doc.use_customer_po",
+            "depends_on": "eval:doc.source_purchase_order_copy_required",
         },
         {
             "fieldname": "legacy_print_preferences_section",

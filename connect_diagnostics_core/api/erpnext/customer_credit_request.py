@@ -13,8 +13,6 @@ from frappe.utils import now_datetime
 
 from connect_diagnostics_core.setup import customer_onboarding
 
-GOVERNMENT_HOSPITAL_GROUP = "GOV. HOSPITAL"
-
 
 def before_validate(doc: Document, method: str | None = None) -> None:
     """Set server-owned defaults before Frappe validates the credit-request workflow."""
@@ -33,19 +31,15 @@ def validate(doc: Document, method: str | None = None) -> None:
     if not doc.get("payment_terms"):
         frappe.throw(_("Payment Terms are required."))
 
-    customer = _get_eligible_customer(cast(str, doc.get("customer")))
+    # Every Customer asks for credit the same way, including GOV. HOSPITAL. There
+    # is no longer an onboarding review to set their terms behind the scenes.
+    _get_eligible_customer(cast(str, doc.get("customer")))
     _validate_protected_fields(doc)
     _validate_rejection_reason(doc)
 
     if doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_APPROVED_STATE:
         if customer_onboarding.CREDIT_APPROVER_ROLE not in set(frappe.get_roles()):
             frappe.throw(_("Only a Customer Credit Approver can approve a Customer Credit Request."))
-    if customer.get("customer_group") == GOVERNMENT_HOSPITAL_GROUP:
-        frappe.throw(
-            _(
-                "GOV. HOSPITAL credit is configured during Customer onboarding, not by Customer Credit Request."
-            )
-        )
 
 
 def before_submit(doc: Document, method: str | None = None) -> None:
@@ -91,8 +85,8 @@ def _get_eligible_customer(customer_name: str, *, customer: Document | None = No
     if not customer_name:
         frappe.throw(_("Customer is required."))
     customer = customer or cast(Document, frappe.get_doc("Customer", customer_name))
-    if customer.get("customer_onboarding_state") != customer_onboarding.CUSTOMER_ACTIVE_STATE:
-        frappe.throw(_("Customer must be active before requesting credit."))
+    if customer.get("disabled"):
+        frappe.throw(_("Credit cannot be requested for a disabled Customer."))
     return customer
 
 

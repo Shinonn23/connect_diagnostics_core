@@ -62,6 +62,8 @@ def download_pdf(
     """
     from frappe.utils.print_format import download_pdf as frappe_download_pdf
 
+    from connect_diagnostics_core.api.erpnext.source_purchase_order import append_source_copy
+
     result = frappe_download_pdf(
         doctype,
         name,
@@ -72,6 +74,9 @@ def download_pdf(
         letterhead=letterhead,
         pdf_generator=pdf_generator,
     )
+    # The only override point for the PDF channel, so the source Purchase Order
+    # copy a Customer requires is joined on here rather than in its own wrapper.
+    append_source_copy(doctype, name, print_format=format)
     record_print(doctype, name, CHANNEL_PDF, print_format=format, language=language)
     return result
 

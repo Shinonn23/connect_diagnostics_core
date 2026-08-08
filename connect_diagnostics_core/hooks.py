@@ -51,6 +51,8 @@ doctype_js = {
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
+    "Sales Invoice": "public/js/custom/sales_invoice/doctype.js",
+    "Sales Order": "public/js/custom/sales_order/doctype.js",
     "Stock Entry": "public/js/custom/stock_entry/doctype.js",
 }
 doctype_list_js = {
@@ -191,6 +193,12 @@ doc_events = {
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
+    },
+    "Sales Order": {
+        "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
+    },
+    "Sales Invoice": {
+        "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
     },
     "Payment Entry": {
         "before_submit": (

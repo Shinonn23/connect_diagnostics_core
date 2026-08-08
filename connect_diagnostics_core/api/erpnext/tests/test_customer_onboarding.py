@@ -98,6 +98,7 @@ class TestCustomerReadiness(UnitTestCase):
             "tax_invoice_original_count",
             "print_tax_invoice_original",
             "show_tax_invoice_batch_serial",
+            "use_customer_po",
         ):
             with self.subTest(fieldname=retired):
                 self.assertNotIn(retired, fields)
@@ -105,13 +106,14 @@ class TestCustomerReadiness(UnitTestCase):
     def test_customer_keeps_its_own_scalar_print_defaults(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        self.assertEqual(fields["use_customer_po"]["default"], "1")
+        self.assertEqual(fields["source_purchase_order_copy_required"]["default"], "0")
         self.assertEqual(fields["purchase_order_copy_count"]["default"], "1")
         self.assertEqual(fields["purchase_order_copy_count"]["non_negative"], 1)
         self.assertEqual(
             fields["purchase_order_copy_count"]["depends_on"],
-            "eval:doc.use_customer_po",
+            "eval:doc.source_purchase_order_copy_required",
         )
+        self.assertEqual(fields["quotation_required"]["default"], "0")
         self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
         self.assertEqual(fields["quotation_delivery_terms"]["fieldtype"], "Small Text")
         for per_quotation in ("override_quotation_validity_text", "quotation_custom_validity_text"):
