@@ -27,9 +27,7 @@ class FakeMeta:
         return fieldname in self._fields
 
 
-CUSTOMER_META_WITH_VALIDITY = FakeMeta(
-    {"override_quotation_validity_text", "quotation_custom_validity_text"}
-)
+CUSTOMER_META_WITH_VALIDITY = FakeMeta({"override_quotation_validity_text", "quotation_custom_validity_text"})
 CUSTOMER_META_AFTER_MIGRATION = FakeMeta(set())
 
 
