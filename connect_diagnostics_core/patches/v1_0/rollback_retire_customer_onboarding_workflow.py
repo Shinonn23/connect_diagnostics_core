@@ -132,9 +132,7 @@ def execute() -> None:
         ).insert(ignore_permissions=True)
 
     for name in frappe.get_all("Customer", filters={"disabled": 0}, pluck="name"):
-        frappe.db.set_value(
-            "Customer", name, ONBOARDING_STATE_FIELD, ACTIVE_STATE, update_modified=False
-        )
+        frappe.db.set_value("Customer", name, ONBOARDING_STATE_FIELD, ACTIVE_STATE, update_modified=False)
 
     frappe.clear_cache(doctype="Customer")
     frappe.db.commit()

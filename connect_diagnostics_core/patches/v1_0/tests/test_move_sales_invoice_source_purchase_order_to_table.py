@@ -27,8 +27,18 @@ class TestMoveSalesInvoiceSourcePurchaseOrderToTable(UnitTestCase):
 
     def test_only_invoices_with_a_value_get_a_row_then_columns_are_dropped(self) -> None:
         invoices = [
-            {"name": "SINV-1", "customer": "CUST-1", "source_purchase_order": "PO-1", "source_purchase_order_file": ""},
-            {"name": "SINV-2", "customer": "CUST-1", "source_purchase_order": "", "source_purchase_order_file": ""},
+            {
+                "name": "SINV-1",
+                "customer": "CUST-1",
+                "source_purchase_order": "PO-1",
+                "source_purchase_order_file": "",
+            },
+            {
+                "name": "SINV-2",
+                "customer": "CUST-1",
+                "source_purchase_order": "",
+                "source_purchase_order_file": "",
+            },
         ]
         with (
             patch.object(patch_module.frappe.db, "has_column", return_value=True),

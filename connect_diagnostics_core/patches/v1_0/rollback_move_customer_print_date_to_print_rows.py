@@ -29,8 +29,7 @@ FIELD_DEF: dict[str, Any] = {
     "insert_after": "purchase_order_copy_count",
     "default": "1",
     "description": (
-        "Read directly by the Sales Order Print Format, which has no "
-        "Customer print configuration of its own."
+        "Read directly by the Sales Order Print Format, which has no Customer print configuration of its own."
     ),
 }
 

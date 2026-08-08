@@ -17,35 +17,35 @@ class TestDKSHItem(IntegrationTestCase):
         frappe.db.rollback()
 
     def test_stand_alone_record_saves_without_an_item(self) -> None:
-        doc = frappe.get_doc(
-            {"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Standalone"}
-        ).insert(ignore_permissions=True)
+        doc = frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Standalone"}).insert(
+            ignore_permissions=True
+        )
 
         self.assertEqual(doc.name, "_Test DKSH Standalone")
         self.assertFalse(doc.item)
 
     def test_code_trims_surrounding_whitespace(self) -> None:
-        doc = frappe.get_doc(
-            {"doctype": "DKSH Item", "dksh_item_code": "  _Test DKSH Trim  "}
-        ).insert(ignore_permissions=True)
+        doc = frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": "  _Test DKSH Trim  "}).insert(
+            ignore_permissions=True
+        )
 
         self.assertEqual(doc.dksh_item_code, "_Test DKSH Trim")
 
     def test_duplicate_code_is_rejected_by_naming(self) -> None:
-        frappe.get_doc(
-            {"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Dup"}
-        ).insert(ignore_permissions=True)
+        frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Dup"}).insert(
+            ignore_permissions=True
+        )
 
         with self.assertRaises(frappe.DuplicateEntryError):
-            frappe.get_doc(
-                {"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Dup"}
-            ).insert(ignore_permissions=True)
+            frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Dup"}).insert(
+                ignore_permissions=True
+            )
 
     def test_second_record_for_the_same_item_is_rejected(self) -> None:
         item = _make_item("_Test DKSH Linked Item")
-        frappe.get_doc(
-            {"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Link A", "item": item}
-        ).insert(ignore_permissions=True)
+        frappe.get_doc({"doctype": "DKSH Item", "dksh_item_code": "_Test DKSH Link A", "item": item}).insert(
+            ignore_permissions=True
+        )
 
         with self.assertRaises(frappe.ValidationError):
             frappe.get_doc(

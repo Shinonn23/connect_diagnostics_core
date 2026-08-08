@@ -4,11 +4,7 @@
 	"doctype": "DocType",
 	"editable_grid": 1,
 	"engine": "InnoDB",
-	"field_order": [
-		"purchase_order",
-		"purchase_order_file",
-		"copies"
-	],
+	"field_order": ["purchase_order", "purchase_order_file", "copies"],
 	"fields": [
 		{
 			"columns": 5,
