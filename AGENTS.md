@@ -8,6 +8,8 @@ project guidance. It is the contract for how we work: behavioral/engineering rul
 > For procedural guides, invoke the repository skills:
 > `$ship-pr` `$dispatch-test` `$test-result` `$promote-uat` `$promote-prod`
 > `$commit` `$pr` `$review` `$security-audit` and `$erpnext-docs`.
+> The Notion task skills (`next-task`, `take-task`, `update-task`) are Claude-only —
+> see the parity exception below.
 
 ---
 
@@ -27,6 +29,10 @@ project guidance. It is the contract for how we work: behavioral/engineering rul
 - Before completing any project change, verify this parity and report any intentional
   platform-specific difference. Do not invent an unsupported setting merely to make
   the files textually identical.
+- **Known exception:** `next-task`, `take-task`, and `update-task` depend on the
+  Notion MCP server, which Codex cannot reach, so they exist only under
+  `.claude/skills/` and have no `.agents/` twin. Everything they do can also be done
+  by hand in Notion. Do not create shell-only stubs for them.
 - The Codex project instruction filename is `AGENTS.md` (plural). Do not create
   `AGENT.md`.
 
@@ -197,6 +203,24 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text)
 - Set a value: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`).
 - An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
+
+## Notion Task Tracker reference (Claude-only skills)
+
+The client-facing task list, separate from board #6 and not synchronized with it —
+a Notion task may span several GitHub issues, or none. Codex has no Notion access;
+this section documents the shared model so both assistants describe it the same way,
+and so the data is recoverable if the skills are ever ported.
+
+- Database **Task Tracker** `4c1c5f86101c46d18557190f96aa9aab`, under the page
+  *ERPNext Connect Diagnostics*; tasks are referred to as `TSK-<Task ID>`
+- Data source `collection://bcd5f7fa-c9c1-43dc-bfd7-c30272a1d100`
+- **Status**: `Not started` · `Backlog` · `In progress` · `In review` · `Done` · `Cancelled`
+- **Priority**: `🔴 Critical` · `🟠 High` · `🟡 Medium` · `🟢 Low`
+- **Work Type**: `Requirement` · `Design` · `Development` · `Configuration` ·
+  `Data Migration` · `Testing` · `Documentation`
+- Never set a task to `Done` on code evidence alone. Tasks whose Acceptance Criteria
+  require a human step — a real-printer test, a tester's Pass/Fail record — close
+  only when that human has certified them.
 
 ---
 
