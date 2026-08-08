@@ -73,7 +73,7 @@
 	"links": [],
 	"modified": "2026-08-08 18:30:00.000000",
 	"modified_by": "Administrator",
-	"module": "Connect Diagnostics Core",
+	"module": "Connect Diagnostics DKSH",
 	"name": "DKSH Item",
 	"naming_rule": "By fieldname",
 	"owner": "Administrator",

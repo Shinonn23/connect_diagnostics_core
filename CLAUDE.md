@@ -583,9 +583,11 @@ return {"data": <payload>, "message": <str>}
   product with no CD Item. They are optional reference data only, with no workflow and no
   roles of their own, and must not control Item lifecycle or transaction eligibility. The
   link surfaces on the Item form's Connections via `override_doctype_dashboards`
-  (`api/erpnext/item.py`). The earlier design that grouped these as five Custom Fields on
-  an Item DKSH tab, plus the Item list view and the stock-showing `get_item_with_stock`
-  link query that searched them, were removed; do not reintroduce them.
+  (`api/erpnext/item.py`). `DKSH Item` and every other DKSH reference master live in the
+  `Connect Diagnostics DKSH` module (see the *DKSH module* section below), not in Core. The
+  earlier design that grouped these as five Custom Fields on an Item DKSH tab, plus the Item
+  list view and the stock-showing `get_item_with_stock` link query that searched them, were
+  removed; do not reintroduce them.
 - Sales Order uses the standard `item_code` grid and otherwise standard ERPNext
   behavior for every Company. Do not force a selling Price List, Skip Delivery Note,
   external order status, or Company-specific Item link query. The sales document
@@ -646,6 +648,27 @@ return {"data": <payload>, "message": <str>}
 - The retired DKSH APIs and hooks are explicitly exempt from the usual one-release
   deprecation period because this domain was removed before go-live. Do not restore
   compatibility stubs for them.
+
+### DKSH module
+
+- `Connect Diagnostics DKSH` (in `modules.txt`, folder
+  `connect_diagnostics_core/connect_diagnostics_dksh/`) is the single home for the DKSH
+  domain: the DKSH reference masters and the deferred DKSH daily sales import / analysis.
+  It is registered in `setup/print_format.py::APP_MODULES` so any future DKSH Print Format
+  is not purged. `DKSH Item` lives here (moved from Core by
+  `patches/v1_0/move_dksh_item_to_dksh_module.py`, which repoints `DocType.module` and
+  reloads from the new folder — records are untouched).
+- **DKSH reference master convention.** Each one is a standalone DocType autonamed by its
+  DKSH code (`autoname: field:<code>`), carrying an **optional** `Link` to the CD master it
+  references (blank = a DKSH stand-alone record). It is reference data only — no workflow,
+  no roles, no control over the CD master's lifecycle or transaction eligibility — and may
+  offer a Convert-to-CD action. Two shared behaviours live in
+  `connect_diagnostics_dksh/reference.py`, so every master is built the same way:
+  `validate_reference(doc, *, code_fields, link_field, master_doctype)` trims the codes and
+  rejects a second reference pointing at the same CD master; `inject_connection(data, *,
+  reference_doctype, link_field, group_label)` is the generic `override_doctype_dashboards`
+  helper that surfaces the master under the CD form's Connections. `DKSH Item` and
+  `api/erpnext/item.py::get_item_dashboard_data` both delegate here.
 
 ### Custom Fields
 

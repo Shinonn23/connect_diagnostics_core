@@ -16,9 +16,17 @@ control Item lifecycle or transaction eligibility.
 
 from __future__ import annotations
 
-import frappe
-from frappe import _
 from frappe.model.document import Document
+
+from connect_diagnostics_core.connect_diagnostics_dksh import reference
+
+CODE_FIELDS = (
+    "dksh_item_code",
+    "supplier_product_code",
+    "mat_group_code",
+    "mat_group4_code",
+    "material_type_code",
+)
 
 
 class DKSHItem(Document):
@@ -40,31 +48,9 @@ class DKSHItem(Document):
     # end: auto-generated types
 
     def validate(self) -> None:
-        self._trim_codes()
-        self._reject_duplicate_item()
-
-    def _trim_codes(self) -> None:
-        for fieldname in (
-            "dksh_item_code",
-            "supplier_product_code",
-            "mat_group_code",
-            "mat_group4_code",
-            "material_type_code",
-        ):
-            value = self.get(fieldname)
-            if isinstance(value, str):
-                self.set(fieldname, value.strip())
-
-    def _reject_duplicate_item(self) -> None:
-        if not self.item:
-            return
-        existing = frappe.db.get_value(
-            "DKSH Item",
-            {"item": self.item, "name": ["!=", self.name]},
-            "name",
+        reference.validate_reference(
+            self,
+            code_fields=CODE_FIELDS,
+            link_field="item",
+            master_doctype="Item",
         )
-        if existing:
-            frappe.throw(
-                _("Item {0} already has DKSH Item {1}.").format(self.item, existing),
-                title=_("Item already mapped"),
-            )
