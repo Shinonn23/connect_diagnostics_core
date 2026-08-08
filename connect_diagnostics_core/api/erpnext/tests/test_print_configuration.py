@@ -346,9 +346,9 @@ class TestSidebarConfiguration(ResolverHarness):
         self.assertEqual(result["data"]["sources"]["show_date"], print_documents.SOURCE_TEMPLATE)
 
     def test_sidebar_is_empty_for_an_unregistered_format(self) -> None:
-        doc = FakeDocument({"doctype": "Sales Order", "name": "SAL-ORD-0001", "customer": "CUST-0001"})
+        doc = FakeDocument({"doctype": "Delivery Note", "name": "MAT-DN-0001", "customer": "CUST-0001"})
 
-        result = self._sidebar(doc, "Sales Order")
+        result = self._sidebar(doc, "Delivery Note")
 
         self.assertEqual(result["data"]["fields"], [])
 
