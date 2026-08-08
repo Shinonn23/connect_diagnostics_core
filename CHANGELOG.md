@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.33.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.32.1...v0.33.0) (2026-08-08)
+
+
+### Features
+
+* add Connect Diagnostics DKSH module and reference foundation ([c154cd6](https://github.com/Shinonn23/connect_diagnostics_core/commit/c154cd639a7ebc0c4e14b466a8097666a4056261))
+* add DKSH Customer reference master with Convert to CD Customer ([6c89e6c](https://github.com/Shinonn23/connect_diagnostics_core/commit/6c89e6c123d4da8d633d72cb763f4c500952ceb5))
+* allow several source Purchase Orders per tax invoice ([64a380a](https://github.com/Shinonn23/connect_diagnostics_core/commit/64a380a0a96cd2aa12b137b49bab8e4750a64c35))
+* customer sales document requirements and onboarding cleanup ([a60a0bc](https://github.com/Shinonn23/connect_diagnostics_core/commit/a60a0bc82498987784a168bd4e99a087a82b4fcd))
+* DKSH module and customer sales document requirements ([4c6db9d](https://github.com/Shinonn23/connect_diagnostics_core/commit/4c6db9d7b09d3eee6aa8d86196e2dce333ea9099))
+* fold the Sales Order print date into the print registry ([bf09c94](https://github.com/Shinonn23/connect_diagnostics_core/commit/bf09c94dc5c4a3906feb499b5ed3de3f72d767ab))
+
+
+### Code Refactoring
+
+* move DKSH reference codes to a DKSH Item DocType ([61035a7](https://github.com/Shinonn23/connect_diagnostics_core/commit/61035a7e411c25089357c569a0cf200922d1fd06))
+
+
+### Miscellaneous Chores
+
+* register migrations and sync docs for the DKSH Item and print changes ([606c33e](https://github.com/Shinonn23/connect_diagnostics_core/commit/606c33e067de6ecd146fb81806b0a63f0befd3ac))
+
+
+### Styles
+
+* apply pinned ruff formatting to DKSH customer test ([edf5968](https://github.com/Shinonn23/connect_diagnostics_core/commit/edf59681cb51ad57d407474c53c78f58b9c965e4))
+* apply pre-commit formatting ([b965d8c](https://github.com/Shinonn23/connect_diagnostics_core/commit/b965d8c713bb3ed73a7cf7856cb9fb7fecab3c87))
+
+
+### Tests
+
+* point print-registry unregistered tests at still-unregistered doctypes ([7243d0b](https://github.com/Shinonn23/connect_diagnostics_core/commit/7243d0bfa37cea8bb976d21e9ea7372b4009248c))
+
 ## [0.32.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.32.0...v0.32.1) (2026-08-08)
 
 
