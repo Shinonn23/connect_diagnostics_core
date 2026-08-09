@@ -8,7 +8,8 @@ description: Gate-check then open the promotion PR developments → user-accepta
 Open the promotion PR **`developments → user-acceptance-testing`** after
 inspecting every change and its manual-test state. Normally every item must be
 certified by `newyodsapad`. The only exception is an explicit owner-authorized
-manual-test bypass. Board IDs / roles are in `AGENTS.md`.
+manual-test bypass. The tester/certifier is `newyodsapad` and the owner/approver
+is `Shinonn23`; board field IDs are in the Board #6 reference below.
 
 ## Invocation
 
@@ -107,3 +108,11 @@ carrying `/test-bypass` audit markers. Report board movement as pending until
 merge and UAT deployment are verified; only then report the issues moved to UAT
 Deploy and any existing PROD Deploy status preserved. Never auto-merge — branch
 protection + review apply.
+
+## Board #6 reference
+
+- Project: owner `Shinonn23`, number `6`, id `PVT_kwHOB1tcMM4BLM7I`.
+- **Status** field `PVTSSF_lAHOB1tcMM4BLM7Izg62NJg`: TODO `f75ad846` · DEV Ready `61e4505c` · Dev In progress `47fc9ee4` · Dev review `df73e18b` · Test In progress `18955566` · Test Review `6c769416` · UAT Deploy `98236657` · PROD Deploy `dba9dd7f` · Hold `232c6587`.
+- **Test Status** field `PVTSSF_lAHOB1tcMM4BLM7IzhWdi_0`: Not Tested `9d66b7d0` · Testing `2556afad` · Passed `97d946bc` · Failed `15087b1c`.
+- **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text).
+- Set a field: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`). Find an issue's item id with `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
