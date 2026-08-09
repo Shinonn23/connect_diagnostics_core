@@ -4,10 +4,15 @@
 	"issingle": 1,
 	"engine": "InnoDB",
 	"field_order": [
+		"general_tab",
+		"owner_section",
 		"default_regulatory_owner",
+		"owner_column",
 		"default_regulatory_department",
+		"validation_tab",
 		"validation_section",
 		"validate_on_purchase_order",
+		"validation_column",
 		"validate_on_purchase_receipt",
 		"validate_on_stock_entry",
 		"validate_on_sales_order",
@@ -19,8 +24,10 @@
 		"revoked_registration_action",
 		"missing_newcode_action",
 		"manufacturer_mismatch_action",
+		"existing_stock_tab",
 		"existing_stock_section",
 		"expired_registration_existing_stock_policy",
+		"alerts_tab",
 		"alert_section",
 		"auto_create_renewal_action",
 		"renewal_start_days_before_expiry",
@@ -28,16 +35,35 @@
 	],
 	"fields": [
 		{
+			"fieldname": "general_tab",
+			"fieldtype": "Tab Break",
+			"label": "General"
+		},
+		{
+			"fieldname": "owner_section",
+			"fieldtype": "Section Break",
+			"label": "Regulatory Ownership"
+		},
+		{
 			"fieldname": "default_regulatory_owner",
 			"fieldtype": "Link",
 			"label": "Default Regulatory Owner",
 			"options": "User"
 		},
 		{
+			"fieldname": "owner_column",
+			"fieldtype": "Column Break"
+		},
+		{
 			"fieldname": "default_regulatory_department",
 			"fieldtype": "Link",
 			"label": "Default Regulatory Department",
 			"options": "Department"
+		},
+		{
+			"fieldname": "validation_tab",
+			"fieldtype": "Tab Break",
+			"label": "Transaction Validation"
 		},
 		{
 			"fieldname": "validation_section",
@@ -49,6 +75,10 @@
 			"fieldtype": "Check",
 			"label": "Validate on Purchase Order",
 			"default": "1"
+		},
+		{
+			"fieldname": "validation_column",
+			"fieldtype": "Column Break"
 		},
 		{
 			"fieldname": "validate_on_purchase_receipt",
@@ -123,6 +153,11 @@
 			"default": "Warning"
 		},
 		{
+			"fieldname": "existing_stock_tab",
+			"fieldtype": "Tab Break",
+			"label": "Existing Stock"
+		},
+		{
 			"fieldname": "existing_stock_section",
 			"fieldtype": "Section Break",
 			"label": "Existing Stock Policy"
@@ -133,6 +168,11 @@
 			"label": "Expired Registration Existing Stock Policy",
 			"options": "Block\nWarning\nAllow Existing Compliant Stock",
 			"default": "Warning"
+		},
+		{
+			"fieldname": "alerts_tab",
+			"fieldtype": "Tab Break",
+			"label": "Expiry Alerts"
 		},
 		{ "fieldname": "alert_section", "fieldtype": "Section Break", "label": "Expiry Alerts" },
 		{

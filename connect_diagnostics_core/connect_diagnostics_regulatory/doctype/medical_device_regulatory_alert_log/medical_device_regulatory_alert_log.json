@@ -4,16 +4,24 @@
 	"doctype": "DocType",
 	"engine": "InnoDB",
 	"field_order": [
+		"alert_section",
 		"registration",
+		"alert_column",
 		"regulatory_document",
 		"alert_kind",
 		"threshold_days",
 		"severity",
+		"result_section",
 		"alerted_on",
 		"recipient_summary",
 		"status"
 	],
 	"fields": [
+		{
+			"fieldname": "alert_section",
+			"fieldtype": "Section Break",
+			"label": "Alert"
+		},
 		{
 			"fieldname": "registration",
 			"fieldtype": "Link",
@@ -21,6 +29,10 @@
 			"options": "Medical Device Product Registration",
 			"reqd": 1,
 			"in_list_view": 1
+		},
+		{
+			"fieldname": "alert_column",
+			"fieldtype": "Column Break"
 		},
 		{
 			"fieldname": "regulatory_document",
@@ -50,6 +62,11 @@
 			"label": "Severity",
 			"options": "Info\nWarning\nCritical\nExpired",
 			"in_list_view": 1
+		},
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Notification Result"
 		},
 		{
 			"fieldname": "alerted_on",

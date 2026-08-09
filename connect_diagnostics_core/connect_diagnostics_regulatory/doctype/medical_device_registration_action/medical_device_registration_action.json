@@ -5,21 +5,34 @@
 	"editable_grid": 1,
 	"engine": "InnoDB",
 	"field_order": [
+		"action_section",
 		"registration",
+		"action_column",
 		"action_type",
 		"fda_application_number",
+		"tracking_section",
 		"submitted_date",
+		"tracking_column",
 		"current_stage",
 		"fda_query_date",
 		"response_due_date",
+		"result_section",
 		"approval_date",
+		"result_column",
 		"new_expiry_date",
 		"resulting_registration",
+		"evidence_section",
 		"assigned_to",
+		"evidence_column",
 		"attachment",
 		"remarks"
 	],
 	"fields": [
+		{
+			"fieldname": "action_section",
+			"fieldtype": "Section Break",
+			"label": "Action"
+		},
 		{
 			"fieldname": "registration",
 			"fieldtype": "Link",
@@ -27,6 +40,10 @@
 			"options": "Medical Device Product Registration",
 			"reqd": 1,
 			"in_list_view": 1
+		},
+		{
+			"fieldname": "action_column",
+			"fieldtype": "Column Break"
 		},
 		{
 			"fieldname": "action_type",
@@ -37,7 +54,16 @@
 			"in_list_view": 1
 		},
 		{ "fieldname": "fda_application_number", "fieldtype": "Data", "label": "FDA Application Number" },
+		{
+			"fieldname": "tracking_section",
+			"fieldtype": "Section Break",
+			"label": "FDA Tracking"
+		},
 		{ "fieldname": "submitted_date", "fieldtype": "Date", "label": "Submitted Date" },
+		{
+			"fieldname": "tracking_column",
+			"fieldtype": "Column Break"
+		},
 		{
 			"fieldname": "current_stage",
 			"fieldtype": "Select",
@@ -48,7 +74,16 @@
 		},
 		{ "fieldname": "fda_query_date", "fieldtype": "Date", "label": "FDA Query Date" },
 		{ "fieldname": "response_due_date", "fieldtype": "Date", "label": "Response Due Date" },
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Dates and Result"
+		},
 		{ "fieldname": "approval_date", "fieldtype": "Date", "label": "Approval Date" },
+		{
+			"fieldname": "result_column",
+			"fieldtype": "Column Break"
+		},
 		{ "fieldname": "new_expiry_date", "fieldtype": "Date", "label": "New Expiry Date" },
 		{
 			"fieldname": "resulting_registration",
@@ -56,7 +91,16 @@
 			"label": "Resulting Registration",
 			"options": "Medical Device Product Registration"
 		},
+		{
+			"fieldname": "evidence_section",
+			"fieldtype": "Section Break",
+			"label": "Assignment and Evidence"
+		},
 		{ "fieldname": "assigned_to", "fieldtype": "Link", "label": "Assigned To", "options": "User" },
+		{
+			"fieldname": "evidence_column",
+			"fieldtype": "Column Break"
+		},
 		{ "fieldname": "attachment", "fieldtype": "Attach", "label": "Attachment" },
 		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
 	],

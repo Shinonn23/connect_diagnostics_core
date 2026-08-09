@@ -108,8 +108,17 @@ def after_sync() -> None:
     remove_non_app_print_formats()
 
 
+def before_migrate() -> None:
+    workspace.snapshot_regulatory_workspace_customizations()
+    workspace.snapshot_regulatory_sidebar_customizations()
+
+
 def after_migrate() -> None:
+    workspace.restore_regulatory_sidebar_customizations()
     apply_all()
+    workspace.ensure_regulatory_workspace()
+    workspace.restore_regulatory_workspace_customizations()
+    workspace.ensure_regulatory_workspace()
     _ensure_default_print_configuration_template()
     remove_non_app_print_formats()
 

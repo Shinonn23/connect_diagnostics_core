@@ -6,21 +6,39 @@
 	"editable_grid": 1,
 	"engine": "InnoDB",
 	"field_order": [
+		"document_tab",
+		"identity_section",
 		"registration",
+		"identity_column",
 		"document_type",
 		"document_number",
 		"version",
 		"issuer",
+		"validity_section",
 		"issue_date",
+		"validity_column",
 		"expiry_date",
 		"applicable_newcode",
+		"verification_section",
 		"file",
+		"verification_column",
 		"verification_status",
 		"verified_by",
 		"verified_on",
+		"remarks_section",
 		"remarks"
 	],
 	"fields": [
+		{
+			"fieldname": "document_tab",
+			"fieldtype": "Tab Break",
+			"label": "Document"
+		},
+		{
+			"fieldname": "identity_section",
+			"fieldtype": "Section Break",
+			"label": "Document Identity"
+		},
 		{
 			"fieldname": "registration",
 			"fieldtype": "Link",
@@ -28,6 +46,10 @@
 			"options": "Medical Device Product Registration",
 			"reqd": 1,
 			"in_list_view": 1
+		},
+		{
+			"fieldname": "identity_column",
+			"fieldtype": "Column Break"
 		},
 		{
 			"fieldname": "document_type",
@@ -45,10 +67,28 @@
 		},
 		{ "fieldname": "version", "fieldtype": "Data", "label": "Version" },
 		{ "fieldname": "issuer", "fieldtype": "Data", "label": "Issuer" },
+		{
+			"fieldname": "validity_section",
+			"fieldtype": "Section Break",
+			"label": "Validity and Scope"
+		},
 		{ "fieldname": "issue_date", "fieldtype": "Date", "label": "Issue Date" },
+		{
+			"fieldname": "validity_column",
+			"fieldtype": "Column Break"
+		},
 		{ "fieldname": "expiry_date", "fieldtype": "Date", "label": "Expiry Date", "in_list_view": 1 },
 		{ "fieldname": "applicable_newcode", "fieldtype": "Data", "label": "Applicable NEWCODE" },
+		{
+			"fieldname": "verification_section",
+			"fieldtype": "Section Break",
+			"label": "Verification and Evidence"
+		},
 		{ "fieldname": "file", "fieldtype": "Attach", "label": "File", "reqd": 1 },
+		{
+			"fieldname": "verification_column",
+			"fieldtype": "Column Break"
+		},
 		{
 			"fieldname": "verification_status",
 			"fieldtype": "Select",
@@ -65,6 +105,11 @@
 			"read_only": 1
 		},
 		{ "fieldname": "verified_on", "fieldtype": "Date", "label": "Verified On", "read_only": 1 },
+		{
+			"fieldname": "remarks_section",
+			"fieldtype": "Section Break",
+			"label": "Remarks"
+		},
 		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
 	],
 	"module": "Connect Diagnostics Regulatory",

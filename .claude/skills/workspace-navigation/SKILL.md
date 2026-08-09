@@ -34,6 +34,14 @@ or Report.
 - For an independent, major domain, create a Connect Diagnostics Module and its
   own Workspace, then give its user-facing items intentional card and Sidebar
   navigation there.
+- Use the standard ERPNext Workspace information architecture for every
+  independent Workspace: start with Home, follow with the important operational
+  DocTypes, then provide collapsible Reports and Setup sections, followed by
+  Settings. This is a content and ordering requirement for the Workspace cards
+  and Sidebar, not a requirement to copy a particular ERPNext module's files or
+  business labels.
+- Add a standard top-level Desktop Icon linked to the Workspace Sidebar so the
+  independent module is visible in the Desk module grid.
 - Child-table and technical DocTypes with no standalone Desk route do not receive
   navigation. State the reason in the change proposal and PR.
 - Do not modify ERPNext Workspace or Workspace Sidebar source files. Keep site
@@ -48,7 +56,9 @@ or Report.
    required setup entry point only after the approved scope includes both files.
 3. Add focused tests for placement, ordering, idempotency, and preservation of
    existing Workspace cards and links.
-4. Run migration on the target site. Confirm managed links resolve, no stale links
-   remain, cards still render, and the Sidebar contains no duplicates.
+4. Run migration on the target site. Confirm the actual Sidebar order is Home,
+   important DocTypes, Reports, Setup, and Settings; a module-grid icon alone is
+   not sufficient. Confirm managed links resolve, no stale links remain, cards
+   still render, and the Sidebar contains no duplicates.
 5. Run the repository's required pre-commit checks and final review. Verify the
    expected user roles can see and open each user-facing entry after deployment.
