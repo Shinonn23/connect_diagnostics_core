@@ -1,0 +1,18 @@
+{
+ "actions": [], "allow_import": 1, "allow_rename": 1, "autoname": "field:establishment_registration_no", "doctype": "DocType", "editable_grid": 1, "engine": "InnoDB",
+ "field_order": ["company", "establishment_registration_no", "registration_type", "establishment_name", "establishment_address", "issue_date", "expiry_date", "official_status", "responsible_user", "certificate_file", "remarks"],
+ "fields": [
+  {"fieldname":"company","fieldtype":"Link","label":"Company","options":"Company","reqd":1,"in_list_view":1},
+  {"fieldname":"establishment_registration_no","fieldtype":"Data","label":"Establishment Registration Number","reqd":1,"unique":1,"in_list_view":1,"in_global_search":1},
+  {"fieldname":"registration_type","fieldtype":"Select","label":"Registration Type","options":"Import\nManufacture\nSale","reqd":1},
+  {"fieldname":"establishment_name","fieldtype":"Data","label":"Establishment Name","reqd":1},
+  {"fieldname":"establishment_address","fieldtype":"Link","label":"Establishment Address","options":"Address"},
+  {"fieldname":"issue_date","fieldtype":"Date","label":"Issue Date"},
+  {"fieldname":"expiry_date","fieldtype":"Date","label":"Expiry Date"},
+  {"fieldname":"official_status","fieldtype":"Select","label":"Official Status","options":"Active\nExpired\nSuspended\nCancelled","default":"Active","in_list_view":1},
+  {"fieldname":"responsible_user","fieldtype":"Link","label":"Responsible User","options":"User"},
+  {"fieldname":"certificate_file","fieldtype":"Attach","label":"Certificate File"},
+  {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
+ ],
+ "module":"Connect Diagnostics Regulatory", "name":"Medical Device Establishment Registration", "naming_rule":"By fieldname", "permissions":[{"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"System Manager","share":1,"write":1}], "track_changes":1
+}
