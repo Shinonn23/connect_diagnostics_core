@@ -32,12 +32,22 @@ class FakeDocument(frappe._dict):
     def save(self, **_: Any) -> None:
         self.save_count += 1
 
+    def is_new(self) -> bool:
+        return False
+
 
 def workspace_documents() -> dict[str, FakeDocument]:
-    return {
+    documents = {
         group.name: FakeDocument(name=group.name, parent_page="", links=[], content="[]")
         for group in workspace.NAVIGATION_GROUPS
     }
+    documents[workspace.REGULATORY_WORKSPACE] = FakeDocument(
+        name=workspace.REGULATORY_WORKSPACE,
+        parent_page="",
+        links=[],
+        content="[]",
+    )
+    return documents
 
 
 def sidebar_documents() -> dict[str, FakeDocument]:
@@ -80,6 +90,7 @@ def sidebar_documents() -> dict[str, FakeDocument]:
                 sidebar_link("Subscription Settings", child=1),
             ],
         ),
+        workspace.REGULATORY_WORKSPACE: FakeDocument(name=workspace.REGULATORY_WORKSPACE, items=[]),
     }
 
 
@@ -110,10 +121,13 @@ class TestWorkspaceNavigation(UnitTestCase):
         workspaces = workspace_documents()
         sidebars = sidebar_documents()
 
-        with patch.object(
-            workspace.frappe,
-            "get_doc",
-            side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", return_value=True),
         ):
             workspace.ensure_workspace_navigation()
 
@@ -146,17 +160,20 @@ class TestWorkspaceNavigation(UnitTestCase):
         workspaces = workspace_documents()
         sidebars = sidebar_documents()
 
-        with patch.object(
-            workspace.frappe,
-            "get_doc",
-            side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", return_value=True),
         ):
             workspace.ensure_workspace_navigation()
 
         reports = [
             row
-            for document in workspaces.values()
-            for row in document["links"]
+            for group in workspace.NAVIGATION_GROUPS
+            for row in workspaces[group.name]["links"]
             if row.get("link_type") == "Report"
         ]
         self.assertEqual(
@@ -186,10 +203,13 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         sidebars["Selling"]["items"].insert(0, sidebar_link("Home"))
 
-        with patch.object(
-            workspace.frappe,
-            "get_doc",
-            side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", return_value=True),
         ):
             workspace.ensure_workspace_navigation()
             workspace.ensure_workspace_navigation()
@@ -206,6 +226,39 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         self.assertEqual(sum(row.get("link_to") == "Home" for row in selling_sidebar["items"]), 1)
         self.assertEqual(sum(row.get("link_to") == "Customer" for row in selling_sidebar["items"]), 1)
+
+    def test_regulatory_workspace_and_sidebar_are_idempotent(self) -> None:
+        workspaces = workspace_documents()
+        sidebars = sidebar_documents()
+
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", return_value=True),
+        ):
+            workspace.ensure_workspace_navigation()
+            workspace.ensure_workspace_navigation()
+
+        regulatory_workspace = workspaces[workspace.REGULATORY_WORKSPACE]
+        regulatory_sidebar = sidebars[workspace.REGULATORY_WORKSPACE]
+        expected_links = [link.link_to for link in workspace.REGULATORY_LINKS]
+        self.assertEqual(regulatory_workspace.save_count, 1)
+        self.assertEqual(regulatory_sidebar.save_count, 1)
+        self.assertEqual(
+            [row["link_to"] for row in regulatory_workspace["links"] if row.get("type") == "Link"],
+            expected_links,
+        )
+        self.assertEqual(
+            [block["data"]["card_name"] for block in json.loads(regulatory_workspace["content"])],
+            [workspace.NAVIGATION_LABEL],
+        )
+        self.assertEqual(
+            [row["link_to"] for row in regulatory_sidebar["items"] if row.get("type") == "Link"],
+            expected_links,
+        )
 
     def test_stale_missing_workspace_parent_is_cleared_before_save(self) -> None:
         financial_reports = FakeDocument(
