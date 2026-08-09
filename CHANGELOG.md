@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.9](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.8...v0.36.9) (2026-08-09)
+
+
+### Bug Fixes
+
+* drop orphan DKSH-sales patch entries from patches.txt ([8fc058d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8fc058d5ef3e16d6268c79cd1b2d4e292d13a925))
+* drop orphan DKSH-sales patch entries from patches.txt ([eedec67](https://github.com/Shinonn23/connect_diagnostics_core/commit/eedec67baf085efcdc7b8d478e087c43835d85e5))
+
 ## [0.36.8](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.7...v0.36.8) (2026-08-09)
 
 
