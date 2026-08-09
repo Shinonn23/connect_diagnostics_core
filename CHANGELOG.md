@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.8](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.7...v0.36.8) (2026-08-09)
+
+
+### Bug Fixes
+
+* guard alternative-name migrations against retired target tables ([cbea092](https://github.com/Shinonn23/connect_diagnostics_core/commit/cbea092f20beb85a625bcc9b19656907807b22bf))
+* guard alternative-name migrations against retired target tables ([568a557](https://github.com/Shinonn23/connect_diagnostics_core/commit/568a5578178ce274f477ff1e6afbd33cea615e01))
+
 ## [0.36.7](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.6...v0.36.7) (2026-08-09)
 
 
