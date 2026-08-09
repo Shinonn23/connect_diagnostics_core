@@ -156,13 +156,6 @@ CUSTOM_FIELDS = {
             ),
         },
         {
-            "fieldname": "alternative_names",
-            "label": "Alternative Names",
-            "fieldtype": "Table",
-            "insert_after": "customer_name",
-            "options": "Customer Alternative Name",
-        },
-        {
             "fieldname": "document_preferences_section",
             "label": "Document / Print Configuration",
             "fieldtype": "Tab Break",
