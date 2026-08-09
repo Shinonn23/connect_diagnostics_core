@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.2...v0.36.3) (2026-08-09)
+
+
+### Documentation
+
+* slim CLAUDE.md/AGENTS.md and move domain knowledge to .github/domain ([3d1507e](https://github.com/Shinonn23/connect_diagnostics_core/commit/3d1507e5fa5382f36e70f52b230e44fdbb316002))
+* slim CLAUDE.md/AGENTS.md and move domain knowledge to .github/domain ([ecfe6c3](https://github.com/Shinonn23/connect_diagnostics_core/commit/ecfe6c34c0a64dc5765a9b274ad96a5e7292abd7))
+
 ## [0.36.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.1...v0.36.2) (2026-08-09)
 
 
