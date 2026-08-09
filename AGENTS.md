@@ -450,6 +450,13 @@ If a bug or issue is discovered during implementation (outside the current task 
   JSON, controller, tests, and schema migrations in the repository; do not create
   ad hoc site-local schema through Desk or console. Existing or third-party
   DocTypes remain managed through their documented Frappe mechanism.
+- **Workspace navigation**: every new app Module and user-facing app DocType must
+  receive a deliberate Desk home in the same change. When it belongs to an existing
+  ERPNext domain (for example Stock or Accounting), embed it in the relevant existing
+  Workspace card and contextual Sidebar section; do not create a separate Connect
+  Diagnostics group. When it is an independent, major Connect Diagnostics domain
+  (for example Loan), create its own Module and Workspace. Child-table and technical
+  DocTypes with no standalone Desk route are exempt; document the reason in the change.
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
 
 ### API Response Shape
