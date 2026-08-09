@@ -1,0 +1,124 @@
+{
+	"actions": [],
+	"autoname": "format:ACT-.#####",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"action_section",
+		"registration",
+		"action_column",
+		"action_type",
+		"fda_application_number",
+		"tracking_section",
+		"submitted_date",
+		"tracking_column",
+		"current_stage",
+		"fda_query_date",
+		"response_due_date",
+		"result_section",
+		"approval_date",
+		"result_column",
+		"new_expiry_date",
+		"resulting_registration",
+		"evidence_section",
+		"assigned_to",
+		"evidence_column",
+		"attachment",
+		"remarks"
+	],
+	"fields": [
+		{
+			"fieldname": "action_section",
+			"fieldtype": "Section Break",
+			"label": "Action"
+		},
+		{
+			"fieldname": "registration",
+			"fieldtype": "Link",
+			"label": "Registration",
+			"options": "Medical Device Product Registration",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "action_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "action_type",
+			"fieldtype": "Select",
+			"label": "Action Type",
+			"options": "New Registration\nRenewal\nVariation\nAdd Product\nRemove Product\nCancel\nNot Renew",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{ "fieldname": "fda_application_number", "fieldtype": "Data", "label": "FDA Application Number" },
+		{
+			"fieldname": "tracking_section",
+			"fieldtype": "Section Break",
+			"label": "FDA Tracking"
+		},
+		{ "fieldname": "submitted_date", "fieldtype": "Date", "label": "Submitted Date" },
+		{
+			"fieldname": "tracking_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "current_stage",
+			"fieldtype": "Select",
+			"label": "Current Stage",
+			"options": "Preparing\nInternal Review\nSubmitted\nFDA Query\nApproved\nRejected\nCancelled",
+			"default": "Preparing",
+			"in_list_view": 1
+		},
+		{ "fieldname": "fda_query_date", "fieldtype": "Date", "label": "FDA Query Date" },
+		{ "fieldname": "response_due_date", "fieldtype": "Date", "label": "Response Due Date" },
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Dates and Result"
+		},
+		{ "fieldname": "approval_date", "fieldtype": "Date", "label": "Approval Date" },
+		{
+			"fieldname": "result_column",
+			"fieldtype": "Column Break"
+		},
+		{ "fieldname": "new_expiry_date", "fieldtype": "Date", "label": "New Expiry Date" },
+		{
+			"fieldname": "resulting_registration",
+			"fieldtype": "Link",
+			"label": "Resulting Registration",
+			"options": "Medical Device Product Registration"
+		},
+		{
+			"fieldname": "evidence_section",
+			"fieldtype": "Section Break",
+			"label": "Assignment and Evidence"
+		},
+		{ "fieldname": "assigned_to", "fieldtype": "Link", "label": "Assigned To", "options": "User" },
+		{
+			"fieldname": "evidence_column",
+			"fieldtype": "Column Break"
+		},
+		{ "fieldname": "attachment", "fieldtype": "Attach", "label": "Attachment" },
+		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Registration Action",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
+}

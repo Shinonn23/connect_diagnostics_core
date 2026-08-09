@@ -9,7 +9,6 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
-    company,
     contact,
     currency_exchange,
     customer,
@@ -23,23 +22,27 @@ from connect_diagnostics_core.setup import (
     journal_entry_account,
     packed_item,
     payment_approval,
+    payroll,
     procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
     quotation,
+    regulatory,
+    regulatory_transactions,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
+    sales_requirements,
     sales_taxes_and_charges,
     supplier,
     uom,
+    workspace,
 )
 from connect_diagnostics_core.setup.print_format import remove_non_app_print_formats
 
 _MODULES = (
     account,
-    company,
     contact,
     currency_exchange,
     customer,
@@ -54,6 +57,8 @@ _MODULES = (
     packed_item,
     payment_approval,
     procure_to_pay,
+    regulatory,
+    regulatory_transactions,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -61,6 +66,7 @@ _MODULES = (
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
+    sales_requirements,
     sales_taxes_and_charges,
     supplier,
     uom,
@@ -86,7 +92,11 @@ def apply_all() -> None:
                 )
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
+    payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
+    sales_requirements.ensure_configuration()
+    regulatory.ensure_configuration()
+    workspace.ensure_workspace_navigation()
 
 
 def after_install() -> None:
@@ -98,16 +108,27 @@ def after_sync() -> None:
     remove_non_app_print_formats()
 
 
+def before_migrate() -> None:
+    workspace.snapshot_regulatory_workspace_customizations()
+    workspace.snapshot_regulatory_sidebar_customizations()
+
+
 def after_migrate() -> None:
+    workspace.restore_regulatory_sidebar_customizations()
     apply_all()
+    workspace.ensure_regulatory_workspace()
+    workspace.restore_regulatory_workspace_customizations()
+    workspace.ensure_regulatory_workspace()
     _ensure_default_print_configuration_template()
     remove_non_app_print_formats()
 
 
 def _ensure_default_print_configuration_template() -> None:
-    """Create the reusable default after the standard DocType has synchronized."""
-    from connect_diagnostics_core.patches.v1_0.migrate_print_configuration_templates import (
-        _ensure_default_template,
+    """Create the reusable Templates after the standard DocType has synchronized."""
+    from connect_diagnostics_core.setup.print_configuration_template import (
+        ensure_default_template,
+        ensure_policy_templates,
     )
 
-    _ensure_default_template()
+    ensure_default_template()
+    ensure_policy_templates()

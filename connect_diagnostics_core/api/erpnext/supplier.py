@@ -168,10 +168,10 @@ def supplier_query(
     page_len: int,
     filters: dict[str, Any] | None = None,
 ) -> list[tuple]:
-    """Link search for Supplier that also matches DKSH code and alternative names.
+    """Link search for Supplier that also matches by name.
 
     Registered as the ``standard_queries`` handler for Supplier, so it applies to
-    every Supplier link field. Mirrors the cross-field search used for Item.
+    every Supplier link field.
     """
     frappe.has_permission("Supplier", throw=True)
 
@@ -182,7 +182,6 @@ def supplier_query(
         or_filters=[
             ["Supplier", "name", "like", like],
             ["Supplier", "supplier_name", "like", like],
-            ["Supplier Alternative Name", "name_value", "like", like],
         ],
         fields=["name", "supplier_name"],
         limit_start=start,

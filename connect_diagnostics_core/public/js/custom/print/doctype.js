@@ -51,24 +51,67 @@
 			return;
 		}
 
+		// Values are resolved server-side; keep them so Reset can restore them
+		// without another round trip.
+		this.__cd_print_configuration_defaults = data.values || {};
+		this.__cd_print_configuration_sources = data.sources || {};
+		this.__cd_print_configuration_controls = {};
+
 		this.sidebar_dynamic_section.append(`<h6 class="mt-4 mb-2">${__("Customer Print Options")}</h6>`);
+
 		for (const df of data.fields) {
-			let field;
-			field = this.add_sidebar_item(
+			const value = data.values?.[df.fieldname] ?? "";
+			const field = this.add_sidebar_item(
 				{
 					...df,
 					fieldname: `cd_${df.fieldname}`,
 					change: () => {
 						this.additional_settings[field.df.fieldname] = field.get_value();
+						this.cd_mark_configuration_source(df.fieldname, __("This print"));
 						this.preview();
 					},
 				},
 				true,
 			);
-			const value = data.values?.[df.fieldname];
-			field.set_input(value ?? "");
-			this.additional_settings[field.df.fieldname] = value ?? "";
+			field.set_input(value);
+			this.additional_settings[field.df.fieldname] = value;
+			this.__cd_print_configuration_controls[df.fieldname] = field;
+			this.cd_mark_configuration_source(df.fieldname, data.sources?.[df.fieldname]);
 		}
+
+		this.cd_add_configuration_reset();
+	};
+
+	// Show where each resolved value came from, so a user can tell an inherited
+	// Template value apart from one set on this Customer or this print only.
+	PrintView.prototype.cd_mark_configuration_source = function (fieldname, source) {
+		const field = this.__cd_print_configuration_controls?.[fieldname];
+		if (!field?.$wrapper || !source) {
+			return;
+		}
+		let $hint = field.$wrapper.find(".cd-print-source");
+		if (!$hint.length) {
+			$hint = $('<div class="cd-print-source text-muted small mt-1"></div>').appendTo(field.$wrapper);
+		}
+		$hint.text(source);
+	};
+
+	PrintView.prototype.cd_add_configuration_reset = function () {
+		const $reset = $(
+			`<button type="button" class="btn btn-xs btn-default mt-2">${__("Reset to default")}</button>`,
+		).appendTo(this.sidebar_dynamic_section);
+
+		$reset.on("click", () => {
+			const defaults = this.__cd_print_configuration_defaults || {};
+			const sources = this.__cd_print_configuration_sources || {};
+			for (const [fieldname, field] of Object.entries(this.__cd_print_configuration_controls || {})) {
+				const value = defaults[fieldname] ?? "";
+				field.set_input(value);
+				this.additional_settings[field.df.fieldname] = value;
+				this.cd_mark_configuration_source(fieldname, sources[fieldname]);
+			}
+			this.preview();
+		});
 	};
 
 	PrintView.prototype.refresh_print_format = function () {

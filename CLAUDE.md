@@ -3,11 +3,14 @@
 Custom ERPNext app for Connect Diagnostics. This file is **auto-loaded every
 session** and is the contract for how we work: behavioral/engineering rules plus
 **how we branch, version, and ship**. Workflow narrative:
-[`.github/WORKFLOW.md`](.github/WORKFLOW.md).
+[`.github/WORKFLOW.md`](.github/WORKFLOW.md). Deep per-domain design records live in
+[`.github/domain/`](.github/domain/) and are read on demand.
 
-> For procedural guides, use the slash skills:
+> Procedural guides live in the slash skills — the skill carries its own IDs and
+> steps, so this file no longer repeats them:
 > `/ship-pr` `/dispatch-test` `/test-result` `/promote-uat` `/promote-prod`
-> `/commit` `/pr` `/review` and the scaffold/check helpers.
+> `/commit` `/pr` `/review`, the Notion task skills `/next-task` `/take-task`
+> `/update-task`, `/workspace-navigation`, and the scaffold/check helpers.
 
 ---
 
@@ -20,13 +23,20 @@ session** and is the contract for how we work: behavioral/engineering rules plus
   - `.claude/skills/<name>/` ↔ `.agents/skills/<name>/`
   - `.claude/knowledge/` ↔ `.codex/knowledge/`
   - `.claude/settings.json` ↔ `.codex/config.toml` when an equivalent setting exists
+- `.github/domain/` is the **shared** domain-knowledge tree used by both assistants; it
+  is not mirrored under `.claude` / `.codex`. Update the relevant file there when a
+  domain's design changes.
 - Keep the semantic content equivalent. Differences are allowed only when required
   by a platform, such as skill frontmatter, invocation syntax, or file location.
 - When adding, updating, renaming, or removing an instruction, skill, knowledge
-  note, or supported setting on one side, mirror the change on the other side.
+  note, domain doc, or supported setting on one side, mirror the change on the other.
 - Before completing any project change, verify this parity and report any intentional
   platform-specific difference. Do not invent an unsupported setting merely to make
   the files textually identical.
+- **Known exception:** `/next-task`, `/take-task`, and `/update-task` depend on the
+  Notion MCP server, which Codex cannot reach, so they exist only under
+  `.claude/skills/` and have no `.agents/` twin. Everything they do can also be done
+  by hand in Notion. Do not create shell-only stubs for them.
 - The Codex project instruction filename is `AGENTS.md` (plural). Do not create
   `AGENT.md`.
 
@@ -50,6 +60,10 @@ When rules conflict, follow this order:
   `after_install` / `after_migrate`)
 - **Custom field naming**: no prefix — the name must describe the data it holds
   (e.g., `print_date`, `product_group`, `dksh_item_code`); naming is important
+- **People**: tester / UAT certifier is GitHub `newyodsapad` (Yodsapad Junta);
+  owner / release approver is GitHub `Shinonn23` (Siwat). The exact promotion gating
+  each role enforces lives in the `/promote-uat`, `/promote-prod`, and `/test-result`
+  skills.
 - **Bench**: `/home/frappe/frappe-bench`, dev site `dev.erp.connectdiacnostics.local`
   (= the `developments` environment). `gh` is authenticated as `Shinonn23`
   (scopes include `repo` + `project`). Run server code via
@@ -58,34 +72,6 @@ When rules conflict, follow this order:
 ---
 
 # Workflow, Branching & Releases
-
-## Roles
-
-- **Tester / UAT certifier:** GitHub `newyodsapad` (Yodsapad Junta). Only his
-  target-qualified `/test-pass — all steps verified on <environment> @ <full
-  SHA>` matching the task's current Test target counts as certification to
-  promote; a bare, stale, or target-mismatched marker does not. The owner may
-  explicitly bypass the UAT manual-test gate with
-  `/promote-uat --bypass-test "<reason>"`; a bypass is not certification and must
-  not change test results. A later `/test-fail` reopens the source issue and
-  invalidates its earlier UAT approval. Deferred certification must name the exact
-  deployed environment and commit tested. Each bypassed source issue carries an
-  owner-authored `/test-bypass` marker linked to the matching UAT PR audit entry.
-- **Owner / release approver:** GitHub `Shinonn23` (Siwat). `/uat-approve` sign-off
-  must be newer than the latest `/test-fail` on each source issue; a generic marker
-  on a shared test task blocks promotion until its failing source issues are
-  identified. Production deployment does not close bypassed or otherwise
-  uncertified source issues, regardless of the Test Status enum. Failed or active
-  re-test issues normally block production promotion. An unresolved failure on an
-  already-PROD issue globally
-  blocks unrelated production batches until it passes and receives newer approval.
-  A remediation-only batch may deploy a fix when every included developments PR
-  directly `Refs` an actively held source; the hold remains until that new PROD
-  target passes. Any source without either target-matched certification or a
-  matching bypass audit is a production blocker, even if Test Status says Passed.
-  Each current source must use the UAT promotion PR that introduced its latest
-  included developments PR; cumulative PROD batches may map sources to different
-  UAT promotions.
 
 ## Branch & environment topology
 
@@ -97,32 +83,18 @@ feature work ─PR→ developments ─PR→ user-acceptance-testing ─PR→ pro
 All three long-lived branches are protected (required checks `Server` +
 `Frappe Linter`, 1 review). We **merge first, then test on the DEV site** — code
 review + CI are the pre-merge gate; manual functional testing happens after merge
-on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
+on `developments`. Rationale and full loop: [`.github/WORKFLOW.md`](.github/WORKFLOW.md).
 
-## Automated DEV and UAT deployment
+## Automated deployment
 
-- `.github/workflows/deploy.yml` deploys every push to `developments` to GitHub
-  Environment `DEV` (`34.143.156.218`) and every push to
-  `user-acceptance-testing` to `UAT` (`136.110.8.47`). It does not deploy PROD.
-- `workflow_dispatch` supports an explicit `DEV` or `UAT` target for retrying or
-  manually starting the same deployment flow.
-- Both GitHub Environments require an Environment secret named `BENCH_PATH`,
-  initially `/home/erp/frappe`; it is the Frappe Bench root, not the CLI path.
-  Repository secret `SSH_PRIVATE_KEY` contains the passphrase-free
-  `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified host-key entries
-  for both servers. Never print these values in workflow logs.
-- Deployment connects as `erp`, validates the directory and `flock`, prepends
-  `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, initializes
-  `$HOME/.nvm/nvm.sh`, selects Node.js 24, and validates executable `node`, `npm`,
-  `yarn`, and `bench` commands before running `bench update --reset` from
-  `BENCH_PATH`. Jobs have a 120-minute timeout; the remote lock waits up to 60
-  minutes before failing. Do not source interactive shell configuration such as
-  `.zshrc` in deployment automation.
-- DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
-  Never cancel a running deployment or enable cancellation mid-deploy. GitHub
-  preserves the running job and retains only the newest pending job per environment.
-- The remote `flock` coordinates GitHub workflow deployments only. Anyone running
-  `bench update` manually must wait for the workflow deployment to finish.
+Every push to `developments`, `user-acceptance-testing`, and `production` deploys to
+the `DEV`, `UAT`, and `PROD` GitHub Environments respectively through
+`.github/workflows/deploy.yml` — one identical flow, with `workflow_dispatch` able to
+retry a specific target. The mechanics (the `BENCH_PATH` variable, SSH secrets,
+`flock`, per-environment concurrency) live in that workflow and
+[`.github/WORKFLOW.md`](.github/WORKFLOW.md). **Never cancel a running deployment**,
+and anyone running `bench update` manually must wait for the workflow's remote lock
+to release.
 
 ## Branch naming rule
 
@@ -158,14 +130,11 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 | `revert` / unrecognized                                            | **skipped** unless the commit supplies `Release-As:`    |
 
 - `.github/workflows/release-please.yml` runs on pushes to `developments` and
-  maintains a cumulative Release PR. The PR updates `CHANGELOG.md`,
+  maintains a cumulative Release PR that updates `CHANGELOG.md`,
   `connect_diagnostics_core/__init__.py`, and `.release-please-manifest.json`.
 - Merge the Release PR after its DEV batch is tested and before promoting that
   batch to UAT. Merging it creates a `vX.Y.Z` tag and published GitHub Release
   from `developments`; promotion PRs never double-bump.
-- Release Please uses the `RELEASE_PLEASE_TOKEN` Actions secret so its PR triggers
-  the protected-branch checks. The token must have write access to Contents,
-  Pull requests, and Issues (for Release PR labels).
 - **Do not hand-edit `__version__` or the release manifest.** For a revert whose
   inverse version cannot be inferred safely, put `Release-As: X.Y.Z` in the
   Conventional Commit body and let Release Please update the version files.
@@ -178,25 +147,6 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - When related issues exist, reference them with **`Refs #<n>`**, never
   `Closes #<n>` — issues stay open through testing and are closed only after
   `newyodsapad` certifies the tests pass.
-
-## Ship & promote — use the skills
-
-| Skill                                            | What it does                                                                                                |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `/ship-pr`                                       | from a work branch → ready-to-merge PR into `developments`; dispatch testing only after DEV deployment      |
-| `/dispatch-test <PR#>`                           | bind a manual-test task to the exact deployed environment and commit                                          |
-| `/test-result <PR#\|issue#> pass\|fail [reason]` | record revision-bound results; map failures and create post-PROD holds                                         |
-| `/promote-uat [--bypass-test "<reason>"]`        | gate tests; record matching PR and source-issue bypass audit markers                                           |
-| `/promote-prod`                                  | map UAT batches; enforce holds, approvals, audits, and remediation-only releases                            |
-
-## Board #6 reference (for skills using `gh project`)
-
-- Owner `Shinonn23`, project number `6`, id `PVT_kwHOB1tcMM4BLM7I`
-- **Status** field `PVTSSF_lAHOB1tcMM4BLM7Izg62NJg`: TODO `f75ad846` · DEV Ready `61e4505c` · Dev In progress `47fc9ee4` · Dev review `df73e18b` · Test In progress `18955566` · Test Review `6c769416` · UAT Deploy `98236657` · PROD Deploy `dba9dd7f` · Hold `232c6587`
-- **Test Status** field `PVTSSF_lAHOB1tcMM4BLM7IzhWdi_0`: Not Tested `9d66b7d0` · Testing `2556afad` · Passed `97d946bc` · Failed `15087b1c`
-- **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text)
-- Set a value: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`).
-- An issue's board **item id** comes from `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
 
 ---
 
@@ -426,6 +376,16 @@ If a bug or issue is discovered during implementation (outside the current task 
   JSON, controller, tests, and schema migrations in the repository; do not create
   ad hoc site-local schema through Desk or console. Existing or third-party
   DocTypes remain managed through their documented Frappe mechanism.
+- **Workspace navigation**: every new app Module and user-facing app DocType must
+  receive a deliberate Desk home in the same change. When it belongs to an existing
+  ERPNext domain (for example Stock or Accounting), embed it in the relevant existing
+  Workspace card and contextual Sidebar section; do not create a separate Connect
+  Diagnostics group. When it is an independent, major Connect Diagnostics domain
+  (for example Loan), create its own Module and Workspace. Independent workspaces
+  follow ERPNext's information architecture: Home, important DocTypes, collapsible
+  Reports and Setup sections, then Settings. Standard Workspace and Sidebar sync
+  must preserve unmanaged user rows across migrations. Child-table and technical
+  DocTypes with no standalone Desk route are exempt; document the reason in the change.
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
 
 ### API Response Shape
@@ -441,157 +401,29 @@ return {"data": <payload>, "message": <str>}
 - Never return raw strings, bare lists, or inconsistent shapes.
 - Existing API response structures are immutable — do not change the shape of an existing endpoint unless explicitly approved
 
-### Leave Notifications
+### Domain knowledge
 
-- `Leave Approval Notification` emails an open Leave Application to its leave approver;
-  `Leave Status Notification` emails Approved, Rejected, or Cancelled results to the employee.
-- Both templates are code-managed in `fixtures/email_template.json` and store
-  their Jinja/HTML content in `response_html` with `use_html` enabled.
-- Do not fixture the complete HR Settings Single DocType. Select both templates
-  in HR Settings per site so unrelated environment-specific HR configuration is not overwritten.
+Deep design records — the "why it is built this way" for each domain — live in
+[`.github/domain/`](.github/domain/) and are loaded **on demand** to keep session-start
+context small. Read the relevant file **before** working in that area, and update it
+in the same change when a domain's architecture, behavior, or constraints change.
 
-### Payment Request Approval
-
-- The code-managed Frappe Workflow `Payment Request Approval` applies only to
-  `Payment Request.payment_request_type = "Outward"`. Inward requests use the
-  standard submit path. Payment Entry Receive and Internal Transfer behavior is
-  unchanged.
-- `Company.low_value_payment_approval_limit` is expressed in company currency.
-  Blank or zero sends every Outward request to the primary approver. With a
-  positive limit, amounts below the limit use the low-value approver; amounts equal
-  to or above it use the primary approver. The limit is snapshotted when approval
-  is requested, so later Company changes do not reroute a pending request.
-- `Payment Request.base_grand_total` is the requested amount in company currency.
-  It equals `grand_total` for company-currency requests and otherwise uses the
-  reference document's `conversion_rate`.
-- After 24 calendar hours, the secondary executive is added as an approver. The
-  original primary remains eligible; low-value requests also remain eligible for
-  the accounting approver. The first approval or rejection completes the shared
-  Workflow Action. Self-approval is disabled; creator, deadline, base amount, and
-  limit snapshot are protected and revalidated server-side.
-- Every submitted `Payment Entry.payment_type = "Pay"` must allocate its complete
-  amount to one or more submitted, approved Outward Payment Requests whose company,
-  party, and reference match. Requests are locked in sorted order and allocation is
-  aggregated per request, allowing partial payments and multiple requests without
-  concurrent overpayment. Pay entries without such references are rejected.
-- The workflow, custom roles, profiles, fields, Custom DocPerm records, submit gate,
-  and scheduler are managed in `connect_diagnostics_core/setup/payment_approval.py`
-  and `connect_diagnostics_core/api/erpnext/payment_approval.py`. The scheduler
-  checks escalation deadlines every five minutes.
-- Setup and migration append the approved payment profile when a User already uses
-  Role Profiles. For a User with no Role Profiles they add only the profile's roles
-  directly so existing direct roles are not erased. Missing or disabled approver
-  Users do not block a fresh installation; later migrations retry the assignment.
-  Arirat receives primary plus low-value access, Sopha receives low-value access,
-  and Sasin receives the secondary direct role until his later Role Profile migration.
-- Workflow Actions work without email, but email delivery requires a configured
-  Default Outgoing Email Account on each site.
-
-### Customer Onboarding and Master Data
-
-- A Customer's document name is its required manual `Customer Code`; do not restore
-  the Customer naming series. Customer Code cannot be changed after activation.
-- `Customer Onboarding` keeps new Customers disabled from Customer Request through
-  duplicate verification and accounting/credit review. The accounting reviewer
-  activates a ready Customer directly; there is no external-system setup state.
-  Active is the sole transaction-eligible state. Workflow Actions provide internal
-  role notifications; the Customer workflow does not send email.
-- A reviewer must save `Correction Reason` before selecting Return for correction.
-  The reason remains visible to Sales and is cleared when the Customer is sent for
-  duplicate verification again, so a later return requires a newly documented reason.
-- Activation requires tax-invoice readiness plus delivery readiness (or a documented
-  no-delivery reason). Tax readiness requires one active primary Billing Address
-  whose Thai address, tax ID, and branch code match Customer; delivery readiness
-  requires one active preferred Shipping Address and one primary Contact with a
-  name and mobile/phone. These readiness fields are informational for documents,
-  but are an Active gate.
-- Customer Onboarding State, Correction Reason, document-readiness fields, and
-  no-delivery controls belong in the dedicated Customer Onboarding tab, not Details.
-- `Print Configuration Template` is the reusable master for the six fixed sections:
-  Quotation, Tax Invoice, Delivery Note, Invoice, Abbreviated Tax Invoice, and
-  Receipt. It holds document enablement, date visibility, language, original/copy
-  counts, source Purchase Order copy settings, Customer Print Name, and Quotation
-  signatory/validity/Delivery Terms defaults. It deliberately has no Form Preset:
-  every Quotation option is configured independently. Valid Till is the standard
-  validity source; `Override validity text` reveals custom text only when required.
-- Customer `Document / Print Configuration` links one Template. Selecting it, or
-  using `Fetch Configuration`, copies Template values into Customer fields; those
-  Customer values are independent defaults and Template changes never propagate
-  until the next fetch. Existing Customer values are preserved during migration.
-- The Print sidebar loads only the active format's Customer fields and sends them
-  as request-only `settings` overrides. Overrides affect preview, print, and PDF
-  for that request only; they never save Customer or the source document. Missing
-  fields during a code-before-migration rollout fall back to system defaults.
-- Sales Invoice uses named transient selections for Original, Customer Copy,
-  Accounting Copy, and Sales Copy, plus a Batch / Serial visibility option. The
-  default configuration selects all four copies; sidebar changes apply only to
-  the current print request. Sales Invoice is Thai-only; its legacy language
-  field remains hidden for compatibility and is ignored by the print context.
-- The combined Sales Invoice format resolves Batch and Serial values from both
-  direct item fields and `Serial and Batch Bundle`, renders one traceability
-  line per record without ellipsis, then paginates whole item blocks before
-  rendering. Each page repeats the invoice summary and resets the current-page /
-  total-pages value within each selected copy set; only the final overall page
-  omits the page break after it.
-- Purchase Order keeps supplier and order header data in separate boxes, adds
-  the company's Ship To address and supplier Contact, shows ETA from the
-  standard `schedule_date` field plus Incoterm and Currency, and uses Item Code,
-  Description, QTY, UOM, Unit Price, and Amount columns without warehouse or
-  item-level discount columns.
-- Quotation has no Print Configuration fields or snapshot. Its context resolves
-  Customer defaults plus sidebar overrides; Sales Representative resolves from the
-  Customer Sales Team through `Sales Person.employee`, while Managing Director uses
-  `Company.quotation_authorized_signatory_employee`. The single Quotation format
-  renders Thai, English, or Thai / English and configured original/copy pages.
-- Later `Customer Credit Request` is available to every active Customer and is
-  approved by the Customer Credit Approver; it does not depend on a channel field.
-  `GOV. HOSPITAL` credit is set by the accounting reviewer during onboarding;
-  other Customers start on Cash terms.
-- Customer, Item, and Supplier keep their current document names and codes. Do not
-  add conversion flags or automatically rename these masters. `Item.dksh_item_code`
-  and the DKSH reference fields `supplier_product_code`, `mat_group_code`,
-  `mat_group4_code`, and `material_type_code` are grouped on the Item's DKSH tab.
-  They are optional reference data only and must not control Item lifecycle or
-  transaction eligibility.
-- Sales Order uses the standard `item_code` grid and standard ERPNext behavior for
-  every Company. Do not force a selling Price List, Skip Delivery Note, external
-  order status, or Company-specific Item link query.
-- The retired mapping doctypes, workflow, roles, Sales Order fields, and dedicated
-  selling Price List must not be recreated. Retirement migrations may delete only
-  those explicitly retired records and fields; they must not rename or delete
-  Customer, Item, Supplier, Asset, or historical transactions.
-- The retired DKSH APIs and hooks are explicitly exempt from the usual one-release
-  deprecation period because this domain was removed before go-live. Do not restore
-  compatibility stubs for them.
+| Domain | Read before touching |
+| ------ | -------------------- |
+| Leave notifications | [`.github/domain/leave-notifications.md`](.github/domain/leave-notifications.md) |
+| Thai payroll | [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md) |
+| Payment Request approval | [`.github/domain/payment-approval.md`](.github/domain/payment-approval.md) |
+| Customer onboarding & master data | [`.github/domain/customer-master-data.md`](.github/domain/customer-master-data.md) |
+| Customer sales document requirements | [`.github/domain/sales-requirements.md`](.github/domain/sales-requirements.md) |
+| Regulatory module | [`.github/domain/regulatory.md`](.github/domain/regulatory.md) |
+| DKSH module | [`.github/domain/dksh.md`](.github/domain/dksh.md) |
+| Print formats & audit log | [`.github/domain/print.md`](.github/domain/print.md) |
 
 ### Custom Fields
 
 - Custom fields are code-managed: define them in `connect_diagnostics_core/setup/<doctype>.py`
   (`CUSTOM_FIELDS` / `PROPERTY_SETTERS`), applied idempotently on `after_install` and
   `after_migrate` — do not create fields ad hoc via desk or console
-- Print Formats are app-owned and editable through Desk (`standard = "No"`): `after_sync` and
-  `after_migrate` remove every
-  `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
-  `Connect Diagnostics Stock`, or `Connect Diagnostics Accounting`) or an ERPNext Thailand
-  module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or `Petty Cash`). Retired formats are
-  removed explicitly; `Sales Invoice Print` is retired and Sales Invoice defaults to
-  `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is owned by ERPNext Thailand;
-  do not add a duplicate app-owned Print Format. Do not add a Print Format fixture that restores
-  records from other modules.
-- Print Format Jinja must be ordered as comment, derived variables, pagination, then HTML.
-  Use a namespaced root class, scope CSS beneath that root, keep CSS out of the HTML field,
-  and prefer semantic `header`, `section`, `table`, and `footer` elements. Use physical
-  dimensions in `mm`; app-owned Print Formats must not use a background image. `Shipment Box
-  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
-  and recipient details, and shows the recipient Customer's Territory only when present.
-- When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
-  time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
-  leaves the deployed format stale after `bench migrate`. The Sales Invoice format also has an
-  explicit `sync_sales_invoice_print_format` migration so sites that already ran an earlier
-  configuration migration receive the current HTML/CSS.
-- Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
-  amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
-  do not define local money-formatting macros in Print Formats.
 - **Naming is important** — no prefix; the fieldname must describe the data it holds
   (e.g., `print_date`, `product_group`, `dksh_item_code`). Do not add `cd_`, `custom_`,
   or any other namespace prefix
@@ -599,6 +431,7 @@ return {"data": <payload>, "message": <str>}
   `connect_diagnostics_core/patches/` (see `remove_cd_prefix_from_custom_fields.py`)
 - To reference a custom field in code, declare the `# ty: ignore` with the source
   `setup/*.py` file
+- Print-format and Print Log specifics live in [`.github/domain/print.md`](.github/domain/print.md).
 
 ### Multi-Tenancy
 

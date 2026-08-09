@@ -11,7 +11,7 @@ from typing import Any
 from frappe.tests import UnitTestCase
 from jinja2 import Environment
 
-PRINT_FORMAT_ROOT = Path(__file__).parents[2] / "connect_diagnostics_core" / "print_format"
+PRINT_FORMAT_ROOT = Path(__file__).parents[2] / "connect_diagnostics_print" / "print_format"
 PRINT_FORMAT_FILES = (
     "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json",
     "goods_receipt/goods_receipt.json",
@@ -21,7 +21,27 @@ PRINT_FORMAT_FILES = (
     "sales_order/sales_order.json",
     "shipment_box_label/shipment_box_label.json",
     "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json",
+    "withholding_tax_cert_cd/withholding_tax_cert_cd.json",
 )
+
+# Print formats that resolve the Customer print configuration; the rest register
+# themselves for the audit log with an explicit register_print call.
+CONFIGURATION_PRINT_FORMATS = (
+    "Abbreviated Tax Invoice And Receipt",
+    "Quotation",
+    "Receipt",
+    "Sales Order",
+    "Tax Invoice Delivery Note and Invoice",
+)
+
+# Configuration formats whose language the sidebar can switch; the rest are fixed
+# to one language and never emit the bilingual toggles.
+LANGUAGE_SELECTABLE_CONFIGURATIONS = ("receipt", "abbreviated_tax_invoice")
+
+# Formats that overlay an official government form image. The layout is absolute
+# positioning over that scan, so semantic sectioning and the no-background-image
+# rule -- both aimed at our own recreated layouts -- do not apply.
+FORM_OVERLAY_PRINT_FORMATS = ("Withholding Tax Cert CD",)
 
 
 def load_print_formats() -> list[dict[str, Any]]:
@@ -34,7 +54,7 @@ class TestPrintFormats(UnitTestCase):
     def test_print_format_json_files_are_valid(self) -> None:
         print_formats = load_print_formats()
 
-        self.assertEqual(len(print_formats), 8)
+        self.assertEqual(len(print_formats), 9)
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
@@ -42,6 +62,31 @@ class TestPrintFormats(UnitTestCase):
         for print_format in load_print_formats():
             with self.subTest(name=print_format["name"]):
                 self.assertEqual(print_format["standard"], "No")
+
+    def test_print_formats_belong_to_the_print_module(self) -> None:
+        for print_format in load_print_formats():
+            with self.subTest(name=print_format["name"]):
+                self.assertEqual(print_format["module"], "Connect Diagnostics Print")
+
+    def test_every_print_format_reaches_the_audit_log(self) -> None:
+        """Either the print context resolves it, or it calls register_print itself."""
+        for print_format in load_print_formats():
+            html = print_format["html"]
+            resolves_configuration = print_format["name"] in CONFIGURATION_PRINT_FORMATS
+            with self.subTest(name=print_format["name"]):
+                if resolves_configuration:
+                    self.assertRegex(html, r"get_\w*print_context\(")
+                else:
+                    self.assertIn("{{ register_print(doc) }}", html)
+
+    def test_register_print_is_not_swallowed_by_a_leading_comment(self) -> None:
+        for print_format in load_print_formats():
+            html = print_format["html"]
+            if "register_print(doc)" not in html:
+                continue
+            before = html[: html.index("{{ register_print(doc) }}")]
+            with self.subTest(name=print_format["name"]):
+                self.assertEqual(before.count("{#"), before.count("#}"))
 
     def test_configuration_print_formats_are_newer_than_their_pre_configuration_versions(self) -> None:
         previous_timestamps = {
@@ -66,15 +111,30 @@ class TestPrintFormats(UnitTestCase):
         for print_format in load_print_formats():
             self.assertNotIn("<style", print_format["html"].lower(), print_format["name"])
 
+    def test_css_field_contains_no_jinja(self) -> None:
+        """Frappe appends print_format.css verbatim; only html is rendered.
+
+        A tag left in css is emitted literally, which silently breaks whatever it
+        was building -- a font URL, an asset path.
+        """
+        for print_format in load_print_formats():
+            css = print_format["css"]
+            with self.subTest(name=print_format["name"]):
+                self.assertNotIn("{{", css)
+                self.assertNotIn("{%", css)
+
     def test_templates_do_not_use_background_images(self) -> None:
         for print_format in load_print_formats():
             content = f"{print_format['html']}\n{print_format['css']}"
-            self.assertNotIn("background-image:", content, print_format["name"])
+            if print_format["name"] not in FORM_OVERLAY_PRINT_FORMATS:
+                self.assertNotIn("background-image:", content, print_format["name"])
             self.assertNotIn("--page-bg", content, print_format["name"])
             self.assertNotIn("/images/print_formats/", content, print_format["name"])
 
     def test_templates_use_semantic_document_elements(self) -> None:
         for print_format in load_print_formats():
+            if print_format["name"] in FORM_OVERLAY_PRINT_FORMATS:
+                continue
             html = print_format["html"].lower()
             self.assertIn("<header", html, print_format["name"])
             self.assertIn("<section", html, print_format["name"])
@@ -96,6 +156,8 @@ class TestPrintFormats(UnitTestCase):
         self.assertIn("print_context.delivery_terms", html)
         self.assertIn("print_context.sales_contact", html)
         self.assertIn("print_context.signatory.name", html)
+        self.assertIn("print_context.signatory.caption", html)
+        self.assertIn("print_context.validity_is_custom", html)
         self.assertIn("copy.label", html)
         self.assertIn('label("ใบเสนอราคา", "Quotation")', html)
         self.assertIn('label("กำหนดส่งมอบสินค้า", "Delivery Terms")', html)
@@ -103,11 +165,27 @@ class TestPrintFormats(UnitTestCase):
         self.assertNotIn("ฟอร์มรูปแบบ", html)
         Environment().parse(html)
 
+    def test_quotation_resolves_the_signatory_from_the_print_context_alone(self) -> None:
+        """The Customer Sales Team chain and its template fallbacks are retired."""
+        path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
+        html = json.loads(path.read_text())["html"]
+
+        for retired in (
+            "doc.sales_team",
+            "custom_sales_contact_name",
+            "custom_sales_contact_phone",
+            "signatory.designation",
+            '"90 วัน"',
+        ):
+            with self.subTest(retired=retired):
+                self.assertNotIn(retired, html)
+
     def test_non_quotation_customer_formats_use_the_shared_print_context(self) -> None:
         expected_contexts = {
             "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json": "tax_invoice",
             "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json": "abbreviated_tax_invoice",
             "receipt/receipt.json": "receipt",
+            "sales_order/sales_order.json": "sales_order",
         }
 
         for relative_path, configuration in expected_contexts.items():
@@ -123,7 +201,7 @@ class TestPrintFormats(UnitTestCase):
                 self.assertIn("copy.label", html)
                 Environment().parse(html)
 
-                if configuration != "tax_invoice":
+                if configuration in LANGUAGE_SELECTABLE_CONFIGURATIONS:
                     self.assertIn("print_context.show_thai", html)
                     self.assertIn("print_context.show_english", html)
 
@@ -183,7 +261,7 @@ class TestPrintFormats(UnitTestCase):
 
         self.assertEqual(print_format["name"], "Shipment Box Label")
         self.assertEqual(print_format["doc_type"], "Shipment")
-        self.assertEqual(print_format["module"], "Connect Diagnostics Core")
+        self.assertEqual(print_format["module"], "Connect Diagnostics Print")
         self.assertEqual(print_format["print_format_type"], "Jinja")
         self.assertEqual(print_format["pdf_generator"], "wkhtmltopdf")
         self.assertIn("size: 180mm 100mm", print_format["css"])
@@ -334,4 +412,7 @@ class TestPrintFormats(UnitTestCase):
         return environment.from_string(print_format["html"]).render(
             doc=doc,
             frappe=SimpleNamespace(db=FakeDatabase(values or {})),
+            # Registered as a Jinja method in hooks.py; a no-op here because the
+            # harness renders outside a request.
+            register_print=lambda *args, **kwargs: "",
         )

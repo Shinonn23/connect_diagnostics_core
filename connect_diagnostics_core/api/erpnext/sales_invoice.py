@@ -6,7 +6,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, cast
 
+import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from frappe import _
 from frappe.model.document import Document
 from pythainlp.util import bahttext
 
@@ -23,6 +25,36 @@ class CustomSalesInvoice(SalesInvoice):
 def before_save(doc: CustomSalesInvoice, method: str) -> None:
     if doc.custom_in_words_thai:
         doc.custom_in_words_thai = bahttext(doc.rounded_total)
+
+
+def validate_tax_invoice_readiness(doc: Document, method: str | None = None) -> None:
+    """Require the Customer's tax details only when the tax invoice is issued.
+
+    A Customer is sellable the moment Sales saves it, so this is where the Thai
+    billing address, tax ID and branch code are finally required — at the point
+    the document that must carry them is submitted, not before an order can be
+    raised.
+    """
+    from connect_diagnostics_core.api.erpnext.customer import (
+        MISSING,
+        get_readiness_for_customer,
+    )
+
+    customer = str(doc.get("customer") or "").strip()
+    if not customer:
+        return
+
+    readiness = get_readiness_for_customer(customer)
+    if readiness.get("tax_invoice_readiness") != MISSING:
+        return
+
+    frappe.throw(
+        _("{0} is not ready for a tax invoice: {1}").format(
+            frappe.bold(doc.get("customer_name") or customer),
+            readiness.get("customer_readiness_summary") or _("its tax details are incomplete"),
+        ),
+        title=_("Customer tax details incomplete"),
+    )
 
 
 def get_sales_invoice_print_context(doc: Document | Mapping[str, Any]) -> dict[str, Any]:

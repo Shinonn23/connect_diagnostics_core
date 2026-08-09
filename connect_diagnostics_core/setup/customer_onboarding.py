@@ -1,6 +1,17 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
+"""Credit approval configuration for Customer.
+
+There is no Customer onboarding workflow. Sales saves a Customer and can sell to
+it immediately; the master data a tax invoice needs is required when that invoice
+is submitted, not before an order can be raised.
+
+What is left here is the money: payment terms and credit limits stay behind the
+Accounting Reviewer role, and everyone else asks for them through a
+``Customer Credit Request``, which the Customer Credit Approver approves.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -14,42 +25,30 @@ from frappe.permissions import setup_custom_perms
 CUSTOMER_DOCTYPE = "Customer"
 CREDIT_REQUEST_DOCTYPE = "Customer Credit Request"
 
-CUSTOMER_WORKFLOW_NAME = "Customer Onboarding"
 CREDIT_REQUEST_WORKFLOW_NAME = "Customer Credit Request Approval"
 
-CUSTOMER_WORKFLOW_STATE_FIELD = "customer_onboarding_state"
 CREDIT_REQUEST_WORKFLOW_STATE_FIELD = "credit_request_state"
-
-CUSTOMER_REQUEST_STATE = "Customer Request"
-PENDING_DUPLICATE_STATE = "Customer Pending Duplicate Verification"
-PENDING_ACCOUNTING_STATE = "Customer Pending Accounting & Credit Review"
-CUSTOMER_ACTIVE_STATE = "Customer Active"
 
 CREDIT_REQUEST_DRAFT_STATE = "Customer Credit Request Draft"
 PENDING_CREDIT_APPROVAL_STATE = "Pending Customer Credit Approval"
 CREDIT_REQUEST_APPROVED_STATE = "Customer Credit Request Approved"
 CREDIT_REQUEST_REJECTED_STATE = "Customer Credit Request Rejected"
 
-DUPLICATE_VERIFIER_ROLE = "Customer Duplicate Verifier"
 ACCOUNTING_REVIEWER_ROLE = "Customer Accounting Reviewer"
 CREDIT_APPROVER_ROLE = "Customer Credit Approver"
 
-DUPLICATE_VERIFIER_PROFILE = "Customer Duplicate Verifier Add-on"
 ACCOUNTING_REVIEWER_PROFILE = "Customer Accounting Reviewer Add-on"
 CREDIT_APPROVER_PROFILE = "Customer Credit Approver Add-on"
 
 VITTAYA_USER = "vittaya.ch@connectdiagnostics.com"
 ARIRAT_USER = "arirat.ba@connectdiagnostics.com"
-IT_UB_DEPARTMENT = "IT - UB"
 
 MANAGED_ROLES = (
-    DUPLICATE_VERIFIER_ROLE,
     ACCOUNTING_REVIEWER_ROLE,
     CREDIT_APPROVER_ROLE,
 )
 
 ROLE_PROFILES = {
-    DUPLICATE_VERIFIER_PROFILE: (DUPLICATE_VERIFIER_ROLE,),
     ACCOUNTING_REVIEWER_PROFILE: (ACCOUNTING_REVIEWER_ROLE,),
     CREDIT_APPROVER_PROFILE: (CREDIT_APPROVER_ROLE,),
 }
@@ -79,35 +78,9 @@ CUSTOMER_PERMISSION_COPY_MARKER = {
 }
 
 CUSTOMER_PERMISSIONS: dict[str, dict[str, int]] = {
-    DUPLICATE_VERIFIER_ROLE: {"read": 1, "write": 1},
     ACCOUNTING_REVIEWER_ROLE: {"read": 1, "write": 1},
     CREDIT_APPROVER_ROLE: {"read": 1},
 }
-
-CUSTOMER_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
-    {"state": CUSTOMER_REQUEST_STATE, "doc_status": "0", "allow_edit": "Sales User", "send_email": 0},
-    {"state": CUSTOMER_REQUEST_STATE, "doc_status": "0", "allow_edit": "Sales Manager", "send_email": 0},
-    {
-        "state": PENDING_DUPLICATE_STATE,
-        "doc_status": "0",
-        "allow_edit": DUPLICATE_VERIFIER_ROLE,
-        "send_email": 0,
-    },
-    {
-        "state": PENDING_ACCOUNTING_STATE,
-        "doc_status": "0",
-        "allow_edit": ACCOUNTING_REVIEWER_ROLE,
-        "send_email": 0,
-    },
-    {"state": CUSTOMER_ACTIVE_STATE, "doc_status": "0", "allow_edit": "Sales User", "send_email": 0},
-    {"state": CUSTOMER_ACTIVE_STATE, "doc_status": "0", "allow_edit": "Sales Manager", "send_email": 0},
-    {
-        "state": CUSTOMER_ACTIVE_STATE,
-        "doc_status": "0",
-        "allow_edit": ACCOUNTING_REVIEWER_ROLE,
-        "send_email": 0,
-    },
-)
 
 CREDIT_REQUEST_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
     {
@@ -175,47 +148,6 @@ def _transition(
     }
 
 
-CUSTOMER_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
-    _transition(
-        CUSTOMER_REQUEST_STATE,
-        "Send for duplicate verification",
-        PENDING_DUPLICATE_STATE,
-        "Sales User",
-        allow_self_approval=1,
-    ),
-    _transition(
-        CUSTOMER_REQUEST_STATE,
-        "Send for duplicate verification",
-        PENDING_DUPLICATE_STATE,
-        "Sales Manager",
-        allow_self_approval=1,
-    ),
-    _transition(
-        PENDING_DUPLICATE_STATE,
-        "Duplicate verified",
-        PENDING_ACCOUNTING_STATE,
-        DUPLICATE_VERIFIER_ROLE,
-    ),
-    _transition(
-        PENDING_DUPLICATE_STATE,
-        "Return for correction",
-        CUSTOMER_REQUEST_STATE,
-        DUPLICATE_VERIFIER_ROLE,
-    ),
-    _transition(
-        PENDING_ACCOUNTING_STATE,
-        "Activate customer",
-        CUSTOMER_ACTIVE_STATE,
-        ACCOUNTING_REVIEWER_ROLE,
-    ),
-    _transition(
-        PENDING_ACCOUNTING_STATE,
-        "Return for correction",
-        CUSTOMER_REQUEST_STATE,
-        ACCOUNTING_REVIEWER_ROLE,
-    ),
-)
-
 CREDIT_REQUEST_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
     _transition(
         CREDIT_REQUEST_DRAFT_STATE,
@@ -253,24 +185,13 @@ CREDIT_REQUEST_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
 )
 
 WORKFLOW_STATE_STYLES = {
-    CUSTOMER_REQUEST_STATE: "",
-    PENDING_DUPLICATE_STATE: "Warning",
-    PENDING_ACCOUNTING_STATE: "Warning",
-    CUSTOMER_ACTIVE_STATE: "Success",
     CREDIT_REQUEST_DRAFT_STATE: "",
     PENDING_CREDIT_APPROVAL_STATE: "Warning",
     CREDIT_REQUEST_APPROVED_STATE: "Success",
     CREDIT_REQUEST_REJECTED_STATE: "Danger",
 }
 
-WORKFLOW_ACTIONS = tuple(
-    sorted(
-        {
-            transition["action"]
-            for transition in (*CUSTOMER_WORKFLOW_TRANSITIONS, *CREDIT_REQUEST_WORKFLOW_TRANSITIONS)
-        }
-    )
-)
+WORKFLOW_ACTIONS = tuple(sorted({transition["action"] for transition in CREDIT_REQUEST_WORKFLOW_TRANSITIONS}))
 
 STATE_COMPARISON_FIELDS = (
     "state",
@@ -304,15 +225,6 @@ def ensure_configuration() -> None:
     ensure_customer_permissions()
     ensure_workflow_masters()
     ensure_workflow(
-        workflow_name=CUSTOMER_WORKFLOW_NAME,
-        document_type=CUSTOMER_DOCTYPE,
-        workflow_state_field=CUSTOMER_WORKFLOW_STATE_FIELD,
-        states=CUSTOMER_WORKFLOW_STATES,
-        transitions=CUSTOMER_WORKFLOW_TRANSITIONS,
-        send_email_alert=0,
-        is_active=0,
-    )
-    ensure_workflow(
         workflow_name=CREDIT_REQUEST_WORKFLOW_NAME,
         document_type=CREDIT_REQUEST_DOCTYPE,
         workflow_state_field=CREDIT_REQUEST_WORKFLOW_STATE_FIELD,
@@ -337,24 +249,6 @@ def assign_customer_role_holders(*, require_users: bool = True) -> None:
         CREDIT_APPROVER_PROFILE,
         require_user=require_users,
     )
-
-    verifier_users = frappe.get_all(
-        "Employee",
-        filters={"status": "Active", "department": IT_UB_DEPARTMENT},
-        pluck="user_id",
-    )
-    skipped = 0
-    for user_name in sorted({cast(str, user) for user in verifier_users if user}):
-        if not _assign_role_profile_or_direct_roles(
-            user_name,
-            DUPLICATE_VERIFIER_PROFILE,
-            require_user=False,
-        ):
-            skipped += 1
-    if skipped:
-        frappe.logger(__name__).warning(
-            "Skipped %s inactive or missing IT-UB Customer Duplicate Verifier Users", skipped
-        )
 
 
 def _assign_role_profile_or_direct_roles(
