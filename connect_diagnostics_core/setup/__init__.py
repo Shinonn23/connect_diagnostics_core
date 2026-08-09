@@ -34,6 +34,7 @@ from connect_diagnostics_core.setup import (
     sales_taxes_and_charges,
     supplier,
     uom,
+    workspace,
 )
 from connect_diagnostics_core.setup.print_format import remove_non_app_print_formats
 
@@ -88,6 +89,7 @@ def apply_all() -> None:
     payment_approval.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
+    workspace.ensure_workspace_navigation()
 
 
 def after_install() -> None:
