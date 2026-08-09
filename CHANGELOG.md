@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.10](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.9...v0.36.10) (2026-08-09)
+
+
+### Bug Fixes
+
+* drop retired legacy column instead of copying in strip-prefix patch ([8905170](https://github.com/Shinonn23/connect_diagnostics_core/commit/890517017f1bfb06a9ccd5934511c4482f5c01fc))
+
 ## [0.36.9](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.8...v0.36.9) (2026-08-09)
 
 
