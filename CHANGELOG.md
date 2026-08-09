@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.1...v0.36.2) (2026-08-09)
+
+
+### Continuous Integration
+
+* deploy production on push to production branch ([213a0ef](https://github.com/Shinonn23/connect_diagnostics_core/commit/213a0ef98da891cf86af1cac6de5820b23d6a05d))
+* deploy production on push to production branch ([1fd8aa0](https://github.com/Shinonn23/connect_diagnostics_core/commit/1fd8aa09c21a02593a2a9135a04eea45a9f7f2bb))
+
 ## [0.36.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.0...v0.36.1) (2026-08-09)
 
 
