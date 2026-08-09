@@ -160,8 +160,22 @@ def ensure_income_tax_slab(company: str) -> None:
 
 def ensure_payroll_period(company: str) -> None:
     year = cast(date, getdate(today())).year
-    name = f"{company} {year}"
-    if frappe.db.exists("Payroll Period", name):
+    start_date = getdate(f"{year}-01-01")
+    end_date = getdate(f"{year}-12-31")
+
+    # HRMS forbids overlapping Payroll Periods for the same company, so a period
+    # is treated as present when any existing one (whatever its name) already
+    # covers this range — e.g. a manually created one. Keying on our own name
+    # alone would try to insert a second overlapping period and abort migrate.
+    if frappe.get_all(
+        "Payroll Period",
+        filters={
+            "company": company,
+            "start_date": ["<=", end_date],
+            "end_date": [">=", start_date],
+        },
+        limit=1,
+    ):
         return
 
     doc = cast(
@@ -169,10 +183,10 @@ def ensure_payroll_period(company: str) -> None:
         frappe.get_doc(
             {
                 "doctype": "Payroll Period",
-                "name": name,
+                "name": f"{company} {year}",
                 "company": company,
-                "start_date": getdate(f"{year}-01-01"),
-                "end_date": getdate(f"{year}-12-31"),
+                "start_date": start_date,
+                "end_date": end_date,
             }
         ),
     )
