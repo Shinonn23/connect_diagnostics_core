@@ -28,6 +28,8 @@ from connect_diagnostics_core.setup import (
     purchase_invoice_item,
     purchase_taxes_and_charges,
     quotation,
+    regulatory,
+    regulatory_transactions,
     sales_invoice,
     sales_invoice_item,
     sales_order_item,
@@ -55,6 +57,8 @@ _MODULES = (
     packed_item,
     payment_approval,
     procure_to_pay,
+    regulatory,
+    regulatory_transactions,
     purchase_invoice,
     purchase_invoice_item,
     purchase_taxes_and_charges,
@@ -91,6 +95,7 @@ def apply_all() -> None:
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
+    regulatory.ensure_configuration()
     workspace.ensure_workspace_navigation()
 
 

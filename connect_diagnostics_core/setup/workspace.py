@@ -13,6 +13,8 @@ import frappe
 from frappe.model.document import Document
 
 NAVIGATION_LABEL = "Connect Diagnostics"
+REGULATORY_WORKSPACE = "Connect Diagnostics Regulatory"
+REGULATORY_MODULE = "Connect Diagnostics Regulatory"
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
     "ERPNext Settings": frozenset({("DocType", "Repost Accounting Ledger Settings")}),
@@ -45,6 +47,40 @@ class SidebarPlacement:
     after_link_to: str | None = None
     section: str | None = None
     icon: str = ""
+
+
+REGULATORY_LINKS = (
+    NavigationLink("Medical Device Product Registration", "Medical Device Product Registration", "DocType"),
+    NavigationLink(
+        "Medical Device Establishment Registration", "Medical Device Establishment Registration", "DocType"
+    ),
+    NavigationLink("Medical Device Regulatory Document", "Medical Device Regulatory Document", "DocType"),
+    NavigationLink("Medical Device Registration Action", "Medical Device Registration Action", "DocType"),
+    NavigationLink("Medical Device Regulatory Override", "Medical Device Regulatory Override", "DocType"),
+    NavigationLink("Medical Device Regulatory Settings", "Medical Device Regulatory Settings", "DocType"),
+    NavigationLink(
+        "Medical Device Registration Expiry Summary",
+        "Medical Device Registration Expiry Summary",
+        "Report",
+        "Medical Device Product Registration",
+    ),
+    NavigationLink(
+        "Medical Device Item Coverage Matrix", "Medical Device Item Coverage Matrix", "Report", "Item"
+    ),
+    NavigationLink("Medical Device Compliance Gap", "Medical Device Compliance Gap", "Report", "Item"),
+    NavigationLink(
+        "Medical Device Regulatory Renewal Workbench",
+        "Medical Device Regulatory Renewal Workbench",
+        "Report",
+        "Medical Device Registration Action",
+    ),
+    NavigationLink(
+        "Medical Device Expiring Registration Affected Business",
+        "Medical Device Expiring Registration Affected Business",
+        "Report",
+        "Medical Device Product Registration",
+    ),
+)
 
 
 NAVIGATION_GROUPS = (
@@ -140,20 +176,92 @@ SIDEBAR_PLACEMENTS = {
 
 def ensure_workspace_navigation() -> None:
     """Maintain Connect Diagnostics cards and prioritized module sidebar sections."""
+    ensure_regulatory_workspace()
     for group in NAVIGATION_GROUPS:
-        workspace = cast(Document, frappe.get_doc("Workspace", group.name))
+        workspace = frappe.get_doc("Workspace", group.name)
         workspace_changed = _repair_stale_parent_page(workspace)
         if _ensure_workspace_card(workspace, group):
             workspace_changed = True
         if workspace_changed:
             workspace.save(ignore_permissions=True)
 
-        sidebar = cast(Document, frappe.get_doc("Workspace Sidebar", group.name))
+        sidebar = frappe.get_doc("Workspace Sidebar", group.name)
         sidebar_changed = _remove_retired_sidebar_links(sidebar, group.name)
         if _ensure_sidebar_navigation(sidebar, group):
             sidebar_changed = True
         if sidebar_changed:
             _save_sidebar(sidebar)
+
+
+def ensure_regulatory_workspace() -> None:
+    """Create and maintain the independent Regulatory Workspace and its sidebar."""
+    if not frappe.db.exists("Module Def", REGULATORY_MODULE):
+        return
+    if frappe.db.exists("Workspace", REGULATORY_WORKSPACE):
+        workspace = frappe.get_doc("Workspace", REGULATORY_WORKSPACE)
+    else:
+        workspace = frappe.get_doc(
+            {
+                "doctype": "Workspace",
+                "label": REGULATORY_WORKSPACE,
+                "title": REGULATORY_WORKSPACE,
+                "module": REGULATORY_MODULE,
+                "public": 1,
+                "content": "[]",
+            }
+        )
+    group = NavigationGroup(REGULATORY_WORKSPACE, REGULATORY_LINKS)
+    changed = _ensure_workspace_card(workspace, group)
+    if workspace.is_new():
+        workspace.insert(ignore_permissions=True)
+    elif changed:
+        workspace.save(ignore_permissions=True)
+
+    if frappe.db.exists("Workspace Sidebar", REGULATORY_WORKSPACE):
+        sidebar = frappe.get_doc("Workspace Sidebar", REGULATORY_WORKSPACE)
+    else:
+        sidebar = frappe.get_doc(
+            {
+                "doctype": "Workspace Sidebar",
+                "title": REGULATORY_WORKSPACE,
+                "module": REGULATORY_MODULE,
+                "standard": 1,
+                "app": "connect_diagnostics_core",
+                "items": [],
+            }
+        )
+    sidebar_changed = _ensure_regulatory_sidebar(sidebar)
+    if sidebar.is_new():
+        sidebar.insert(ignore_permissions=True)
+    elif sidebar_changed:
+        _save_sidebar(sidebar)
+
+
+def _ensure_regulatory_sidebar(sidebar: Document) -> bool:
+    rows = _rows(sidebar, "items")
+    changed = False
+    for link in REGULATORY_LINKS:
+        values = {
+            "type": "Link",
+            "label": link.label,
+            "link_type": link.link_type,
+            "link_to": link.link_to,
+            "child": 0,
+            "collapsible": 1,
+            "icon": "",
+            "indent": 0,
+            "keep_closed": 0,
+            "show_arrow": 0,
+        }
+        row = _find_link(rows, link)
+        if row is None:
+            sidebar.append("items", values)
+            changed = True
+        elif _update_row(row, values):
+            changed = True
+    if changed:
+        _reindex(rows)
+    return changed
 
 
 def _repair_stale_parent_page(workspace: Document) -> bool:

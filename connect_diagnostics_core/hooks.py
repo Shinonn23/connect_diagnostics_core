@@ -185,11 +185,19 @@ doc_events = {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
     "Sales Order": {
-        "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
+        ],
+        "before_submit": "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
     },
     "Sales Invoice": {
         "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
-        "before_submit": "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
     },
     "Payment Entry": {
         "before_submit": (
@@ -213,13 +221,35 @@ doc_events = {
     },
     "Purchase Order": {
         "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_order",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_order",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
+        ],
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
     },
     "Purchase Receipt": {
         "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_receipt",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
+    },
+    "Stock Entry": {
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
+    },
+    "Delivery Note": {
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
     },
     "Purchase Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
@@ -258,12 +288,14 @@ company_data_to_be_ignored = ["Accounting Department"]
 # ---------------
 
 scheduler_events = {
+    "daily": ["connect_diagnostics_core.api.erpnext.regulatory_alerts.run_daily_expiry_processing"],
+    "weekly": ["connect_diagnostics_core.api.erpnext.regulatory_alerts.send_weekly_regulatory_digest"],
     "cron": {
         # Runs hourly; the handler self-throttles to Backup Settings.backup_interval_hours.
         "0 * * * *": [
             "connect_diagnostics_core.connect_diagnostics_core.doctype.backup_settings.backup_settings.run_scheduled_backup"
         ],
-    }
+    },
 }
 
 # Testing
