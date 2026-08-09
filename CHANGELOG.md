@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.36.5](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.4...v0.36.5) (2026-08-09)
+
+
+### Bug Fixes
+
+* remove stray trailing blank line ([9b12feb](https://github.com/Shinonn23/connect_diagnostics_core/commit/9b12feb2e1a677676e8d0fc9b98ebdc0b85182a7))
+
+
+### Code Refactoring
+
+* remove accounting reports and department user permission ([382d0c6](https://github.com/Shinonn23/connect_diagnostics_core/commit/382d0c6c2195d30d43cb2956aa937b382e983467))
+* remove alternative names from customer, item, and supplier ([622790b](https://github.com/Shinonn23/connect_diagnostics_core/commit/622790be107d54af95e7f67c06a44a1ab81c5151))
+* remove alternative names, accounting reports, and department user permission ([fd56185](https://github.com/Shinonn23/connect_diagnostics_core/commit/fd56185e6a5ef36b3d4f17039a120b21a93bdbcb))
+
 ## [0.36.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.3...v0.36.4) (2026-08-09)
 
 
