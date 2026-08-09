@@ -5,25 +5,42 @@
 	"engine": "InnoDB",
 	"istable": 1,
 	"field_order": [
+		"identity_section",
 		"line_no",
+		"identity_column",
 		"newcode",
 		"product_name",
 		"identifier",
+		"manufacturer_section",
 		"physical_manufacturer",
+		"manufacturer_column",
 		"manufacturer_country",
 		"other_details",
+		"pack_section",
 		"pack_quantity",
+		"pack_column",
 		"pack_uom",
 		"item_code",
 		"item_name_at_registration",
+		"effective_section",
 		"effective_from",
+		"effective_column",
 		"effective_to",
 		"line_status",
 		"label_verified",
 		"remarks"
 	],
 	"fields": [
+		{
+			"fieldname": "identity_section",
+			"fieldtype": "Section Break",
+			"label": "Product Identity"
+		},
 		{ "fieldname": "line_no", "fieldtype": "Int", "label": "Line Number", "in_list_view": 1 },
+		{
+			"fieldname": "identity_column",
+			"fieldtype": "Column Break"
+		},
 		{
 			"fieldname": "newcode",
 			"fieldtype": "Data",
@@ -45,10 +62,19 @@
 			"in_list_view": 1
 		},
 		{
+			"fieldname": "manufacturer_section",
+			"fieldtype": "Section Break",
+			"label": "Manufacturer"
+		},
+		{
 			"fieldname": "physical_manufacturer",
 			"fieldtype": "Link",
 			"label": "Physical Manufacturer",
 			"options": "Manufacturer"
+		},
+		{
+			"fieldname": "manufacturer_column",
+			"fieldtype": "Column Break"
 		},
 		{
 			"fieldname": "manufacturer_country",
@@ -57,7 +83,16 @@
 			"options": "Country"
 		},
 		{ "fieldname": "other_details", "fieldtype": "Small Text", "label": "Other Details" },
+		{
+			"fieldname": "pack_section",
+			"fieldtype": "Section Break",
+			"label": "Pack and Item"
+		},
 		{ "fieldname": "pack_quantity", "fieldtype": "Float", "label": "Pack Quantity" },
+		{
+			"fieldname": "pack_column",
+			"fieldtype": "Column Break"
+		},
 		{ "fieldname": "pack_uom", "fieldtype": "Link", "label": "Pack UOM", "options": "UOM" },
 		{
 			"fieldname": "item_code",
@@ -72,7 +107,16 @@
 			"label": "Item Name at Registration",
 			"read_only": 1
 		},
+		{
+			"fieldname": "effective_section",
+			"fieldtype": "Section Break",
+			"label": "Effective Dates and Verification"
+		},
 		{ "fieldname": "effective_from", "fieldtype": "Date", "label": "Effective From", "in_list_view": 1 },
+		{
+			"fieldname": "effective_column",
+			"fieldtype": "Column Break"
+		},
 		{ "fieldname": "effective_to", "fieldtype": "Date", "label": "Effective To", "in_list_view": 1 },
 		{
 			"fieldname": "line_status",
