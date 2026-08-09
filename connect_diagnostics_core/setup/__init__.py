@@ -22,6 +22,7 @@ from connect_diagnostics_core.setup import (
     journal_entry_account,
     packed_item,
     payment_approval,
+    payroll,
     procure_to_pay,
     purchase_invoice,
     purchase_invoice_item,
@@ -91,6 +92,7 @@ def apply_all() -> None:
                 )
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
+    payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
     regulatory.ensure_configuration()
