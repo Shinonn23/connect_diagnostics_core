@@ -464,7 +464,7 @@ def customer_query(
     page_len: int,
     filters: dict[str, Any] | list[list[Any]] | None = None,
 ) -> list[tuple[Any, ...]]:
-    """Return only transaction-eligible Customers matched by code, name, or alternative name."""
+    """Return only transaction-eligible Customers matched by code or name."""
     frappe.has_permission("Customer", throw=True)
     like = f"%{txt}%"
     return frappe.get_list(
@@ -474,7 +474,6 @@ def customer_query(
             ["Customer", "name", "like", like],
             ["Customer", "customer_code", "like", like],
             ["Customer", "customer_name", "like", like],
-            ["Customer Alternative Name", "name_value", "like", like],
         ],
         fields=["name", "customer_name"],
         limit_start=start,
