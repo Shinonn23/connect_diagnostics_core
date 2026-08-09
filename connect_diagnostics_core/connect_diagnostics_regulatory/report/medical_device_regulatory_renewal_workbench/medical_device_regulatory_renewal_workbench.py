@@ -19,18 +19,36 @@ def execute(filters: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]]
         INNER JOIN `tabMedical Device Product Registration` AS registration ON registration.name = action.registration
         WHERE action.action_type = 'Renewal'
         ORDER BY registration.expiry_date ASC, action.modified DESC
-        """, as_dict=True
+        """,
+        as_dict=True,
     )
     return _columns(), rows
 
 
 def _columns() -> list[dict[str, Any]]:
     return [
-        {"fieldname": "registration", "label": _("Registration"), "fieldtype": "Link", "options": "Medical Device Product Registration", "width": 180},
+        {
+            "fieldname": "registration",
+            "label": _("Registration"),
+            "fieldtype": "Link",
+            "options": "Medical Device Product Registration",
+            "width": 180,
+        },
         {"fieldname": "expiry_date", "label": _("Expiry"), "fieldtype": "Date", "width": 100},
         {"fieldname": "current_stage", "label": _("Stage"), "fieldtype": "Data", "width": 130},
-        {"fieldname": "assigned_to", "label": _("Assigned To"), "fieldtype": "Link", "options": "User", "width": 140},
-        {"fieldname": "fda_application_number", "label": _("FDA Application"), "fieldtype": "Data", "width": 150},
+        {
+            "fieldname": "assigned_to",
+            "label": _("Assigned To"),
+            "fieldtype": "Link",
+            "options": "User",
+            "width": 140,
+        },
+        {
+            "fieldname": "fda_application_number",
+            "label": _("FDA Application"),
+            "fieldtype": "Data",
+            "width": 150,
+        },
         {"fieldname": "submitted_date", "label": _("Submitted"), "fieldtype": "Date", "width": 100},
         {"fieldname": "response_due_date", "label": _("Query Due"), "fieldtype": "Date", "width": 100},
     ]

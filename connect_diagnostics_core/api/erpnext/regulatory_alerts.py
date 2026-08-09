@@ -49,9 +49,7 @@ def send_weekly_regulatory_digest() -> None:
         if row.expiry_date
         and date_diff(cast(date, getdate(row.expiry_date)), cast(date, getdate(today()))) <= 30
     ]
-    no_renewal = [
-        row for row in upcoming if row.renewal_status in ("", "Not Started")
-    ]
+    no_renewal = [row for row in upcoming if row.renewal_status in ("", "Not Started")]
     frappe.sendmail(
         recipients=recipients,
         subject=_("Weekly medical-device regulatory digest"),
@@ -71,9 +69,13 @@ def _process_registrations(settings: Any, rules: list[Any]) -> None:
         days_remaining = date_diff(
             cast(date, getdate(registration.expiry_date)), cast(date, getdate(today()))
         )
-        frappe.db.set_value(PRODUCT_REGISTRATION, registration.name, "days_to_expiry", days_remaining, update_modified=False)
+        frappe.db.set_value(
+            PRODUCT_REGISTRATION, registration.name, "days_to_expiry", days_remaining, update_modified=False
+        )
         if days_remaining < 0 and registration.official_status == "Active":
-            frappe.db.set_value(PRODUCT_REGISTRATION, registration.name, "official_status", "Expired", update_modified=False)
+            frappe.db.set_value(
+                PRODUCT_REGISTRATION, registration.name, "official_status", "Expired", update_modified=False
+            )
         _create_renewal_action(settings, registration, days_remaining)
         for rule in rules:
             if cast(int, rule.get("days_before_expiry") or -1) == days_remaining:
@@ -116,7 +118,11 @@ def _create_renewal_action(settings: Any, registration: Any, days_remaining: int
         return
     if frappe.db.exists(
         "Medical Device Registration Action",
-        {"registration": registration.name, "action_type": "Renewal", "current_stage": ["not in", ["Rejected", "Cancelled"]]},
+        {
+            "registration": registration.name,
+            "action_type": "Renewal",
+            "current_stage": ["not in", ["Rejected", "Cancelled"]],
+        },
     ):
         return
     frappe.get_doc(
@@ -134,7 +140,11 @@ def _create_renewal_action(settings: Any, registration: Any, days_remaining: int
 def _send_alert(
     *, registration: str, document: str | None, alert_kind: str, threshold: int, rule: Any, settings: Any
 ) -> None:
-    filters: dict[str, Any] = {"registration": registration, "alert_kind": alert_kind, "threshold_days": threshold}
+    filters: dict[str, Any] = {
+        "registration": registration,
+        "alert_kind": alert_kind,
+        "threshold_days": threshold,
+    }
     if document:
         filters["regulatory_document"] = document
     if frappe.db.exists(ALERT_LOG, filters):
@@ -175,7 +185,9 @@ def _rule_recipients(rule: Any, settings: Any, registration: str) -> list[str]:
     recipient_role = cast(str, rule.get("recipient_role") or "")
     if recipient_role:
         recipients.update(get_users_with_role(recipient_role))
-    responsible_user = cast(str, frappe.db.get_value(PRODUCT_REGISTRATION, registration, "responsible_user") or "")
+    responsible_user = cast(
+        str, frappe.db.get_value(PRODUCT_REGISTRATION, registration, "responsible_user") or ""
+    )
     if responsible_user:
         recipients.add(responsible_user)
     return sorted(recipients or set(_default_recipients(settings)))

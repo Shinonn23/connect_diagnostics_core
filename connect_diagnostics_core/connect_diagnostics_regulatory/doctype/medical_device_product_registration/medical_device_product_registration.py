@@ -91,7 +91,11 @@ class MedicalDeviceProductRegistration(Document):
                 frappe.throw(_("Registered Product Effective To must be on or after Effective From."))
 
     def _validate_effective_mapping_overlaps(self) -> None:
-        active_rows = [row for row in self.get("registered_products", []) if row.get("item_code") and row.get("line_status") == "Active"]
+        active_rows = [
+            row
+            for row in self.get("registered_products", [])
+            if row.get("item_code") and row.get("line_status") == "Active"
+        ]
         for index, row in enumerate(active_rows):
             for other in active_rows[index + 1 :]:
                 if row.item_code == other.item_code and _ranges_overlap(row, other):

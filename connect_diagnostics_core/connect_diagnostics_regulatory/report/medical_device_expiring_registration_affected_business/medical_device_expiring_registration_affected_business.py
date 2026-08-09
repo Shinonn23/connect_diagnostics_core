@@ -14,7 +14,9 @@ def execute(filters: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]]
     report_filters.setdefault("expiry_within_days", 365)
     data: list[dict[str, Any]] = []
     for registration in registration_rows(report_filters):
-        for item_code in frappe.get_all("Medical Device Registered Product", filters={"parent": registration["name"]}, pluck="item_code"):
+        for item_code in frappe.get_all(
+            "Medical Device Registered Product", filters={"parent": registration["name"]}, pluck="item_code"
+        ):
             if item_code:
                 data.append({**registration, "item_code": item_code})
     return _columns(), data
@@ -28,6 +30,12 @@ def _columns() -> list[dict[str, Any]]:
         {"fieldname": "current_stock_qty", "label": _("Warehouse Stock"), "fieldtype": "Float", "width": 120},
         {"fieldname": "open_po_qty", "label": _("Open PO"), "fieldtype": "Float", "width": 100},
         {"fieldname": "open_so_qty", "label": _("Open SO"), "fieldtype": "Float", "width": 100},
-        {"fieldname": "responsible_user", "label": _("Owner"), "fieldtype": "Link", "options": "User", "width": 140},
+        {
+            "fieldname": "responsible_user",
+            "label": _("Owner"),
+            "fieldtype": "Link",
+            "options": "User",
+            "width": 140,
+        },
         {"fieldname": "renewal_status", "label": _("Renewal Status"), "fieldtype": "Data", "width": 130},
     ]

@@ -25,10 +25,15 @@ class MedicalDeviceRegistrationAction(Document):
         if current_stage == "Approved" and resulting_registration:
             previous_registration = cast(
                 str,
-                frappe.db.get_value("Medical Device Product Registration", resulting_registration, "previous_registration") or "",
+                frappe.db.get_value(
+                    "Medical Device Product Registration", resulting_registration, "previous_registration"
+                )
+                or "",
             )
             if previous_registration and previous_registration != self.get("registration"):
-                frappe.throw(_("The resulting registration is already linked to a different previous registration."))
+                frappe.throw(
+                    _("The resulting registration is already linked to a different previous registration.")
+                )
 
     def on_update(self) -> None:
         """Link an approved successor without replacing the historical registration record."""
@@ -37,8 +42,16 @@ class MedicalDeviceRegistrationAction(Document):
         resulting_registration = cast(str, self.get("resulting_registration"))
         registration = cast(str, self.get("registration"))
         frappe.db.set_value(
-            "Medical Device Product Registration", resulting_registration, "previous_registration", registration, update_modified=False
+            "Medical Device Product Registration",
+            resulting_registration,
+            "previous_registration",
+            registration,
+            update_modified=False,
         )
         frappe.db.set_value(
-            "Medical Device Product Registration", registration, "superseded_by", resulting_registration, update_modified=False
+            "Medical Device Product Registration",
+            registration,
+            "superseded_by",
+            resulting_registration,
+            update_modified=False,
         )

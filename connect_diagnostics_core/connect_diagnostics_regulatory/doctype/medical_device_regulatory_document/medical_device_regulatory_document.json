@@ -1,20 +1,87 @@
 {
- "actions": [], "allow_import": 1, "autoname": "format:DOC-.#####", "doctype": "DocType", "editable_grid": 1, "engine": "InnoDB",
- "field_order": ["registration", "document_type", "document_number", "version", "issuer", "issue_date", "expiry_date", "applicable_newcode", "file", "verification_status", "verified_by", "verified_on", "remarks"],
- "fields": [
-  {"fieldname":"registration","fieldtype":"Link","label":"Registration","options":"Medical Device Product Registration","reqd":1,"in_list_view":1},
-  {"fieldname":"document_type","fieldtype":"Select","label":"Document Type","options":"Certificate\nAnnex\nLabel\nIFU\nLOA\nISO\nGMP\nDeclaration of Conformity\nProduct Specification\nRisk Analysis\nClinical Evidence\nOther","reqd":1,"in_list_view":1},
-  {"fieldname":"document_number","fieldtype":"Data","label":"Document Number","in_list_view":1},
-  {"fieldname":"version","fieldtype":"Data","label":"Version"},
-  {"fieldname":"issuer","fieldtype":"Data","label":"Issuer"},
-  {"fieldname":"issue_date","fieldtype":"Date","label":"Issue Date"},
-  {"fieldname":"expiry_date","fieldtype":"Date","label":"Expiry Date","in_list_view":1},
-  {"fieldname":"applicable_newcode","fieldtype":"Data","label":"Applicable NEWCODE"},
-  {"fieldname":"file","fieldtype":"Attach","label":"File","reqd":1},
-  {"fieldname":"verification_status","fieldtype":"Select","label":"Verification Status","options":"Pending\nVerified\nRejected\nExpired","default":"Pending","in_list_view":1},
-  {"fieldname":"verified_by","fieldtype":"Link","label":"Verified By","options":"User","read_only":1},
-  {"fieldname":"verified_on","fieldtype":"Date","label":"Verified On","read_only":1},
-  {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
- ],
- "module":"Connect Diagnostics Regulatory", "name":"Medical Device Regulatory Document", "permissions":[{"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"System Manager","share":1,"write":1}], "track_changes":1
+	"actions": [],
+	"allow_import": 1,
+	"autoname": "format:DOC-.#####",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"registration",
+		"document_type",
+		"document_number",
+		"version",
+		"issuer",
+		"issue_date",
+		"expiry_date",
+		"applicable_newcode",
+		"file",
+		"verification_status",
+		"verified_by",
+		"verified_on",
+		"remarks"
+	],
+	"fields": [
+		{
+			"fieldname": "registration",
+			"fieldtype": "Link",
+			"label": "Registration",
+			"options": "Medical Device Product Registration",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "document_type",
+			"fieldtype": "Select",
+			"label": "Document Type",
+			"options": "Certificate\nAnnex\nLabel\nIFU\nLOA\nISO\nGMP\nDeclaration of Conformity\nProduct Specification\nRisk Analysis\nClinical Evidence\nOther",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "document_number",
+			"fieldtype": "Data",
+			"label": "Document Number",
+			"in_list_view": 1
+		},
+		{ "fieldname": "version", "fieldtype": "Data", "label": "Version" },
+		{ "fieldname": "issuer", "fieldtype": "Data", "label": "Issuer" },
+		{ "fieldname": "issue_date", "fieldtype": "Date", "label": "Issue Date" },
+		{ "fieldname": "expiry_date", "fieldtype": "Date", "label": "Expiry Date", "in_list_view": 1 },
+		{ "fieldname": "applicable_newcode", "fieldtype": "Data", "label": "Applicable NEWCODE" },
+		{ "fieldname": "file", "fieldtype": "Attach", "label": "File", "reqd": 1 },
+		{
+			"fieldname": "verification_status",
+			"fieldtype": "Select",
+			"label": "Verification Status",
+			"options": "Pending\nVerified\nRejected\nExpired",
+			"default": "Pending",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "verified_by",
+			"fieldtype": "Link",
+			"label": "Verified By",
+			"options": "User",
+			"read_only": 1
+		},
+		{ "fieldname": "verified_on", "fieldtype": "Date", "label": "Verified On", "read_only": 1 },
+		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Regulatory Document",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
 }

@@ -16,14 +16,26 @@ def execute(filters: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]]
 
 def _columns() -> list[dict[str, Any]]:
     return [
-        {"fieldname": "registration_number", "label": _("Registration"), "fieldtype": "Link", "options": "Medical Device Product Registration", "width": 180},
+        {
+            "fieldname": "registration_number",
+            "label": _("Registration"),
+            "fieldtype": "Link",
+            "options": "Medical Device Product Registration",
+            "width": 180,
+        },
         {"fieldname": "certificate_type", "label": _("Certificate Type"), "fieldtype": "Data", "width": 130},
         {"fieldname": "device_category", "label": _("Category"), "fieldtype": "Data", "width": 100},
         {"fieldname": "product_family_name", "label": _("Product Family"), "fieldtype": "Data", "width": 180},
         {"fieldname": "expiry_date", "label": _("Expiry Date"), "fieldtype": "Date", "width": 100},
         {"fieldname": "days_remaining", "label": _("Days Remaining"), "fieldtype": "Int", "width": 100},
         {"fieldname": "renewal_status", "label": _("Renewal Status"), "fieldtype": "Data", "width": 120},
-        {"fieldname": "responsible_user", "label": _("Responsible User"), "fieldtype": "Link", "options": "User", "width": 150},
+        {
+            "fieldname": "responsible_user",
+            "label": _("Responsible User"),
+            "fieldtype": "Link",
+            "options": "User",
+            "width": 150,
+        },
         {"fieldname": "affected_item_count", "label": _("Affected Items"), "fieldtype": "Int", "width": 100},
         {"fieldname": "current_stock_qty", "label": _("Current Stock"), "fieldtype": "Float", "width": 110},
         {"fieldname": "stock_value", "label": _("Stock Value"), "fieldtype": "Currency", "width": 110},

@@ -16,7 +16,9 @@ class TestRegulatoryImport(UnitTestCase):
         rows = json.dumps(
             [{"registration_number": "68-2-2-1-0006254"}, {"registration_number": "682210006254"}]
         )
-        with patch("connect_diagnostics_core.api.erpnext.regulatory_import.frappe.has_permission", return_value=True):
+        with patch(
+            "connect_diagnostics_core.api.erpnext.regulatory_import.frappe.has_permission", return_value=True
+        ):
             result = validate_regulatory_import_rows(rows)
 
         self.assertFalse(result["data"]["valid"])

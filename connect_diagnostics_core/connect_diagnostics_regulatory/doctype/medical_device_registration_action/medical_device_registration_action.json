@@ -1,20 +1,80 @@
 {
- "actions": [], "autoname": "format:ACT-.#####", "doctype": "DocType", "editable_grid": 1, "engine": "InnoDB",
- "field_order": ["registration", "action_type", "fda_application_number", "submitted_date", "current_stage", "fda_query_date", "response_due_date", "approval_date", "new_expiry_date", "resulting_registration", "assigned_to", "attachment", "remarks"],
- "fields": [
-  {"fieldname":"registration","fieldtype":"Link","label":"Registration","options":"Medical Device Product Registration","reqd":1,"in_list_view":1},
-  {"fieldname":"action_type","fieldtype":"Select","label":"Action Type","options":"New Registration\nRenewal\nVariation\nAdd Product\nRemove Product\nCancel\nNot Renew","reqd":1,"in_list_view":1},
-  {"fieldname":"fda_application_number","fieldtype":"Data","label":"FDA Application Number"},
-  {"fieldname":"submitted_date","fieldtype":"Date","label":"Submitted Date"},
-  {"fieldname":"current_stage","fieldtype":"Select","label":"Current Stage","options":"Preparing\nInternal Review\nSubmitted\nFDA Query\nApproved\nRejected\nCancelled","default":"Preparing","in_list_view":1},
-  {"fieldname":"fda_query_date","fieldtype":"Date","label":"FDA Query Date"},
-  {"fieldname":"response_due_date","fieldtype":"Date","label":"Response Due Date"},
-  {"fieldname":"approval_date","fieldtype":"Date","label":"Approval Date"},
-  {"fieldname":"new_expiry_date","fieldtype":"Date","label":"New Expiry Date"},
-  {"fieldname":"resulting_registration","fieldtype":"Link","label":"Resulting Registration","options":"Medical Device Product Registration"},
-  {"fieldname":"assigned_to","fieldtype":"Link","label":"Assigned To","options":"User"},
-  {"fieldname":"attachment","fieldtype":"Attach","label":"Attachment"},
-  {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
- ],
- "module":"Connect Diagnostics Regulatory", "name":"Medical Device Registration Action", "permissions":[{"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"System Manager","share":1,"write":1}], "track_changes":1
+	"actions": [],
+	"autoname": "format:ACT-.#####",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"registration",
+		"action_type",
+		"fda_application_number",
+		"submitted_date",
+		"current_stage",
+		"fda_query_date",
+		"response_due_date",
+		"approval_date",
+		"new_expiry_date",
+		"resulting_registration",
+		"assigned_to",
+		"attachment",
+		"remarks"
+	],
+	"fields": [
+		{
+			"fieldname": "registration",
+			"fieldtype": "Link",
+			"label": "Registration",
+			"options": "Medical Device Product Registration",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "action_type",
+			"fieldtype": "Select",
+			"label": "Action Type",
+			"options": "New Registration\nRenewal\nVariation\nAdd Product\nRemove Product\nCancel\nNot Renew",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{ "fieldname": "fda_application_number", "fieldtype": "Data", "label": "FDA Application Number" },
+		{ "fieldname": "submitted_date", "fieldtype": "Date", "label": "Submitted Date" },
+		{
+			"fieldname": "current_stage",
+			"fieldtype": "Select",
+			"label": "Current Stage",
+			"options": "Preparing\nInternal Review\nSubmitted\nFDA Query\nApproved\nRejected\nCancelled",
+			"default": "Preparing",
+			"in_list_view": 1
+		},
+		{ "fieldname": "fda_query_date", "fieldtype": "Date", "label": "FDA Query Date" },
+		{ "fieldname": "response_due_date", "fieldtype": "Date", "label": "Response Due Date" },
+		{ "fieldname": "approval_date", "fieldtype": "Date", "label": "Approval Date" },
+		{ "fieldname": "new_expiry_date", "fieldtype": "Date", "label": "New Expiry Date" },
+		{
+			"fieldname": "resulting_registration",
+			"fieldtype": "Link",
+			"label": "Resulting Registration",
+			"options": "Medical Device Product Registration"
+		},
+		{ "fieldname": "assigned_to", "fieldtype": "Link", "label": "Assigned To", "options": "User" },
+		{ "fieldname": "attachment", "fieldtype": "Attach", "label": "Attachment" },
+		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Registration Action",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
 }

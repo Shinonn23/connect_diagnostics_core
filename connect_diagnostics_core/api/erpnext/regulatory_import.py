@@ -25,15 +25,30 @@ def validate_regulatory_import_rows(rows_json: str) -> dict[str, Any]:
     for index, row in enumerate(rows, start=1):
         registration_number = cast(str, row.get("registration_number") or "").strip()
         if not registration_number:
-            errors.append({"row": index, "field": "registration_number", "message": "Registration Number is required."})
+            errors.append(
+                {"row": index, "field": "registration_number", "message": "Registration Number is required."}
+            )
             continue
         normalized = normalize_registration_number(registration_number)
         if not normalized:
-            errors.append({"row": index, "field": "registration_number", "message": "Registration Number has no searchable characters."})
+            errors.append(
+                {
+                    "row": index,
+                    "field": "registration_number",
+                    "message": "Registration Number has no searchable characters.",
+                }
+            )
             continue
         if normalized in seen:
             errors.append(
-                {"row": index, "field": "registration_number", "message": f"Duplicates row {seen[normalized]} after normalization."}
+                {
+                    "row": index,
+                    "field": "registration_number",
+                    "message": f"Duplicates row {seen[normalized]} after normalization.",
+                }
             )
         seen[normalized] = index
-    return {"data": {"valid": not errors, "errors": errors}, "message": _("Regulatory import preflight completed.")}
+    return {
+        "data": {"valid": not errors, "errors": errors},
+        "message": _("Regulatory import preflight completed."),
+    }

@@ -23,7 +23,8 @@ def execute(filters: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]]
         WHERE product.line_status = 'Active'
         GROUP BY item.name, item.item_name, product.name, registration.name
         ORDER BY item.name, product.newcode
-        """, as_dict=True
+        """,
+        as_dict=True,
     )
     return _columns(), rows
 

@@ -25,9 +25,10 @@ class TestRegulatoryAlerts(UnitTestCase):
     def test_renewal_creation_is_idempotent(self) -> None:
         settings = {"auto_create_renewal_action": 1, "renewal_start_days_before_expiry": 365}
         registration = type("Registration", (), {"name": "REG-1", "responsible_user": "owner@example.com"})()
-        with patch.object(regulatory_alerts.frappe.db, "exists", return_value=True), patch.object(
-            regulatory_alerts.frappe, "get_doc"
-        ) as get_doc:
+        with (
+            patch.object(regulatory_alerts.frappe.db, "exists", return_value=True),
+            patch.object(regulatory_alerts.frappe, "get_doc") as get_doc,
+        ):
             regulatory_alerts._create_renewal_action(settings, registration, 30)
 
         get_doc.assert_not_called()
