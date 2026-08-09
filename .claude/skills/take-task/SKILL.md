@@ -5,9 +5,8 @@ description: Claim a Notion Task Tracker task — read it in full, summarize wha
 
 # Take Task
 
-Claim one task and set up the work. Database and property IDs are in `CLAUDE.md`
-under **Notion Task Tracker reference**. Branch naming follows the branch rule in
-the same file.
+Claim one task and set up the work. Database and property IDs are in the Notion
+Task Tracker reference below. Branch naming follows the branch rule in `CLAUDE.md`.
 
 ## Input
 
@@ -60,3 +59,24 @@ the same file.
 
 The fields changed with their before → after values, the summary of what is left,
 the parts that need a human, and the proposed branch command.
+
+## Notion Task Tracker reference
+
+- Database **Task Tracker** `4c1c5f86101c46d18557190f96aa9aab`, under the page
+  *ERPNext Connect Diagnostics*; tasks are `TSK-<Task ID>`.
+- Data source `collection://bcd5f7fa-c9c1-43dc-bfd7-c30272a1d100` — use this string as
+  the SQL table name. All Tasks view `view://320d5160-c409-40a4-87e2-b0f6962bf6ae`.
+- **Status**: `Not started` · `Backlog` · `In progress` · `In review` · `Done` · `Cancelled`
+- **Priority**: `🔴 Critical` · `🟠 High` · `🟡 Medium` · `🟢 Low`
+- **Work Type**: `Requirement` · `Design` · `Development` · `Configuration` · `Data Migration` · `Testing` · `Documentation`
+- `Related User Tickets` relates to `collection://e73aded7-efef-4426-b312-0dc4d0e6047a`.
+- Write quirks that silently fail if ignored: `Task ID` is `auto_increment_id` and
+  read-only; dates split into `date:<Name>:start` / `:end` / `:is_datetime`; `Assignee`
+  is an array of user IDs; checkboxes use `__YES__` / `__NO__`.
+- Tools are the Notion MCP `fetch`, `query-data-sources`, and `update-page`
+  (`command: update_properties`). Match them by name suffix — the server prefix is a
+  per-install UUID and must never be hardcoded.
+- Resolve the current user by calling `fetch` with the literal id `self`.
+- Never set a task to `Done` on code evidence alone. Tasks whose Acceptance Criteria
+  require a human step (real-printer test, tester's Pass/Fail record) close only when
+  that human has certified them.
