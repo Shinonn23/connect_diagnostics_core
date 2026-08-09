@@ -41,7 +41,7 @@ WORKFLOW_STATES = {
     "Registration Draft": "Info",
     "Registration Data Verification": "Warning",
     "Registration Active": "Success",
-    "Registration Superseded": "Dark",
+    "Registration Superseded": "Inverse",
     "Registration Cancelled": "Danger",
 }
 WORKFLOW_ACTIONS = (
