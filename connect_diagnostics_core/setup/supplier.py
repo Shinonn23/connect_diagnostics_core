@@ -10,13 +10,6 @@ CUSTOM_FIELDS = {
             "default": "00000",
             "is_system_generated": 1,
         },
-        {
-            "fieldname": "alternative_names",
-            "label": "Alternative Names",
-            "fieldtype": "Table",
-            "insert_after": "supplier_name",
-            "options": "Supplier Alternative Name",
-        },
     ],
 }
 

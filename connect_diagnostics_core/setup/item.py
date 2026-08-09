@@ -98,13 +98,6 @@ CUSTOM_FIELDS = {
             "insert_after": "width",
         },
         {
-            "fieldname": "alternative_names",
-            "label": "Alternative Names",
-            "fieldtype": "Table",
-            "insert_after": "item_name",
-            "options": "Item Alternative Name",
-        },
-        {
             "fieldname": "length",
             "label": "Length",
             "fieldtype": "Float",
