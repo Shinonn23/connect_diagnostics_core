@@ -5,6 +5,9 @@ def execute():
     if not frappe.db.exists("DocType", "Alias Name"):
         return
 
+    if not frappe.db.table_exists("Item Alternative Name", cached=False):
+        return
+
     aliases = frappe.db.get_all(
         "Alias Name",
         filters={"documents": "Item"},
