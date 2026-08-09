@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.0...v0.36.1) (2026-08-09)
+
+
+### Bug Fixes
+
+* skip payroll period seeding when an overlapping one exists ([7ce79d0](https://github.com/Shinonn23/connect_diagnostics_core/commit/7ce79d07dd997b4154de998c1d1f0f64facf72c5))
+
 ## [0.36.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.35.0...v0.36.0) (2026-08-09)
 
 
