@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.36.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.3...v0.36.4) (2026-08-09)
+
+
+### Bug Fixes
+
+* stop discarding build_response errors silently in exporter ([7fcb59f](https://github.com/Shinonn23/connect_diagnostics_core/commit/7fcb59fb6ddb7da44f4d0a16b6bfdc7d6a6ca101))
+
+
+### Miscellaneous Chores
+
+* add patch rollback parity and stop silent exporter failure ([ad50a7a](https://github.com/Shinonn23/connect_diagnostics_core/commit/ad50a7ac8eb9056f86e29bda66d6dbb44ea23b5b))
+* add rollback patches for parity and remove dead patch ([afcbfed](https://github.com/Shinonn23/connect_diagnostics_core/commit/afcbfed6d971f0d947536126ffac37f9dff91175))
+
 ## [0.36.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.2...v0.36.3) (2026-08-09)
 
 
