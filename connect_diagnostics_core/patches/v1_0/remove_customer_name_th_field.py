@@ -13,26 +13,29 @@ def execute():
     if not frappe.db.has_column("Customer", "customer_name_th"):
         return
 
-    frappe.db.sql(
-        """
-        INSERT INTO `tabCustomer Alternative Name`
-            (name, parent, parenttype, parentfield, idx,
-             name_value, creation, modified, modified_by, owner)
-        SELECT
-            MD5(CONCAT(c.name, c.customer_name_th)),
-            c.name, 'Customer', 'alternative_names', 1,
-            c.customer_name_th,
-            NOW(), NOW(), 'Administrator', 'Administrator'
-        FROM tabCustomer c
-        WHERE c.customer_name_th IS NOT NULL
-          AND c.customer_name_th != ''
-          AND NOT EXISTS (
-              SELECT 1 FROM `tabCustomer Alternative Name` can
-              WHERE can.parent = c.name
-                AND can.name_value = c.customer_name_th
-          )
-        """
-    )
+    # Skip the copy when Customer Alternative Name has already been retired (table
+    # dropped); the Custom Field and orphan column are still removed below.
+    if frappe.db.table_exists("Customer Alternative Name", cached=False):
+        frappe.db.sql(
+            """
+            INSERT INTO `tabCustomer Alternative Name`
+                (name, parent, parenttype, parentfield, idx,
+                 name_value, creation, modified, modified_by, owner)
+            SELECT
+                MD5(CONCAT(c.name, c.customer_name_th)),
+                c.name, 'Customer', 'alternative_names', 1,
+                c.customer_name_th,
+                NOW(), NOW(), 'Administrator', 'Administrator'
+            FROM tabCustomer c
+            WHERE c.customer_name_th IS NOT NULL
+              AND c.customer_name_th != ''
+              AND NOT EXISTS (
+                  SELECT 1 FROM `tabCustomer Alternative Name` can
+                  WHERE can.parent = c.name
+                    AND can.name_value = c.customer_name_th
+              )
+            """
+        )
 
     if frappe.db.exists("Custom Field", "Customer-customer_name_th"):
         frappe.delete_doc("Custom Field", "Customer-customer_name_th", force=True)
