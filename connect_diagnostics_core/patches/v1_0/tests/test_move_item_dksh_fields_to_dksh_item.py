@@ -14,6 +14,7 @@ class TestMoveItemDKSHFieldsToDKSHItem(UnitTestCase):
     def test_no_op_when_no_dksh_columns_remain(self) -> None:
         with (
             patch.object(patch_module.frappe.db, "has_column", return_value=False),
+            patch.object(patch_module.frappe, "reload_doc") as mocked_reload,
             patch.object(patch_module, "_items_with_dksh_values") as mocked_read,
             patch.object(patch_module, "_drop_old") as mocked_drop,
             patch.object(patch_module.frappe.db, "commit"),
@@ -22,6 +23,7 @@ class TestMoveItemDKSHFieldsToDKSHItem(UnitTestCase):
 
         mocked_read.assert_not_called()
         mocked_drop.assert_not_called()
+        mocked_reload.assert_not_called()
 
     def test_item_with_a_code_is_moved_then_every_column_is_dropped(self) -> None:
         row = {
@@ -32,9 +34,18 @@ class TestMoveItemDKSHFieldsToDKSHItem(UnitTestCase):
             "mat_group4_code": "",
             "material_type_code": "",
         }
+
+        def read_items(present: list[str]) -> list[dict[str, str]]:
+            mocked_reload.assert_called_once_with(
+                patch_module.DKSH_MODULE, "doctype", "dksh_item", force=True
+            )
+            self.assertEqual(present, list(patch_module.DKSH_FIELDS))
+            return [row]
+
         with (
             patch.object(patch_module.frappe.db, "has_column", return_value=True),
-            patch.object(patch_module, "_items_with_dksh_values", return_value=[row]),
+            patch.object(patch_module.frappe, "reload_doc") as mocked_reload,
+            patch.object(patch_module, "_items_with_dksh_values", side_effect=read_items),
             patch.object(patch_module, "_upsert_dksh_item") as mocked_upsert,
             patch.object(patch_module, "_drop_old") as mocked_drop,
             patch.object(patch_module.frappe.db, "commit"),
@@ -59,6 +70,7 @@ class TestMoveItemDKSHFieldsToDKSHItem(UnitTestCase):
         logger = MagicMock()
         with (
             patch.object(patch_module.frappe.db, "has_column", return_value=True),
+            patch.object(patch_module.frappe, "reload_doc"),
             patch.object(patch_module, "_items_with_dksh_values", return_value=[row]),
             patch.object(patch_module, "_upsert_dksh_item") as mocked_upsert,
             patch.object(patch_module, "_drop_old"),
