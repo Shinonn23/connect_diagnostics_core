@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.34.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.34.0...v0.34.1) (2026-08-09)
+
+
+### Documentation
+
+* add workspace navigation skill ([b442879](https://github.com/Shinonn23/connect_diagnostics_core/commit/b442879eb0e9b3166fd33127996854f04010dbc3))
+* add workspace navigation skill ([dfd8b77](https://github.com/Shinonn23/connect_diagnostics_core/commit/dfd8b77e66b693cf3a24b42f41fb347a148c3131))
+
 ## [0.34.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.33.0...v0.34.0) (2026-08-09)
 
 
