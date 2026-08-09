@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.36.6](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.5...v0.36.6) (2026-08-09)
+
+
+### Bug Fixes
+
+* **regulatory:** restore grouped workspace navigation ([53360c1](https://github.com/Shinonn23/connect_diagnostics_core/commit/53360c18a02bfe41d33e4141f0bef3c14303d3be))
+* **regulatory:** restore grouped workspace navigation ([47165c6](https://github.com/Shinonn23/connect_diagnostics_core/commit/47165c692eafd052a0137dfe76e30e093f46e698))
+* restore grouped regulatory workspace navigation ([e817a85](https://github.com/Shinonn23/connect_diagnostics_core/commit/e817a85ae2dc9e4717447bebe78aa18cd7ef2c06))
+
 ## [0.36.5](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.4...v0.36.5) (2026-08-09)
 
 
