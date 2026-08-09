@@ -144,6 +144,13 @@ class TestWorkspaceNavigation(UnitTestCase):
             with self.subTest(module=group.name):
                 workspace_doc = workspaces[group.name]
                 sidebar_doc = sidebars[group.name]
+                if not group.links:
+                    # A group with no managed links (e.g. a retired report group)
+                    # has nothing to sync onto an already-empty fixture.
+                    self.assertEqual(workspace_doc.save_count, 0)
+                    self.assertEqual(sidebar_doc.save_count, 0)
+                    self.assertEqual(workspace_doc["links"], [])
+                    continue
                 self.assertEqual(workspace_doc.save_count, 1)
                 self.assertEqual(sidebar_doc.save_count, 1)
                 self.assertEqual(
@@ -188,9 +195,6 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(
             {(row["link_to"], row["report_ref_doctype"], row["is_query_report"]) for row in reports},
             {
-                ("General Ledger TH", "GL Entry", 1),
-                ("Trial Balance TH", "GL Entry", 1),
-                ("Trial Balance TH Detail", "GL Entry", 1),
                 ("Back Orders", "Sales Order", 1),
             },
         )
@@ -895,38 +899,56 @@ class TestWorkspaceNavigation(UnitTestCase):
 
     def test_existing_workspace_card_links_are_reordered_by_priority(self) -> None:
         workspace_doc = FakeDocument(
-            name="Financial Reports",
+            name="Stock",
             parent_page="",
             links=[
                 frappe._dict({"type": "Card Break", "label": workspace.NAVIGATION_LABEL}),
                 frappe._dict(
                     {
                         "type": "Link",
-                        "label": "Trial Balance TH Detail",
-                        "link_type": "Report",
-                        "link_to": "Trial Balance TH Detail",
+                        "label": "Storage Condition",
+                        "link_type": "DocType",
+                        "link_to": "Storage Condition",
                     }
                 ),
                 frappe._dict(
                     {
                         "type": "Link",
-                        "label": "General Ledger TH",
+                        "label": "Back Orders",
                         "link_type": "Report",
-                        "link_to": "General Ledger TH",
+                        "link_to": "Back Orders",
+                        "report_ref_doctype": "Sales Order",
+                        "is_query_report": 1,
                     }
                 ),
                 frappe._dict(
                     {
                         "type": "Link",
-                        "label": "Trial Balance TH",
-                        "link_type": "Report",
-                        "link_to": "Trial Balance TH",
+                        "label": "DKSH Item",
+                        "link_type": "DocType",
+                        "link_to": "DKSH Item",
+                    }
+                ),
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "label": "Regulation Class",
+                        "link_type": "DocType",
+                        "link_to": "Regulation Class",
+                    }
+                ),
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "label": "Product Group",
+                        "link_type": "DocType",
+                        "link_to": "Product Group",
                     }
                 ),
             ],
             content='[{"type":"card","data":{"card_name":"Connect Diagnostics","col":4}}]',
         )
-        group = next(group for group in workspace.NAVIGATION_GROUPS if group.name == "Financial Reports")
+        group = next(group for group in workspace.NAVIGATION_GROUPS if group.name == "Stock")
 
         changed = workspace._ensure_workspace_card(cast(Document, workspace_doc), group)
 
@@ -935,3 +957,47 @@ class TestWorkspaceNavigation(UnitTestCase):
             [row.get("link_to") for row in workspace_doc["links"][1:]],
             [link.link_to for link in group.links],
         )
+
+    def test_empty_group_removes_existing_card_break_and_content_block(self) -> None:
+        # By the time _ensure_workspace_card runs, _remove_retired_card_links has
+        # already stripped any stale report/doctype Link rows — only the now-empty
+        # "Connect Diagnostics" Card Break and its content block are left to tear down.
+        workspace_doc = FakeDocument(
+            name="Financial Reports",
+            parent_page="",
+            links=[frappe._dict({"type": "Card Break", "label": workspace.NAVIGATION_LABEL})],
+            content='[{"type":"card","data":{"card_name":"Connect Diagnostics","col":4}}]',
+        )
+        group = next(group for group in workspace.NAVIGATION_GROUPS if group.name == "Financial Reports")
+
+        changed = workspace._ensure_workspace_card(cast(Document, workspace_doc), group)
+
+        self.assertTrue(changed)
+        self.assertEqual(workspace_doc["links"], [])
+        self.assertEqual(json.loads(workspace_doc["content"]), [])
+
+    def test_retired_report_card_link_is_removed_from_financial_reports(self) -> None:
+        workspace_doc = FakeDocument(
+            name="Financial Reports",
+            links=[
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "link_type": "Report",
+                        "link_to": "General Ledger TH",
+                    }
+                ),
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "link_type": "Report",
+                        "link_to": "Trial Balance",
+                    }
+                ),
+            ],
+        )
+
+        changed = workspace._remove_retired_card_links(cast(Document, workspace_doc), "Financial Reports")
+
+        self.assertTrue(changed)
+        self.assertEqual([row["link_to"] for row in workspace_doc["links"]], ["Trial Balance"])

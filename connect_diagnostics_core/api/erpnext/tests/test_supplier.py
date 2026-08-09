@@ -13,7 +13,7 @@ from connect_diagnostics_core.api.erpnext.supplier import supplier_query
 class TestSupplierSearch(UnitTestCase):
     @patch("connect_diagnostics_core.api.erpnext.supplier.frappe.get_list", return_value=[])
     @patch("connect_diagnostics_core.api.erpnext.supplier.frappe.has_permission")
-    def test_supplier_query_matches_id_name_and_alternative_name(
+    def test_supplier_query_matches_id_and_name(
         self,
         _mocked_has_permission: MagicMock,
         mocked_get_list: MagicMock,
@@ -25,7 +25,6 @@ class TestSupplierSearch(UnitTestCase):
             [
                 ["Supplier", "name", "like", "%SUP-001%"],
                 ["Supplier", "supplier_name", "like", "%SUP-001%"],
-                ["Supplier Alternative Name", "name_value", "like", "%SUP-001%"],
             ],
         )
         self.assertEqual(mocked_get_list.call_args.kwargs["filters"], {"disabled": 0})
