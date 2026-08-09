@@ -29,6 +29,7 @@ from connect_diagnostics_core.patches.v1_0.strip_custom_prefix_from_field_names 
 )
 
 CODE_FIELD = "dksh_item_code"
+DKSH_MODULE = "Connect Diagnostics DKSH"
 REFERENCE_FIELDS = (
     "supplier_product_code",
     "mat_group_code",
@@ -43,6 +44,8 @@ def execute() -> None:
     present = [field for field in DKSH_FIELDS if frappe.db.has_column("Item", field)]
     if not present:
         return
+
+    frappe.reload_doc(DKSH_MODULE, "doctype", "dksh_item", force=True)
 
     skipped = 0
     for row in _items_with_dksh_values(present):
