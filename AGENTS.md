@@ -106,18 +106,25 @@ All three long-lived branches are protected (required checks `Server` +
 review + CI are the pre-merge gate; manual functional testing happens after merge
 on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
 
-## Automated DEV and UAT deployment
+## Automated DEV, UAT, and PROD deployment
 
 - `.github/workflows/deploy.yml` deploys every push to `developments` to GitHub
-  Environment `DEV` (`34.143.156.218`) and every push to
-  `user-acceptance-testing` to `UAT` (`136.110.8.47`). It does not deploy PROD.
-- `workflow_dispatch` supports an explicit `DEV` or `UAT` target for retrying or
-  manually starting the same deployment flow.
-- Both GitHub Environments require an Environment secret named `BENCH_PATH`,
-  initially `/home/erp/frappe`; it is the Frappe Bench root, not the CLI path.
+  Environment `DEV` (`34.143.156.218`), every push to `user-acceptance-testing` to
+  `UAT` (`136.110.8.47`), and every push to `production` to `PROD` (`34.87.7.164`).
+  All three environments run the identical deployment flow.
+- `workflow_dispatch` supports an explicit `DEV`, `UAT`, or `PROD` target for
+  retrying or manually starting the same deployment flow. Configure required
+  reviewers on the GitHub `PROD` Environment if an approval gate is wanted; the
+  workflow itself does not enforce one.
+- Deployment reads the Frappe Bench root from the `BENCH_PATH` Actions **variable**
+  (`vars.BENCH_PATH`), not a secret — it is a path, not a credential. Set it as a
+  repository variable for the shared value (DEV/UAT are `/home/erp/frappe`) and
+  override it with an Environment variable where a server differs (PROD is
+  `/home/erp/frappe-bench`); the Environment variable wins for that environment.
   Repository secret `SSH_PRIVATE_KEY` contains the passphrase-free
-  `google_compute_engine` key; `SSH_KNOWN_HOSTS` contains verified host-key entries
-  for both servers. Never print these values in workflow logs.
+  `google_compute_engine` key; repository secret `SSH_KNOWN_HOSTS` contains verified
+  host-key entries for all three servers. Never print these secret values in
+  workflow logs.
 - Deployment connects as `erp`, validates the directory and `flock`, prepends
   `$HOME/.local/bin` and `/usr/local/bin` to `PATH`, initializes
   `$HOME/.nvm/nvm.sh`, selects Node.js 24, and validates executable `node`, `npm`,
@@ -125,9 +132,10 @@ on `developments`. Rationale and full loop: `.github/WORKFLOW.md`.
   `BENCH_PATH`. Jobs have a 120-minute timeout; the remote lock waits up to 60
   minutes before failing. Do not source interactive shell configuration such as
   `.zshrc` in deployment automation.
-- DEV and UAT have separate concurrency groups with `cancel-in-progress: false`.
-  Never cancel a running deployment or enable cancellation mid-deploy. GitHub
-  preserves the running job and retains only the newest pending job per environment.
+- DEV, UAT, and PROD each have a separate concurrency group with
+  `cancel-in-progress: false`. Never cancel a running deployment or enable
+  cancellation mid-deploy. GitHub preserves the running job and retains only the
+  newest pending job per environment.
 - The remote `flock` coordinates GitHub workflow deployments only. Anyone running
   `bench update` manually must wait for the workflow deployment to finish.
 

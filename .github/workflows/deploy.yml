@@ -5,6 +5,7 @@ on:
         branches:
             - developments
             - user-acceptance-testing
+            - production
     workflow_dispatch:
         inputs:
             target_environment:
@@ -14,18 +15,19 @@ on:
                 options:
                     - DEV
                     - UAT
+                    - PROD
 
 permissions:
     contents: read
 
 jobs:
     deploy:
-        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
         runs-on: ubuntu-latest
         timeout-minutes: 120
-        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
         concurrency:
-            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.ref_name == 'developments' && 'DEV' || 'UAT' }}
+            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
             cancel-in-progress: false
 
         steps:
@@ -48,10 +50,14 @@ jobs:
 
             - name: Update Bench
               env:
-                  BENCH_PATH: ${{ secrets.BENCH_PATH }}
-                  DEPLOY_HOST: ${{ ((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || (github.event_name == 'push' && github.ref_name == 'developments')) && '34.143.156.218' || '136.110.8.47' }}
+                  BENCH_PATH: ${{ vars.BENCH_PATH }}
+                  DEPLOY_HOST: ${{ (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || (github.event_name == 'push' && github.ref_name == 'developments')) && '34.143.156.218') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'UAT') || (github.event_name == 'push' && github.ref_name == 'user-acceptance-testing')) && '136.110.8.47') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'PROD') || (github.event_name == 'push' && github.ref_name == 'production')) && '34.87.7.164') || '' }}
               run: |
                   set -Eeuo pipefail
+                  if [[ -z "$DEPLOY_HOST" ]]; then
+                    echo "Deployment host could not be resolved for the selected environment." >&2
+                    exit 1
+                  fi
                   if [[ -z "$BENCH_PATH" ]]; then
                     echo "BENCH_PATH is not configured for the selected environment." >&2
                     exit 1
