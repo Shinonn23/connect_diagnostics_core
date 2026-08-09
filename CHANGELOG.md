@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.34.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.33.0...v0.34.0) (2026-08-09)
+
+
+### Features
+
+* embed diagnostics navigation in ERPNext workspaces ([b51672e](https://github.com/Shinonn23/connect_diagnostics_core/commit/b51672e61b9d8184a470c96648962f2737d8fb11))
+* embed diagnostics navigation in ERPNext workspaces ([c32f915](https://github.com/Shinonn23/connect_diagnostics_core/commit/c32f915926cc06baeb3504c5607e2f53af67f364))
+
+
+### Documentation
+
+* require workspace navigation for new modules ([b12d79d](https://github.com/Shinonn23/connect_diagnostics_core/commit/b12d79d7d689f231a6700c70a9bac2cf315e5b0d))
+* require workspace navigation for new modules ([76a65f2](https://github.com/Shinonn23/connect_diagnostics_core/commit/76a65f2b35f392edef5335445cf1a9587a3fdc98))
+
 ## [0.33.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.32.1...v0.33.0) (2026-08-08)
 
 
