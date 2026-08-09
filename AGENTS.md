@@ -7,7 +7,8 @@ project guidance. It is the contract for how we work: behavioral/engineering rul
 
 > For procedural guides, invoke the repository skills:
 > `$ship-pr` `$dispatch-test` `$test-result` `$promote-uat` `$promote-prod`
-> `$commit` `$pr` `$review` `$security-audit` and `$erpnext-docs`.
+> `$commit` `$pr` `$review` `$security-audit` `$erpnext-docs`, and
+> `$workspace-navigation`.
 > The Notion task skills (`next-task`, `take-task`, `update-task`) are Claude-only —
 > see the parity exception below.
 

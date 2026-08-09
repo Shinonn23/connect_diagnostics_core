@@ -8,7 +8,7 @@ session** and is the contract for how we work: behavioral/engineering rules plus
 > For procedural guides, use the slash skills:
 > `/ship-pr` `/dispatch-test` `/test-result` `/promote-uat` `/promote-prod`
 > `/commit` `/pr` `/review`, the Notion task skills `/next-task` `/take-task`
-> `/update-task`, and the scaffold/check helpers.
+> `/update-task`, `/workspace-navigation`, and the scaffold/check helpers.
 
 ---
 
