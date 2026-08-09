@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.7](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.6...v0.36.7) (2026-08-09)
+
+
+### Bug Fixes
+
+* **dksh:** prepare item schema before migration ([ddd6526](https://github.com/Shinonn23/connect_diagnostics_core/commit/ddd652685687b6f94288ab15f773c495dff63838))
+* **dksh:** prepare item schema before migration ([7796de7](https://github.com/Shinonn23/connect_diagnostics_core/commit/7796de74ca7d49bbacf0363d0467e003cc38a1e2))
+
 ## [0.36.6](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.5...v0.36.6) (2026-08-09)
 
 
