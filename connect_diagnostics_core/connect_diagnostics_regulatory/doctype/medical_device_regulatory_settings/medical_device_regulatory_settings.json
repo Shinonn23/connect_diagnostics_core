@@ -1,0 +1,174 @@
+{
+	"actions": [],
+	"doctype": "DocType",
+	"issingle": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"default_regulatory_owner",
+		"default_regulatory_department",
+		"validation_section",
+		"validate_on_purchase_order",
+		"validate_on_purchase_receipt",
+		"validate_on_stock_entry",
+		"validate_on_sales_order",
+		"validate_on_delivery_note",
+		"validate_on_sales_invoice",
+		"missing_registration_action",
+		"expired_registration_action",
+		"suspended_registration_action",
+		"revoked_registration_action",
+		"missing_newcode_action",
+		"manufacturer_mismatch_action",
+		"existing_stock_section",
+		"expired_registration_existing_stock_policy",
+		"alert_section",
+		"auto_create_renewal_action",
+		"renewal_start_days_before_expiry",
+		"expiry_alert_rules"
+	],
+	"fields": [
+		{
+			"fieldname": "default_regulatory_owner",
+			"fieldtype": "Link",
+			"label": "Default Regulatory Owner",
+			"options": "User"
+		},
+		{
+			"fieldname": "default_regulatory_department",
+			"fieldtype": "Link",
+			"label": "Default Regulatory Department",
+			"options": "Department"
+		},
+		{
+			"fieldname": "validation_section",
+			"fieldtype": "Section Break",
+			"label": "Transaction Validation"
+		},
+		{
+			"fieldname": "validate_on_purchase_order",
+			"fieldtype": "Check",
+			"label": "Validate on Purchase Order",
+			"default": "1"
+		},
+		{
+			"fieldname": "validate_on_purchase_receipt",
+			"fieldtype": "Check",
+			"label": "Validate on Purchase Receipt",
+			"default": "1"
+		},
+		{
+			"fieldname": "validate_on_stock_entry",
+			"fieldtype": "Check",
+			"label": "Validate on Stock Entry",
+			"default": "1"
+		},
+		{
+			"fieldname": "validate_on_sales_order",
+			"fieldtype": "Check",
+			"label": "Validate on Sales Order",
+			"default": "1"
+		},
+		{
+			"fieldname": "validate_on_delivery_note",
+			"fieldtype": "Check",
+			"label": "Validate on Delivery Note",
+			"default": "1"
+		},
+		{
+			"fieldname": "validate_on_sales_invoice",
+			"fieldtype": "Check",
+			"label": "Validate on Sales Invoice",
+			"default": "1"
+		},
+		{
+			"fieldname": "missing_registration_action",
+			"fieldtype": "Select",
+			"label": "Missing Registration Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Block"
+		},
+		{
+			"fieldname": "expired_registration_action",
+			"fieldtype": "Select",
+			"label": "Expired Registration Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Block"
+		},
+		{
+			"fieldname": "suspended_registration_action",
+			"fieldtype": "Select",
+			"label": "Suspended Registration Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Block"
+		},
+		{
+			"fieldname": "revoked_registration_action",
+			"fieldtype": "Select",
+			"label": "Revoked Registration Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Block"
+		},
+		{
+			"fieldname": "missing_newcode_action",
+			"fieldtype": "Select",
+			"label": "Missing NEWCODE Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Block"
+		},
+		{
+			"fieldname": "manufacturer_mismatch_action",
+			"fieldtype": "Select",
+			"label": "Manufacturer Mismatch Action",
+			"options": "Ignore\nWarning\nBlock",
+			"default": "Warning"
+		},
+		{
+			"fieldname": "existing_stock_section",
+			"fieldtype": "Section Break",
+			"label": "Existing Stock Policy"
+		},
+		{
+			"fieldname": "expired_registration_existing_stock_policy",
+			"fieldtype": "Select",
+			"label": "Expired Registration Existing Stock Policy",
+			"options": "Block\nWarning\nAllow Existing Compliant Stock",
+			"default": "Warning"
+		},
+		{ "fieldname": "alert_section", "fieldtype": "Section Break", "label": "Expiry Alerts" },
+		{
+			"fieldname": "auto_create_renewal_action",
+			"fieldtype": "Check",
+			"label": "Auto Create Renewal Action",
+			"default": "1"
+		},
+		{
+			"fieldname": "renewal_start_days_before_expiry",
+			"fieldtype": "Int",
+			"label": "Renewal Start Days Before Expiry",
+			"default": "365"
+		},
+		{
+			"fieldname": "expiry_alert_rules",
+			"fieldtype": "Table",
+			"label": "Expiry Alert Rules",
+			"options": "Regulatory Expiry Alert Rule"
+		}
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Regulatory Settings",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
+}

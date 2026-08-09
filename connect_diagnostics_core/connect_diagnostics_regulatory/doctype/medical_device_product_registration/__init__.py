@@ -1,0 +1,1 @@
+"""Product registration controller package."""
