@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+from datetime import date
 from itertools import pairwise
+from unittest.mock import MagicMock, patch
 
 from frappe.tests import UnitTestCase
 
@@ -102,3 +104,31 @@ class TestSalaryStructureWiring(UnitTestCase):
         row = payroll._structure_row("Withholding Tax")
 
         self.assertEqual(row["variable_based_on_taxable_salary"], 1)
+
+
+class TestEnsurePayrollPeriod(UnitTestCase):
+    # `today` is stubbed so the real timezone lookup (which caches System Settings
+    # via frappe.get_doc) is not reached while frappe.get_doc is patched.
+    @patch.object(payroll, "today", return_value=date(2026, 1, 15))
+    @patch.object(payroll.frappe, "get_doc")
+    @patch.object(payroll.frappe, "get_all")
+    def test_skips_creation_when_an_overlapping_period_exists(
+        self, get_all: MagicMock, get_doc: MagicMock, _today: MagicMock
+    ) -> None:
+        get_all.return_value = [{"name": "งวดเงินเดือน 2569 (สำหรับทดสอบ)"}]
+
+        payroll.ensure_payroll_period("_Test Company")
+
+        get_doc.assert_not_called()
+
+    @patch.object(payroll, "today", return_value=date(2026, 1, 15))
+    @patch.object(payroll.frappe, "get_doc")
+    @patch.object(payroll.frappe, "get_all")
+    def test_creates_period_when_none_overlaps(
+        self, get_all: MagicMock, get_doc: MagicMock, _today: MagicMock
+    ) -> None:
+        get_all.return_value = []
+
+        payroll.ensure_payroll_period("_Test Company")
+
+        get_doc.assert_called_once()
