@@ -1,0 +1,16 @@
+{
+    "app": "connect_diagnostics_core",
+    "doctype": "Desktop Icon",
+    "hidden": 0,
+    "icon": "shield-check",
+    "icon_type": "Link",
+    "modified": "2026-08-09 00:00:00.000000",
+    "label": "Regulatory",
+    "link_to": "Regulatory",
+    "link_type": "Workspace Sidebar",
+    "name": "Regulatory",
+    "parent_icon": "",
+    "restrict_removal": 0,
+    "roles": [],
+    "standard": 1
+}

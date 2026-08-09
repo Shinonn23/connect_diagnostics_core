@@ -470,7 +470,10 @@ If a bug or issue is discovered during implementation (outside the current task 
   ERPNext domain (for example Stock or Accounting), embed it in the relevant existing
   Workspace card and contextual Sidebar section; do not create a separate Connect
   Diagnostics group. When it is an independent, major Connect Diagnostics domain
-  (for example Loan), create its own Module and Workspace. Child-table and technical
+  (for example Loan), create its own Module and Workspace. Independent workspaces
+  follow ERPNext's information architecture: Home, important DocTypes, collapsible
+  Reports and Setup sections, then Settings. Standard Workspace and Sidebar sync
+  must preserve unmanaged user rows across migrations. Child-table and technical
   DocTypes with no standalone Desk route are exempt; document the reason in the change.
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
 
