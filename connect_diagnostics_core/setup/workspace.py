@@ -17,7 +17,29 @@ REGULATORY_WORKSPACE = "Connect Diagnostics Regulatory"
 REGULATORY_MODULE = "Connect Diagnostics Regulatory"
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
-    "ERPNext Settings": frozenset({("DocType", "Repost Accounting Ledger Settings")}),
+    "ERPNext Settings": frozenset(
+        {
+            ("DocType", "Repost Accounting Ledger Settings"),
+            ("DocType", "Department User Permission"),
+        }
+    ),
+    "Financial Reports": frozenset(
+        {
+            ("Report", "General Ledger TH"),
+            ("Report", "Trial Balance TH"),
+            ("Report", "Trial Balance TH Detail"),
+        }
+    ),
+}
+RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
+    "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
+    "Financial Reports": frozenset(
+        {
+            ("Report", "General Ledger TH"),
+            ("Report", "Trial Balance TH"),
+            ("Report", "Trial Balance TH Detail"),
+        }
+    ),
 }
 
 
@@ -86,11 +108,7 @@ REGULATORY_LINKS = (
 NAVIGATION_GROUPS = (
     NavigationGroup(
         name="Financial Reports",
-        links=(
-            NavigationLink("General Ledger TH", "General Ledger TH", "Report", "GL Entry"),
-            NavigationLink("Trial Balance TH", "Trial Balance TH", "Report", "GL Entry"),
-            NavigationLink("Trial Balance TH Detail", "Trial Balance TH Detail", "Report", "GL Entry"),
-        ),
+        links=(),
     ),
     NavigationGroup(
         name="Invoicing",
@@ -122,21 +140,12 @@ NAVIGATION_GROUPS = (
     ),
     NavigationGroup(
         name="ERPNext Settings",
-        links=(
-            NavigationLink("Department User Permission", "Department User Permission", "DocType"),
-            NavigationLink("Backup Settings", "Backup Settings", "DocType"),
-        ),
+        links=(NavigationLink("Backup Settings", "Backup Settings", "DocType"),),
     ),
 )
 
 SIDEBAR_PLACEMENTS = {
-    "Financial Reports": (
-        SidebarPlacement("General Ledger TH", after_link_to="General Ledger", section="Ledgers"),
-        SidebarPlacement("Trial Balance TH", after_link_to="Trial Balance", section="Financial Reports"),
-        SidebarPlacement(
-            "Trial Balance TH Detail", after_link_to="Trial Balance TH", section="Financial Reports"
-        ),
-    ),
+    "Financial Reports": (),
     "Invoicing": (SidebarPlacement("Accounting Department", after_link_to="Account", icon="building-2"),),
     "Selling": (
         SidebarPlacement("Back Orders", after_link_to="Sales Order", icon="list-todo"),
@@ -165,12 +174,7 @@ SIDEBAR_PLACEMENTS = {
             icon="git-pull-request-arrow",
         ),
     ),
-    "ERPNext Settings": (
-        SidebarPlacement("Department User Permission", section="Other Settings"),
-        SidebarPlacement(
-            "Backup Settings", after_link_to="Department User Permission", section="Other Settings"
-        ),
-    ),
+    "ERPNext Settings": (SidebarPlacement("Backup Settings", section="Other Settings"),),
 }
 
 
@@ -180,6 +184,8 @@ def ensure_workspace_navigation() -> None:
     for group in NAVIGATION_GROUPS:
         workspace = frappe.get_doc("Workspace", group.name)
         workspace_changed = _repair_stale_parent_page(workspace)
+        if _remove_retired_card_links(workspace, group.name):
+            workspace_changed = True
         if _ensure_workspace_card(workspace, group):
             workspace_changed = True
         if workspace_changed:
@@ -279,6 +285,15 @@ def _ensure_workspace_card(workspace: Document, group: NavigationGroup) -> bool:
     card_break = _find_card_break(rows)
     changed = False
 
+    if not group.links:
+        if card_break is not None:
+            rows.remove(card_break)
+            _reindex(rows)
+            changed = True
+        if _remove_card_block(workspace):
+            changed = True
+        return changed
+
     if card_break is None:
         workspace.append(
             "links",
@@ -355,6 +370,15 @@ def _ensure_card_block(workspace: Document) -> bool:
     return True
 
 
+def _remove_card_block(workspace: Document) -> bool:
+    content = _content_blocks(workspace)
+    remaining = [block for block in content if not _is_card_block(block)]
+    if len(remaining) == len(content):
+        return False
+    workspace.set("content", json.dumps(remaining, separators=(",", ":")))
+    return True
+
+
 def _is_card_block(block: dict[str, object]) -> bool:
     data = block.get("data")
     if not isinstance(data, dict):
@@ -386,6 +410,23 @@ def _remove_retired_sidebar_links(sidebar: Document, sidebar_name: str) -> bool:
     if len(retained_rows) == len(rows):
         return False
     rows[:] = retained_rows
+    return True
+
+
+def _remove_retired_card_links(workspace: Document, workspace_name: str) -> bool:
+    retired_links = RETIRED_CARD_LINKS.get(workspace_name, frozenset())
+    if not retired_links:
+        return False
+    rows = _rows(workspace, "links")
+    retained_rows = [
+        row
+        for row in rows
+        if (str(row.get("link_type") or ""), str(row.get("link_to") or "")) not in retired_links
+    ]
+    if len(retained_rows) == len(rows):
+        return False
+    rows[:] = retained_rows
+    _reindex(rows)
     return True
 
 
