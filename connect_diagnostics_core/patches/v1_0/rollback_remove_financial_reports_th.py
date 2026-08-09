@@ -35,4 +35,3 @@ def execute():
             "against the database."
         )
     )
-
