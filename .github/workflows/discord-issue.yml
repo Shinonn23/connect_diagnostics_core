@@ -1,90 +1,74 @@
 name: Discord Issue Notify
-
 on:
-    issues:
-        types: [opened, closed, reopened]
-
+  issues:
+    types: [opened, closed, reopened]
 jobs:
-    notify:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Notify Issue to Discord
-              env:
-                  WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ISSUE }}
-              run: |
-                  case "${{ github.event.action }}" in
-                    opened)
-                      COLOR=15548997
-                      ;;
-                    closed)
-                      COLOR=5763719
-                      ;;
-                    reopened)
-                      COLOR=15105570
-                      ;;
-                  esac
-
-                  LABELS="${{ join(github.event.issue.labels.*.name, ', ') }}"
-                  if [ -z "$LABELS" ]; then
-                    LABELS="none"
-                  fi
-
-                  BODY_CONTENT="${{ github.event.issue.body }}"
-                  if [ ${#BODY_CONTENT} -gt 300 ]; then
-                    BODY_CONTENT="${BODY_CONTENT:0:300}..."
-                  fi
-
-                  REPO="${{ github.repository }}"
-                  REPO_MD="[$REPO](https://github.com/$REPO)"
-
-                  PAYLOAD=$(jq -n \
-                    --arg title "${{ github.event.issue.title }}" \
-                    --arg url "${{ github.event.issue.html_url }}" \
-                    --arg number "${{ github.event.issue.number }}" \
-                    --arg actor "${{ github.actor }}" \
-                    --arg avatar "${{ github.event.sender.avatar_url }}" \
-                    --arg action "${{ github.event.action }}" \
-                    --arg body "$BODY_CONTENT" \
-                    --arg labels "$LABELS" \
-                    --arg created "${{ github.event.issue.created_at }}" \
-                    --arg repo "$REPO_MD" \
-                    --argjson color $COLOR \
-                    '{
-                      username: "GitHub Issues",
-                      avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-                      embeds: [{
-                        title: ("#" + $number + " " + $title),
-                        url: $url,
-                        description: (if $body and $body != "" then $body else "*No description provided*" end),
-                        color: $color,
-                        author: {
-                          name: $actor,
-                          icon_url: $avatar,
-                          url: ("https://github.com/" + $actor)
-                        },
-                        fields: [
-                          {
-                            name: "Repository",
-                            value: $repo,
-                            inline: true
-                          },
-                          {
-                            name: "Status",
-                            value: ($action | ascii_upcase),
-                            inline: true
-                          },
-                          {
-                            name: "Labels",
-                            value: $labels,
-                            inline: false
-                          }
-                        ],
-                        footer: {
-                          text: ("Created • " + ($created | split("T")[0]))
-                        }
-                      }]
-                    }')
-
-                  curl -X POST -H "Content-Type: application/json" \
-                    -d "$PAYLOAD" \
-                    "$WEBHOOK"
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Issue to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ISSUE }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_CREATED: ${{ github.event.issue.created_at }}
+          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
+          ISSUE_ACTION: ${{ github.event.action }}
+          ACTOR: ${{ github.actor }}
+          ACTOR_AVATAR: ${{ github.event.sender.avatar_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          case "$ISSUE_ACTION" in
+            opened)   COLOR=15548997 ;;
+            closed)   COLOR=5763719  ;;
+            reopened) COLOR=15105570 ;;
+          esac
+          LABELS="$ISSUE_LABELS"
+          if [ -z "$LABELS" ]; then
+            LABELS="none"
+          fi
+          BODY_CONTENT="$ISSUE_BODY"
+          if [ ${#BODY_CONTENT} -gt 300 ]; then
+            BODY_CONTENT="${BODY_CONTENT:0:300}..."
+          fi
+          REPO_MD="[$REPO](https://github.com/$REPO)"
+          PAYLOAD=$(jq -n \
+            --arg title "$ISSUE_TITLE" \
+            --arg url "$ISSUE_URL" \
+            --arg number "$ISSUE_NUMBER" \
+            --arg actor "$ACTOR" \
+            --arg avatar "$ACTOR_AVATAR" \
+            --arg action "$ISSUE_ACTION" \
+            --arg body "$BODY_CONTENT" \
+            --arg labels "$LABELS" \
+            --arg created "$ISSUE_CREATED" \
+            --arg repo "$REPO_MD" \
+            --argjson color $COLOR \
+            '{
+              username: "GitHub Issues",
+              avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              embeds: [{
+                title: ("#" + $number + " " + $title),
+                url: $url,
+                description: (if $body and $body != "" then $body else "*No description provided*" end),
+                color: $color,
+                author: {
+                  name: $actor,
+                  icon_url: $avatar,
+                  url: ("https://github.com/" + $actor)
+                },
+                fields: [
+                  { name: "Repository", value: $repo,   inline: true  },
+                  { name: "Status",     value: ($action | ascii_upcase), inline: true },
+                  { name: "Labels",     value: $labels, inline: false }
+                ],
+                footer: {
+                  text: ("Created • " + ($created | split("T")[0]))
+                }
+              }]
+            }')
+          curl -X POST -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$WEBHOOK"

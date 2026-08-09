@@ -5,3 +5,14 @@
 tags
 node_modules
 __pycache__
+.ruff_cache
+
+frappe-semgrep-rules
+typings
+docs
+
+# internal AI working directories (project knowledge caches)
+.claude/knowledge/
+.codex/knowledge/
+
+tmp/

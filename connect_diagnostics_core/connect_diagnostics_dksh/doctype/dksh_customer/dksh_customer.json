@@ -1,0 +1,173 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"autoname": "field:dksh_customer_code",
+	"creation": "2026-08-08 22:00:00.000000",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"dksh_customer_code",
+		"customer",
+		"customer_name",
+		"contact_tax_section",
+		"tax_id",
+		"branch_code",
+		"column_break_contact",
+		"phone",
+		"email_id",
+		"address_section",
+		"address_line1",
+		"address_line2",
+		"city",
+		"county",
+		"column_break_address",
+		"state",
+		"pincode",
+		"country"
+	],
+	"fields": [
+		{
+			"bold": 1,
+			"fieldname": "dksh_customer_code",
+			"fieldtype": "Data",
+			"in_global_search": 1,
+			"in_list_view": 1,
+			"label": "DKSH Customer Code",
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"description": "The CD Customer this DKSH code maps to. Leave blank for a DKSH stand-alone customer with no CD Customer.",
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Customer",
+			"options": "Customer"
+		},
+		{
+			"description": "DKSH's own name for this customer, which may differ from the CD Customer name.",
+			"fieldname": "customer_name",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "Customer Name"
+		},
+		{
+			"fieldname": "contact_tax_section",
+			"fieldtype": "Section Break",
+			"label": "Contact & Tax"
+		},
+		{
+			"fieldname": "tax_id",
+			"fieldtype": "Data",
+			"label": "Tax ID"
+		},
+		{
+			"default": "00000",
+			"fieldname": "branch_code",
+			"fieldtype": "Data",
+			"label": "Branch Code"
+		},
+		{
+			"fieldname": "column_break_contact",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "phone",
+			"fieldtype": "Data",
+			"label": "Phone"
+		},
+		{
+			"fieldname": "email_id",
+			"fieldtype": "Data",
+			"label": "Email",
+			"options": "Email"
+		},
+		{
+			"fieldname": "address_section",
+			"fieldtype": "Section Break",
+			"label": "Address"
+		},
+		{
+			"fieldname": "address_line1",
+			"fieldtype": "Data",
+			"label": "Address Line 1"
+		},
+		{
+			"fieldname": "address_line2",
+			"fieldtype": "Data",
+			"label": "Address Line 2"
+		},
+		{
+			"fieldname": "city",
+			"fieldtype": "Data",
+			"label": "City / Town"
+		},
+		{
+			"fieldname": "county",
+			"fieldtype": "Data",
+			"label": "County"
+		},
+		{
+			"fieldname": "column_break_address",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "state",
+			"fieldtype": "Data",
+			"label": "State / Province"
+		},
+		{
+			"fieldname": "pincode",
+			"fieldtype": "Data",
+			"label": "Postal Code"
+		},
+		{
+			"default": "Thailand",
+			"fieldname": "country",
+			"fieldtype": "Link",
+			"label": "Country",
+			"options": "Country"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2026-08-08 22:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics DKSH",
+	"name": "DKSH Customer",
+	"naming_rule": "By fieldname",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

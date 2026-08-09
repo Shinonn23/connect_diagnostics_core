@@ -1,0 +1,9 @@
+/* Enlarge the navbar app logo.
+ * Frappe sets `.app-logo { width: 24px }` in desk/global.scss. The Connect
+ * Diagnostics logo is a horizontal mark (~2:1), so constrain by height and
+ * let the width scale automatically. */
+header.navbar .navbar-brand .app-logo {
+  width: auto !important;
+  height: 32px !important;
+  max-height: 36px !important;
+}

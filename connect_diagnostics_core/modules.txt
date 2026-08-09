@@ -1,2 +1,6 @@
 Connect Diagnostics Core
-CD Stock
+Connect Diagnostics Stock
+Connect Diagnostics Accounting
+Connect Diagnostics Print
+Connect Diagnostics Regulatory
+Connect Diagnostics DKSH

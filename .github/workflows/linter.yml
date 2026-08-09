@@ -1,9 +1,11 @@
-
 name: Linters
 
 on:
   pull_request:
   workflow_dispatch:
+
+env:
+  PRE_COMMIT_VERSION: "4.6.1"
 
 permissions:
   contents: read
@@ -14,7 +16,7 @@ concurrency:
 
 jobs:
   linter:
-    name: 'Frappe Linter'
+    name: "Frappe Linter"
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
@@ -22,9 +24,20 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.14"
           cache: pip
-      - uses: pre-commit/action@v3.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install Node.js dependencies
+        run: npm ci
+      - name: Run pre-commit
+        run: |
+          python -m pip install "pre-commit==${PRE_COMMIT_VERSION}"
+          pre-commit run --all-files
+        env:
+          SKIP: ty-check
 
       - name: Download Semgrep rules
         run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
@@ -35,13 +48,13 @@ jobs:
           semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
 
   deps-vulnerable-check:
-    name: 'Vulnerable Dependency Check'
+    name: "Vulnerable Dependency Check"
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.14"
 
       - uses: actions/checkout@v4
 

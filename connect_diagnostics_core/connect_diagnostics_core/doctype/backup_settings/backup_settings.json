@@ -1,0 +1,150 @@
+{
+	"actions": [],
+	"allow_bulk_edit": 1,
+	"allow_rename": 1,
+	"creation": "2026-07-07 01:04:59.927010",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"enabled",
+		"backup_interval_hours",
+		"gcs_section",
+		"gcs_project",
+		"bucket_col",
+		"frequent_bucket",
+		"daily_bucket",
+		"monthly_bucket",
+		"mirror_bucket",
+		"status_section",
+		"last_backup_on",
+		"last_backup_status",
+		"last_daily_on",
+		"last_monthly_on",
+		"last_mirror_on",
+		"last_error"
+	],
+	"fields": [
+		{
+			"default": "0",
+			"fieldname": "enabled",
+			"fieldtype": "Check",
+			"label": "Enabled"
+		},
+		{
+			"default": "6",
+			"description": "Minimum hours between runs. Each run uploads the database backup to the frequent bucket and mirrors files.",
+			"fieldname": "backup_interval_hours",
+			"fieldtype": "Int",
+			"label": "Backup Interval (Hours)"
+		},
+		{
+			"fieldname": "gcs_section",
+			"fieldtype": "Section Break",
+			"label": "Google Cloud Storage"
+		},
+		{
+			"description": "Optional. Leave blank to use the project inferred from Application Default Credentials.",
+			"fieldname": "gcs_project",
+			"fieldtype": "Data",
+			"label": "GCP Project ID"
+		},
+		{
+			"fieldname": "bucket_col",
+			"fieldtype": "Column Break"
+		},
+		{
+			"description": "Database + config, every run. Set a short lifecycle (e.g. delete > 7 days) on GCP.",
+			"fieldname": "frequent_bucket",
+			"fieldtype": "Data",
+			"label": "Frequent Bucket (DB)"
+		},
+		{
+			"description": "Database + config, once per calendar day. Set a medium lifecycle (e.g. delete > 30 days).",
+			"fieldname": "daily_bucket",
+			"fieldtype": "Data",
+			"label": "Daily Bucket (DB)"
+		},
+		{
+			"description": "Database + config, once per calendar month. No deletion lifecycle = kept forever.",
+			"fieldname": "monthly_bucket",
+			"fieldtype": "Data",
+			"label": "Monthly Bucket (DB)"
+		},
+		{
+			"description": "Public + private files are mirrored here (never included in the database backups). Additive only: files are never deleted from the bucket. Enable Object Versioning to keep history of overwritten files.",
+			"fieldname": "mirror_bucket",
+			"fieldtype": "Data",
+			"label": "File Mirror Bucket"
+		},
+		{
+			"fieldname": "status_section",
+			"fieldtype": "Section Break",
+			"label": "Status"
+		},
+		{
+			"fieldname": "last_backup_on",
+			"fieldtype": "Datetime",
+			"label": "Last Backup On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "last_backup_status",
+			"fieldtype": "Select",
+			"label": "Last Backup Status",
+			"options": "\nSuccess\nFailed",
+			"read_only": 1
+		},
+		{
+			"fieldname": "last_daily_on",
+			"fieldtype": "Date",
+			"label": "Last Daily Upload On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "last_monthly_on",
+			"fieldtype": "Data",
+			"label": "Last Monthly Upload (YYYY-MM)",
+			"read_only": 1
+		},
+		{
+			"fieldname": "last_mirror_on",
+			"fieldtype": "Datetime",
+			"label": "Last Mirror On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "last_error",
+			"fieldtype": "Small Text",
+			"label": "Last Error",
+			"read_only": 1
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"issingle": 1,
+	"links": [],
+	"modified": "2026-07-07 01:17:46.628773",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Core",
+	"name": "Backup Settings",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"print": 1,
+			"read": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"rows_threshold_for_grid_search": 20,
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

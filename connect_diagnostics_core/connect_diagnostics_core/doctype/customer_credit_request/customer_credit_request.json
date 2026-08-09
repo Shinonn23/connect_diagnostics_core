@@ -1,0 +1,207 @@
+{
+	"actions": [],
+	"allow_bulk_edit": 1,
+	"allow_rename": 1,
+	"autoname": "naming_series:",
+	"creation": "2026-07-24 17:36:14.003404",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"naming_series",
+		"customer",
+		"company",
+		"requested_credit_limit",
+		"payment_terms",
+		"reason",
+		"review_reason",
+		"credit_request_state",
+		"approved_by",
+		"approved_on",
+		"credit_applied",
+		"amended_from"
+	],
+	"fields": [
+		{
+			"default": "CCR-.#####",
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"hidden": 1,
+			"label": "Series",
+			"options": "CCR-.#####",
+			"read_only": 1
+		},
+		{
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Customer",
+			"options": "Customer",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Company",
+			"options": "Company",
+			"read_only": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "requested_credit_limit",
+			"fieldtype": "Currency",
+			"in_list_view": 1,
+			"label": "Requested Credit Limit",
+			"non_negative": 1,
+			"options": "Company:company:default_currency",
+			"reqd": 1
+		},
+		{
+			"fieldname": "payment_terms",
+			"fieldtype": "Link",
+			"label": "Payment Terms",
+			"options": "Payment Terms Template",
+			"reqd": 1
+		},
+		{
+			"fieldname": "reason",
+			"fieldtype": "Small Text",
+			"label": "Reason",
+			"reqd": 1
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "review_reason",
+			"fieldtype": "Small Text",
+			"label": "Review Reason"
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "credit_request_state",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Credit Request State",
+			"no_copy": 1,
+			"options": "Workflow State",
+			"read_only": 1
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "approved_by",
+			"fieldtype": "Link",
+			"label": "Approved By",
+			"no_copy": 1,
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "approved_on",
+			"fieldtype": "Datetime",
+			"label": "Approved On",
+			"no_copy": 1,
+			"read_only": 1
+		},
+		{
+			"allow_on_submit": 1,
+			"default": "0",
+			"fieldname": "credit_applied",
+			"fieldtype": "Check",
+			"label": "Credit Applied",
+			"no_copy": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "amended_from",
+			"fieldtype": "Link",
+			"label": "Amended From",
+			"no_copy": 1,
+			"options": "Customer Credit Request",
+			"print_hide": 1,
+			"read_only": 1,
+			"search_index": 1
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"is_submittable": 1,
+	"links": [],
+	"modified": "2026-07-24 17:36:14.003404",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Core",
+	"name": "Customer Credit Request",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales User",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Customer Accounting Reviewer",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Customer Credit Approver",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		},
+		{
+			"amend": 1,
+			"cancel": 1,
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"rows_threshold_for_grid_search": 20,
+	"sort_field": "creation",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

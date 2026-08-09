@@ -1,104 +1,33 @@
-import inspect
-import re
-from typing import cast
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
 
-import frappe
-from erpnext.setup.doctype.employee.employee import Employee
-from frappe import throw
-from frappe.model.naming import make_autoname
+from __future__ import annotations
+
+from typing import Any
+
 from frappe.utils import getdate
 
-
-def _apply_autoname_tokens(
-	format_pattern: str,
-	thai_year_2: str,
-	thai_year_4: str,
-	thai_month: str,
-	thai_day: str,
-) -> str:
-	token_values = {
-		"YYYY": thai_year_4,
-		"YY": thai_year_2,
-		"MM": thai_month,
-		"DD": thai_day,
-	}
-
-	resolved = format_pattern
-	for token, value in token_values.items():
-		resolved = resolved.replace(f"{{{token}}}", value)
-
-	# Keep backward compatibility with legacy non-brace token format.
-	for token, value in token_values.items():
-		resolved = re.sub(token, value, resolved)
-
-	# Handle hash sequences of any length, e.g. {##} -> ##, {###} -> ###, etc.
-	# and we just leave legacy ## or ### without braces as they are.
-	resolved = re.sub(r"\{(#+)\}", r"\1", resolved)
-
-	return resolved
+BUDDHIST_ERA_YEAR_OFFSET = 543
 
 
-def set_thai_employee_name(doc: Employee, method: str) -> None:
-	if method != "validate":
-		return
+def _get_series_date(doc: Any):
+    if doc:
+        for fieldname in ("posting_date", "transaction_date", "date", "date_of_joining"):
+            value = doc.get(fieldname) if hasattr(doc, "get") else getattr(doc, fieldname, None)
+            if value:
+                return getdate(value)
 
-	first_name: str = cast(str, doc.get("custom_first_name_th") or "").strip()
-	last_name: str = cast(str, doc.get("custom_last_name_th") or "").strip()
-
-	if first_name and last_name:
-		doc.custom_full_name_th = f"{first_name} {last_name}"
-
-
-def _resolve_employee_autoname_pattern(
-	doc: Employee,
-	thai_year_2: str,
-	thai_year_4: str,
-	thai_month: str,
-	thai_day: str,
-) -> str:
-	employment_type = cast(str, doc.get("employment_type") or "").strip()
-
-	if employment_type:
-		custom_format = cast(
-			str,
-			frappe.db.get_value("Employment Type", employment_type, "custom_format") or "",
-		).strip()
-
-		if custom_format:
-			return _apply_autoname_tokens(
-				custom_format,
-				thai_year_2,
-				thai_year_4,
-				thai_month,
-				thai_day,
-			)
-
-	# Legacy format from old logic: Thai 2-digit year + 2-digit month + running sequence
-	return f"{thai_year_2}{thai_month}.###"
+    return getdate()
 
 
-def autoname(doc: Employee, _method: str) -> None:
-	joining_date = getdate(doc.date_of_joining) if doc.date_of_joining else None
-	if not joining_date:
-		current_line = inspect.currentframe().f_lineno or 0
+def parse_buddhist_era_naming_series_variable(doc: Any, variable: str) -> str | None:
+    series_date = _get_series_date(doc)
+    buddhist_year = series_date.year + BUDDHIST_ERA_YEAR_OFFSET
 
-		throw(
-			f"Cannot generate autoname: joining date is not available. File: {__file__}, Line: {current_line}"
-		)
-		return
-	thai_year_4: str = str(joining_date.year + 543)
-	thai_year_2: str = thai_year_4[-2:]
-	thai_month: str = f"{joining_date.month:02d}"
-	thai_day: str = f"{joining_date.day:02d}"
-	autoname_pattern = _resolve_employee_autoname_pattern(
-		doc,
-		thai_year_2,
-		thai_year_4,
-		thai_month,
-		thai_day,
-	)
-	doc.name = make_autoname(autoname_pattern)
+    if variable == "YYYY-BE":
+        return str(buddhist_year)
 
+    if variable == "YY-BE":
+        return f"{buddhist_year % 100:02d}"
 
-def validate(doc: Employee, _method: str):
-	set_thai_employee_name(doc, _method)
+    return None

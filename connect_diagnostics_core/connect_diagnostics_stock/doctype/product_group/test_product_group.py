@@ -1,0 +1,35 @@
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from __future__ import annotations
+
+import frappe
+from frappe.tests import IntegrationTestCase
+
+TEST_NAME = "_Test Product Group"
+
+
+class TestProductGroup(IntegrationTestCase):
+    def tearDown(self) -> None:
+        if frappe.db.exists("Product Group", TEST_NAME):
+            frappe.delete_doc("Product Group", TEST_NAME)
+        super().tearDown()
+
+    def test_names_document_by_product_group_name(self) -> None:
+        doc = frappe.get_doc({"doctype": "Product Group", "product_group_name": TEST_NAME}).insert(
+            ignore_permissions=True
+        )
+        self.assertEqual(doc.name, TEST_NAME)
+
+    def test_requires_product_group_name(self) -> None:
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc({"doctype": "Product Group"}).insert(ignore_permissions=True)
+
+    def test_rejects_duplicate_product_group_name(self) -> None:
+        frappe.get_doc({"doctype": "Product Group", "product_group_name": TEST_NAME}).insert(
+            ignore_permissions=True
+        )
+        with self.assertRaises(frappe.DuplicateEntryError):
+            frappe.get_doc({"doctype": "Product Group", "product_group_name": TEST_NAME}).insert(
+                ignore_permissions=True
+            )

@@ -1,0 +1,148 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            - developments
+            - user-acceptance-testing
+            - production
+    workflow_dispatch:
+        inputs:
+            target_environment:
+                description: Environment to deploy
+                required: true
+                type: choice
+                options:
+                    - DEV
+                    - UAT
+                    - PROD
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
+        concurrency:
+            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
+            cancel-in-progress: false
+
+        steps:
+            - name: Configure SSH
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+              run: |
+                  set -Eeuo pipefail
+                  if [[ -z "$SSH_PRIVATE_KEY" || -z "$SSH_KNOWN_HOSTS" ]]; then
+                    echo "Required SSH secrets are not configured." >&2
+                    exit 1
+                  fi
+
+                  install -d -m 700 "$HOME/.ssh"
+                  umask 077
+                  printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/google_compute_engine"
+                  printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+                  chmod 600 "$HOME/.ssh/google_compute_engine" "$HOME/.ssh/known_hosts"
+
+            - name: Update Bench
+              env:
+                  BENCH_PATH: ${{ vars.BENCH_PATH }}
+                  DEPLOY_HOST: ${{ (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || (github.event_name == 'push' && github.ref_name == 'developments')) && '34.143.156.218') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'UAT') || (github.event_name == 'push' && github.ref_name == 'user-acceptance-testing')) && '136.110.8.47') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'PROD') || (github.event_name == 'push' && github.ref_name == 'production')) && '34.87.7.164') || '' }}
+              run: |
+                  set -Eeuo pipefail
+                  if [[ -z "$DEPLOY_HOST" ]]; then
+                    echo "Deployment host could not be resolved for the selected environment." >&2
+                    exit 1
+                  fi
+                  if [[ -z "$BENCH_PATH" ]]; then
+                    echo "BENCH_PATH is not configured for the selected environment." >&2
+                    exit 1
+                  fi
+                  if [[ ! "$BENCH_PATH" =~ ^/[A-Za-z0-9._/-]+$ ]]; then
+                    echo "BENCH_PATH must be an absolute path containing only safe characters." >&2
+                    exit 1
+                  fi
+
+                  printf -v quoted_bench_path '%q' "$BENCH_PATH"
+                  ssh \
+                    -i "$HOME/.ssh/google_compute_engine" \
+                    -o BatchMode=yes \
+                    -o ConnectTimeout=30 \
+                    -o ServerAliveInterval=30 \
+                    -o ServerAliveCountMax=6 \
+                    -o StrictHostKeyChecking=yes \
+                    -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+                    "erp@${DEPLOY_HOST}" \
+                    "bash -s -- ${quoted_bench_path}" <<'REMOTE_SCRIPT'
+                  set -Eeuo pipefail
+                  bench_path=$1
+                  export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+
+                  if [[ ! -d "$bench_path" ]]; then
+                    echo "Configured Bench directory does not exist." >&2
+                    exit 1
+                  fi
+                  if ! command -v flock >/dev/null 2>&1; then
+                    echo "flock is not installed on the deployment host." >&2
+                    exit 1
+                  fi
+
+                  export NVM_DIR="$HOME/.nvm"
+                  if [[ ! -r "$NVM_DIR/nvm.sh" ]]; then
+                    echo "NVM is not installed on the deployment host." >&2
+                    exit 1
+                  fi
+                  set +u
+                  if ! . "$NVM_DIR/nvm.sh"; then
+                    set -u
+                    echo "NVM could not be initialized on the deployment host." >&2
+                    exit 1
+                  fi
+                  if ! nvm use --silent 24 >/dev/null; then
+                    set -u
+                    echo "Node.js 24 is not installed for the deployment user." >&2
+                    exit 1
+                  fi
+                  set -u
+
+                  for command_name in node npm yarn; do
+                    if ! command_path=$(command -v "$command_name"); then
+                      echo "Required deployment command was not found: $command_name." >&2
+                      exit 1
+                    fi
+                    if [[ "$command_path" != /* || ! -x "$command_path" ]]; then
+                      echo "Required deployment command is not executable: $command_name." >&2
+                      exit 1
+                    fi
+                    if ! "$command_name" --version >/dev/null; then
+                      echo "Required deployment command failed its version check: $command_name." >&2
+                      exit 1
+                    fi
+                  done
+                  if [[ "$(node --version)" != v24.* ]]; then
+                    echo "Node.js 24 is required for deployment." >&2
+                    exit 1
+                  fi
+
+                  if ! bench_executable=$(command -v bench); then
+                    echo "Bench executable was not found in the deployment PATH." >&2
+                    exit 1
+                  fi
+                  if [[ "$bench_executable" != /* || ! -x "$bench_executable" ]]; then
+                    echo "Bench executable is missing or not executable." >&2
+                    exit 1
+                  fi
+
+                  exec 9>"$bench_path/.github-deploy.lock"
+                  if ! flock --exclusive --timeout 3600 9; then
+                    echo "Timed out after 60 minutes waiting for the deployment lock." >&2
+                    exit 1
+                  fi
+
+                  cd "$bench_path"
+                  "$bench_executable" update --reset
+                  REMOTE_SCRIPT

@@ -2,11 +2,14 @@
 name = "connect_diagnostics_core"
 authors = [{ name = "Siwat Sroisuwan", email = "siwat61719@gmail.com" }]
 description = "Custom app for Connect Diagnostics to manage and implement company-specific business logic, workflows, and processes on ERPNext."
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
+    "pythainlp==5.3.4",
+    "xlsxwriter==3.2.9",
+    "google-cloud-storage==3.12.0"
 ]
 
 [build-system]
@@ -19,8 +22,8 @@ build-backend = "flit_core.buildapi"
 
 [tool.ruff]
 line-length = 110
-target-version = "py310"
-exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**"]
+target-version = "py313"
+exclude = ["**/*_generated.py", "**/__pycache__/**", "**/node_modules/**", "**/typings/**"]
 
 
 [tool.ruff.lint]
@@ -44,11 +47,8 @@ typing-modules = ["frappe.types.DF"]
 
 [tool.ruff.format]
 quote-style = "double"
-indent-style = "tab"
-docstring-code-format = false
+indent-style = "space"
+docstring-code-format = true
 
-[tool.pyright]
-typeCheckingMode = "strict"
-reportUnknownMemberType = false
-reportUntypedFunctionDecorator = false
-reportUnknownVariableType = false
+[tool.ty.environment]
+python = "../../env/bin/python"

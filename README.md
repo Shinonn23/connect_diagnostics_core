@@ -1,10 +1,19 @@
-### Connect Diagnostics Core
+# Connect Diagnostics Core
 
-Custom app for Connect Diagnostics to manage and implement company-specific business logic, workflows, and processes on ERPNext.
+Custom ERPNext app for [Connect Diagnostics](https://connectdiagnostics.com) — extends Frappe/ERPNext with company-specific business logic, workflows, and processes for the healthcare diagnostics industry.
 
-### Installation
+Built on the [Frappe Framework](https://frappeframework.com) with [ERPNext](https://erpnext.com), [ERPNext Thailand](https://github.com/aakvatech-labs/erpnext_thailand), and [HRMS](https://github.com/frappe/hrms) as required dependencies.
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+## What It Does
+
+| Area                 | Customizations                                                                                 |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| **Stock & Products** | Product registration with Thai FDA tracking, regulation classes, shipping/storage conditions   |
+| **HR & Employees**   | Employee autoname with Thai Buddhist year format, employment type validation                   |
+| **CRM**              | Customer and contact extensions                                                                |
+| **Custom Fields**    | Extended standard DocTypes (Item, Item Barcode, Item Default) via `cd_` prefixed custom fields |
+
+## Installation
 
 ```bash
 cd $PATH_TO_YOUR_BENCH
@@ -12,29 +21,34 @@ bench get-app $URL_OF_THIS_REPO --branch develop
 bench install-app connect_diagnostics_core
 ```
 
-### Contributing
+**Required apps** (installed automatically):
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+- `erpnext`
+- `erpnext_thailand`
+- `hrms`
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide covering:
+
+- Code style and conventions
+- Branch and PR rules
+- AI-assisted development workflow (Claude Code commands and pipeline)
+
+Quick setup:
 
 ```bash
 cd apps/connect_diagnostics_core
 pre-commit install
 ```
 
-Pre-commit is configured to use the following tools for checking and formatting your code:
+## CI
 
-- ruff
-- eslint
-- prettier
-- pyupgrade
+GitHub Actions workflows:
 
-### CI
+- **CI** — installs the app and runs unit tests on every push to `developments`
+- **Linters** — runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request
 
-This app can use GitHub Actions for CI. The following workflows are configured:
+## License
 
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
-### License
-
-bsl-1.0
+[bsl-1.0](./license.txt)
