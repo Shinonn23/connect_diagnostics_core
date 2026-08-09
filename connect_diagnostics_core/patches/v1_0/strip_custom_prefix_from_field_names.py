@@ -62,6 +62,12 @@ def execute():
         if not frappe.db.has_column(doctype, old):
             continue  # fresh install or already migrated
 
+        if field_def is None:
+            # New name was retired (not defined in setup/) — there is no destination
+            # column to copy into, so just drop the orphan legacy column.
+            _drop_old(doctype, old)
+            continue
+
         _ensure_new_field(doctype, new, field_def)
         table = frappe.qb.DocType(_ident(doctype))
         new_col, old_col = _ident(new), _ident(old)
