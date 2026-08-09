@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.35.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.34.1...v0.35.0) (2026-08-09)
+
+
+### Features
+
+* add Thai payroll foundation and Employee payroll fields ([10fb67d](https://github.com/Shinonn23/connect_diagnostics_core/commit/10fb67db4b6d36cf09721996839ec2440a22b935))
+* add Thai payroll foundation and Employee payroll fields ([7e649ed](https://github.com/Shinonn23/connect_diagnostics_core/commit/7e649ed43d13990451d6611b544c86f8fe44bda0))
+
 ## [0.34.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.34.0...v0.34.1) (2026-08-09)
 
 
