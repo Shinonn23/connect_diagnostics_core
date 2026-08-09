@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.36.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.35.0...v0.36.0) (2026-08-09)
+
+
+### Features
+
+* **regulatory:** add medical device regulatory master ([fd684d8](https://github.com/Shinonn23/connect_diagnostics_core/commit/fd684d8df0e45cac9b4dc282acca40538f5b2e66))
+
+
+### Tests
+
+* **workspace:** cover regulatory navigation ([194a3ed](https://github.com/Shinonn23/connect_diagnostics_core/commit/194a3ed17b5f113b5ff6674394b514d5499e3779))
+
 ## [0.35.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.34.1...v0.35.0) (2026-08-09)
 
 
