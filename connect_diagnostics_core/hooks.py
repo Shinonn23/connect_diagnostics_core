@@ -206,6 +206,9 @@ doc_events = {
         ),
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
+    "Salary Slip": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
+    },
     "Bank Account": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
     },
@@ -313,6 +316,10 @@ before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 # recorded from the template by api.frappe.print_log.register_print.
 override_whitelisted_methods = {
     "frappe.utils.print_format.download_pdf": ("connect_diagnostics_core.api.frappe.print_log.download_pdf"),
+}
+
+extend_doctype_class = {
+    "Payroll Entry": "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryReviewMixin",
 }
 
 # each overriding function accepts a `data` argument;
