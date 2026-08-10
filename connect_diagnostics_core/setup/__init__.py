@@ -9,11 +9,13 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from connect_diagnostics_core.setup import (
     account,
+    accounting_dimension,
     contact,
     currency_exchange,
     customer,
     customer_onboarding,
     delivery_note,
+    department,
     employee,
     item,
     item_barcode,
@@ -48,6 +50,7 @@ _MODULES = (
     customer,
     customer_onboarding,
     delivery_note,
+    department,
     employee,
     item,
     item_barcode,
@@ -91,6 +94,7 @@ def apply_all() -> None:
                     for_doctype=fieldname is None,
                     validate_fields_for_doctype=False,
                 )
+    accounting_dimension.ensure_configuration()
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     payroll.ensure_configuration()

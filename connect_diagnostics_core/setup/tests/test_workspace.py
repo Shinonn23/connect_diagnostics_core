@@ -91,6 +91,22 @@ def sidebar_documents() -> dict[str, FakeDocument]:
                 sidebar_link("Subscription Settings", child=1),
             ],
         ),
+        "HR Setup": FakeDocument(
+            name="HR Setup",
+            items=[
+                sidebar_link("Employee"),
+                sidebar_section("Setup"),
+                sidebar_link("Department", child=1),
+            ],
+        ),
+        "Payroll": FakeDocument(
+            name="Payroll",
+            items=[
+                sidebar_link("Payroll Entry"),
+                sidebar_section("Setup"),
+                sidebar_link("Salary Structure", child=1),
+            ],
+        ),
         workspace.REGULATORY_WORKSPACE: FakeDocument(name=workspace.REGULATORY_WORKSPACE, items=[]),
     }
 
