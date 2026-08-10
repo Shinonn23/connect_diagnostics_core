@@ -9,10 +9,15 @@ from connect_diagnostics_core.setup import employee
 
 THAI_PAYROLL_FIELDS = {
     "thai_payroll_section": "Section Break",
-    "national_id": "Data",
-    "social_security_id": "Data",
     "social_security_eligible": "Check",
     "provident_fund_rate": "Percent",
+}
+
+NATIONAL_ID_FIELDS = {
+    "national_id_section": "Section Break",
+    "national_id": "Data",
+    "national_id_display": "Data",
+    "social_security_id": "Data",
 }
 
 
@@ -36,12 +41,24 @@ class TestEmployeeCustomFields(UnitTestCase):
             with self.subTest(fieldname=fieldname):
                 self.assertEqual(self._field(fieldname)["fieldtype"], fieldtype)
 
+    def test_national_id_fields_exist_with_expected_types(self) -> None:
+        for fieldname, fieldtype in NATIONAL_ID_FIELDS.items():
+            with self.subTest(fieldname=fieldname):
+                self.assertEqual(self._field(fieldname)["fieldtype"], fieldtype)
+
     def test_thai_payroll_insert_after_chain_is_contiguous(self) -> None:
         self.assertEqual(self._field("thai_payroll_section")["insert_after"], "payroll_cost_center")
-        self.assertEqual(self._field("national_id")["insert_after"], "thai_payroll_section")
-        self.assertEqual(self._field("social_security_id")["insert_after"], "national_id")
-        self.assertEqual(self._field("social_security_eligible")["insert_after"], "social_security_id")
+        self.assertEqual(self._field("social_security_eligible")["insert_after"], "thai_payroll_section")
         self.assertEqual(self._field("provident_fund_rate")["insert_after"], "social_security_eligible")
+
+    def test_national_id_insert_after_chain_is_contiguous(self) -> None:
+        self.assertEqual(self._field("national_id_section")["insert_after"], "place_of_issue")
+        self.assertEqual(self._field("national_id")["insert_after"], "national_id_section")
+        self.assertEqual(self._field("national_id_display")["insert_after"], "national_id")
+        self.assertEqual(self._field("social_security_id")["insert_after"], "national_id_display")
+
+    def test_national_id_display_is_read_only(self) -> None:
+        self.assertEqual(self._field("national_id_display").get("read_only"), 1)
 
     def test_provident_fund_rate_has_no_default(self) -> None:
         field = self._field("provident_fund_rate")
@@ -57,3 +74,4 @@ class TestEmployeeCustomFields(UnitTestCase):
         }
 
         self.assertTrue(THAI_PAYROLL_FIELDS.keys().isdisjoint(required))
+        self.assertTrue(NATIONAL_ID_FIELDS.keys().isdisjoint(required))
