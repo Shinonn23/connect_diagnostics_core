@@ -274,6 +274,9 @@ doc_events = {
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
     },
+    "Employee": {
+        "validate": "connect_diagnostics_core.api.erpnext.employee.normalize_national_id",
+    },
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
     },

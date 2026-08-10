@@ -5,11 +5,22 @@
   DocTypes are HRMS's (Salary Component / Structure / Structure Assignment / Income Tax Slab /
   Payroll Period / Salary Slip); `erpnext_thailand` covers only creditor withholding (ภงด3/53),
   **not** employee personal income tax.
-- Employee payroll fields live in the **Thai Payroll** section of `setup/employee.py`
-  `CUSTOM_FIELDS`: `national_id` (13-digit citizen ID; doubles as the personal tax ID for
-  ภงด1/ภงด1ก — Employee otherwise stores only `passport_number`), `social_security_id`,
-  `social_security_eligible`, and `provident_fund_rate` (Percent, per-employee, **no default** —
-  real rates differ, e.g. 3% / 7.5%). No property setter makes any of the four required.
+- Employee payroll fields live in `setup/employee.py` `CUSTOM_FIELDS`, split across two sections.
+  The **Thai Payroll** section (Overview tab) holds only genuine payroll settings:
+  `social_security_eligible` and `provident_fund_rate` (Percent, per-employee, **no default** —
+  real rates differ, e.g. 3% / 7.5%). The **National ID & Social Security** section (Personal
+  Details tab, right after Passport Details) holds identity data instead: `national_id` (13-digit
+  citizen ID, stored as plain digits — no dashes; doubles as the personal tax ID for ภงด1/ภงด1ก —
+  Employee otherwise stores only `passport_number`), the read-only `national_id_display`
+  (auto-formatted `X-XXXX-XXXXX-XX-X`), and `social_security_id`. No property setter makes any of
+  these five required.
+- `national_id`/`national_id_display` are kept consistent by
+  `connect_diagnostics_core.api.erpnext.employee.normalize_national_id`, wired as the Employee
+  `validate` hook (`hooks.py`): it strips non-digits from `national_id`, `frappe.throw()`s unless
+  exactly 13 digits remain with a valid check digit (`has_valid_national_id_checksum`, mod-11 over
+  digits 1-12), and computes `national_id_display` from the cleaned value. Existing records are
+  backfilled once by `patches/v1_0/backfill_national_id_display.py`, which reuses the same length
+  and checksum checks to decide what to skip.
 - `setup/payroll.py` seeds, **create-only-if-absent** so a later manual edit survives: 14 Salary
   Components (8 earnings / 6 deductions), the `Thailand Personal Income Tax` Income Tax Slab, a
   current-year Payroll Period, and the `Connect Diagnostics Monthly` Salary Structure. The

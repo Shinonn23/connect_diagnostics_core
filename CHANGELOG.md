@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.37.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.10...v0.37.0) (2026-08-10)
+
+
+### Features
+
+* relocate national ID fields and format them with checksum validation ([d75650b](https://github.com/Shinonn23/connect_diagnostics_core/commit/d75650bd345b4d1c0b313854ccf028e041b48712))
+* relocate national ID fields and format them with checksum validation ([dbc873c](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbc873c570acd274e8667e32d988261d77f2174a))
+
+
+### Styles
+
+* wrap over-length assertion lines in backfill patch test ([73b68c3](https://github.com/Shinonn23/connect_diagnostics_core/commit/73b68c329ffa1c8ff9a75cd5b7116f29dc773da2))
+
+## [0.36.10](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.9...v0.36.10) (2026-08-09)
+
+
+### Bug Fixes
+
+* drop retired legacy column instead of copying in strip-prefix patch ([8905170](https://github.com/Shinonn23/connect_diagnostics_core/commit/890517017f1bfb06a9ccd5934511c4482f5c01fc))
+
+## [0.36.9](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.8...v0.36.9) (2026-08-09)
+
+
+### Bug Fixes
+
+* drop orphan DKSH-sales patch entries from patches.txt ([8fc058d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8fc058d5ef3e16d6268c79cd1b2d4e292d13a925))
+* drop orphan DKSH-sales patch entries from patches.txt ([eedec67](https://github.com/Shinonn23/connect_diagnostics_core/commit/eedec67baf085efcdc7b8d478e087c43835d85e5))
+
 ## [0.36.8](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.7...v0.36.8) (2026-08-09)
 
 
