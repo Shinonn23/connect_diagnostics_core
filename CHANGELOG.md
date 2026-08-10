@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.37.0...v0.38.0) (2026-08-10)
+
+
+### Features
+
+* **payroll:** require reviewed salary slips ([73b38b4](https://github.com/Shinonn23/connect_diagnostics_core/commit/73b38b45fc9ad50e4240801d6f5e59a2423c44d0))
+
 ## [0.37.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.10...v0.37.0) (2026-08-10)
 
 
