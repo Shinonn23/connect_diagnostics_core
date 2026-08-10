@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.37.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.10...v0.37.0) (2026-08-10)
+
+
+### Features
+
+* relocate national ID fields and format them with checksum validation ([d75650b](https://github.com/Shinonn23/connect_diagnostics_core/commit/d75650bd345b4d1c0b313854ccf028e041b48712))
+* relocate national ID fields and format them with checksum validation ([dbc873c](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbc873c570acd274e8667e32d988261d77f2174a))
+
+
+### Styles
+
+* wrap over-length assertion lines in backfill patch test ([73b68c3](https://github.com/Shinonn23/connect_diagnostics_core/commit/73b68c329ffa1c8ff9a75cd5b7116f29dc773da2))
+
 ## [0.36.10](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.36.9...v0.36.10) (2026-08-09)
 
 
