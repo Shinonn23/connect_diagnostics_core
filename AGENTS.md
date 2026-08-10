@@ -417,6 +417,7 @@ in the same change when a domain's architecture, behavior, or constraints change
 | ------ | -------------------- |
 | Leave notifications | [`.github/domain/leave-notifications.md`](.github/domain/leave-notifications.md) |
 | Thai payroll | [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md) |
+| Accounting dimensions (Department) | [`.github/domain/accounting-dimensions.md`](.github/domain/accounting-dimensions.md) |
 | Payment Request approval | [`.github/domain/payment-approval.md`](.github/domain/payment-approval.md) |
 | Customer onboarding & master data | [`.github/domain/customer-master-data.md`](.github/domain/customer-master-data.md) |
 | Customer sales document requirements | [`.github/domain/sales-requirements.md`](.github/domain/sales-requirements.md) |

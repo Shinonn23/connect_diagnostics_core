@@ -322,7 +322,10 @@ override_whitelisted_methods = {
 }
 
 extend_doctype_class = {
-    "Payroll Entry": "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryReviewMixin",
+    "Payroll Entry": [
+        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryReviewMixin",
+        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryAccountingDimensionMixin",
+    ],
 }
 
 # each overriding function accepts a `data` argument;

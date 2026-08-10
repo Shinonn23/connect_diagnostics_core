@@ -208,6 +208,14 @@ NAVIGATION_GROUPS = (
         name="ERPNext Settings",
         links=(NavigationLink("Backup Settings", "Backup Settings", "DocType"),),
     ),
+    NavigationGroup(
+        name="HR Setup",
+        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
+    ),
+    NavigationGroup(
+        name="Payroll",
+        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
+    ),
 )
 
 SIDEBAR_PLACEMENTS = {
@@ -241,6 +249,10 @@ SIDEBAR_PLACEMENTS = {
         ),
     ),
     "ERPNext Settings": (SidebarPlacement("Backup Settings", section="Other Settings"),),
+    "HR Setup": (SidebarPlacement("Accounting Department", after_link_to="Department", section="Setup"),),
+    "Payroll": (
+        SidebarPlacement("Accounting Department", after_link_to="Salary Structure", section="Setup"),
+    ),
 }
 
 
