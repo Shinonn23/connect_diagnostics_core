@@ -26,8 +26,12 @@ class TestBackfillNationalIdDisplayPatch(UnitTestCase):
         self.assertEqual(
             frappe.db.set_value.call_args_list,
             [
-                call("Employee", "EMP-001", "national_id_display", "3-1004-00828-61-1", update_modified=False),
-                call("Employee", "EMP-002", "national_id_display", "1-0020-03004-00-7", update_modified=False),
+                call(
+                    "Employee", "EMP-001", "national_id_display", "3-1004-00828-61-1", update_modified=False
+                ),
+                call(
+                    "Employee", "EMP-002", "national_id_display", "1-0020-03004-00-7", update_modified=False
+                ),
             ],
         )
 
