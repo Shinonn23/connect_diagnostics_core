@@ -70,6 +70,9 @@ When rules conflict, follow this order:
   (= the `developments` environment). `gh` is authenticated as `Shinonn23`
   (scopes include `repo` + `project`). Run server code via
   `bench --site … console` with `exec(open(f).read(), globals())`.
+- **Salary Slip submission**: submit only through Payroll Entry after every draft slip is
+  reviewed by `HR Manager`; never add a direct Salary Slip submit path. See
+  [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md).
 
 ---
 
