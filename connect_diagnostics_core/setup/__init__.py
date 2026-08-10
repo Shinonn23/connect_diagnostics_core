@@ -55,6 +55,7 @@ _MODULES = (
     item_group,
     journal_entry_account,
     packed_item,
+    payroll,
     payment_approval,
     procure_to_pay,
     regulatory,
