@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.39.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.38.0...v0.39.0) (2026-08-10)
+
+
+### Features
+
+* register Department and Territory accounting dimensions ([41cb149](https://github.com/Shinonn23/connect_diagnostics_core/commit/41cb1494da43381e6e73c6a740c65699bffd3bb3))
+* register Department and Territory accounting dimensions ([8f1db4d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8f1db4d38ce5c03c6f87e79e34d7204c1e807cfc))
+
+
+### Tests
+
+* update Employee insert_after chain for accounting_department ([72d3380](https://github.com/Shinonn23/connect_diagnostics_core/commit/72d3380d4a889b6a33e26689cf4659e450064b9a))
+
 ## [0.38.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.37.0...v0.38.0) (2026-08-10)
 
 
