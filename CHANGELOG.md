@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.40.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.0...v0.40.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **lint:** apply ruff formatting to workflow code ([908f544](https://github.com/Shinonn23/connect_diagnostics_core/commit/908f5445c8951ee28250d727ca68977a589e028e))
+
+
+### Code Refactoring
+
+* **workflow:** make approval workflow the single owner ([8f69c19](https://github.com/Shinonn23/connect_diagnostics_core/commit/8f69c191d1dbe20344b64a28ab19e3d687beba8e))
+
 ## [0.40.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.39.0...v0.40.0) (2026-08-12)
 
 
