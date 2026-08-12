@@ -24,8 +24,8 @@ def before_tests() -> None:
 
 
 def _bootstrap_erpnext_test_records() -> None:
-    """Run ERPNext's own `_Test *` record bootstrap once, with this app's extra
-    mandatory fields supplied.
+    """Run ERPNext's own `_Test *` record bootstrap once per database, with this
+    app's extra mandatory fields supplied.
 
     `erpnext.tests.utils.BootStrapTestData` runs as a module-level side effect the
     first time anything imports `erpnext.tests.utils` -- which normally happens
@@ -38,10 +38,20 @@ def _bootstrap_erpnext_test_records() -> None:
     `_Test Company` / `_Test Warehouse - _TC` / `_Test Item` etc. ever get
     created. Triggering the import here -- before any test runs, with the
     missing fields auto-filled only for the duration of this one call -- makes
-    the bootstrap succeed exactly once; every later lazy import of
-    `erpnext.tests.utils` just reuses Python's cached module without re-running
-    it.
+    the bootstrap succeed.
+
+    Each test category (unit/integration) runs as its own process against the
+    *same* site database, so Python's module cache -- which would otherwise stop
+    a second `import erpnext.tests.utils` from re-running `BootStrapTestData()`
+    -- is reset every time. Without this guard, the second category's run tries
+    to re-insert records the first category's run already committed and dies on
+    a duplicate key. Checking for "_Test Company" makes the whole function
+    idempotent across processes, the same way BootStrapTestData's own per-record
+    existence checks are meant to.
     """
+    if frappe.db.exists("Company", "_Test Company"):
+        return
+
     from frappe.model.document import Document
 
     original_insert = Document.insert
