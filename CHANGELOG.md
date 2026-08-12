@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.40.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.39.0...v0.40.0) (2026-08-12)
+
+
+### Features
+
+* **naming:** standardize operational document numbers ([647983f](https://github.com/Shinonn23/connect_diagnostics_core/commit/647983fe5efa88335d314255536d718a02823d79))
+* **naming:** standardize operational document numbers ([91b1fec](https://github.com/Shinonn23/connect_diagnostics_core/commit/91b1fec3e7fcb0d138de9781e4b65c93b28eecef))
+
+
+### Bug Fixes
+
+* **ci:** normalize naming lint files ([0ccfaba](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ccfaba9310e5f6d06ad4464d8c7d77632ecd102))
+* **naming:** remove unavailable stock count doctype ([8bd7d3e](https://github.com/Shinonn23/connect_diagnostics_core/commit/8bd7d3eebbe7626bd08c3f258835b5e38161cf34))
+
 ## [0.39.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.38.0...v0.39.0) (2026-08-10)
 
 
