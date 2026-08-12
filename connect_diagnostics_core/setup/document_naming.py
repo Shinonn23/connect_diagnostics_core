@@ -20,7 +20,6 @@ SERIES_PATTERN = f"YY-BE.{DATE_TOKEN}.####"
 NAMING_SERIES_PREFIXES: dict[str, tuple[str, ...]] = {
     "Customer Credit Request": ("CCR",),
     "Supplier Bank Change Request": ("SBCR",),
-    "Stock Count": ("SC",),
     "Bank Transaction": ("BT",),
     "Budget": ("BUD",),
     "Cashier Closing": ("CC",),
