@@ -43,11 +43,16 @@ def _bootstrap_erpnext_test_records() -> None:
     Each test category (unit/integration) runs as its own process against the
     *same* site database, so Python's module cache -- which would otherwise stop
     a second `import erpnext.tests.utils` from re-running `BootStrapTestData()`
-    -- is reset every time. Without this guard, the second category's run tries
-    to re-insert records the first category's run already committed and dies on
-    a duplicate key. Checking for "_Test Company" makes the whole function
-    idempotent across processes, the same way BootStrapTestData's own per-record
-    existence checks are meant to.
+    -- is reset every time. The "_Test Company" guard below covers the common
+    case cheaply, but it is not sufficient on its own: MySQL implicitly commits
+    the current transaction on any DDL statement, and creating an Accounting
+    Dimension does exactly that (it adds a Custom Field), so records like the
+    "Department" Accounting Dimension survive a previous category's test
+    rollback even though plain records like Company do not. Passing
+    ``ignore_if_duplicate=True`` into every insert during this bootstrap -- the
+    same flag `Document.insert` already exposes for this exact situation --
+    makes each individual record idempotent too, regardless of which ones
+    happened to survive.
     """
     if frappe.db.exists("Company", "_Test Company"):
         return
@@ -61,6 +66,7 @@ def _bootstrap_erpnext_test_records() -> None:
             self.set("customer_code", self.get("customer_name"))
         elif self.doctype == "Employee" and not str(self.get("employment_type") or "").strip():
             self.set("employment_type", _test_employment_type())
+        kwargs.setdefault("ignore_if_duplicate", True)
         return original_insert(self, *args, **kwargs)
 
     with patch.object(Document, "insert", insert_with_app_mandatory_fields):
