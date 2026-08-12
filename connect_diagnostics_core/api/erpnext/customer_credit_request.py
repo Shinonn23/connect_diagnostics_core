@@ -11,15 +11,19 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
+from connect_diagnostics_core.api.erpnext.workflow import (
+    finalize_if_workflow_inactive,
+    has_active_workflow,
+    initialize_workflow_state,
+)
 from connect_diagnostics_core.setup import customer_onboarding
 
 
 def before_validate(doc: Document, method: str | None = None) -> None:
     """Set server-owned defaults before Frappe validates the credit-request workflow."""
+    initialize_workflow_state(doc)
     if not doc.get("company"):
         doc.set("company", _default_company())
-    if doc.is_new():
-        doc.set("credit_request_state", customer_onboarding.CREDIT_REQUEST_DRAFT_STATE)
 
 
 def validate(doc: Document, method: str | None = None) -> None:
@@ -37,19 +41,17 @@ def validate(doc: Document, method: str | None = None) -> None:
     _validate_protected_fields(doc)
     _validate_rejection_reason(doc)
 
-    if doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_APPROVED_STATE:
-        if customer_onboarding.CREDIT_APPROVER_ROLE not in set(frappe.get_roles()):
-            frappe.throw(_("Only a Customer Credit Approver can approve a Customer Credit Request."))
-
 
 def before_submit(doc: Document, method: str | None = None) -> None:
-    """Reject direct submit attempts that do not represent an approved workflow transition."""
-    if doc.get("credit_request_state") != customer_onboarding.CREDIT_REQUEST_APPROVED_STATE:
-        frappe.throw(_("Customer Credit Request must be approved before submission."))
-    if customer_onboarding.CREDIT_APPROVER_ROLE not in set(frappe.get_roles()):
-        frappe.throw(_("Only a Customer Credit Approver can submit an approved Customer Credit Request."))
-    doc.set("approved_by", frappe.session.user)
-    doc.set("approved_on", now_datetime())
+    """Finalize a credit request when its Workflow is intentionally inactive."""
+    bypassed = finalize_if_workflow_inactive(
+        doc,
+        customer_onboarding.CREDIT_REQUEST_WORKFLOW_STATE_FIELD,
+        customer_onboarding.CREDIT_REQUEST_APPROVED_STATE,
+    )
+    if bypassed:
+        doc.set("approved_by", frappe.session.user)
+        doc.set("approved_on", now_datetime())
 
 
 def on_submit(doc: Document, method: str | None = None) -> None:
@@ -94,7 +96,10 @@ def _validate_protected_fields(doc: Document) -> None:
     previous_doc = doc.get_doc_before_save()
     if not previous_doc:
         return
-    if previous_doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_DRAFT_STATE:
+    if (
+        not has_active_workflow(customer_onboarding.CREDIT_REQUEST_DOCTYPE)
+        or previous_doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_DRAFT_STATE
+    ):
         return
     protected_fields = ("customer", "company", "requested_credit_limit", "payment_terms", "reason")
     changed = [
@@ -109,7 +114,8 @@ def _validate_rejection_reason(doc: Document) -> None:
     if not previous_doc:
         return
     if (
-        previous_doc.get("credit_request_state") == customer_onboarding.PENDING_CREDIT_APPROVAL_STATE
+        has_active_workflow(customer_onboarding.CREDIT_REQUEST_DOCTYPE)
+        and previous_doc.get("credit_request_state") == customer_onboarding.PENDING_CREDIT_APPROVAL_STATE
         and doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_REJECTED_STATE
         and not str(doc.get("review_reason") or "").strip()
     ):

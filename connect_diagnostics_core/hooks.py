@@ -182,6 +182,7 @@ doc_events = {
     "Supplier": {
         "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
+        "before_submit": "connect_diagnostics_core.api.erpnext.supplier.before_submit",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -214,8 +215,8 @@ doc_events = {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
     },
     "Supplier Bank Change Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate_bank_change_request",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
+        "before_submit": "connect_diagnostics_core.api.erpnext.supplier.before_submit_bank_change_request",
         "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
     },
@@ -237,7 +238,6 @@ doc_events = {
     },
     "Purchase Receipt": {
         "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_receipt",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
@@ -262,10 +262,7 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
     },
     "Payment Request": {
-        "before_save": [
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_request_transition",
-            "connect_diagnostics_core.api.erpnext.payment_approval.clear_completed_workflow_actions_for_next_state",
-        ],
+        "before_validate": "connect_diagnostics_core.api.erpnext.payment_approval.before_validate",
         "before_cancel": "connect_diagnostics_core.api.erpnext.payment_approval.set_cancelled_workflow_state",
         "before_discard": "connect_diagnostics_core.api.erpnext.payment_approval.validate_before_discard",
         "before_submit": (
