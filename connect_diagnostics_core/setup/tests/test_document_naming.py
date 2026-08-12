@@ -11,8 +11,8 @@ from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.tests import UnitTestCase
 
-from connect_diagnostics_core.setup import document_naming
 from connect_diagnostics_core.api.erpnext.employee import parse_buddhist_era_naming_series_variable
+from connect_diagnostics_core.setup import document_naming
 
 
 class TestDocumentNaming(UnitTestCase):

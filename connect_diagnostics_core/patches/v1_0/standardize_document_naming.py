@@ -13,4 +13,3 @@ def execute() -> None:
 
     document_naming.apply()
     frappe.db.commit()
-
