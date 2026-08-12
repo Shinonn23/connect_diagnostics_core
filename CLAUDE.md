@@ -71,6 +71,11 @@ When rules conflict, follow this order:
 - **Salary Slip submission**: submit only through Payroll Entry after every draft slip is
   reviewed by `HR Manager`; never add a direct Salary Slip submit path. See
   [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md).
+- **Operational document naming**: automatically numbered transactional and operational
+  DocTypes use `[prefix][YY-BE][MM][####]`; the central registry is
+  `connect_diagnostics_core.setup.document_naming`. The month uses the document date,
+  alternate series are selected from business fields, and company abbreviations are not
+  prepended.
 
 ---
 

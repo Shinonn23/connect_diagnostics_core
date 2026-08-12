@@ -19,10 +19,9 @@ _NATIONAL_ID_CHECKSUM_WEIGHTS = range(13, 1, -1)
 
 def _get_series_date(doc: Any):
     if doc:
-        for fieldname in ("posting_date", "transaction_date", "date", "date_of_joining"):
-            value = doc.get(fieldname) if hasattr(doc, "get") else getattr(doc, fieldname, None)
-            if value:
-                return getdate(value)
+        from connect_diagnostics_core.setup.document_naming import _document_date
+
+        return _document_date(doc)
 
     return getdate()
 
