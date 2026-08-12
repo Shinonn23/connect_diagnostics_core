@@ -21,6 +21,7 @@ def before_tests() -> None:
     """
     frappe.clear_cache()
     _bootstrap_erpnext_test_records()
+    _skip_auto_test_records_for_app_doctypes()
 
 
 def _bootstrap_erpnext_test_records() -> None:
@@ -71,6 +72,24 @@ def _bootstrap_erpnext_test_records() -> None:
 
     with patch.object(Document, "insert", insert_with_app_mandatory_fields):
         import erpnext.tests.utils
+
+
+def _skip_auto_test_records_for_app_doctypes() -> None:
+    """Mark this app's stock doctypes as already handling their own test records.
+
+    IntegrationTestCase.setUpClass calls make_test_records(cls.doctype) for any
+    test that lives in a doctype folder, which walks the full link dependency
+    graph. Our stock doctypes link to Warehouse -> Customer, whose graph reaches
+    the "Payment Gateway" doctype ERPNext v16 removed while leaving a dangling
+    link on "Payment Gateway Account" -- so the walk raises DoesNotExistError
+    before creating anything. These tests build the records they need
+    themselves, so pre-seeding frappe.local.test_objects (preserved across
+    setUpClass because frappe.init is a no-op once initialised) tells the
+    framework to skip the walk. It only suppresses generation for our own
+    doctypes, never ERPNext's.
+    """
+    for doctype in ("Stock Count", "Stock Count Item", "Stock Count Adjustment", "Storage Location"):
+        frappe.local.test_objects.setdefault(doctype, [])
 
 
 def _test_employment_type() -> str:
