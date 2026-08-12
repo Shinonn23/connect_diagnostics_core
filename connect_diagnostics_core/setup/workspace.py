@@ -176,7 +176,10 @@ REGULATORY_LINKS = tuple(link for group in REGULATORY_WORKSPACE_GROUPS for link 
 # its own independent Workspace instead of crowding the existing Stock Workspace.
 # General stock reports/masters (Storage Location, expiry, goods receipt) stay in
 # the existing Stock Workspace since they are not specific to counting.
-STOCK_COUNT_WORKSPACE = "Stock Count"
+STOCK_COUNT_WORKSPACE = "Stock Counting"
+# Deliberately not "Stock Count": Frappe's route-conflict check slugifies every Page,
+# Workspace, and DocType name and rejects duplicates, and the "Stock Count" DocType
+# already owns that slug -- see `frappe.desk.utils.validate_route_conflict`.
 STOCK_COUNT_MODULE = "Connect Diagnostics Stock"
 STOCK_COUNT_ICON = "clipboard-list"
 
