@@ -155,6 +155,7 @@ after_migrate = "connect_diagnostics_core.setup.after_migrate"
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
+    "MM-DOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
 }
 
 # Document Events
@@ -163,7 +164,7 @@ naming_series_variables = {
 
 
 doc_events = {
-    "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
+    "*": {"before_naming": "connect_diagnostics_core.setup.document_naming.set_operational_naming_series"},
     "Customer": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",

@@ -78,6 +78,11 @@ When rules conflict, follow this order:
   data integrity and process routing, but must not duplicate approval gates. When a
   managed Workflow is inactive, its documents bypass approval and finalize through
   the shared workflow bypass helper; Salary Slip still requires Payroll Entry.
+- **Operational document naming**: automatically numbered transactional and operational
+  DocTypes use `[prefix][YY-BE][MM][####]`; the central registry is
+  `connect_diagnostics_core.setup.document_naming`. The month uses the document date,
+  alternate series are selected from business fields, and company abbreviations are not
+  prepended.
 
 ---
 
