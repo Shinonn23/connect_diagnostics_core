@@ -54,8 +54,6 @@ def initialize_workflow_state(doc: Document) -> None:
     state_field = workflow.get("workflow_state_field")
     if not state_field or doc.get(state_field):
         return
-    initial_states = [
-        state for state in workflow.get("states", []) if str(state.get("doc_status")) == "0"
-    ]
+    initial_states = [state for state in workflow.get("states", []) if str(state.get("doc_status")) == "0"]
     if initial_states:
         doc.set(state_field, initial_states[0].get("state"))

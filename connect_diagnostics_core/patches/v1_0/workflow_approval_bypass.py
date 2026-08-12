@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import frappe
 
-
 MANAGED_DOCUMENT_TYPES = (
     "Payment Request",
     "Supplier",
