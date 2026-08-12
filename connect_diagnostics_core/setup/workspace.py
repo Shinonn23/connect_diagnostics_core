@@ -171,6 +171,30 @@ REGULATORY_WORKSPACE_GROUPS = (
 REGULATORY_LINKS = tuple(link for group in REGULATORY_WORKSPACE_GROUPS for link in group.links)
 
 
+# Stock Count's counting + two-tier approval workflow is a distinct operating loop
+# from day-to-day Stock (see the workspace-navigation rule in CLAUDE.md), so it gets
+# its own independent Workspace instead of crowding the existing Stock Workspace.
+# General stock reports/masters (Storage Location, expiry, goods receipt) stay in
+# the existing Stock Workspace since they are not specific to counting.
+STOCK_COUNT_WORKSPACE = "Stock Counting"
+# Deliberately not "Stock Count": Frappe's route-conflict check slugifies every Page,
+# Workspace, and DocType name and rejects duplicates, and the "Stock Count" DocType
+# already owns that slug -- see `frappe.desk.utils.validate_route_conflict`.
+STOCK_COUNT_MODULE = "Connect Diagnostics Stock"
+STOCK_COUNT_ICON = "clipboard-list"
+
+STOCK_COUNT_WORKSPACE_GROUPS = (
+    NavigationGroup(
+        name="Main",
+        links=(NavigationLink("Stock Count", "Stock Count", "DocType"),),
+    ),
+    NavigationGroup(
+        name="Reports",
+        links=(NavigationLink("Variance Summary", "Stock Count Variance", "Report", "Stock Count"),),
+    ),
+)
+
+
 NAVIGATION_GROUPS = (
     NavigationGroup(
         name="Financial Reports",
@@ -197,7 +221,10 @@ NAVIGATION_GROUPS = (
             NavigationLink("Product Group", "Product Group", "DocType"),
             NavigationLink("Regulation Class", "Regulation Class", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
+            NavigationLink("Storage Location", "Storage Location", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
+            NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
+            NavigationLink("Goods Receipt Report", "Goods Receipt Report", "Report", "Purchase Receipt"),
         ),
     ),
     NavigationGroup(
@@ -236,10 +263,13 @@ SIDEBAR_PLACEMENTS = {
     ),
     "Stock": (
         SidebarPlacement("Back Orders", after_link_to="Pick List", icon="list-todo"),
+        SidebarPlacement("Short Expiry Report", after_link_to="Back Orders", icon="calendar-clock"),
+        SidebarPlacement("Goods Receipt Report", after_link_to="Short Expiry Report", icon="package-check"),
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
         SidebarPlacement("Regulation Class", after_link_to="Product Group", section="Setup"),
         SidebarPlacement("Storage Condition", after_link_to="Regulation Class", section="Setup"),
+        SidebarPlacement("Storage Location", after_link_to="Storage Condition", section="Setup"),
     ),
     "Buying": (
         SidebarPlacement(
@@ -259,6 +289,7 @@ SIDEBAR_PLACEMENTS = {
 def ensure_workspace_navigation() -> None:
     """Maintain Connect Diagnostics cards and prioritized module sidebar sections."""
     ensure_regulatory_workspace()
+    ensure_stock_count_workspace()
     for group in NAVIGATION_GROUPS:
         workspace = frappe.get_doc("Workspace", group.name)
         workspace_changed = _repair_stale_parent_page(workspace)
@@ -329,6 +360,170 @@ def ensure_regulatory_workspace() -> None:
         sidebar.insert(ignore_permissions=True)
     elif sidebar_changed:
         _save_sidebar(sidebar)
+
+
+def ensure_stock_count_workspace() -> None:
+    """Create and maintain the independent Stock Count Workspace and its sidebar.
+
+    Unlike Regulatory, there is no pre-existing site to migrate: this workspace
+    and sidebar are wholly app-owned from creation, so a full-replace comparison
+    (rebuild the managed rows, save only if they differ) is sufficient -- no
+    partial reconciliation with unmanaged customizations is needed.
+    """
+    if frappe.db.exists("Workspace", STOCK_COUNT_WORKSPACE):
+        workspace = frappe.get_doc("Workspace", STOCK_COUNT_WORKSPACE)
+    else:
+        workspace = frappe.get_doc(
+            {
+                "doctype": "Workspace",
+                "label": STOCK_COUNT_WORKSPACE,
+                "title": STOCK_COUNT_WORKSPACE,
+                "module": STOCK_COUNT_MODULE,
+                "icon": STOCK_COUNT_ICON,
+                "public": 1,
+                "content": "[]",
+            }
+        )
+
+    changed = False
+    if workspace.get("icon") != STOCK_COUNT_ICON:
+        workspace.set("icon", STOCK_COUNT_ICON)
+        changed = True
+
+    desired_links: list[dict[str, str | int]] = []
+    for group in STOCK_COUNT_WORKSPACE_GROUPS:
+        desired_links.append({"type": "Card Break", "label": group.name, "link_count": 0})
+        desired_links.extend(_workspace_link_values(link) for link in group.links)
+    current_links = _rows(workspace, "links")
+    if len(current_links) != len(desired_links) or not all(
+        _workspace_row_matches(row, values) for row, values in zip(current_links, desired_links, strict=False)
+    ):
+        workspace.set("links", [])
+        for values in desired_links:
+            workspace.append("links", values)
+        _reindex(_rows(workspace, "links"))
+        changed = True
+
+    desired_content = [
+        {"type": "card", "data": {"card_name": group.name, "col": 4}}
+        for group in STOCK_COUNT_WORKSPACE_GROUPS
+    ]
+    if _content_blocks(workspace) != desired_content:
+        workspace.set("content", json.dumps(desired_content, separators=(",", ":")))
+        changed = True
+
+    if workspace.is_new():
+        workspace.insert(ignore_permissions=True)
+    elif changed:
+        workspace.save(ignore_permissions=True)
+
+    _ensure_stock_count_sidebar()
+
+
+def _ensure_stock_count_sidebar() -> None:
+    if frappe.db.exists("Workspace Sidebar", STOCK_COUNT_WORKSPACE):
+        sidebar = frappe.get_doc("Workspace Sidebar", STOCK_COUNT_WORKSPACE)
+    else:
+        sidebar = frappe.get_doc(
+            {
+                "doctype": "Workspace Sidebar",
+                "title": STOCK_COUNT_WORKSPACE,
+                "module": STOCK_COUNT_MODULE,
+                "header_icon": STOCK_COUNT_ICON,
+                "standard": 1,
+                "app": "connect_diagnostics_core",
+                "items": [],
+            }
+        )
+
+    desired_items = _stock_count_sidebar_items()
+    current_items = _rows(sidebar, "items")
+    changed = sidebar.get("header_icon") != STOCK_COUNT_ICON
+    if changed:
+        sidebar.set("header_icon", STOCK_COUNT_ICON)
+    if len(current_items) != len(desired_items) or not all(
+        _sidebar_row_matches(row, values) for row, values in zip(current_items, desired_items, strict=False)
+    ):
+        sidebar.set("items", [])
+        for values in desired_items:
+            sidebar.append("items", values)
+        _reindex(_rows(sidebar, "items"))
+        changed = True
+
+    if sidebar.is_new():
+        sidebar.insert(ignore_permissions=True)
+    elif changed:
+        _save_sidebar(sidebar)
+
+
+def _stock_count_sidebar_items() -> list[dict[str, str | int]]:
+    items: list[dict[str, str | int]] = [
+        {
+            "type": "Link",
+            "label": "Home",
+            "link_type": "Workspace",
+            "link_to": STOCK_COUNT_WORKSPACE,
+            "child": 0,
+            "collapsible": 1,
+            "icon": "home",
+            "indent": 0,
+            "keep_closed": 0,
+            "show_arrow": 0,
+        }
+    ]
+    main_group, reports_group = STOCK_COUNT_WORKSPACE_GROUPS
+    items.extend(
+        {
+            "type": "Link",
+            "label": link.label,
+            "link_type": link.link_type,
+            "link_to": link.link_to,
+            "child": 0,
+            "collapsible": 1,
+            "icon": STOCK_COUNT_ICON,
+            "indent": 0,
+            "keep_closed": 0,
+            "show_arrow": 0,
+            **(
+                {"is_query_report": 1, "report_ref_doctype": link.report_ref_doctype or ""}
+                if link.link_type == "Report"
+                else {}
+            ),
+        }
+        for link in main_group.links
+    )
+    items.append(
+        {
+            "type": "Section Break",
+            "label": reports_group.name,
+            "link_type": "DocType",
+            "child": 0,
+            "collapsible": 1,
+            "icon": "sheet",
+            "indent": 1,
+        }
+    )
+    items.extend(
+        {
+            "type": "Link",
+            "label": link.label,
+            "link_type": link.link_type,
+            "link_to": link.link_to,
+            "child": 1,
+            "collapsible": 1,
+            "icon": "",
+            "indent": 0,
+            "keep_closed": 0,
+            "show_arrow": 0,
+            **(
+                {"is_query_report": 1, "report_ref_doctype": link.report_ref_doctype or ""}
+                if link.link_type == "Report"
+                else {}
+            ),
+        }
+        for link in reports_group.links
+    )
+    return items
 
 
 def snapshot_regulatory_sidebar_customizations() -> None:

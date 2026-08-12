@@ -31,6 +31,7 @@ PRINT_MODULE = "Connect Diagnostics Print"
 PRINT_FORMATS = (
     "Abbreviated Tax Invoice And Receipt",
     "Goods Receipt",
+    "Monthly Count Sheet",
     "Purchase Order",
     "Quotation",
     "Receipt",
@@ -38,6 +39,7 @@ PRINT_FORMATS = (
     "Shipment Box Label",
     "Tax Invoice Delivery Note and Invoice",
     "Withholding Tax Cert CD",
+    "Yearly Count Sheet",
 )
 
 MOVED_DOCTYPES = (

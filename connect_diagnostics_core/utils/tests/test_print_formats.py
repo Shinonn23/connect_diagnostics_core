@@ -15,6 +15,7 @@ PRINT_FORMAT_ROOT = Path(__file__).parents[2] / "connect_diagnostics_print" / "p
 PRINT_FORMAT_FILES = (
     "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json",
     "goods_receipt/goods_receipt.json",
+    "monthly_count_sheet/monthly_count_sheet.json",
     "purchase_order/purchase_order.json",
     "quotation/quotation.json",
     "receipt/receipt.json",
@@ -22,6 +23,7 @@ PRINT_FORMAT_FILES = (
     "shipment_box_label/shipment_box_label.json",
     "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json",
     "withholding_tax_cert_cd/withholding_tax_cert_cd.json",
+    "yearly_count_sheet/yearly_count_sheet.json",
 )
 
 # Print formats that resolve the Customer print configuration; the rest register
@@ -54,7 +56,7 @@ class TestPrintFormats(UnitTestCase):
     def test_print_format_json_files_are_valid(self) -> None:
         print_formats = load_print_formats()
 
-        self.assertEqual(len(print_formats), 9)
+        self.assertEqual(len(print_formats), 11)
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
