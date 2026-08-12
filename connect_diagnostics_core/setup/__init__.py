@@ -37,6 +37,10 @@ from connect_diagnostics_core.setup import (
     sales_order_item,
     sales_requirements,
     sales_taxes_and_charges,
+    stock_count,
+    stock_entry,
+    stock_settings,
+    storage_location,
     supplier,
     uom,
     workspace,
@@ -72,6 +76,8 @@ _MODULES = (
     sales_order_item,
     sales_requirements,
     sales_taxes_and_charges,
+    stock_entry,
+    stock_settings,
     supplier,
     uom,
 )
@@ -95,12 +101,14 @@ def apply_all() -> None:
                     validate_fields_for_doctype=False,
                 )
     accounting_dimension.ensure_configuration()
+    storage_location.ensure_configuration()
     procure_to_pay.ensure_configuration()
     payment_approval.ensure_configuration()
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
     regulatory.ensure_configuration()
+    stock_count.ensure_configuration()
     workspace.ensure_workspace_navigation()
 
 
