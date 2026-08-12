@@ -20,6 +20,36 @@ def before_tests() -> None:
     records under Frappe v16's eager test-record bootstrap.
     """
     frappe.clear_cache()
+    _bootstrap_erpnext_test_records()
+
+
+def _bootstrap_erpnext_test_records() -> None:
+    """Run ERPNext's own `_Test *` record bootstrap once, with Customer Code supplied.
+
+    `erpnext.tests.utils.BootStrapTestData` runs as a module-level side effect the
+    first time anything imports `erpnext.tests.utils` -- which normally happens
+    lazily, triggered by whichever IntegrationTestCase's dependency graph reaches
+    "Company" first via Frappe's `make_test_records`. Its `_Test Customer*` records
+    never set this app's mandatory Customer Code (`connect_diagnostics_core.naming.
+    customer`), so that bootstrap throws "Customer Code is required" wherever it
+    happens to trigger, and none of `_Test Company` / `_Test Warehouse - _TC` /
+    `_Test Item` etc. ever get created. Triggering the import here -- before any
+    test runs, with Customer Code auto-filled from customer_name only for the
+    duration of this one call -- makes the bootstrap succeed exactly once; every
+    later lazy import of `erpnext.tests.utils` just reuses Python's cached module
+    without re-running it.
+    """
+    from frappe.model.document import Document
+
+    original_insert = Document.insert
+
+    def insert_with_customer_code(self, *args, **kwargs):
+        if self.doctype == "Customer" and not str(self.get("customer_code") or "").strip():
+            self.set("customer_code", self.get("customer_name"))
+        return original_insert(self, *args, **kwargs)
+
+    with patch.object(Document, "insert", insert_with_customer_code):
+        import erpnext.tests.utils
 
 
 class TestPrintFormatCleanup(UnitTestCase):
