@@ -24,32 +24,51 @@ def before_tests() -> None:
 
 
 def _bootstrap_erpnext_test_records() -> None:
-    """Run ERPNext's own `_Test *` record bootstrap once, with Customer Code supplied.
+    """Run ERPNext's own `_Test *` record bootstrap once, with this app's extra
+    mandatory fields supplied.
 
     `erpnext.tests.utils.BootStrapTestData` runs as a module-level side effect the
     first time anything imports `erpnext.tests.utils` -- which normally happens
     lazily, triggered by whichever IntegrationTestCase's dependency graph reaches
-    "Company" first via Frappe's `make_test_records`. Its `_Test Customer*` records
-    never set this app's mandatory Customer Code (`connect_diagnostics_core.naming.
-    customer`), so that bootstrap throws "Customer Code is required" wherever it
-    happens to trigger, and none of `_Test Company` / `_Test Warehouse - _TC` /
-    `_Test Item` etc. ever get created. Triggering the import here -- before any
-    test runs, with Customer Code auto-filled from customer_name only for the
-    duration of this one call -- makes the bootstrap succeed exactly once; every
-    later lazy import of `erpnext.tests.utils` just reuses Python's cached module
-    without re-running it.
+    "Company" first via Frappe's `make_test_records`. Its records never set this
+    app's app-specific mandatory fields (Customer Code from
+    `connect_diagnostics_core.naming.customer`, Employee's `employment_type`
+    property setter in `connect_diagnostics_core.setup.employee`), so that
+    bootstrap throws wherever it happens to first need one, and none of
+    `_Test Company` / `_Test Warehouse - _TC` / `_Test Item` etc. ever get
+    created. Triggering the import here -- before any test runs, with the
+    missing fields auto-filled only for the duration of this one call -- makes
+    the bootstrap succeed exactly once; every later lazy import of
+    `erpnext.tests.utils` just reuses Python's cached module without re-running
+    it.
     """
     from frappe.model.document import Document
 
     original_insert = Document.insert
 
-    def insert_with_customer_code(self, *args, **kwargs):
+    def insert_with_app_mandatory_fields(self, *args, **kwargs):
         if self.doctype == "Customer" and not str(self.get("customer_code") or "").strip():
             self.set("customer_code", self.get("customer_name"))
+        elif self.doctype == "Employee" and not str(self.get("employment_type") or "").strip():
+            self.set("employment_type", _test_employment_type())
         return original_insert(self, *args, **kwargs)
 
-    with patch.object(Document, "insert", insert_with_customer_code):
+    with patch.object(Document, "insert", insert_with_app_mandatory_fields):
         import erpnext.tests.utils
+
+
+def _test_employment_type() -> str:
+    """Get-or-create a placeholder Employment Type for the ERPNext bootstrap.
+
+    Its own default Employment Types (if any) aren't a stable name to depend on,
+    so this creates one deterministically instead of guessing.
+    """
+    name = "_Test Employment Type"
+    if not frappe.db.exists("Employment Type", name):
+        frappe.get_doc({"doctype": "Employment Type", "employee_type_name": name}).insert(
+            ignore_permissions=True
+        )
+    return name
 
 
 class TestPrintFormatCleanup(UnitTestCase):

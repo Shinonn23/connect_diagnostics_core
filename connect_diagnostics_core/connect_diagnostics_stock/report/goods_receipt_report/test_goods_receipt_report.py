@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, cast
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
@@ -16,26 +17,23 @@ from connect_diagnostics_core.connect_diagnostics_stock.report.goods_receipt_rep
 
 
 class TestFillExpiryDates(UnitTestCase):
-    def test_fills_expiry_only_for_rows_with_a_batch(self) -> None:
+    @patch.object(goods_receipt_report.frappe, "get_all", return_value=[("_Test GRR Batch", "2027-01-01")])
+    def test_fills_expiry_only_for_rows_with_a_batch(self, mocked_get_all) -> None:
         rows = [
             frappe._dict({"batch_no": "_Test GRR Batch", "expiry_date": None}),
             frappe._dict({"batch_no": None, "expiry_date": None}),
         ]
-        try:
-            if not frappe.db.exists("Batch", "_Test GRR Batch"):
-                frappe.get_doc(
-                    {
-                        "doctype": "Batch",
-                        "batch_id": "_Test GRR Batch",
-                        "item": "_Test Item",
-                        "expiry_date": "2027-01-01",
-                    }
-                ).insert(ignore_permissions=True)
-            goods_receipt_report._fill_expiry_dates(rows)
-            self.assertEqual(str(rows[0].expiry_date), "2027-01-01")
-            self.assertIsNone(rows[1].expiry_date)
-        finally:
-            frappe.delete_doc("Batch", "_Test GRR Batch", force=True, ignore_permissions=True)
+
+        goods_receipt_report._fill_expiry_dates(rows)
+
+        mocked_get_all.assert_called_once_with(
+            "Batch",
+            filters={"name": ("in", ["_Test GRR Batch"])},
+            fields=["name", "expiry_date"],
+            as_list=True,
+        )
+        self.assertEqual(rows[0].expiry_date, "2027-01-01")
+        self.assertIsNone(rows[1].expiry_date)
 
 
 class TestGoodsReceiptReportValidation(IntegrationTestCase):
