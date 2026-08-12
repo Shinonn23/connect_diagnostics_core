@@ -48,6 +48,12 @@ def workspace_documents() -> dict[str, FakeDocument]:
         links=[],
         content="[]",
     )
+    documents[workspace.STOCK_COUNT_WORKSPACE] = FakeDocument(
+        name=workspace.STOCK_COUNT_WORKSPACE,
+        parent_page="",
+        links=[],
+        content="[]",
+    )
     return documents
 
 
@@ -108,6 +114,7 @@ def sidebar_documents() -> dict[str, FakeDocument]:
             ],
         ),
         workspace.REGULATORY_WORKSPACE: FakeDocument(name=workspace.REGULATORY_WORKSPACE, items=[]),
+        workspace.STOCK_COUNT_WORKSPACE: FakeDocument(name=workspace.STOCK_COUNT_WORKSPACE, items=[]),
     }
 
 
@@ -212,9 +219,13 @@ class TestWorkspaceNavigation(UnitTestCase):
             {(row["link_to"], row["report_ref_doctype"], row["is_query_report"]) for row in reports},
             {
                 ("Back Orders", "Sales Order", 1),
+                ("Short Expiry Report", "Item", 1),
+                ("Goods Receipt Report", "Purchase Receipt", 1),
             },
         )
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
+        self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
+        self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
 
     def test_sync_is_idempotent_and_preserves_existing_navigation(self) -> None:
         workspaces = workspace_documents()
@@ -306,6 +317,58 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(settings_item["link_to"], "Medical Device Regulatory Settings")
         self.assertEqual(settings_item["child"], 0)
         self.assertEqual(settings_item["icon"], "settings")
+
+    def test_stock_count_workspace_and_sidebar_are_idempotent(self) -> None:
+        workspaces = workspace_documents()
+        sidebars = sidebar_documents()
+
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
+        ):
+            workspace.ensure_stock_count_workspace()
+            workspace.ensure_stock_count_workspace()
+
+        stock_count_workspace = workspaces[workspace.STOCK_COUNT_WORKSPACE]
+        stock_count_sidebar = sidebars[workspace.STOCK_COUNT_WORKSPACE]
+        expected_groups = [group.name for group in workspace.STOCK_COUNT_WORKSPACE_GROUPS]
+
+        self.assertEqual(stock_count_workspace.save_count, 1)
+        self.assertEqual(stock_count_sidebar.save_count, 1)
+        self.assertEqual(stock_count_workspace["icon"], workspace.STOCK_COUNT_ICON)
+        self.assertEqual(
+            [row["label"] for row in stock_count_workspace["links"] if row.get("type") == "Card Break"],
+            expected_groups,
+        )
+        self.assertEqual(
+            [row["link_to"] for row in stock_count_workspace["links"] if row.get("type") == "Link"],
+            ["Stock Count", "Stock Count Variance"],
+        )
+        self.assertEqual(
+            [block["data"]["card_name"] for block in json.loads(stock_count_workspace["content"])],
+            expected_groups,
+        )
+        self.assertEqual(stock_count_sidebar["header_icon"], workspace.STOCK_COUNT_ICON)
+        sidebar_items = stock_count_sidebar["items"]
+        self.assertEqual(sidebar_items[0]["label"], "Home")
+        self.assertEqual(sidebar_items[0]["link_type"], "Workspace")
+        self.assertEqual(
+            [row["link_to"] for row in sidebar_items if row.get("type") == "Link"],
+            [workspace.STOCK_COUNT_WORKSPACE, "Stock Count", "Stock Count Variance"],
+        )
+        self.assertEqual(
+            [row["label"] for row in sidebar_items if row.get("type") == "Section Break"],
+            ["Reports"],
+        )
+        variance_item = sidebar_items[-1]
+        self.assertEqual(variance_item["link_to"], "Stock Count Variance")
+        self.assertEqual(variance_item["child"], 1)
+        self.assertEqual(variance_item["is_query_report"], 1)
+        self.assertEqual(variance_item["report_ref_doctype"], "Stock Count")
 
     def test_regulatory_navigation_preserves_unmanaged_rows(self) -> None:
         workspaces = workspace_documents()

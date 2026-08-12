@@ -55,7 +55,7 @@ def _approved_stock_count(**overrides: object) -> StockCount:
     doc.db_set("docstatus", 1, update_modified=False)
     doc.db_set("count_state", APPROVED, update_modified=False)
     doc.reload()
-    return cast(StockCount, doc)
+    return doc
 
 
 class TestGenerateHoldingTransfer(IntegrationTestCase):
