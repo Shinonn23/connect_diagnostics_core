@@ -13,19 +13,27 @@ from connect_diagnostics_core.setup import payment_approval as setup
 
 
 class TestPaymentRequestApproval(UnitTestCase):
-    def test_outward_request_requires_approved_state_before_submit(self) -> None:
+    def test_inactive_workflow_finalizes_outward_request_before_submit(self) -> None:
         document = MagicMock()
         document.get.side_effect = lambda fieldname: {
             "payment_request_type": "Outward",
-            setup.WORKFLOW_STATE_FIELD: setup.PENDING_AP_REVIEW_STATE,
+            "company": "Connect Diagnostics",
+            "currency": "THB",
+            "reference_doctype": "Purchase Order",
+            "reference_name": "PO-0001",
         }.get(fieldname)
 
         with (
             patch.object(payment_approval, "_get_previous_doc", return_value=None),
             patch.object(payment_approval, "_validate_payment_request_fields"),
-            self.assertRaises(frappe.ValidationError),
+            patch.object(payment_approval, "_validate_verified_supplier_bank"),
+            patch.object(
+                payment_approval.frappe.db, "get_value", side_effect=[None, "Payment Request Approval"]
+            ),
         ):
             payment_approval.validate_payment_request_before_submit(document, "before_submit")
+
+        document.set.assert_called_once_with(setup.WORKFLOW_STATE_FIELD, setup.APPROVED_STATE)
 
     def test_payment_entry_requires_reference_and_evidence(self) -> None:
         document = MagicMock()

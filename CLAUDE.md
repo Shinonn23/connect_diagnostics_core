@@ -71,6 +71,11 @@ When rules conflict, follow this order:
 - **Salary Slip submission**: submit only through Payroll Entry after every draft slip is
   reviewed by `HR Manager`; never add a direct Salary Slip submit path. See
   [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md).
+- **Approval ownership**: Frappe Workflow is the single owner of approval states,
+  transitions, roles, and approval-required submission. Custom hooks may validate
+  data integrity and process routing, but must not duplicate approval gates. When a
+  managed Workflow is inactive, its documents bypass approval and finalize through
+  the shared workflow bypass helper; Salary Slip still requires Payroll Entry.
 
 ---
 

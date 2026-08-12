@@ -34,3 +34,7 @@
   and Sasin receives the secondary direct role until his later Role Profile migration.
 - Workflow Actions work without email, but email delivery requires a configured
   Default Outgoing Email Account on each site.
+- Frappe Workflow owns approval states, transitions, roles, and approval-required
+  submission. If this managed Workflow is inactive, an Outward Payment Request
+  bypasses approval and finalizes on submit; financial and reference validations
+  remain enforced.
