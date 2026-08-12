@@ -16,6 +16,7 @@ from connect_diagnostics_core.setup import (
     customer_onboarding,
     delivery_note,
     department,
+    document_naming,
     employee,
     item,
     item_barcode,
@@ -51,6 +52,7 @@ _MODULES = (
     customer_onboarding,
     delivery_note,
     department,
+    document_naming,
     employee,
     item,
     item_barcode,
@@ -74,6 +76,7 @@ _MODULES = (
     sales_taxes_and_charges,
     supplier,
     uom,
+    document_naming,
 )
 
 
