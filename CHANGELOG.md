@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.40.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.0...v0.40.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **lint:** apply ruff formatting to workflow code ([908f544](https://github.com/Shinonn23/connect_diagnostics_core/commit/908f5445c8951ee28250d727ca68977a589e028e))
+
+
+### Code Refactoring
+
+* **workflow:** make approval workflow the single owner ([8f69c19](https://github.com/Shinonn23/connect_diagnostics_core/commit/8f69c191d1dbe20344b64a28ab19e3d687beba8e))
+
+## [0.40.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.39.0...v0.40.0) (2026-08-12)
+
+
+### Features
+
+* **naming:** standardize operational document numbers ([647983f](https://github.com/Shinonn23/connect_diagnostics_core/commit/647983fe5efa88335d314255536d718a02823d79))
+* **naming:** standardize operational document numbers ([91b1fec](https://github.com/Shinonn23/connect_diagnostics_core/commit/91b1fec3e7fcb0d138de9781e4b65c93b28eecef))
+
+
+### Bug Fixes
+
+* **ci:** normalize naming lint files ([0ccfaba](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ccfaba9310e5f6d06ad4464d8c7d77632ecd102))
+* **naming:** remove unavailable stock count doctype ([8bd7d3e](https://github.com/Shinonn23/connect_diagnostics_core/commit/8bd7d3eebbe7626bd08c3f258835b5e38161cf34))
+
 ## [0.39.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.38.0...v0.39.0) (2026-08-10)
 
 

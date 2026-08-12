@@ -10,6 +10,11 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from connect_diagnostics_core.api.erpnext.workflow import (
+    finalize_if_workflow_inactive,
+    has_active_workflow,
+    initialize_workflow_state,
+)
 from connect_diagnostics_core.setup.payment_approval import (
     AP_REVIEWER_ROLE,
     APPROVED_STATE,
@@ -23,30 +28,10 @@ from connect_diagnostics_core.setup.payment_approval import (
     WORKFLOW_STATE_FIELD,
 )
 
-ACCOUNTING_ROLES = frozenset({"Accounts User", "Accounts Manager"})
-PAYMENT_APPROVER_ROLES = frozenset(
-    {
-        EXECUTIVE_APPROVER_ROLE,
-        AP_REVIEWER_ROLE,
-    }
-)
+PAYMENT_APPROVER_ROLES = frozenset({EXECUTIVE_APPROVER_ROLE, AP_REVIEWER_ROLE})
 ACTIONABLE_WORKFLOW_STATES = frozenset(
-    {
-        PENDING_AP_REVIEW_STATE,
-        PENDING_EXECUTIVE_APPROVAL_STATE,
-        REJECTED_STATE,
-    }
+    {PENDING_AP_REVIEW_STATE, PENDING_EXECUTIVE_APPROVAL_STATE, REJECTED_STATE}
 )
-APPROVAL_DECISION_STATES = frozenset(
-    {
-        PENDING_AP_REVIEW_STATE,
-        PENDING_EXECUTIVE_APPROVAL_STATE,
-    }
-)
-APPROVAL_EDIT_ROLES_BY_STATE = {
-    PENDING_AP_REVIEW_STATE: frozenset({AP_REVIEWER_ROLE}),
-    PENDING_EXECUTIVE_APPROVAL_STATE: frozenset({EXECUTIVE_APPROVER_ROLE}),
-}
 
 PAYMENT_REQUEST_LOCK_FIELDS = (
     "docstatus",
@@ -61,29 +46,43 @@ PAYMENT_REQUEST_LOCK_FIELDS = (
 )
 
 
+def before_validate(doc: Document, _method: str | None = None) -> None:
+    initialize_workflow_state(doc)
+
+
 def validate_payment_request_before_submit(doc: Document, _method: str) -> None:
     previous_doc = _get_previous_doc(doc)
     _validate_payment_request_fields(doc, previous_doc)
 
     payment_request_type = cast(str, doc.get("payment_request_type") or "")
-    approval_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
     if payment_request_type != "Outward":
         _validate_inward_submitter()
         return
 
-    if approval_state != APPROVED_STATE:
-        frappe.throw(
-            _(
-                "Outward Payment Request must be approved through the payment approval workflow "
-                "before submission."
-            ),
-            title=_("Payment approval required"),
-        )
+    finalize_if_workflow_inactive(doc, WORKFLOW_STATE_FIELD, APPROVED_STATE)
     _validate_verified_supplier_bank(doc)
 
 
-def validate_payment_request_transition(doc: Document, _method: str) -> None:
-    _validate_payment_request_fields(doc, _get_previous_doc(doc))
+def set_cancelled_workflow_state(doc: Document, _method: str) -> None:
+    if not has_active_workflow(PAYMENT_REQUEST_DOCTYPE):
+        doc.set(WORKFLOW_STATE_FIELD, CANCELLED_STATE)
+
+
+def validate_before_discard(doc: Document, _method: str) -> None:
+    approval_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
+    if (
+        doc.get("payment_request_type") != "Outward"
+        or approval_state not in ACTIONABLE_WORKFLOW_STATES
+        or not has_active_workflow(PAYMENT_REQUEST_DOCTYPE)
+    ):
+        return
+    frappe.throw(
+        _(
+            "An Outward Payment Request in the approval workflow cannot be discarded. "
+            "Complete the workflow instead."
+        ),
+        title=_("Payment approval is active"),
+    )
 
 
 def validate_payment_entry_before_submit(doc: Document, _method: str) -> None:
@@ -148,55 +147,12 @@ def validate_payment_entry_before_submit(doc: Document, _method: str) -> None:
             )
 
 
-def set_cancelled_workflow_state(doc: Document, _method: str) -> None:
-    doc.set(WORKFLOW_STATE_FIELD, CANCELLED_STATE)
-
-
-def validate_before_discard(doc: Document, _method: str) -> None:
-    approval_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    if doc.get("payment_request_type") != "Outward" or approval_state not in ACTIONABLE_WORKFLOW_STATES:
-        return
-    frappe.throw(
-        _(
-            "An Outward Payment Request in the approval workflow cannot be discarded. "
-            "Complete the workflow instead."
-        ),
-        title=_("Payment approval is active"),
-    )
-
-
-def clear_completed_workflow_actions_for_next_state(doc: Document, _method: str) -> None:
-    previous_doc = _get_previous_doc(doc)
-    if not previous_doc:
-        return
-
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "")
-    next_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    payment_request_name = cast(str, doc.get("name") or "")
-    if (
-        not payment_request_name
-        or previous_state == next_state
-        or next_state not in ACTIONABLE_WORKFLOW_STATES
-    ):
-        return
-
-    _delete_completed_workflow_actions(payment_request_name, next_state)
-
-
 def _validate_payment_request_fields(doc: Document, previous_doc: Document | None) -> None:
-    if doc.get("payment_request_type") != "Outward":
-        previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "") if previous_doc else ""
-        if previous_state in APPROVAL_DECISION_STATES:
-            frappe.throw(
-                _("Payment Request type cannot change while payment approval is pending."),
-                title=_("Payment Request type cannot be changed"),
-            )
-        return
-
     _validate_creator_unchanged(doc, previous_doc)
+    _validate_pending_request_immutability(doc, previous_doc)
+    if doc.get("payment_request_type") != "Outward":
+        return
     _maintain_base_grand_total(doc, previous_doc)
-    _validate_workflow_state_write_access(doc, previous_doc)
-    _validate_approval_decision(doc, previous_doc)
 
 
 def _get_previous_doc(doc: Document) -> Document | None:
@@ -208,30 +164,39 @@ def _get_previous_doc(doc: Document) -> Document | None:
 
 def _maintain_base_grand_total(doc: Document, previous_doc: Document | None) -> None:
     expected_base_grand_total = _calculate_base_grand_total(doc)
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "") if previous_doc else ""
-
-    if previous_doc and previous_state in APPROVAL_DECISION_STATES:
-        previous_base_grand_total = flt(
-            previous_doc.get(BASE_GRAND_TOTAL_FIELD),
-            doc.precision(BASE_GRAND_TOTAL_FIELD),
-        )
-        current_base_grand_total = flt(
-            doc.get(BASE_GRAND_TOTAL_FIELD),
-            doc.precision(BASE_GRAND_TOTAL_FIELD),
-        )
-        if (
-            current_base_grand_total != previous_base_grand_total
-            or expected_base_grand_total != previous_base_grand_total
-        ):
-            frappe.throw(
-                _(
-                    "The company-currency amount of a Payment Request cannot change while approval "
-                    "is pending."
-                ),
-                title=_("Payment approval amount cannot be changed"),
-            )
-
     doc.set(BASE_GRAND_TOTAL_FIELD, expected_base_grand_total)
+
+
+def _validate_pending_request_immutability(doc: Document, previous_doc: Document | None) -> None:
+    if not previous_doc or not has_active_workflow(PAYMENT_REQUEST_DOCTYPE):
+        return
+    if previous_doc.get("payment_request_type") != "Outward":
+        return
+    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "")
+    if previous_state not in {PENDING_AP_REVIEW_STATE, PENDING_EXECUTIVE_APPROVAL_STATE}:
+        return
+    locked_fields = (
+        "payment_request_type",
+        "company",
+        "party_type",
+        "party",
+        "reference_doctype",
+        "reference_name",
+        "outstanding_amount",
+    )
+    if any(doc.get(fieldname) != previous_doc.get(fieldname) for fieldname in locked_fields):
+        frappe.throw(
+            _("Payment Request details cannot change while approval is pending."),
+            title=_("Payment Request is locked"),
+        )
+    previous_amount = flt(previous_doc.get(BASE_GRAND_TOTAL_FIELD), doc.precision(BASE_GRAND_TOTAL_FIELD))
+    current_amount = flt(doc.get(BASE_GRAND_TOTAL_FIELD), doc.precision(BASE_GRAND_TOTAL_FIELD))
+    expected_amount = _calculate_base_grand_total(doc)
+    if current_amount != previous_amount or expected_amount != previous_amount:
+        frappe.throw(
+            _("The company-currency amount of a Payment Request cannot change while approval is pending."),
+            title=_("Payment Request amount cannot change"),
+        )
 
 
 def _calculate_base_grand_total(doc: Document) -> float:
@@ -303,32 +268,6 @@ def _calculate_base_grand_total(doc: Document) -> float:
     return flt(flt(doc.get("grand_total")) * conversion_rate, precision)
 
 
-def _validate_approval_decision(doc: Document, previous_doc: Document | None) -> None:
-    next_state = cast(str, doc.get(WORKFLOW_STATE_FIELD) or "")
-    if next_state not in {APPROVED_STATE, REJECTED_STATE}:
-        return
-
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "") if previous_doc else ""
-    if previous_state == next_state:
-        return
-    if previous_state not in APPROVAL_DECISION_STATES:
-        frappe.throw(
-            _("Payment approval decisions are only allowed from a pending approval state."),
-            title=_("Invalid payment approval transition"),
-        )
-    if frappe.session.user != "Administrator" and doc.get("owner") == frappe.session.user:
-        frappe.throw(
-            _("You cannot approve or reject a Payment Request that you created."),
-            title=_("Self approval is not allowed"),
-        )
-
-    if doc.get("payment_request_type") != "Outward":
-        frappe.throw(
-            _("Only Outward Payment Requests can use the payment approval states."),
-            title=_("Invalid payment approval transition"),
-        )
-
-
 def _validate_creator_unchanged(doc: Document, previous_doc: Document | None) -> None:
     if not previous_doc or doc.get("owner") == previous_doc.get("owner"):
         return
@@ -336,32 +275,6 @@ def _validate_creator_unchanged(doc: Document, previous_doc: Document | None) ->
         _("The creator of a Payment Request cannot be changed."),
         title=_("Payment Request creator cannot be changed"),
     )
-
-
-def _validate_workflow_state_write_access(doc: Document, previous_doc: Document | None) -> None:
-    if not previous_doc or frappe.session.user == "Administrator" or bool(doc.flags.ignore_permissions):
-        return
-
-    roles = set(frappe.get_roles())
-    previous_state = cast(str, previous_doc.get(WORKFLOW_STATE_FIELD) or "")
-    allowed_roles = set(APPROVAL_EDIT_ROLES_BY_STATE.get(previous_state, ()))
-
-    if previous_state in APPROVAL_DECISION_STATES:
-        if doc.get("payment_request_type") != "Outward":
-            allowed_roles.clear()
-
-        if allowed_roles.intersection(roles):
-            return
-        frappe.throw(
-            _("You cannot edit this Payment Request in its current payment approval state."),
-            title=_("Payment approval role required"),
-        )
-
-    if PAYMENT_APPROVER_ROLES.intersection(roles) and not ACCOUNTING_ROLES.intersection(roles):
-        frappe.throw(
-            _("Payment approver roles do not grant general Payment Request editing access."),
-            title=_("Accounts role required"),
-        )
 
 
 def _validate_inward_submitter() -> None:
@@ -414,7 +327,10 @@ def _validate_payment_request_matches_reference(
         _throw_reference_mismatch(reference_row, payment_request_name, "must be Outward")
     if int(payment_request.get("docstatus") or 0) != 1:
         _throw_reference_mismatch(reference_row, payment_request_name, "must be submitted")
-    if payment_request.get(WORKFLOW_STATE_FIELD) != APPROVED_STATE:
+    if (
+        has_active_workflow(PAYMENT_REQUEST_DOCTYPE)
+        and payment_request.get(WORKFLOW_STATE_FIELD) != APPROVED_STATE
+    ):
         _throw_reference_mismatch(reference_row, payment_request_name, "must be approved")
 
     expected_values = {
@@ -464,23 +380,3 @@ def _throw_reference_mismatch(
         ),
         title=_("Invalid Payment Request"),
     )
-
-
-def _delete_completed_workflow_actions(payment_request_name: str, workflow_state: str) -> None:
-    workflow_action_names = frappe.get_all(
-        "Workflow Action",
-        filters={
-            "reference_doctype": PAYMENT_REQUEST_DOCTYPE,
-            "reference_name": payment_request_name,
-            "workflow_state": workflow_state,
-            "status": "Completed",
-        },
-        pluck="name",
-    )
-    for workflow_action_name in workflow_action_names:
-        frappe.delete_doc(
-            "Workflow Action",
-            workflow_action_name,
-            force=True,
-            ignore_permissions=True,
-        )

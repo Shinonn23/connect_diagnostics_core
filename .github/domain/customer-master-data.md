@@ -86,6 +86,9 @@
   Credit Approver. It does not depend on a channel field. Customers start on whatever
   terms they are created with; `Customer.validate` still blocks anyone without the
   Customer Accounting Reviewer role from editing terms or limits directly.
+- Customer Credit Request approval states and transitions belong to its Frappe
+  Workflow. When that Workflow is inactive, submission bypasses approval and applies
+  the requested credit terms and limit while retaining normal data validation.
 - Customer, Item, and Supplier keep their current document names and codes. Do not
   add conversion flags or automatically rename these masters. The DKSH reference codes
   `dksh_item_code`, `supplier_product_code`, `mat_group_code`, `mat_group4_code`, and

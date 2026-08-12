@@ -73,6 +73,16 @@ When rules conflict, follow this order:
 - **Salary Slip submission**: submit only through Payroll Entry after every draft slip is
   reviewed by `HR Manager`; never add a direct Salary Slip submit path. See
   [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md).
+- **Approval ownership**: Frappe Workflow is the single owner of approval states,
+  transitions, roles, and approval-required submission. Custom hooks may validate
+  data integrity and process routing, but must not duplicate approval gates. When a
+  managed Workflow is inactive, its documents bypass approval and finalize through
+  the shared workflow bypass helper; Salary Slip still requires Payroll Entry.
+- **Operational document naming**: automatically numbered transactional and operational
+  DocTypes use `[prefix][YY-BE][MM][####]`; the central registry is
+  `connect_diagnostics_core.setup.document_naming`. The month uses the document date,
+  alternate series are selected from business fields, and company abbreviations are not
+  prepended.
 
 ---
 
