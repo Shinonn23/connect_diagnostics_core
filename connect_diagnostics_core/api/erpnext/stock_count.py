@@ -202,6 +202,12 @@ def _fill_expiry_dates(lines: list[dict[str, Any]]) -> None:
 
 
 def _apply_selection(doc: Any, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Narrow the fetched lines for a monthly cycle count.
+
+    Sampling is done at the count-line grain -- each distinct item / storage
+    location / batch / serial combination is one unit -- so "Random by Count = 50"
+    yields at most 50 lines total, not 50 items' worth of lines.
+    """
     if doc.count_type == YEARLY:
         return candidates
 
@@ -209,16 +215,14 @@ def _apply_selection(doc: Any, candidates: list[dict[str, Any]]) -> list[dict[st
     if method in ("Manual", "Random by Zone"):
         return candidates
 
-    items = list({line["item_code"] for line in candidates})
     if method == "Random by Count":
-        sample_size = min(int(doc.sample_count or 0), len(items))
+        sample_size = min(int(doc.sample_count or 0), len(candidates))
     else:  # Random by Percentage
-        sample_size = min(math.ceil(len(items) * (doc.sample_percentage or 0) / 100.0), len(items))
+        sample_size = min(math.ceil(len(candidates) * (doc.sample_percentage or 0) / 100.0), len(candidates))
 
     if sample_size <= 0:
         return []
-    chosen = set(random.sample(items, sample_size))
-    return [line for line in candidates if line["item_code"] in chosen]
+    return random.sample(candidates, sample_size)
 
 
 def _existing_counts(doc: Any) -> dict[_LineKey, float]:
