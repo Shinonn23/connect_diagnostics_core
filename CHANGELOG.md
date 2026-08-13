@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.41.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.1...v0.41.0) (2026-08-12)
+
+
+### Features
+
+* add Stock Count cycle/yearly counting with location-aware adjustments ([d52b6da](https://github.com/Shinonn23/connect_diagnostics_core/commit/d52b6da6fbd5c13a4b8190008ab678bf1c66cfe3))
+
+
+### Bug Fixes
+
+* make every bootstrap insert idempotent, not just the top-level check ([8d20f43](https://github.com/Shinonn23/connect_diagnostics_core/commit/8d20f430145ba13452e8a63d9dba20fe9b8805dc))
+* make Stock Count integration tests self-sufficient and skip broken dep walk ([33a3281](https://github.com/Shinonn23/connect_diagnostics_core/commit/33a32816b92d7ddeba0708f69fe13f4dc98202fe))
+* make the ERPNext test-record bootstrap idempotent across test categories ([dbacf36](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbacf360361a1bdf2c49d8c801144e523f06e577))
+* resolve remaining CI failures after ERPNext bootstrap fix ([e2d893e](https://github.com/Shinonn23/connect_diagnostics_core/commit/e2d893ebae73b7f6adce530a653f86bdcfe05788))
+* supply Customer Code during ERPNext's eager test-record bootstrap ([3caf95b](https://github.com/Shinonn23/connect_diagnostics_core/commit/3caf95bc16e96a2abf1f30ec19f76cc411cc5778))
+
 ## [0.40.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.0...v0.40.1) (2026-08-12)
 
 
