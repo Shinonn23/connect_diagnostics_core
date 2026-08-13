@@ -29,18 +29,26 @@ frappe.ui.form.on("Stock Count", {
 	},
 
 	fetch_items: function (frm) {
-		frappe.call({
-			method: "connect_diagnostics_core.api.erpnext.stock_count.fetch_items",
-			args: { stock_count: frm.doc.name },
-			freeze: true,
-			freeze_message: __("Fetching count lines..."),
-			callback: function (r) {
-				if (r.message && r.message.message) {
-					frappe.show_alert({ message: r.message.message, indicator: "green" });
-				}
-				frm.reload_doc();
-			},
-		});
+		// fetch_items reads the saved document from the DB, so any unsaved
+		// selection method / sample count would be ignored -- persist first.
+		const run = () =>
+			frappe.call({
+				method: "connect_diagnostics_core.api.erpnext.stock_count.fetch_items",
+				args: { stock_count: frm.doc.name },
+				freeze: true,
+				freeze_message: __("Fetching count lines..."),
+				callback: function (r) {
+					if (r.message && r.message.message) {
+						frappe.show_alert({ message: r.message.message, indicator: "green" });
+					}
+					frm.reload_doc();
+				},
+			});
+		if (frm.is_dirty()) {
+			frm.save().then(run);
+		} else {
+			run();
+		}
 	},
 
 	run_generate: function (frm, method) {

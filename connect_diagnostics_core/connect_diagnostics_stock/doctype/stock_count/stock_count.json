@@ -142,11 +142,11 @@
 			"label": "Count Lines"
 		},
 		{
+			"description": "Populated by the Fetch Items button. Required only when submitting.",
 			"fieldname": "items",
 			"fieldtype": "Table",
 			"label": "Items",
-			"options": "Stock Count Item",
-			"reqd": 1
+			"options": "Stock Count Item"
 		},
 		{
 			"fieldname": "result_section",

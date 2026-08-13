@@ -13,12 +13,14 @@ from connect_diagnostics_core.api.erpnext import stock_count
 
 
 def _candidates() -> list[dict]:
+    # 10 lines but only 5 distinct item codes: each item appears as two batches,
+    # so a line-level sample must not collapse to item-level counting.
     return [
         {
-            "item_code": f"ITEM-{i}",
+            "item_code": f"ITEM-{i % 5}",
             "warehouse": "WH",
             "storage_location": None,
-            "batch_no": None,
+            "batch_no": f"BATCH-{i}",
             "serial_no": None,
             "system_qty": float(i + 1),
             "valuation_rate": 0.0,
@@ -36,14 +38,15 @@ class TestStockCountSelection(UnitTestCase):
         doc = SimpleNamespace(count_type=stock_count.MONTHLY, selection_method="Manual")
         self.assertEqual(len(stock_count._apply_selection(doc, _candidates())), 10)
 
-    def test_random_by_count_limits_to_sample_items(self) -> None:
+    def test_random_by_count_limits_total_lines(self) -> None:
         doc = SimpleNamespace(
             count_type=stock_count.MONTHLY, selection_method="Random by Count", sample_count=3
         )
         result = stock_count._apply_selection(doc, _candidates())
-        self.assertEqual(len({line["item_code"] for line in result}), 3)
+        # 3 lines total (batch/serial counted separately), not 3 items' worth of lines.
+        self.assertEqual(len(result), 3)
 
-    def test_random_by_count_caps_at_available_items(self) -> None:
+    def test_random_by_count_caps_at_available_lines(self) -> None:
         doc = SimpleNamespace(
             count_type=stock_count.MONTHLY, selection_method="Random by Count", sample_count=99
         )
@@ -55,10 +58,8 @@ class TestStockCountSelection(UnitTestCase):
             selection_method="Random by Percentage",
             sample_percentage=25,
         )
-        # ceil(10 * 0.25) == 3 distinct items
-        self.assertEqual(
-            len({line["item_code"] for line in stock_count._apply_selection(doc, _candidates())}), 3
-        )
+        # ceil(10 lines * 0.25) == 3 lines
+        self.assertEqual(len(stock_count._apply_selection(doc, _candidates())), 3)
 
     def test_random_by_zone_returns_all_prefiltered_candidates(self) -> None:
         doc = SimpleNamespace(count_type=stock_count.MONTHLY, selection_method="Random by Zone")
