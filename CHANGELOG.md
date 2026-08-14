@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.41.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.0...v0.41.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* don't force manual item entry on Stock Count before fetching ([8d8c654](https://github.com/Shinonn23/connect_diagnostics_core/commit/8d8c654f6ff26d0a0bac61f446beb5ebcc6279cc))
+* sample Stock Count lines, not item codes, and save before fetching ([098adc0](https://github.com/Shinonn23/connect_diagnostics_core/commit/098adc0a55ebadca8c48f28802bdf8663b4bd2bf))
+* Stock Count random selection and draft item entry ([178cd7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/178cd7d7aec32ceca18166b7bd2be69566e705ad))
+
 ## [0.41.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.1...v0.41.0) (2026-08-12)
 
 
