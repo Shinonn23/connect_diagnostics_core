@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.42.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.2...v0.42.0) (2026-08-16)
+
+
+### Features
+
+* group Stock and Stock Counting under an Inventory Desk folder ([a02600e](https://github.com/Shinonn23/connect_diagnostics_core/commit/a02600ef05da0e786800ab0b2b572c06b42d3eb4))
+* group Stock and Stock Counting under an Inventory Desk folder ([c70fcf5](https://github.com/Shinonn23/connect_diagnostics_core/commit/c70fcf50499a98c386920c7da0b54e4288b45dc3))
+
 ## [0.41.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.1...v0.41.2) (2026-08-16)
 
 
