@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.41.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.1...v0.41.2) (2026-08-16)
+
+
+### Continuous Integration
+
+* make DEV deployment release-driven and gate expensive checks ([92c6afd](https://github.com/Shinonn23/connect_diagnostics_core/commit/92c6afd273e933200b249a4eef376f7effc74b51))
+* make DEV deployment release-driven and gate expensive checks ([9fcc1e5](https://github.com/Shinonn23/connect_diagnostics_core/commit/9fcc1e5285fa2d4c5cfa1581e74ea8fbf3003302))
+
 ## [0.41.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.0...v0.41.1) (2026-08-13)
 
 
