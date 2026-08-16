@@ -22,13 +22,22 @@ feature/* ──PR──▶ developments ──PR──▶ user-acceptance-testi
 | **`production`**                | released, live                  | PROD site   |
 
 - CI (`ci.yml` → **Server**, `linter.yml` → **Frappe Linter**) runs on every PR
-  into `developments`, `user-acceptance-testing`, and `production`.
+  into `developments`, `user-acceptance-testing`, and `production`. **Server** and
+  **Vulnerable Dependency Check** always report but skip their expensive steps when
+  `.github/actions/change-scope` finds no runtime impact — a Release Please branch, or
+  a diff confined to markdown, `.claude/`, `.agents/`, `.codex/` and `.vscode/`.
+  Everything under `connect_diagnostics_core/**`, the dependency manifests and
+  `.github/workflows/**` still run in full.
 - `release-please.yml` maintains a cumulative Release PR into `developments`
   from merged Conventional Commits. Merging that PR updates `__version__` and
   `CHANGELOG.md`, then publishes the `vX.Y.Z` tag and GitHub Release. Promotion
   PRs never double-bump.
-- `deploy.yml` deploys `developments` to DEV and `user-acceptance-testing` to
-  UAT after each push to those branches. Production deployment remains manual.
+- `deploy.yml` deploys **DEV when a `vX.Y.Z` release is published**, and
+  `user-acceptance-testing` to UAT after each push to that branch. Merging into
+  `developments` does **not** deploy on its own: several merged PRs accumulate in one
+  Release PR and reach DEV together when it is merged. `workflow_dispatch` can still
+  target DEV, UAT or PROD directly — the escape hatch for a hotfix that must reach DEV
+  without cutting a release. Production deployment remains manual.
 - All three long-lived branches are **protected**: required checks
   (`Server`, `Frappe Linter`) + 1 review. Admins may override for hotfixes.
 
@@ -85,12 +94,17 @@ Two extra board fields support testing:
    checklist). Card → **Dev review**.
 3. CI (`Server`, `Frappe Linter`) must be green; get 1 approving review.
 
-### 4.2 Merge & test (on DEV)
+### 4.2 Release the batch & test (on DEV)
 
-4. Merge to `developments`. Release Please updates the cumulative Release PR.
-   The issue stays **open**; card → **Test In progress**, **Test Status = Testing**.
-5. Deploy `developments` to the DEV site. Run the issue's **test-step checklist**
-   (the `- [ ]` task list in the issue body), ticking each step.
+4. Merge to `developments`. Release Please updates the cumulative Release PR. Merging
+   does **not** deploy — this is where a batch is assembled, so keep merging the PRs
+   that belong together. The issue stays **open**; card → **Test In progress**,
+   **Test Status = Testing**.
+5. When the batch is complete, **merge the Release PR**. Its protected-branch checks
+   must pass, and the resulting `vX.Y.Z` tag and published GitHub Release must point to
+   its merge commit. Publishing that release deploys the whole batch to the DEV site.
+   Wait for the deployment, then run each issue's **test-step checklist** (the `- [ ]`
+   task list in the issue body), ticking each step.
 6. **Pass** → tick all steps, set **Test Status = Passed**, fill **Tested By**,
    move card → **Test Review**, then **close the issue**.
    **Fail** → set **Test Status = Failed**; open a **fix issue** (or push a small
@@ -99,12 +113,12 @@ Two extra board fields support testing:
 
 ### 4.3 Promote to UAT
 
-7. When every issue in the release batch is **Test Status = Passed**, merge the
-   current Release Please PR first. Its protected-branch checks must pass, and the
-   resulting `vX.Y.Z` tag and published GitHub Release must point to its merge
-   commit. Wait for the resulting DEV deployment, then open the promotion PR
-   **`developments → user-acceptance-testing`**. The promotion copies the released
-   version; it does not calculate another bump. Merge & deploy the UAT site.
+7. When every issue in the release batch is **Test Status = Passed**, open the
+   promotion PR **`developments → user-acceptance-testing`**. The batch was already
+   released and deployed to DEV at step 5, so no Release PR remains to merge here; if
+   one has reappeared it belongs to a later batch and must not be swept into this
+   promotion. The promotion copies the released version; it does not calculate another
+   bump. Merge & deploy the UAT site.
    - **Owner-only exception:** `Shinonn23` may explicitly invoke
      `$promote-uat --bypass-test "<reason>"`. The promotion process must inspect
      the complete batch, verify the authenticated GitHub login, and record the

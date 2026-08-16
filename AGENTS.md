@@ -96,20 +96,35 @@ feature work ─PR→ developments ─PR→ user-acceptance-testing ─PR→ pro
 ```
 
 All three long-lived branches are protected (required checks `Server` +
-`Frappe Linter`, 1 review). We **merge first, then test on the DEV site** — code
-review + CI are the pre-merge gate; manual functional testing happens after merge
-on `developments`. Rationale and full loop: [`.github/WORKFLOW.md`](.github/WORKFLOW.md).
+`Frappe Linter`, 1 review). We **merge first, release the batch, then test on the DEV
+site** — code review + CI are the pre-merge gate; manual functional testing happens
+after the Release PR merges and its `vX.Y.Z` release has deployed `developments` to
+DEV. Rationale and full loop: [`.github/WORKFLOW.md`](.github/WORKFLOW.md).
 
 ## Automated deployment
 
-Every push to `developments`, `user-acceptance-testing`, and `production` deploys to
-the `DEV`, `UAT`, and `PROD` GitHub Environments respectively through
-`.github/workflows/deploy.yml` — one identical flow, with `workflow_dispatch` able to
-retry a specific target. The mechanics (the `BENCH_PATH` variable, SSH secrets,
-`flock`, per-environment concurrency) live in that workflow and
+DEV is **release-driven**: merging into `developments` does not deploy. Several merged
+PRs accumulate in one Release PR, and publishing its `vX.Y.Z` release deploys the whole
+batch to `DEV` once. `user-acceptance-testing` and `production` still deploy on push to
+`UAT` and `PROD`. All three run the same flow in `.github/workflows/deploy.yml`, and
+`workflow_dispatch` can target any environment directly — the escape hatch for a hotfix
+that must reach DEV without cutting a release, or when Release Please produces no
+release (for example a lone `revert`). The environment is resolved from the trigger and
+**fails closed**: an unrecognized trigger stops the job instead of falling through to
+PROD. The mechanics (the `BENCH_PATH` variable, SSH secrets, `flock`, per-environment
+concurrency) live in that workflow and
 [`.github/WORKFLOW.md`](.github/WORKFLOW.md). **Never cancel a running deployment**,
 and anyone running `bench update` manually must wait for the workflow's remote lock
 to release.
+
+`Server` and `Vulnerable Dependency Check` always report — they are required checks, so
+gating the jobs themselves would leave a PR pending forever — but skip their expensive
+steps when `.github/actions/change-scope` finds no runtime impact: a Release Please
+branch, or a diff confined to markdown, `.claude/`, `.agents/`, `.codex/`, `.vscode/`.
+Anything under `connect_diagnostics_core/**` (custom fields in `setup/*.py`, DocType
+JSON, fixtures), the dependency manifests, and `.github/workflows/**` still run in full.
+When adding a path to that allowlist, the test is whether it can change app behaviour on
+a site — not whether it looks like a small edit.
 
 ## Branch naming rule
 
@@ -147,9 +162,12 @@ SemVer **`0.MINOR.PATCH`** (MAJOR stays `0` until the owner declares production-
 - `.github/workflows/release-please.yml` runs on pushes to `developments` and
   maintains a cumulative Release PR that updates `CHANGELOG.md`,
   `connect_diagnostics_core/__init__.py`, and `.release-please-manifest.json`.
-- Merge the Release PR after its DEV batch is tested and before promoting that
-  batch to UAT. Merging it creates a `vX.Y.Z` tag and published GitHub Release
-  from `developments`; promotion PRs never double-bump.
+- Merge the Release PR once the batch of PRs that belong together is complete, and
+  **before** testing it — merging is what deploys the batch to DEV. It creates a
+  `vX.Y.Z` tag and published GitHub Release from `developments`, whose publication
+  triggers the DEV deployment; promotion PRs never double-bump. Keep merging feature
+  PRs while a batch is still forming: they cost no deployment until the Release PR
+  merges.
 - **Do not hand-edit `__version__` or the release manifest.** For a revert whose
   inverse version cannot be inferred safely, put `Release-As: X.Y.Z` in the
   Conventional Commit body and let Release Please update the version files.

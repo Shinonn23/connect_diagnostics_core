@@ -41,9 +41,13 @@ and prepare its post-deployment manual testing for `newyodsapad`. Follows the pr
 7. **Dispatch only after merge and deployment.** Read the PR state with
    `gh pr view <PR#> --json state,mergedAt`. Run the `dispatch-test` skill only
    when the PR is merged and its deployment to the DEV site has been explicitly
-   verified. Otherwise leave source issues in **Dev review**, report manual-test
-   dispatch as the pending post-deployment action, and do not create or update
-   test tasks or testing board fields.
+   verified. Merging into `developments` no longer deploys on its own — DEV is
+   deployed when the Release PR merges and its `vX.Y.Z` release is published — so a
+   merged PR normally sits undeployed until the batch is released. That is expected,
+   not a stalled deployment: report it as pending rather than waiting on it. Otherwise
+   leave source issues in **Dev review**, report manual-test dispatch as the pending
+   post-deployment action, and do not create or update test tasks or testing board
+   fields.
 
 ## Output
 
