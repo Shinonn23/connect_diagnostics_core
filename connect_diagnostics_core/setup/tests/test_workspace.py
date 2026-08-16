@@ -141,7 +141,13 @@ def get_document(
 
 
 def existing_document(doctype: str, name: str) -> bool:
-    """Model the test fixture's current documents without a legacy navigation record."""
+    """Model the test fixture's current documents without a legacy navigation record.
+
+    The fixture holds no Desktop Icons, so ``ensure_desktop_icons`` is a no-op inside
+    the Workspace/Workspace Sidebar flows; it is covered by its own tests below.
+    """
+    if doctype == "Desktop Icon":
+        return False
     return not (
         doctype in {"Workspace", "Workspace Sidebar"} and name == workspace.LEGACY_REGULATORY_WORKSPACE
     )
@@ -369,6 +375,92 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(variance_item["child"], 1)
         self.assertEqual(variance_item["is_query_report"], 1)
         self.assertEqual(variance_item["report_ref_doctype"], "Stock Count")
+
+    def test_inventory_desktop_icon_folder_groups_the_stock_workspaces(self) -> None:
+        desktop_icon_dir = Path(__file__).parents[2] / "desktop_icon"
+        inventory = json.loads((desktop_icon_dir / "inventory.json").read_text())
+        stock_counting = json.loads((desktop_icon_dir / "stock_counting.json").read_text())
+
+        self.assertEqual(inventory["doctype"], "Desktop Icon")
+        self.assertEqual(inventory["name"], workspace.INVENTORY_DESKTOP_ICON)
+        self.assertEqual(inventory["label"], workspace.INVENTORY_DESKTOP_ICON)
+        self.assertEqual(inventory["icon_type"], "Folder")
+        self.assertEqual(inventory["link_to"], "")
+        self.assertEqual(inventory["parent_icon"], "")
+        self.assertEqual(inventory["app"], "connect_diagnostics_core")
+        self.assertEqual(inventory["standard"], 1)
+        self.assertEqual(inventory["hidden"], 0)
+        self.assertTrue(inventory["modified"])
+
+        self.assertEqual(stock_counting["doctype"], "Desktop Icon")
+        self.assertEqual(stock_counting["name"], workspace.STOCK_COUNT_WORKSPACE)
+        self.assertEqual(stock_counting["label"], workspace.STOCK_COUNT_WORKSPACE)
+        self.assertEqual(stock_counting["icon_type"], "Link")
+        self.assertEqual(stock_counting["link_type"], "Workspace Sidebar")
+        self.assertEqual(stock_counting["link_to"], workspace.STOCK_COUNT_WORKSPACE)
+        self.assertEqual(stock_counting["parent_icon"], workspace.INVENTORY_DESKTOP_ICON)
+        self.assertEqual(stock_counting["icon"], workspace.STOCK_COUNT_ICON)
+        self.assertEqual(stock_counting["app"], "connect_diagnostics_core")
+        self.assertEqual(stock_counting["standard"], 1)
+        self.assertEqual(stock_counting["hidden"], 0)
+        self.assertTrue(stock_counting["modified"])
+        # ERPNext ships the Stock icon at idx 1, so Stock Counting must sort after it.
+        self.assertGreater(stock_counting["idx"], 1)
+
+        for variant in ("subtle", "solid"):
+            self.assertTrue(
+                (
+                    Path(__file__).parents[2]
+                    / "public"
+                    / "icons"
+                    / "desktop_icons"
+                    / variant
+                    / "stock_counting.svg"
+                ).is_file()
+            )
+
+    def test_stock_desktop_icon_is_reparented_under_inventory(self) -> None:
+        stock_icon = FakeDocument(
+            name=workspace.STOCK_DESKTOP_ICON, parent_icon=workspace.ERPNEXT_DESKTOP_ICON
+        )
+
+        with (
+            patch.object(workspace.frappe.db, "exists", return_value=True),
+            patch.object(workspace.frappe.db, "get_value", side_effect=lambda *_: stock_icon["parent_icon"]),
+            patch.object(workspace.frappe, "get_doc", return_value=stock_icon),
+        ):
+            workspace.ensure_desktop_icons()
+            workspace.ensure_desktop_icons()
+
+        self.assertEqual(stock_icon["parent_icon"], workspace.INVENTORY_DESKTOP_ICON)
+        self.assertEqual(stock_icon.save_count, 1)
+
+    def test_stock_desktop_icon_falls_back_to_erpnext_when_inventory_is_missing(self) -> None:
+        stock_icon = FakeDocument(
+            name=workspace.STOCK_DESKTOP_ICON, parent_icon=workspace.INVENTORY_DESKTOP_ICON
+        )
+        present = {workspace.STOCK_DESKTOP_ICON, workspace.ERPNEXT_DESKTOP_ICON}
+
+        with (
+            patch.object(workspace.frappe.db, "exists", side_effect=lambda _doctype, name: name in present),
+            patch.object(workspace.frappe.db, "get_value", side_effect=lambda *_: stock_icon["parent_icon"]),
+            patch.object(workspace.frappe, "get_doc", return_value=stock_icon),
+        ):
+            workspace.ensure_desktop_icons()
+
+        self.assertEqual(stock_icon["parent_icon"], workspace.ERPNEXT_DESKTOP_ICON)
+        self.assertEqual(stock_icon.save_count, 1)
+
+    def test_desktop_icons_are_untouched_without_an_erpnext_stock_icon(self) -> None:
+        with (
+            patch.object(workspace.frappe.db, "exists", return_value=False),
+            patch.object(workspace.frappe.db, "get_value") as get_value,
+            patch.object(workspace.frappe, "get_doc") as get_doc,
+        ):
+            workspace.ensure_desktop_icons()
+
+        get_value.assert_not_called()
+        get_doc.assert_not_called()
 
     def test_regulatory_navigation_preserves_unmanaged_rows(self) -> None:
         workspaces = workspace_documents()

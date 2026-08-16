@@ -194,6 +194,14 @@ STOCK_COUNT_WORKSPACE_GROUPS = (
     ),
 )
 
+# Desk home grouping. The Inventory folder and the Stock Counting icon ship as
+# app-level `desktop_icon/*.json`, so Frappe's app sync owns them; only ERPNext's
+# Stock icon has to be reconciled here because this app must not edit
+# `erpnext/desktop_icon/stock.json`.
+INVENTORY_DESKTOP_ICON = "Inventory"
+STOCK_DESKTOP_ICON = "Stock"
+ERPNEXT_DESKTOP_ICON = "ERPNext"
+
 
 NAVIGATION_GROUPS = (
     NavigationGroup(
@@ -290,6 +298,7 @@ def ensure_workspace_navigation() -> None:
     """Maintain Connect Diagnostics cards and prioritized module sidebar sections."""
     ensure_regulatory_workspace()
     ensure_stock_count_workspace()
+    ensure_desktop_icons()
     for group in NAVIGATION_GROUPS:
         workspace = frappe.get_doc("Workspace", group.name)
         workspace_changed = _repair_stale_parent_page(workspace)
@@ -305,7 +314,7 @@ def ensure_workspace_navigation() -> None:
         if _ensure_sidebar_navigation(sidebar, group):
             sidebar_changed = True
         if sidebar_changed:
-            _save_sidebar(sidebar)
+            _save_without_export(sidebar)
 
 
 def ensure_regulatory_workspace() -> None:
@@ -359,7 +368,7 @@ def ensure_regulatory_workspace() -> None:
     if sidebar.is_new():
         sidebar.insert(ignore_permissions=True)
     elif sidebar_changed:
-        _save_sidebar(sidebar)
+        _save_without_export(sidebar)
 
 
 def ensure_stock_count_workspace() -> None:
@@ -453,7 +462,7 @@ def _ensure_stock_count_sidebar() -> None:
     if sidebar.is_new():
         sidebar.insert(ignore_permissions=True)
     elif changed:
-        _save_sidebar(sidebar)
+        _save_without_export(sidebar)
 
 
 def _stock_count_sidebar_items() -> list[dict[str, str | int]]:
@@ -524,6 +533,39 @@ def _stock_count_sidebar_items() -> list[dict[str, str | int]]:
         for link in reports_group.links
     )
     return items
+
+
+def ensure_desktop_icons() -> None:
+    """Keep ERPNext's Stock Desk icon grouped under the Inventory folder.
+
+    The Inventory folder and the Stock Counting icon are shipped as app-level
+    ``desktop_icon`` JSON, so Frappe's app sync owns them. ERPNext owns the Stock
+    icon, so its parent is reconciled here instead: this app must not edit
+    ``erpnext/desktop_icon/stock.json``, and re-importing that file resets
+    ``parent_icon`` back to "ERPNext" whenever ERPNext changes it.
+    """
+    if not frappe.db.exists("Desktop Icon", STOCK_DESKTOP_ICON):
+        return
+    parent = _stock_desktop_icon_parent()
+    current: str = cast(str, frappe.db.get_value("Desktop Icon", STOCK_DESKTOP_ICON, "parent_icon") or "")
+    if current == parent:
+        return
+    icon = frappe.get_doc("Desktop Icon", STOCK_DESKTOP_ICON)
+    icon.set("parent_icon", parent)
+    _save_without_export(icon)
+
+
+def _stock_desktop_icon_parent() -> str:
+    """Return the folder Stock belongs to, falling back when Inventory is missing.
+
+    ``frappe.desk.doctype.desktop_icon.desktop_icon.get_desktop_icons`` drops any
+    icon whose ``parent_icon`` is not itself a permitted top-level icon, so leaving
+    Stock pointed at a deleted Inventory folder would hide Stock from the Desk home.
+    """
+    for candidate in (INVENTORY_DESKTOP_ICON, ERPNEXT_DESKTOP_ICON):
+        if frappe.db.exists("Desktop Icon", candidate):
+            return candidate
+    return ""
 
 
 def snapshot_regulatory_sidebar_customizations() -> None:
@@ -646,7 +688,7 @@ def restore_regulatory_sidebar_customizations() -> None:
         for row in restored:
             sidebar.append("items", row)
         _reindex(_rows(sidebar, "items"))
-        _save_sidebar(sidebar)
+        _save_without_export(sidebar)
     setattr(frappe.flags, REGULATORY_SIDEBAR_MIGRATION_FLAG, {})
 
 
@@ -844,7 +886,7 @@ def _preserve_legacy_sidebar_rows(target: Document, legacy: Document) -> None:
     if custom_rows:
         target.set("items", [*custom_rows, *target_rows])
         _reindex(_rows(target, "items"))
-        _save_sidebar(target)
+        _save_without_export(target)
 
 
 def _ensure_regulatory_sidebar(sidebar: Document) -> bool:
@@ -1580,12 +1622,12 @@ def _update_row(row: Document, values: dict[str, str | int]) -> bool:
     return True
 
 
-def _save_sidebar(sidebar: Document) -> None:
-    """Persist the site customization without exporting it into the ERPNext app."""
+def _save_without_export(document: Document) -> None:
+    """Persist the site customization without exporting it into the owning app."""
     previous_in_import = frappe.flags.in_import
     frappe.flags.in_import = True
     try:
-        sidebar.save(ignore_permissions=True)
+        document.save(ignore_permissions=True)
     finally:
         frappe.flags.in_import = previous_in_import
 

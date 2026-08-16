@@ -417,6 +417,13 @@ If a bug or issue is discovered during implementation (outside the current task 
   Reports and Setup sections, then Settings. Standard Workspace and Sidebar sync
   must preserve unmanaged user rows across migrations. Child-table and technical
   DocTypes with no standalone Desk route are exempt; document the reason in the change.
+- **Desk home icons**: app-owned Desktop Icons — including `Folder` icons that group
+  related workspaces — ship as `connect_diagnostics_core/desktop_icon/<scrub(label)>.json`
+  with matching `public/icons/desktop_icons/{subtle,solid}/<scrub(label)>.svg` artwork.
+  Never create them in setup code: migrate deletes any standard icon this app has no
+  file for. Regrouping an icon owned by another app is reconciled idempotently in
+  `setup/workspace.py` instead, and must save through `_save_without_export` so the
+  change is not written back into that app's source.
 - **Overrides**: use `override_whitelisted_methods` in hooks.py — never monkey-patch
 
 ### API Response Shape
