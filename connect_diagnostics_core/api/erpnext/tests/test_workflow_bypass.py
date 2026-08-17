@@ -61,6 +61,50 @@ class TestWorkflowBypass(UnitTestCase):
             p2p.RECEIPT_ACCEPTED,
         )
 
+    def test_purchase_invoice_exception_gate_skipped_when_workflow_inactive(self) -> None:
+        document = MagicMock(doctype="Purchase Invoice")
+
+        with (
+            patch.object(procure_to_pay, "finalize_if_workflow_inactive", return_value=True),
+            patch.object(procure_to_pay, "_validate_purchase_invoice_exception") as exception_gate,
+        ):
+            procure_to_pay.validate_before_submit(document)
+
+        exception_gate.assert_not_called()
+
+    def test_purchase_invoice_exception_gate_enforced_when_workflow_active(self) -> None:
+        document = MagicMock(doctype="Purchase Invoice")
+
+        with (
+            patch.object(procure_to_pay, "finalize_if_workflow_inactive", return_value=False),
+            patch.object(procure_to_pay, "_validate_purchase_invoice_exception") as exception_gate,
+        ):
+            procure_to_pay.validate_before_submit(document)
+
+        exception_gate.assert_called_once_with(document)
+
+    def test_purchase_order_exception_gate_skipped_when_workflow_inactive(self) -> None:
+        document = MagicMock(doctype="Purchase Order")
+
+        with (
+            patch.object(procure_to_pay, "finalize_if_workflow_inactive", return_value=True),
+            patch.object(procure_to_pay, "_validate_purchase_order_exception") as exception_gate,
+        ):
+            procure_to_pay.validate_before_submit(document)
+
+        exception_gate.assert_not_called()
+
+    def test_purchase_order_exception_gate_enforced_when_workflow_active(self) -> None:
+        document = MagicMock(doctype="Purchase Order")
+
+        with (
+            patch.object(procure_to_pay, "finalize_if_workflow_inactive", return_value=False),
+            patch.object(procure_to_pay, "_validate_purchase_order_exception") as exception_gate,
+        ):
+            procure_to_pay.validate_before_submit(document)
+
+        exception_gate.assert_called_once_with(document)
+
     def test_supplier_submit_bypasses_inactive_workflow(self) -> None:
         document = MagicMock(doctype="Supplier")
 
