@@ -81,8 +81,12 @@ def _validate_purchase_invoice_exception(doc: Document) -> None:
 
 
 def validate_before_submit(doc: Document, _method: str | None = None) -> None:
+    # The P2P Exception Reason only feeds the workflow's exception-approval branch.
+    # When the Workflow is intentionally inactive, approval is bypassed and the
+    # document finalizes here, so the exception gate must not block the submit.
+    if finalize_if_workflow_inactive(doc, "p2p_workflow_state", SUBMITTED_STATE_BY_DOCTYPE[doc.doctype]):
+        return
     if doc.doctype == "Purchase Order":
         _validate_purchase_order_exception(doc)
     elif doc.doctype == "Purchase Invoice":
         _validate_purchase_invoice_exception(doc)
-    finalize_if_workflow_inactive(doc, "p2p_workflow_state", SUBMITTED_STATE_BY_DOCTYPE[doc.doctype])
