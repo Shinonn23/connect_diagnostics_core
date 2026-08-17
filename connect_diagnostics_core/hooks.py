@@ -317,6 +317,9 @@ before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 # recorded from the template by api.frappe.print_log.register_print.
 override_whitelisted_methods = {
     "frappe.utils.print_format.download_pdf": ("connect_diagnostics_core.api.frappe.print_log.download_pdf"),
+    "erpnext_thailand.utils.get_address_by_tax_id": (
+        "connect_diagnostics_core.api.frappe.address.get_address_by_tax_id"
+    ),
 }
 
 extend_doctype_class = {
