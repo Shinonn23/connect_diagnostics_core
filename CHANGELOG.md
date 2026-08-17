@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.42.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.0...v0.42.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* skip P2P exception gate when workflow is inactive ([e00fb2f](https://github.com/Shinonn23/connect_diagnostics_core/commit/e00fb2f08ad99b15aef7fc2d85545af2f60db114))
+* stop over-strict submit gates from blocking P2P and tax-invoice operations ([30231bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/30231bf5c2b3abc9abfa49310dc3b9b76548e137))
+* warn instead of block on incomplete customer tax details ([b7f3d54](https://github.com/Shinonn23/connect_diagnostics_core/commit/b7f3d54ae2aadd1d517c8c479fd7b26e5b4580da))
+
 ## [0.42.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.2...v0.42.0) (2026-08-16)
 
 
