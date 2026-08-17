@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.43.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.1...v0.43.0) (2026-08-17)
+
+
+### Features
+
+* add credit note reason select field to Sales Invoice ([86cbd65](https://github.com/Shinonn23/connect_diagnostics_core/commit/86cbd6503c0e3c7ca19c8749474f1e37e8c63edd))
+* add credit note reason select field to Sales Invoice ([abbade2](https://github.com/Shinonn23/connect_diagnostics_core/commit/abbade2c6885030fa8f1df379a55a1e013b66bc1))
+
 ## [0.42.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.0...v0.42.1) (2026-08-17)
 
 
