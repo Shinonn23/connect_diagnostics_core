@@ -1,5 +1,13 @@
 """Custom field / property setter definitions for Sales Invoice."""
 
+CREDIT_NOTE_REASONS = (
+    "เนื่องจากสินค้าชำรุดบกพร่อง",
+    "สินค้าขาดจำนวน",
+    "คำนวณราคาผิดพลาด",
+    "สินค้าไม่ตรงกับใบสั่ง",
+    "สินค้าเกินจำนวน",
+)
+
 CUSTOM_FIELDS = {
     "Sales Invoice": [
         {
@@ -7,6 +15,16 @@ CUSTOM_FIELDS = {
             "fieldtype": "Column Break",
             "insert_after": "tax_invoice_number",
             "is_system_generated": 1,
+        },
+        {
+            "fieldname": "credit_note_reason",
+            "label": "Credit Note Reason",
+            "fieldtype": "Select",
+            "options": "\n".join(CREDIT_NOTE_REASONS),
+            "insert_after": "return_against",
+            "depends_on": "eval:doc.is_return",
+            "mandatory_depends_on": "eval:doc.is_return",
+            "no_copy": 1,
         },
         {
             "fieldname": "department",
