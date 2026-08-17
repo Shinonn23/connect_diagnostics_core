@@ -9,10 +9,12 @@
   duplicate verification by IT-UB → accounting activation, with the Customer
   `disabled` throughout — cost more than it caught and is retired along with the
   `Customer Duplicate Verifier` role. Do not reintroduce an activation state.
-- Master data is required where it is used, not before a sale can start:
-  `sales_invoice.validate_tax_invoice_readiness` blocks **submitting** a Sales Invoice
-  until tax readiness passes — one active primary Billing Address whose Thai address,
-  tax ID, and branch code match Customer. Nothing blocks the order.
+- Master data is surfaced where it is used, not before a sale can start:
+  `sales_invoice.validate_tax_invoice_readiness` **warns** (`frappe.msgprint`, never
+  `throw`) when a Sales Invoice is submitted while tax readiness fails — one active
+  primary Billing Address whose Thai address, tax ID, and branch code match Customer.
+  The warning names exactly what is missing but does not block the submit, and nothing
+  blocks the order.
 - Readiness is **calculated, never stored**. `customer.build_readiness_values` is the
   single place that decides what a Customer is missing; the invoice gate and the
   Customer form both read it live through `get_customer_readiness`. The four readiness

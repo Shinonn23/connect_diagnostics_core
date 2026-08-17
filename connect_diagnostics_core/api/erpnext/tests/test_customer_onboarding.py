@@ -296,24 +296,32 @@ class TestCustomerCodeFreeze(UnitTestCase):
 
 
 class TestTaxInvoiceGate(UnitTestCase):
-    """Tax details are required when the invoice is issued, not before an order."""
+    """Incomplete tax details warn at issue time; they never block the submit."""
 
-    def _submit(self, readiness: dict[str, str]) -> None:
+    def _submit(self, readiness: dict[str, str]) -> MagicMock:
         doc = FakeDocument({"customer": "CD-0001", "customer_name": "Bangkok Hospital"})
-        with patch.object(customer, "get_readiness_for_customer", return_value=readiness):
+        with (
+            patch.object(customer, "get_readiness_for_customer", return_value=readiness),
+            patch.object(sales_invoice.frappe, "msgprint") as msgprint,
+        ):
             sales_invoice.validate_tax_invoice_readiness(cast(Document, doc))
+        return msgprint
 
-    def test_a_ready_customer_submits(self) -> None:
-        self._submit({"tax_invoice_readiness": customer.READY})
+    def test_a_ready_customer_submits_without_a_warning(self) -> None:
+        msgprint = self._submit({"tax_invoice_readiness": customer.READY})
 
-    def test_an_incomplete_customer_is_blocked_with_what_is_missing(self) -> None:
-        with self.assertRaises(frappe.ValidationError):
-            self._submit(
-                {
-                    "tax_invoice_readiness": customer.MISSING,
-                    "customer_readiness_summary": "Tax Invoice: Customer Tax ID",
-                }
-            )
+        msgprint.assert_not_called()
+
+    def test_an_incomplete_customer_is_warned_with_what_is_missing(self) -> None:
+        msgprint = self._submit(
+            {
+                "tax_invoice_readiness": customer.MISSING,
+                "customer_readiness_summary": "Tax Invoice: Customer Tax ID",
+            }
+        )
+
+        msgprint.assert_called_once()
+        self.assertIn("Customer Tax ID", msgprint.call_args.args[0])
 
     def test_an_invoice_without_a_customer_is_left_alone(self) -> None:
         doc = FakeDocument({"customer": ""})
