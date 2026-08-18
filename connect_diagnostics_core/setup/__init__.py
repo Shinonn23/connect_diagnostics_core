@@ -38,7 +38,6 @@ from connect_diagnostics_core.setup import (
     sales_order_item,
     sales_requirements,
     sales_taxes_and_charges,
-    stock_count,
     stock_entry,
     stock_settings,
     storage_location,
@@ -110,7 +109,6 @@ def apply_all() -> None:
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
     regulatory.ensure_configuration()
-    stock_count.ensure_configuration()
     workspace.ensure_workspace_navigation()
 
 
