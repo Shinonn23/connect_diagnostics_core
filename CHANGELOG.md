@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.43.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.1...v0.43.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* keep Shipment Box Label static and correct print-format counts ([f257f4f](https://github.com/Shinonn23/connect_diagnostics_core/commit/f257f4fb915d89cad44ff22b8ee30128e9fde03b))
+
+
+### Code Refactoring
+
+* remove per-Customer print configuration ([8ab8d7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8ab8d7db8632e38ea05da5f16ce7a63bd7a51f35))
+
 ## [0.43.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.0...v0.43.1) (2026-08-17)
 
 
