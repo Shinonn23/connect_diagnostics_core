@@ -29,16 +29,8 @@
   that overlay an official government form scan — `Withholding Tax Cert CD` positions its fields
   over the Revenue Department form image from `erpnext_thailand`, so the background-image and
   semantic-sectioning rules do not apply to it. `Shipment Box
-  Label` is a Shipment format that uses `cd_logo_v2.jpg`, splits sender and recipient details,
-  and shows the recipient Customer's Territory only when present. Its paper size is selectable
-  from the print sidebar — 180 × 100 mm landscape (default) or 100 × 180 mm portrait — through a
-  provider on the print sidebar engine (see **Print sidebar engine** below). The choice rides in
-  `additional_settings.shipment_label_size` (no prefix), which Frappe merges into the render's
-  `print_settings`, so the template reads `print_settings.shipment_label_size`. There is
-  deliberately no Print Settings custom field: the size has no per-Customer state to resolve, so
-  the value rides the request only. The template emits the matching
-  `.print-format { page-width / page-height }` rule for the chosen size, which
-  `frappe.utils.pdf.read_options_from_html` picks up to size the PDF page.
+  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
+  and recipient details, and shows the recipient Customer's Territory only when present.
 - When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
   time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
   leaves the deployed format stale after `bench migrate`. The Sales Invoice format also has an
@@ -72,8 +64,7 @@
   `print_configuration.get_print_options`, which returns the static field list + registry
   defaults for a document with **no** per-Customer resolution; `cd_` prefix; Reset restores
   the defaults), gated to the registry doctypes (`Quotation`, `Sales Order`, `Sales Invoice`,
-  `Payment Entry`, mirroring `setup/print_documents.py`); and `shipment_label_size.js` — a
-  declarative Select gated to the `Shipment Box Label` format. The sidebar values flow into
+  `Payment Entry`, mirroring `setup/print_documents.py`). The sidebar values flow into
   `print_settings` and the server print context reads them back via
   `print_configuration.get_document_print_context`. Add a new sidebar setting by writing a
   provider file and listing it in `page_js` — do not add branches to the engine.
