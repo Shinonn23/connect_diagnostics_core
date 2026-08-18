@@ -64,6 +64,7 @@ SIDEBAR_ITEM_FIELDS = (
 )
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
+    "Selling": frozenset({("DocType", "Print Configuration Template")}),
     "ERPNext Settings": frozenset(
         {
             ("DocType", "Repost Accounting Ledger Settings"),
@@ -79,6 +80,7 @@ RETIRED_SIDEBAR_LINKS = {
     ),
 }
 RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
+    "Selling": frozenset({("DocType", "Print Configuration Template")}),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
     "Financial Reports": frozenset(
         {
