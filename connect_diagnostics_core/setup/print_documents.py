@@ -4,9 +4,9 @@
 """Single source of truth for the documents the print configuration covers.
 
 Every other part of the print configuration derives from ``PRINT_DOCUMENTS``:
-the ``Print Configuration Template`` and Customer child rows, the print sidebar
-controls, and the Jinja print context. Adding a document type is a change here
-and nowhere else.
+the print sidebar controls and the Jinja print context. Print options are chosen
+per print in the sidebar; there is no stored per-Customer configuration. Adding a
+document type is a change here and nowhere else.
 """
 
 from __future__ import annotations
@@ -24,8 +24,6 @@ KIND_ORIGINAL = "Original"
 KIND_COPY = "Copy"
 
 SOURCE_DEFAULT = "Default"
-SOURCE_TEMPLATE = "Template"
-SOURCE_CUSTOMER = "Customer"
 SOURCE_DOCUMENT = "This document"
 SOURCE_REQUEST = "This print"
 
@@ -123,14 +121,6 @@ QUOTATION_EXTRA_FIELDS = (
     "quotation_delivery_terms",
 )
 
-# The subset Customer stores as its own default for new Quotations. The validity
-# wording is deliberately absent: it describes one offer, not a standing customer
-# policy, so it lives on the Quotation alone.
-QUOTATION_CUSTOMER_FIELDS = (
-    "quotation_signatory_type",
-    "quotation_delivery_terms",
-)
-
 # Set on the transaction itself, not on Customer or Template. A non-empty value
 # on the document wins over the resolved default.
 QUOTATION_DOCUMENT_FIELDS = (
@@ -194,23 +184,11 @@ PRINT_DOCUMENTS: tuple[PrintDocument, ...] = (
 
 DOCUMENT_BY_KEY: dict[str, PrintDocument] = {document.key: document for document in PRINT_DOCUMENTS}
 
-# Scalar configuration carried by Customer alone. These are per-customer values,
-# not shared policy, so they are deliberately absent from Print Configuration
-# Template: a Template holds only the per-document rows and copies, which every
-# linked Customer follows immediately.
-SCALAR_FIELDS = (
-    "customer_print_name",
-    "source_purchase_order_copy_required",
-    "purchase_order_copy_count",
-    *QUOTATION_CUSTOMER_FIELDS,
-)
-
 # Registry defaults for every resolved scalar, including the Quotation values
-# that only the document itself carries.
+# that only the document itself carries. Chosen per print in the sidebar; there
+# is no stored per-Customer configuration.
 SCALAR_DEFAULTS: dict[str, object] = {
     "customer_print_name": "",
-    "source_purchase_order_copy_required": 0,
-    "purchase_order_copy_count": 1,
     "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
     "override_quotation_validity_text": 0,
     "quotation_custom_validity_text": "",

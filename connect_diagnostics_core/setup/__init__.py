@@ -116,7 +116,6 @@ def apply_all() -> None:
 
 def after_install() -> None:
     apply_all()
-    _ensure_default_print_configuration_template()
 
 
 def after_sync() -> None:
@@ -134,16 +133,4 @@ def after_migrate() -> None:
     workspace.ensure_regulatory_workspace()
     workspace.restore_regulatory_workspace_customizations()
     workspace.ensure_regulatory_workspace()
-    _ensure_default_print_configuration_template()
     remove_non_app_print_formats()
-
-
-def _ensure_default_print_configuration_template() -> None:
-    """Create the reusable Templates after the standard DocType has synchronized."""
-    from connect_diagnostics_core.setup.print_configuration_template import (
-        ensure_default_template,
-        ensure_policy_templates,
-    )
-
-    ensure_default_template()
-    ensure_policy_templates()

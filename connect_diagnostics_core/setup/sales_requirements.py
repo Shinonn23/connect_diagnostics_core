@@ -4,10 +4,10 @@
 """Fields and the override Role behind the Customer sales document requirements.
 
 A Customer records what it needs before a sale can proceed: a Quotation issued
-first, or a copy of the source Purchase Order attached to its tax invoice. The
-gate that enforces those lives in
+first, so a Sales Order carries the reason field used when that gate is
+overridden. The gate that enforces it lives in
 :mod:`connect_diagnostics_core.api.erpnext.sales_requirements`; this module owns
-the fields it reads and the Role that may override it.
+the field it reads and the Role that may override it.
 """
 
 from __future__ import annotations
@@ -31,34 +31,6 @@ CUSTOM_FIELDS = {
             "label": "Requirement Override Reason",
             "fieldtype": "Small Text",
             "insert_after": "po_date",
-            "no_copy": 1,
-            "description": OVERRIDE_REASON_DESCRIPTION,
-        },
-    ],
-    "Sales Invoice": [
-        {
-            "fieldname": "source_purchase_order_section",
-            "label": "Source Purchase Order Copy",
-            "fieldtype": "Section Break",
-            "insert_after": "po_date",
-        },
-        {
-            "fieldname": "source_purchase_orders",
-            "label": "Source Purchase Orders",
-            "fieldtype": "Table",
-            "options": "Sales Invoice Source Purchase Order",
-            "insert_after": "source_purchase_order_section",
-            "description": (
-                "The Purchase Orders we placed with our supplier for these goods. "
-                "Their copies print after the tax invoice, one row per Purchase Order "
-                "with its own copy count."
-            ),
-        },
-        {
-            "fieldname": "requirement_override_reason",
-            "label": "Requirement Override Reason",
-            "fieldtype": "Small Text",
-            "insert_after": "source_purchase_orders",
             "no_copy": 1,
             "description": OVERRIDE_REASON_DESCRIPTION,
         },

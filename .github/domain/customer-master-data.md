@@ -21,29 +21,24 @@
   Select fields, their summary, `customer_onboarding_state`, `correction_reason`, and
   the no-delivery controls were dropped with the workflow, together with the Address
   and Contact hooks that rewrote them on every save.
-- `Print Configuration Template` is shared print policy: a `Documents` table with one
-  row per registered document, and a `Copies` table of named page sets. It holds no
-  per-customer scalars. Every Customer linked to it follows those rows **live** —
-  editing a Template changes what its Customers print immediately, with no fetch step.
-- Customer `Document / Print Configuration` links one Template and carries only its
-  own values: Customer Print Name, Quotation signatory type and Delivery Terms,
-  and the source Purchase Order copy settings. Its `Documents` and `Copies` tables are
-  overrides: no row means inherit the Template for that document; a row wins wholesale.
+- There is no per-Customer print configuration. Print options — language, show date,
+  Customer Print Name, per-copy-type counts, and the Quotation signatory / validity /
+  delivery fields — are chosen per print in the print sidebar, with static registry
+  defaults only; nothing is stored per Customer. `Print Configuration Template`, its two
+  child tables, and the Customer "Print" tab were removed.
 - `connect_diagnostics_core/setup/print_documents.py` is the single source of truth for
   which documents exist (Quotation, Tax Invoice, Abbreviated Tax Invoice, Receipt),
   their named copies, whether language is selectable, and whether Batch / Serial
-  applies. Doctype rows, sidebar controls, and the print context all derive from it —
-  adding a document type is a change there and nowhere else. The retired `invoice` and
-  `delivery_note` configurations must not be reintroduced; no print format consumed them.
-- Values resolve in four stages, later winning: registry defaults, Template rows,
-  Customer scalars and override rows, then request-only `flags.print_settings`. A blank
-  Customer text value inherits rather than blanking the resolved value. The resolver
-  also reports the source of each value, which the Print sidebar shows under each
-  control alongside a Reset to default action.
-- The Print sidebar loads only the active format's controls and sends them as
-  request-only `settings` overrides. Overrides affect preview, print, and PDF for that
-  request only; they never save Customer or the source document. Missing fields during
-  a code-before-migration rollout fall back to registry defaults.
+  applies. The sidebar controls and the print context derive from it — adding a document
+  type is a change there and nowhere else. The retired `invoice` and `delivery_note`
+  configurations must not be reintroduced; no print format consumed them.
+- Values resolve from two sources, the sidebar winning: registry defaults, then
+  request-only `flags.print_settings` from the print sidebar (`cd_`-prefixed). There is
+  no Customer or Template stage.
+- The Print sidebar loads the active format's controls from
+  `print_configuration.get_print_options` and sends them as request-only `settings`
+  overrides, with a Reset to default action. Overrides affect preview, print, and PDF for
+  that request only; they never save Customer or the source document.
 - Sales Invoice prints the named copies Original, Customer Copy, Accounting Copy, and
   Sales Copy, plus a Batch / Serial visibility option. All four default to one page set
   each. Sales Invoice is Thai-only: the registry fixes its language and any row value
@@ -75,11 +70,11 @@
   and writes the name by hand, and therefore resolves no Employee at all. The retired
   `Company.quotation_authorized_signatory_employee` and its Quotation override must not
   be reintroduced.
-- `override_quotation_validity_text` and `quotation_custom_validity_text` live on
-  Quotation, not Customer: the wording describes one offer. Customer keeps only
-  `quotation_signatory_type` and `quotation_delivery_terms`, copied as defaults to new
-  Quotations. `print_documents.QUOTATION_CUSTOMER_FIELDS` is what Customer stores;
-  `QUOTATION_EXTRA_FIELDS` is what the sidebar may override for one request.
+- The Quotation carries its own `quotation_signatory_type` and
+  `sales_representative_employee` (see `setup/quotation.py`); Customer no longer stores
+  any print or signatory defaults. `print_documents.QUOTATION_EXTRA_FIELDS` /
+  `QUOTATION_DOCUMENT_FIELDS` are what the print sidebar and the document supply for one
+  print, including validity and delivery wording.
 - The single Quotation format renders Thai, English, or Thai / English and configured
   original/copy pages. `show_date` off and a custom validity text are ordinary
   configuration, not separate formats.
