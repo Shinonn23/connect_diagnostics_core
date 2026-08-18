@@ -35,15 +35,15 @@ def on_submit_bank_change_request(doc: Document, _method: str | None = None) -> 
 
 
 def on_cancel_bank_change_request(doc: Document, _method: str | None = None) -> None:
-    approved_request_exists = frappe.db.exists(
+    another_submitted_request_exists = frappe.db.exists(
         p2p.BANK_CHANGE_REQUEST,
         {
             "bank_account": doc.get("bank_account"),
-            "bank_change_request_state": p2p.BANK_VERIFIED,
             "docstatus": 1,
+            "name": ["!=", doc.name],
         },
     )
-    if not approved_request_exists:
+    if not another_submitted_request_exists:
         frappe.db.set_value(
             "Bank Account",
             doc.get("bank_account"),
