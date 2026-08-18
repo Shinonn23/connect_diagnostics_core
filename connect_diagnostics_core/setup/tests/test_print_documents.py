@@ -88,18 +88,9 @@ class TestPrintDocumentRegistry(UnitTestCase):
         self.assertEqual(definition.label(print_documents.LANGUAGE_ENGLISH), "Original")
         self.assertEqual(definition.label(print_documents.LANGUAGE_BILINGUAL), "ต้นฉบับ / Original")
 
-    def test_scalar_defaults_cover_every_scalar_field(self) -> None:
-        self.assertLessEqual(set(print_documents.SCALAR_FIELDS), set(print_documents.SCALAR_DEFAULTS))
-
-    def test_customer_stores_only_its_own_quotation_defaults(self) -> None:
-        """Validity wording describes one offer, so Customer must not carry it."""
-        self.assertEqual(
-            set(print_documents.QUOTATION_CUSTOMER_FIELDS),
-            {"quotation_signatory_type", "quotation_delivery_terms"},
-        )
+    def test_quotation_scalar_defaults_are_present(self) -> None:
         for fieldname in ("override_quotation_validity_text", "quotation_custom_validity_text"):
             with self.subTest(fieldname=fieldname):
-                self.assertNotIn(fieldname, print_documents.SCALAR_FIELDS)
                 self.assertIn(fieldname, print_documents.SCALAR_DEFAULTS)
                 self.assertIn(fieldname, print_documents.QUOTATION_EXTRA_FIELDS)
 

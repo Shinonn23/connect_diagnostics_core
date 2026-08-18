@@ -2,9 +2,10 @@
 
 ## Print Formats
 
-- Print lives in its own module. App-owned Print Formats, `Print Configuration Template`,
-  the two configuration child tables, and `Print Log` all belong to
+- Print lives in its own module. App-owned Print Formats and `Print Log` belong to
   `Connect Diagnostics Print` under `connect_diagnostics_core/connect_diagnostics_print/`.
+  There is no per-Customer print configuration: print options are chosen per print in the
+  print sidebar (see **Print sidebar engine**), with static registry defaults only.
 - Print Formats are app-owned and editable through Desk (`standard = "No"`): `after_sync` and
   `after_migrate` remove every
   `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
@@ -28,8 +29,16 @@
   that overlay an official government form scan — `Withholding Tax Cert CD` positions its fields
   over the Revenue Department form image from `erpnext_thailand`, so the background-image and
   semantic-sectioning rules do not apply to it. `Shipment Box
-  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
-  and recipient details, and shows the recipient Customer's Territory only when present.
+  Label` is a Shipment format that uses `cd_logo_v2.jpg`, splits sender and recipient details,
+  and shows the recipient Customer's Territory only when present. Its paper size is selectable
+  from the print sidebar — 180 × 100 mm landscape (default) or 100 × 180 mm portrait — through a
+  provider on the print sidebar engine (see **Print sidebar engine** below). The choice rides in
+  `additional_settings.shipment_label_size` (no prefix), which Frappe merges into the render's
+  `print_settings`, so the template reads `print_settings.shipment_label_size`. There is
+  deliberately no Print Settings custom field: the size has no per-Customer state to resolve, so
+  the value rides the request only. The template emits the matching
+  `.print-format { page-width / page-height }` rule for the chosen size, which
+  `frappe.utils.pdf.read_options_from_html` picks up to size the PDF page.
 - When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
   time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
   leaves the deployed format stale after `bench migrate`. The Sales Invoice format also has an
@@ -38,6 +47,36 @@
 - Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
   amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
   do not define local money-formatting macros in Print Formats.
+
+## Print sidebar engine
+
+- App-specific print sidebar controls go through a client-side engine, not one-off
+  `PrintView` overrides. `page_js = {"print": [...]}` in `hooks.py` loads, in order,
+  `public/js/custom/print/engine.js` then each provider under
+  `public/js/custom/print/providers/`. `page_js` values are concatenated raw (no bundler,
+  `frappe/desk/form/meta.py: get_code_files_via_hooks`), so the engine must be listed first;
+  it exposes `connect_diagnostics.print.register(provider)` (idempotent by `name`).
+- The engine overrides `PrintView.setup_additional_settings`. When at least one provider's
+  `applies_to(view)` is true it **takes over** the dynamic sidebar section: hides the Letter
+  Head selector (button only — the default letterhead still applies), skips Frappe's native
+  `get_print_settings` controls, and renders the applicable providers. When **no** provider
+  applies it restores the Letter Head selector and delegates to Frappe's original
+  `setup_additional_settings`, so unrelated doctypes keep the native sidebar untouched. This
+  scoping is deliberate — do not make the stripping global.
+- A provider is `{ name, applies_to(view), load?(view)→Promise, build?(view,data)→[df],
+  render?(view,data), on_error?(view,reason), section_label?, prefix? }`. Declarative providers
+  return field descriptors (engine renders + wires them via `cd_add_setting`); imperative
+  providers own their DOM. Value transport stays Frappe's own (`additional_settings` →
+  `print_settings`), shared by preview and print/PDF.
+- Current providers: `print_options.js` — registry-driven Print Options (async `load` of
+  `print_configuration.get_print_options`, which returns the static field list + registry
+  defaults for a document with **no** per-Customer resolution; `cd_` prefix; Reset restores
+  the defaults), gated to the registry doctypes (`Quotation`, `Sales Order`, `Sales Invoice`,
+  `Payment Entry`, mirroring `setup/print_documents.py`); and `shipment_label_size.js` — a
+  declarative Select gated to the `Shipment Box Label` format. The sidebar values flow into
+  `print_settings` and the server print context reads them back via
+  `print_configuration.get_document_print_context`. Add a new sidebar setting by writing a
+  provider file and listing it in `page_js` — do not add branches to the engine.
 
 ## Print Audit Log
 

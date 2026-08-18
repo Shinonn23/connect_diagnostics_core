@@ -266,13 +266,20 @@ class TestPrintFormats(UnitTestCase):
         self.assertEqual(print_format["module"], "Connect Diagnostics Print")
         self.assertEqual(print_format["print_format_type"], "Jinja")
         self.assertEqual(print_format["pdf_generator"], "wkhtmltopdf")
-        self.assertIn("size: 180mm 100mm", print_format["css"])
-        self.assertIn("page-width: 180mm", print_format["css"])
-        self.assertIn("page-height: 100mm", print_format["css"])
-        self.assertIn("margin-top: 0mm", print_format["css"])
-        self.assertIn("margin-right: 0mm", print_format["css"])
-        self.assertIn("margin-bottom: 0mm", print_format["css"])
-        self.assertIn("margin-left: 0mm", print_format["css"])
+        # Both paper sizes live in the html field as Jinja-conditional <style>
+        # blocks so the print sidebar can switch between them per request; page
+        # margins come from the format's own margin_* fields.
+        self.assertIn("size: 180mm 100mm", print_format["html"])
+        self.assertIn("page-width: 180mm", print_format["html"])
+        self.assertIn("page-height: 100mm", print_format["html"])
+        self.assertIn("size: 100mm 180mm", print_format["html"])
+        self.assertIn("page-width: 100mm", print_format["html"])
+        self.assertIn("page-height: 180mm", print_format["html"])
+        self.assertIn("print_settings.shipment_label_size", print_format["html"])
+        self.assertEqual(print_format["margin_top"], 0.0)
+        self.assertEqual(print_format["margin_right"], 0.0)
+        self.assertEqual(print_format["margin_bottom"], 0.0)
+        self.assertEqual(print_format["margin_left"], 0.0)
         self.assertIn("width: 179mm", print_format["css"])
         self.assertIn("height: 99mm", print_format["css"])
         self.assertIn("overflow-wrap: anywhere", print_format["css"])
@@ -364,6 +371,23 @@ class TestPrintFormats(UnitTestCase):
         self.assertIn("…", rendered)
         self.assertNotIn("UNBOUNDED_TAIL", rendered)
 
+    def test_shipment_box_label_defaults_to_landscape_size(self) -> None:
+        rendered = self._render_shipment_box_label()
+
+        self.assertIn("label-size-180x100", rendered)
+        self.assertIn("size: 180mm 100mm", rendered)
+        self.assertNotIn("label-size-100x180", rendered)
+        self.assertNotIn("size: 100mm 180mm", rendered)
+
+    def test_shipment_box_label_switches_to_portrait_size(self) -> None:
+        rendered = self._render_shipment_box_label(label_size="100 x 180 mm")
+
+        self.assertIn("label-size-100x180", rendered)
+        self.assertIn("size: 100mm 180mm", rendered)
+        self.assertIn("page-width: 100mm", rendered)
+        self.assertNotIn("label-size-180x100", rendered)
+        self.assertNotIn("size: 180mm 100mm", rendered)
+
     @staticmethod
     def _load_shipment_box_label() -> dict[str, Any]:
         path = PRINT_FORMAT_ROOT / "shipment_box_label/shipment_box_label.json"
@@ -378,6 +402,7 @@ class TestPrintFormats(UnitTestCase):
         delivery_address: str = "99 Long recipient address<br>Bangkok 10110",
         pickup_contact: str = "",
         pickup_contact_name: str = "",
+        label_size: str | None = None,
         values: dict[tuple[str, str, str], str] | None = None,
     ) -> str:
         class FakeDatabase:
@@ -411,8 +436,13 @@ class TestPrintFormats(UnitTestCase):
         }
         environment = Environment(autoescape=True)
 
+        # The print sidebar merges its selection into `print_settings`; an empty
+        # mapping leaves the template on its landscape default.
+        print_settings = {"shipment_label_size": label_size} if label_size else {}
+
         return environment.from_string(print_format["html"]).render(
             doc=doc,
+            print_settings=print_settings,
             frappe=SimpleNamespace(db=FakeDatabase(values or {})),
             # Registered as a Jinja method in hooks.py; a no-op here because the
             # harness renders outside a request.

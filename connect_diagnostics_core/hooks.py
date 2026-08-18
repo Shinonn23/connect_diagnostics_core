@@ -40,19 +40,23 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-page_js = {"print": "public/js/custom/print/doctype.js"}
+page_js = {
+    "print": [
+        "public/js/custom/print/engine.js",
+        "public/js/custom/print/providers/print_options.js",
+        "public/js/custom/print/providers/shipment_label_size.js",
+    ]
+}
 
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
-    "Customer": "public/js/custom/customer/doctype.js",
     "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
-    "Sales Invoice": "public/js/custom/sales_invoice/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
 }
 doctype_list_js = {
@@ -195,7 +199,6 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
     },
     "Sales Invoice": {
-        "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
