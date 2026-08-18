@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.0...v0.43.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* strip Thai prefixes from By-Tax-ID address lookup ([4762372](https://github.com/Shinonn23/connect_diagnostics_core/commit/476237245ab2fc816325a46c12c1899f9abc3634))
+
 ## [0.43.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.1...v0.43.0) (2026-08-17)
 
 
