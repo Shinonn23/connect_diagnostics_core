@@ -45,16 +45,6 @@ SUBMIT_INWARD_ACTION = "Submit Payment Request"
 CUSTOM_FIELDS = {
     PAYMENT_REQUEST_DOCTYPE: [
         {
-            "fieldname": WORKFLOW_STATE_FIELD,
-            "label": "Payment Approval State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "insert_after": "status",
-            "allow_on_submit": 1,
-            "hidden": 1,
-            "no_copy": 1,
-        },
-        {
             "fieldname": BASE_GRAND_TOTAL_FIELD,
             "label": "Amount (Company Currency)",
             "fieldtype": "Currency",

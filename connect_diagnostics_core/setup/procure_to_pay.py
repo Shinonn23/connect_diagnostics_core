@@ -63,32 +63,22 @@ PI_EXCEPTION = "Pending Purchase Invoice Exception Approval"
 PI_VERIFIED = "Purchase Invoice Verified"
 PI_REJECTED = "Purchase Invoice Rejected"
 
-WORKFLOW_STATE_FIELDS = {
-    SUPPLIER: "supplier_onboarding_state",
-    BANK_CHANGE_REQUEST: "bank_change_request_state",
-    MATERIAL_REQUEST: "p2p_workflow_state",
-    PURCHASE_ORDER: "p2p_workflow_state",
-    PURCHASE_RECEIPT: "p2p_workflow_state",
-    PURCHASE_INVOICE: "p2p_workflow_state",
-}
+CACHE_CLEAR_DOCTYPES = (
+    SUPPLIER,
+    BANK_CHANGE_REQUEST,
+    MATERIAL_REQUEST,
+    PURCHASE_ORDER,
+    PURCHASE_RECEIPT,
+    PURCHASE_INVOICE,
+)
 
 CUSTOM_FIELDS = {
     SUPPLIER: [
         {
-            "fieldname": "supplier_onboarding_state",
-            "label": "Supplier Onboarding State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "insert_after": "disabled",
-            "read_only": 1,
-            "no_copy": 1,
-            "in_list_view": 1,
-        },
-        {
             "fieldname": "supplier_verification_notes",
             "label": "Supplier Verification Notes",
             "fieldtype": "Small Text",
-            "insert_after": "supplier_onboarding_state",
+            "insert_after": "disabled",
             "no_copy": 1,
         },
     ],
@@ -116,21 +106,11 @@ CUSTOM_FIELDS = {
     ],
     MATERIAL_REQUEST: [
         {
-            "fieldname": "p2p_workflow_state",
-            "label": "P2P Workflow State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
-            "insert_after": "status",
-        },
-        {
             "fieldname": "purchase_reason",
             "label": "Purchase Reason",
             "fieldtype": "Small Text",
             "reqd": 1,
-            "insert_after": "p2p_workflow_state",
+            "insert_after": "status",
         },
         {
             "fieldname": "supporting_document_complete",
@@ -142,51 +122,19 @@ CUSTOM_FIELDS = {
     ],
     PURCHASE_ORDER: [
         {
-            "fieldname": "p2p_workflow_state",
-            "label": "P2P Workflow State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
-            "insert_after": "status",
-        },
-        {
             "fieldname": "p2p_exception_reason",
             "label": "P2P Exception Reason",
             "fieldtype": "Small Text",
-            "insert_after": "p2p_workflow_state",
-            "no_copy": 1,
-        },
-    ],
-    PURCHASE_RECEIPT: [
-        {
-            "fieldname": "p2p_workflow_state",
-            "label": "P2P Workflow State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
             "insert_after": "status",
+            "no_copy": 1,
         },
     ],
     PURCHASE_INVOICE: [
         {
-            "fieldname": "p2p_workflow_state",
-            "label": "P2P Workflow State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
-            "insert_after": "status",
-        },
-        {
             "fieldname": "p2p_exception_reason",
             "label": "P2P Exception Reason",
             "fieldtype": "Small Text",
-            "insert_after": "p2p_workflow_state",
+            "insert_after": "status",
             "no_copy": 1,
         },
     ],
@@ -205,7 +153,7 @@ def ensure_configuration() -> None:
     ensure_role_profiles()
     assign_role_holders()
     activate_standard_permissions()
-    for doctype in WORKFLOW_STATE_FIELDS:
+    for doctype in CACHE_CLEAR_DOCTYPES:
         frappe.clear_cache(doctype=doctype)
 
 

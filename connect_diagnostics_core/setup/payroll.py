@@ -48,24 +48,6 @@ INCOME_TAX_SLABS = (
 INCOME_TAX_SLAB_NAME = "Thailand Personal Income Tax"
 SALARY_STRUCTURE_NAME = "Connect Diagnostics Monthly"
 
-SALARY_SLIP_DOCTYPE = "Salary Slip"
-SALARY_SLIP_REVIEW_STATE_FIELD = "salary_slip_review_state"
-
-CUSTOM_FIELDS = {
-    SALARY_SLIP_DOCTYPE: [
-        {
-            "fieldname": SALARY_SLIP_REVIEW_STATE_FIELD,
-            "label": "Salary Slip Review State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
-            "insert_after": "status",
-        }
-    ]
-}
-
 # --- Salary Components -------------------------------------------------------
 # formula: an amount_based_on_formula expression evaluated in the HRMS salary
 #   component context (base, employee fields, min/max are available).
