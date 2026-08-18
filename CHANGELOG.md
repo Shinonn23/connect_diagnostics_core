@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.43.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.2...v0.43.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* retire the Print Configuration Template workspace link ([5168056](https://github.com/Shinonn23/connect_diagnostics_core/commit/5168056a85c20caa6c7a5942bafaba64bbbea5b7))
+* retire the Print Configuration Template workspace link ([bfbf381](https://github.com/Shinonn23/connect_diagnostics_core/commit/bfbf3812cb0263348ae541b2bd2afbfe46124860))
+
 ## [0.43.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.1...v0.43.2) (2026-08-18)
 
 
