@@ -179,13 +179,7 @@ doc_events = {
     "Customer Credit Request": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
-        "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
-    },
-    "Supplier": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
-        "before_submit": "connect_diagnostics_core.api.erpnext.supplier.before_submit",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -205,43 +199,29 @@ doc_events = {
         ],
     },
     "Payment Entry": {
-        "before_submit": (
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_entry_before_submit"
-        ),
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     "Salary Slip": {
         "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
     },
-    "Bank Account": {
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
-    },
     "Supplier Bank Change Request": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
-        "before_submit": "connect_diagnostics_core.api.erpnext.supplier.before_submit_bank_change_request",
         "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
     },
     "Material Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
     },
     "Purchase Order": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "validate": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_order",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
         ],
         "before_submit": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
     },
     "Purchase Receipt": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "before_submit": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
@@ -257,19 +237,6 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-    },
-    "Purchase Invoice": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_invoice",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
-    },
-    "Payment Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.payment_approval.before_validate",
-        "before_cancel": "connect_diagnostics_core.api.erpnext.payment_approval.set_cancelled_workflow_state",
-        "before_discard": "connect_diagnostics_core.api.erpnext.payment_approval.validate_before_discard",
-        "before_submit": (
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_request_before_submit"
-        ),
     },
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
@@ -326,7 +293,6 @@ override_whitelisted_methods = {
 
 extend_doctype_class = {
     "Payroll Entry": [
-        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryReviewMixin",
         "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryAccountingDimensionMixin",
     ],
 }

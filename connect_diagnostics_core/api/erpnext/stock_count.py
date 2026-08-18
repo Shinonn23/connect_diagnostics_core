@@ -19,8 +19,6 @@ from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from frappe import _
 from frappe.utils import flt, get_datetime
 
-from connect_diagnostics_core.setup.stock_count import APPROVED
-
 MONTHLY = "Cycle Count (Monthly)"
 YEARLY = "Yearly Count"
 
@@ -261,7 +259,7 @@ def generate_holding_transfer(stock_count: str) -> dict[str, Any]:
     short/mismatched stock for investigation. This never touches valuation, so it
     only requires Stock Manager approval — no accounting sign-off needed.
     """
-    doc = _load_approved_stock_count(stock_count, MONTHLY)
+    doc = _load_submitted_stock_count(stock_count, MONTHLY)
     if not doc.holding_warehouse:
         frappe.throw(_("Set a Holding Warehouse before generating the transfer."))
     if any(row.entry_type == "Material Transfer" for row in doc.adjustments):
@@ -312,7 +310,7 @@ def generate_stock_adjustment(stock_count: str) -> dict[str, Any]:
     company's Stock Adjustment account (same account Stock Reconciliation uses) —
     this only runs after both Stock Manager and Accounts Manager approval.
     """
-    doc = _load_approved_stock_count(stock_count, YEARLY)
+    doc = _load_submitted_stock_count(stock_count, YEARLY)
     if any(row.entry_type in ("Material Receipt", "Material Issue") for row in doc.adjustments):
         frappe.throw(_("A stock adjustment has already been generated for this Stock Count."))
 
@@ -341,7 +339,7 @@ def generate_stock_adjustment(stock_count: str) -> dict[str, Any]:
     }
 
 
-def _load_approved_stock_count(stock_count: str, expected_count_type: str) -> Any:
+def _load_submitted_stock_count(stock_count: str, expected_count_type: str) -> Any:
     doc = frappe.get_doc("Stock Count", stock_count)
     roles = set(frappe.get_roles())
     if not roles & {"Stock Manager", "System Manager"}:
@@ -349,8 +347,8 @@ def _load_approved_stock_count(stock_count: str, expected_count_type: str) -> An
     frappe.has_permission("Stock Count", doc=doc, ptype="write", throw=True)
     if doc.count_type != expected_count_type:
         frappe.throw(_("This action is only available for {0}.").format(expected_count_type))
-    if doc.docstatus != 1 or doc.count_state != APPROVED:
-        frappe.throw(_("The Stock Count must be fully approved before generating adjustments."))
+    if doc.docstatus != 1:
+        frappe.throw(_("The Stock Count must be submitted before generating adjustments."))
     return doc
 
 

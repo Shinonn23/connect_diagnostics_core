@@ -11,23 +11,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
-from connect_diagnostics_core.api.erpnext.workflow import (
-    finalize_if_workflow_inactive,
-    has_active_workflow,
-    initialize_workflow_state,
-)
-from connect_diagnostics_core.setup import customer_onboarding
-
 
 def before_validate(doc: Document, method: str | None = None) -> None:
-    """Set server-owned defaults before Frappe validates the credit-request workflow."""
-    initialize_workflow_state(doc)
+    """Set server-owned defaults before Frappe validates the credit request."""
     if not doc.get("company"):
         doc.set("company", _default_company())
 
 
 def validate(doc: Document, method: str | None = None) -> None:
-    """Keep credit requests scoped to active Customers and protected after review starts."""
+    """Keep credit requests scoped to active Customers with valid credit terms."""
     if doc.get("company") != _default_company():
         frappe.throw(_("Customer Credit Requests are limited to the default CD Company."))
     if float(doc.get("requested_credit_limit") or 0) <= 0:
@@ -35,23 +27,8 @@ def validate(doc: Document, method: str | None = None) -> None:
     if not doc.get("payment_terms"):
         frappe.throw(_("Payment Terms are required."))
 
-    # Every Customer asks for credit the same way, including GOV. HOSPITAL. There
-    # is no longer an onboarding review to set their terms behind the scenes.
+    # Every Customer asks for credit the same way, including GOV. HOSPITAL.
     _get_eligible_customer(cast(str, doc.get("customer")))
-    _validate_protected_fields(doc)
-    _validate_rejection_reason(doc)
-
-
-def before_submit(doc: Document, method: str | None = None) -> None:
-    """Finalize a credit request when its Workflow is intentionally inactive."""
-    bypassed = finalize_if_workflow_inactive(
-        doc,
-        customer_onboarding.CREDIT_REQUEST_WORKFLOW_STATE_FIELD,
-        customer_onboarding.CREDIT_REQUEST_APPROVED_STATE,
-    )
-    if bypassed:
-        doc.set("approved_by", frappe.session.user)
-        doc.set("approved_on", now_datetime())
 
 
 def on_submit(doc: Document, method: str | None = None) -> None:
@@ -90,36 +67,6 @@ def _get_eligible_customer(customer_name: str, *, customer: Document | None = No
     if customer.get("disabled"):
         frappe.throw(_("Credit cannot be requested for a disabled Customer."))
     return customer
-
-
-def _validate_protected_fields(doc: Document) -> None:
-    previous_doc = doc.get_doc_before_save()
-    if not previous_doc:
-        return
-    if (
-        not has_active_workflow(customer_onboarding.CREDIT_REQUEST_DOCTYPE)
-        or previous_doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_DRAFT_STATE
-    ):
-        return
-    protected_fields = ("customer", "company", "requested_credit_limit", "payment_terms", "reason")
-    changed = [
-        fieldname for fieldname in protected_fields if doc.get(fieldname) != previous_doc.get(fieldname)
-    ]
-    if changed:
-        frappe.throw(_("Customer Credit Request fields cannot be changed after credit review begins."))
-
-
-def _validate_rejection_reason(doc: Document) -> None:
-    previous_doc = doc.get_doc_before_save()
-    if not previous_doc:
-        return
-    if (
-        has_active_workflow(customer_onboarding.CREDIT_REQUEST_DOCTYPE)
-        and previous_doc.get("credit_request_state") == customer_onboarding.PENDING_CREDIT_APPROVAL_STATE
-        and doc.get("credit_request_state") == customer_onboarding.CREDIT_REQUEST_REJECTED_STATE
-        and not str(doc.get("review_reason") or "").strip()
-    ):
-        frappe.throw(_("Review Reason is required when rejecting a Customer Credit Request."))
 
 
 def _set_customer_credit_limit(customer: Document, company: str, credit_limit: float) -> None:
