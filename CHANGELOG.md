@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.2...v0.45.0) (2026-08-19)
+
+
+### Features
+
+* enforce Quotation signatory, add Delivery Terms Template, and redesign the Signatory/Terms layout ([0492703](https://github.com/Shinonn23/connect_diagnostics_core/commit/04927039d6af4988fc4f985eb77b5f244f7fe3f0))
+
 ## [0.44.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.1...v0.44.2) (2026-08-19)
 
 
