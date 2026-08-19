@@ -29,7 +29,10 @@ cases of every issue the PR `Refs`. Board field IDs are in the Board #6 referenc
    STOP on mixed deployment statuses. Fetch the target branch, require the PR merge
    commit to be its ancestor, capture the branch SHA, and require explicit evidence
    that this exact SHA is currently deployed to the target environment. Do not use
-   a newer DEV deployment to certify code preserved on UAT or PROD.
+   a newer DEV deployment to certify code preserved on UAT or PROD. For DEV, that
+   evidence is the `Deploy` run triggered by the published `vX.Y.Z` release — merging
+   into `developments` does not deploy — so a merged-but-unreleased PR is not yet
+   testable and must not be dispatched.
 2. **Collect test cases.** For each source issue, read its body and pull the
    **Manual test steps** `- [ ]` lines. Keep them grouped per issue with a link.
 3. **Find or create the test-task issue.** Search every state first:

@@ -51,16 +51,27 @@ class FakeDocument(frappe._dict):
 
 
 class TestCustomerReadiness(UnitTestCase):
-    def test_print_configuration_tab_holds_override_tables_not_flat_fields(self) -> None:
+    def test_print_configuration_and_source_po_fields_are_gone(self) -> None:
+        """Print options moved to the print sidebar; the source-PO feature was removed."""
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        self.assertEqual(fields["print_documents"]["fieldtype"], "Table")
-        self.assertEqual(fields["print_documents"]["options"], "Print Document Configuration")
-        self.assertEqual(fields["print_copies"]["fieldtype"], "Table")
-        self.assertEqual(fields["print_copies"]["options"], "Print Copy Configuration")
-        self.assertEqual(fields["print_documents_section"]["insert_after"], "customer_print_name")
-
         for retired in (
+            # per-Customer print configuration (now chosen per print in the sidebar)
+            "document_preferences_section",
+            "print_configuration_template",
+            "customer_print_name",
+            "print_documents_section",
+            "print_documents",
+            "print_copies_section",
+            "print_copies",
+            "quotation_print_section",
+            "quotation_signatory_type",
+            "quotation_delivery_terms",
+            # source Purchase Order copy feature
+            "purchase_order_copy_preferences_section",
+            "source_purchase_order_copy_required",
+            "purchase_order_copy_count",
+            # legacy per-document flags
             "use_quotation",
             "use_tax_invoice",
             "use_delivery_note",
@@ -89,22 +100,11 @@ class TestCustomerReadiness(UnitTestCase):
             with self.subTest(fieldname=retired):
                 self.assertNotIn(retired, fields)
 
-    def test_customer_keeps_its_own_scalar_print_defaults(self) -> None:
+    def test_customer_keeps_only_the_quotation_requirement_gate(self) -> None:
         fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
 
-        self.assertEqual(fields["source_purchase_order_copy_required"]["default"], "0")
-        self.assertEqual(fields["purchase_order_copy_count"]["default"], "1")
-        self.assertEqual(fields["purchase_order_copy_count"]["non_negative"], 1)
-        self.assertEqual(
-            fields["purchase_order_copy_count"]["depends_on"],
-            "eval:doc.source_purchase_order_copy_required",
-        )
+        self.assertEqual(fields["sales_requirements_section"]["fieldtype"], "Tab Break")
         self.assertEqual(fields["quotation_required"]["default"], "0")
-        self.assertEqual(fields["quotation_signatory_type"]["default"], "Sales Representative")
-        self.assertEqual(fields["quotation_delivery_terms"]["fieldtype"], "Small Text")
-        for per_quotation in ("override_quotation_validity_text", "quotation_custom_validity_text"):
-            with self.subTest(fieldname=per_quotation):
-                self.assertNotIn(per_quotation, fields)
 
     def test_sales_order_print_date_field_is_retired(self) -> None:
         """Sales Order joined the print registry; the date is a per-document show_date."""
@@ -112,13 +112,6 @@ class TestCustomerReadiness(UnitTestCase):
 
         self.assertNotIn("print_date", fields)
         self.assertNotIn("legacy_print_preferences_section", fields)
-
-    def test_customer_stores_a_template_link_and_print_name_default(self) -> None:
-        fields = {field["fieldname"]: field for field in customer_setup.CUSTOM_FIELDS["Customer"]}
-
-        self.assertEqual(fields["print_configuration_template"]["fieldtype"], "Link")
-        self.assertEqual(fields["print_configuration_template"]["options"], "Print Configuration Template")
-        self.assertEqual(fields["customer_print_name"]["fieldtype"], "Data")
 
     def test_tax_and_delivery_readiness_requires_matching_tax_address_and_contact(self) -> None:
         readiness = customer.build_readiness_values(
@@ -296,24 +289,32 @@ class TestCustomerCodeFreeze(UnitTestCase):
 
 
 class TestTaxInvoiceGate(UnitTestCase):
-    """Tax details are required when the invoice is issued, not before an order."""
+    """Incomplete tax details warn at issue time; they never block the submit."""
 
-    def _submit(self, readiness: dict[str, str]) -> None:
+    def _submit(self, readiness: dict[str, str]) -> MagicMock:
         doc = FakeDocument({"customer": "CD-0001", "customer_name": "Bangkok Hospital"})
-        with patch.object(customer, "get_readiness_for_customer", return_value=readiness):
+        with (
+            patch.object(customer, "get_readiness_for_customer", return_value=readiness),
+            patch.object(sales_invoice.frappe, "msgprint") as msgprint,
+        ):
             sales_invoice.validate_tax_invoice_readiness(cast(Document, doc))
+        return msgprint
 
-    def test_a_ready_customer_submits(self) -> None:
-        self._submit({"tax_invoice_readiness": customer.READY})
+    def test_a_ready_customer_submits_without_a_warning(self) -> None:
+        msgprint = self._submit({"tax_invoice_readiness": customer.READY})
 
-    def test_an_incomplete_customer_is_blocked_with_what_is_missing(self) -> None:
-        with self.assertRaises(frappe.ValidationError):
-            self._submit(
-                {
-                    "tax_invoice_readiness": customer.MISSING,
-                    "customer_readiness_summary": "Tax Invoice: Customer Tax ID",
-                }
-            )
+        msgprint.assert_not_called()
+
+    def test_an_incomplete_customer_is_warned_with_what_is_missing(self) -> None:
+        msgprint = self._submit(
+            {
+                "tax_invoice_readiness": customer.MISSING,
+                "customer_readiness_summary": "Tax Invoice: Customer Tax ID",
+            }
+        )
+
+        msgprint.assert_called_once()
+        self.assertIn("Customer Tax ID", msgprint.call_args.args[0])
 
     def test_an_invoice_without_a_customer_is_left_alone(self) -> None:
         doc = FakeDocument({"customer": ""})

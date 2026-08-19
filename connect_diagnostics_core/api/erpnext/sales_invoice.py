@@ -28,12 +28,13 @@ def before_save(doc: CustomSalesInvoice, method: str) -> None:
 
 
 def validate_tax_invoice_readiness(doc: Document, method: str | None = None) -> None:
-    """Require the Customer's tax details only when the tax invoice is issued.
+    """Warn when the Customer's tax details are incomplete at the point of issue.
 
     A Customer is sellable the moment Sales saves it, so this is where the Thai
-    billing address, tax ID and branch code are finally required — at the point
-    the document that must carry them is submitted, not before an order can be
-    raised.
+    billing address, tax ID and branch code are surfaced — at the point the
+    document that must carry them is submitted. The gap is flagged as a warning,
+    not a hard block: the submit proceeds so operations are never held up, and the
+    message tells Sales exactly what is still missing.
     """
     from connect_diagnostics_core.api.erpnext.customer import (
         MISSING,
@@ -48,12 +49,13 @@ def validate_tax_invoice_readiness(doc: Document, method: str | None = None) -> 
     if readiness.get("tax_invoice_readiness") != MISSING:
         return
 
-    frappe.throw(
+    frappe.msgprint(
         _("{0} is not ready for a tax invoice: {1}").format(
             frappe.bold(doc.get("customer_name") or customer),
             readiness.get("customer_readiness_summary") or _("its tax details are incomplete"),
         ),
         title=_("Customer tax details incomplete"),
+        indicator="orange",
     )
 
 

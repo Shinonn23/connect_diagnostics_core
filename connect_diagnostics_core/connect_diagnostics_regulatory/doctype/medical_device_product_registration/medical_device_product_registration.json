@@ -12,7 +12,6 @@
 		"registration_number",
 		"identity_column",
 		"registration_number_normalized",
-		"regulatory_workflow_state",
 		"official_status",
 		"certificate_type",
 		"activity_type",
@@ -76,15 +75,6 @@
 			"read_only": 1,
 			"unique": 1,
 			"hidden": 1
-		},
-		{
-			"fieldname": "regulatory_workflow_state",
-			"fieldtype": "Link",
-			"label": "Regulatory Workflow State",
-			"options": "Workflow State",
-			"read_only": 1,
-			"no_copy": 1,
-			"in_list_view": 1
 		},
 		{
 			"fieldname": "official_status",

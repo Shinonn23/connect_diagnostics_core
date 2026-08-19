@@ -1,5 +1,194 @@
 # Changelog
 
+## [0.44.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.0...v0.44.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* replace Goods Receipt/Sales Order's local date macro with the shared helper ([f9a0f16](https://github.com/Shinonn23/connect_diagnostics_core/commit/f9a0f162aafce6a0681799c8a430bf9bc8cc38e5))
+* sync live-DEV print format content and stop pinning template content in tests ([1416c07](https://github.com/Shinonn23/connect_diagnostics_core/commit/1416c07a779571f6b0af16f6ec943d9705022ce0))
+* sync live-DEV print format content and stop pinning template content in tests ([93be77f](https://github.com/Shinonn23/connect_diagnostics_core/commit/93be77ff2df52586395c58b2168412816ab4bfd0))
+* sync live-DEV print format content that never deployed ([1372a4d](https://github.com/Shinonn23/connect_diagnostics_core/commit/1372a4dcaaba46af1eef77b61eccc7873c4f0bcc))
+
+## [0.44.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.5...v0.44.0) (2026-08-19)
+
+
+### Features
+
+* update Desk-edited print formats; redesign Shipment Box Label sizes ([8c064b4](https://github.com/Shinonn23/connect_diagnostics_core/commit/8c064b46038a59110c1e95e23e00f5a1aec5893e))
+
+
+### Bug Fixes
+
+* pass print_settings into the Shipment Box Label test render context ([6bb77bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/6bb77bf3de4110b9353489cf7bcb52d9ef0d024f))
+
+
+### Tests
+
+* remove print format rendering tests ([594735c](https://github.com/Shinonn23/connect_diagnostics_core/commit/594735c3d3506930145c327e7f76873a6858f9fd))
+
+
+### Documentation
+
+* remove the "never test print formats" rule this branch had added ([3b86a20](https://github.com/Shinonn23/connect_diagnostics_core/commit/3b86a20dca6b73432f94af19af0d5a10ddd7d48b))
+
+## [0.43.5](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.4...v0.43.5) (2026-08-19)
+
+
+### Bug Fixes
+
+* register Credit Note in the print-format test suite ([8de1a94](https://github.com/Shinonn23/connect_diagnostics_core/commit/8de1a946578cc276c6cb828164d437aec4dfa44a))
+* render POS received/change fields on the abbreviated tax invoice ([cec50bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/cec50bf5ad1e4a0a5f1bccdb783f04ed1a704bb5))
+* resolve braced autoname hyphen-token bug, POS print gap, and doc fixes ([8c331a0](https://github.com/Shinonn23/connect_diagnostics_core/commit/8c331a0178214cf333ac967b3e89be6a192bcbb3))
+* resolve braced autoname tokens never matching hyphenated names ([5fdee97](https://github.com/Shinonn23/connect_diagnostics_core/commit/5fdee97845a8d6645c1e857305e425e4f0834e00))
+
+
+### Documentation
+
+* correct the bench path and dev site name ([2c978ca](https://github.com/Shinonn23/connect_diagnostics_core/commit/2c978ca1b79836efc74cb54472dd4c134e0f40d7))
+
+## [0.43.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.3...v0.43.4) (2026-08-19)
+
+
+### Code Refactoring
+
+* delete app-owned Workflow records from the database ([a8a135c](https://github.com/Shinonn23/connect_diagnostics_core/commit/a8a135ceaec3db378118933d0660833bde675557))
+* remove workflow-derived enforcement from document hooks ([9fc273d](https://github.com/Shinonn23/connect_diagnostics_core/commit/9fc273d920527301d072711eee1bf34ab6b0c59f))
+* remove workflow-only roles, profiles, and approval permissions ([e81c0ff](https://github.com/Shinonn23/connect_diagnostics_core/commit/e81c0ffa9440cceb03fc2f4b28b1f9a9ef3fb185))
+* remove workflow-state custom fields ([5acdb1f](https://github.com/Shinonn23/connect_diagnostics_core/commit/5acdb1f7171c1e8acc2aee6fbb2e0ea132508bd8))
+* remove workflow-state fields from app-owned DocTypes ([df84f49](https://github.com/Shinonn23/connect_diagnostics_core/commit/df84f49e73d8a21b4a72d4be0694caa68130c08f))
+* reset custom workflow architecture to a workflow-free baseline ([01e8796](https://github.com/Shinonn23/connect_diagnostics_core/commit/01e87962b97a263930534d1cf324837703216323))
+* stop provisioning app-owned Workflows ([54f958a](https://github.com/Shinonn23/connect_diagnostics_core/commit/54f958aca19e5e6ade8cfc14718d5dd21154d132))
+
+
+### Documentation
+
+* describe the workflow-free baseline and guard against regressions ([c2f93e9](https://github.com/Shinonn23/connect_diagnostics_core/commit/c2f93e9adc3703d503c2dada982d5202daa37277))
+
+## [0.43.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.2...v0.43.3) (2026-08-18)
+
+
+### Bug Fixes
+
+* retire the Print Configuration Template workspace link ([5168056](https://github.com/Shinonn23/connect_diagnostics_core/commit/5168056a85c20caa6c7a5942bafaba64bbbea5b7))
+* retire the Print Configuration Template workspace link ([bfbf381](https://github.com/Shinonn23/connect_diagnostics_core/commit/bfbf3812cb0263348ae541b2bd2afbfe46124860))
+
+## [0.43.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.1...v0.43.2) (2026-08-18)
+
+
+### Bug Fixes
+
+* keep Shipment Box Label static and correct print-format counts ([f257f4f](https://github.com/Shinonn23/connect_diagnostics_core/commit/f257f4fb915d89cad44ff22b8ee30128e9fde03b))
+
+
+### Code Refactoring
+
+* remove per-Customer print configuration ([8ab8d7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8ab8d7db8632e38ea05da5f16ce7a63bd7a51f35))
+
+## [0.43.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.0...v0.43.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* strip Thai prefixes from By-Tax-ID address lookup ([4762372](https://github.com/Shinonn23/connect_diagnostics_core/commit/476237245ab2fc816325a46c12c1899f9abc3634))
+
+## [0.43.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.1...v0.43.0) (2026-08-17)
+
+
+### Features
+
+* add credit note reason select field to Sales Invoice ([86cbd65](https://github.com/Shinonn23/connect_diagnostics_core/commit/86cbd6503c0e3c7ca19c8749474f1e37e8c63edd))
+* add credit note reason select field to Sales Invoice ([abbade2](https://github.com/Shinonn23/connect_diagnostics_core/commit/abbade2c6885030fa8f1df379a55a1e013b66bc1))
+
+## [0.42.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.42.0...v0.42.1) (2026-08-17)
+
+
+### Bug Fixes
+
+* skip P2P exception gate when workflow is inactive ([e00fb2f](https://github.com/Shinonn23/connect_diagnostics_core/commit/e00fb2f08ad99b15aef7fc2d85545af2f60db114))
+* stop over-strict submit gates from blocking P2P and tax-invoice operations ([30231bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/30231bf5c2b3abc9abfa49310dc3b9b76548e137))
+* warn instead of block on incomplete customer tax details ([b7f3d54](https://github.com/Shinonn23/connect_diagnostics_core/commit/b7f3d54ae2aadd1d517c8c479fd7b26e5b4580da))
+
+## [0.42.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.2...v0.42.0) (2026-08-16)
+
+
+### Features
+
+* group Stock and Stock Counting under an Inventory Desk folder ([a02600e](https://github.com/Shinonn23/connect_diagnostics_core/commit/a02600ef05da0e786800ab0b2b572c06b42d3eb4))
+* group Stock and Stock Counting under an Inventory Desk folder ([c70fcf5](https://github.com/Shinonn23/connect_diagnostics_core/commit/c70fcf50499a98c386920c7da0b54e4288b45dc3))
+
+## [0.41.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.1...v0.41.2) (2026-08-16)
+
+
+### Continuous Integration
+
+* make DEV deployment release-driven and gate expensive checks ([92c6afd](https://github.com/Shinonn23/connect_diagnostics_core/commit/92c6afd273e933200b249a4eef376f7effc74b51))
+* make DEV deployment release-driven and gate expensive checks ([9fcc1e5](https://github.com/Shinonn23/connect_diagnostics_core/commit/9fcc1e5285fa2d4c5cfa1581e74ea8fbf3003302))
+
+## [0.41.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.41.0...v0.41.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* don't force manual item entry on Stock Count before fetching ([8d8c654](https://github.com/Shinonn23/connect_diagnostics_core/commit/8d8c654f6ff26d0a0bac61f446beb5ebcc6279cc))
+* sample Stock Count lines, not item codes, and save before fetching ([098adc0](https://github.com/Shinonn23/connect_diagnostics_core/commit/098adc0a55ebadca8c48f28802bdf8663b4bd2bf))
+* Stock Count random selection and draft item entry ([178cd7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/178cd7d7aec32ceca18166b7bd2be69566e705ad))
+
+## [0.41.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.1...v0.41.0) (2026-08-12)
+
+
+### Features
+
+* add Stock Count cycle/yearly counting with location-aware adjustments ([d52b6da](https://github.com/Shinonn23/connect_diagnostics_core/commit/d52b6da6fbd5c13a4b8190008ab678bf1c66cfe3))
+
+
+### Bug Fixes
+
+* make every bootstrap insert idempotent, not just the top-level check ([8d20f43](https://github.com/Shinonn23/connect_diagnostics_core/commit/8d20f430145ba13452e8a63d9dba20fe9b8805dc))
+* make Stock Count integration tests self-sufficient and skip broken dep walk ([33a3281](https://github.com/Shinonn23/connect_diagnostics_core/commit/33a32816b92d7ddeba0708f69fe13f4dc98202fe))
+* make the ERPNext test-record bootstrap idempotent across test categories ([dbacf36](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbacf360361a1bdf2c49d8c801144e523f06e577))
+* resolve remaining CI failures after ERPNext bootstrap fix ([e2d893e](https://github.com/Shinonn23/connect_diagnostics_core/commit/e2d893ebae73b7f6adce530a653f86bdcfe05788))
+* supply Customer Code during ERPNext's eager test-record bootstrap ([3caf95b](https://github.com/Shinonn23/connect_diagnostics_core/commit/3caf95bc16e96a2abf1f30ec19f76cc411cc5778))
+
+## [0.40.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.40.0...v0.40.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **lint:** apply ruff formatting to workflow code ([908f544](https://github.com/Shinonn23/connect_diagnostics_core/commit/908f5445c8951ee28250d727ca68977a589e028e))
+
+
+### Code Refactoring
+
+* **workflow:** make approval workflow the single owner ([8f69c19](https://github.com/Shinonn23/connect_diagnostics_core/commit/8f69c191d1dbe20344b64a28ab19e3d687beba8e))
+
+## [0.40.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.39.0...v0.40.0) (2026-08-12)
+
+
+### Features
+
+* **naming:** standardize operational document numbers ([647983f](https://github.com/Shinonn23/connect_diagnostics_core/commit/647983fe5efa88335d314255536d718a02823d79))
+* **naming:** standardize operational document numbers ([91b1fec](https://github.com/Shinonn23/connect_diagnostics_core/commit/91b1fec3e7fcb0d138de9781e4b65c93b28eecef))
+
+
+### Bug Fixes
+
+* **ci:** normalize naming lint files ([0ccfaba](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ccfaba9310e5f6d06ad4464d8c7d77632ecd102))
+* **naming:** remove unavailable stock count doctype ([8bd7d3e](https://github.com/Shinonn23/connect_diagnostics_core/commit/8bd7d3eebbe7626bd08c3f258835b5e38161cf34))
+
+## [0.39.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.38.0...v0.39.0) (2026-08-10)
+
+
+### Features
+
+* register Department and Territory accounting dimensions ([41cb149](https://github.com/Shinonn23/connect_diagnostics_core/commit/41cb1494da43381e6e73c6a740c65699bffd3bb3))
+* register Department and Territory accounting dimensions ([8f1db4d](https://github.com/Shinonn23/connect_diagnostics_core/commit/8f1db4d38ce5c03c6f87e79e34d7204c1e807cfc))
+
+
+### Tests
+
+* update Employee insert_after chain for accounting_department ([72d3380](https://github.com/Shinonn23/connect_diagnostics_core/commit/72d3380d4a889b6a33e26689cf4659e450064b9a))
+
 ## [0.38.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.37.0...v0.38.0) (2026-08-10)
 
 

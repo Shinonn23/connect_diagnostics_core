@@ -40,19 +40,23 @@ app_include_css = "/assets/connect_diagnostics_core/css/connect_diagnostics_core
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-page_js = {"print": "public/js/custom/print/doctype.js"}
+page_js = {
+    "print": [
+        "public/js/custom/print/engine.js",
+        "public/js/custom/print/providers/print_options.js",
+        "public/js/custom/print/providers/shipment_label_size.js",
+    ]
+}
 
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
-    "Customer": "public/js/custom/customer/doctype.js",
     "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
-    "Sales Invoice": "public/js/custom/sales_invoice/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
 }
 doctype_list_js = {
@@ -155,6 +159,11 @@ after_migrate = "connect_diagnostics_core.setup.after_migrate"
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
+    "MM-DOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
+    # Hyphen-free aliases: Frappe's braced-autoname regex cannot match "-" inside
+    # {...}, so `format:` autoname strings use these instead of YY-BE/MM-DOC.
+    "YYBE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
+    "MMDOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
 }
 
 # Document Events
@@ -163,7 +172,7 @@ naming_series_variables = {
 
 
 doc_events = {
-    "*": {"before_naming": "connect_diagnostics_core.naming.company_prefix.apply_company_abbr_prefix"},
+    "*": {"before_naming": "connect_diagnostics_core.setup.document_naming.set_operational_naming_series"},
     "Customer": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
@@ -175,12 +184,7 @@ doc_events = {
     "Customer Credit Request": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
-        "before_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_submit",
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
-    },
-    "Supplier": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate",
     },
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
@@ -193,7 +197,6 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
     },
     "Sales Invoice": {
-        "validate": "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
@@ -201,44 +204,29 @@ doc_events = {
         ],
     },
     "Payment Entry": {
-        "before_submit": (
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_entry_before_submit"
-        ),
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     "Salary Slip": {
         "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
     },
-    "Bank Account": {
-        "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_account",
-    },
     "Supplier Bank Change Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.supplier.before_validate_bank_change_request",
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
         "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
     },
     "Material Request": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
     },
     "Purchase Order": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
         "validate": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_order",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
         ],
         "before_submit": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
     },
     "Purchase Receipt": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_receipt",
         "before_submit": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
@@ -254,22 +242,6 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-    },
-    "Purchase Invoice": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.before_validate",
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_purchase_invoice",
-        "before_submit": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_before_submit",
-    },
-    "Payment Request": {
-        "before_save": [
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_request_transition",
-            "connect_diagnostics_core.api.erpnext.payment_approval.clear_completed_workflow_actions_for_next_state",
-        ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.payment_approval.set_cancelled_workflow_state",
-        "before_discard": "connect_diagnostics_core.api.erpnext.payment_approval.validate_before_discard",
-        "before_submit": (
-            "connect_diagnostics_core.api.erpnext.payment_approval.validate_payment_request_before_submit"
-        ),
     },
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
@@ -319,10 +291,15 @@ before_tests = "connect_diagnostics_core.tests.test_utils.before_tests"
 # recorded from the template by api.frappe.print_log.register_print.
 override_whitelisted_methods = {
     "frappe.utils.print_format.download_pdf": ("connect_diagnostics_core.api.frappe.print_log.download_pdf"),
+    "erpnext_thailand.utils.get_address_by_tax_id": (
+        "connect_diagnostics_core.api.frappe.address.get_address_by_tax_id"
+    ),
 }
 
 extend_doctype_class = {
-    "Payroll Entry": "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryReviewMixin",
+    "Payroll Entry": [
+        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryAccountingDimensionMixin",
+    ],
 }
 
 # each overriding function accepts a `data` argument;
@@ -396,114 +373,6 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
-    {
-        "doctype": "Workflow",
-        "filters": [
-            [
-                "name",
-                "in",
-                [
-                    "Payment Request Approval",
-                    "Supplier Onboarding",
-                    "Supplier Bank Change Approval",
-                    "Material Request Approval",
-                    "Purchase Order Approval",
-                    "Purchase Receipt Inspection",
-                    "Purchase Invoice Verification",
-                ],
-            ]
-        ],
-    },
-    {
-        "doctype": "Workflow State",
-        "filters": [
-            [
-                "workflow_state_name",
-                "in",
-                [
-                    "Payment Request Draft",
-                    "Payment Request Submitted",
-                    "Pending Payment Request AP Review",
-                    "Pending Executive Payment Request Approval",
-                    "Payment Request Approved",
-                    "Payment Request Rejected",
-                    "Payment Request Cancelled",
-                    "Supplier Draft",
-                    "Pending Supplier Verification",
-                    "Pending Supplier Activation",
-                    "Supplier Active",
-                    "Supplier Active (Legacy)",
-                    "Supplier Bank Change Draft",
-                    "Pending Supplier Bank Verification",
-                    "Pending Supplier Bank Approval",
-                    "Supplier Bank Verified",
-                    "Supplier Bank Change Rejected",
-                    "Material Request Draft",
-                    "Pending Material Request Approval",
-                    "Material Request Approved",
-                    "Material Request Rejected",
-                    "Purchase Order Draft",
-                    "Pending Purchase Order Finance Review",
-                    "Pending Purchase Order Exception Approval",
-                    "Purchase Order Approved",
-                    "Purchase Order Rejected",
-                    "Purchase Receipt Draft",
-                    "Pending Goods Inspection",
-                    "Purchase Receipt Accepted",
-                    "Purchase Invoice Draft",
-                    "Pending Purchase Invoice Verification",
-                    "Pending Purchase Invoice Exception Approval",
-                    "Purchase Invoice Verified",
-                    "Purchase Invoice Rejected",
-                ],
-            ]
-        ],
-    },
-    {
-        "doctype": "Workflow Action Master",
-        "filters": [
-            [
-                "workflow_action_name",
-                "in",
-                [
-                    "Request Payment Approval",
-                    "Complete Payment Request AP Review",
-                    "Approve Payment Request",
-                    "Reject Payment Request",
-                    "Revise Payment Request",
-                    "Submit Payment Request",
-                    "Request supplier verification",
-                    "Verify supplier",
-                    "Activate supplier",
-                    "Request bank verification",
-                    "Verify bank details",
-                    "Approve bank change",
-                    "Request approval",
-                    "Approve material request",
-                    "Request finance review",
-                    "Approve purchase order",
-                    "Request goods inspection",
-                    "Accept goods",
-                    "Request AP verification",
-                    "Verify purchase invoice",
-                    "Return supplier",
-                    "Return bank change",
-                    "Reject bank change",
-                    "Reject material request",
-                    "Revise material request",
-                    "Request exception approval",
-                    "Approve purchase order exception",
-                    "Reject purchase order",
-                    "Revise purchase order",
-                    "Return receipt",
-                    "Request invoice exception approval",
-                    "Approve purchase invoice exception",
-                    "Reject purchase invoice",
-                    "Revise purchase invoice",
-                ],
-            ]
-        ],
-    },
     {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
     {"doctype": "Terms and Conditions"},

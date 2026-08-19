@@ -14,8 +14,7 @@ Accounting Reviewer role, and everyone else asks for them through a
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, cast
+from typing import cast
 
 import frappe
 from frappe import _
@@ -24,15 +23,6 @@ from frappe.permissions import setup_custom_perms
 
 CUSTOMER_DOCTYPE = "Customer"
 CREDIT_REQUEST_DOCTYPE = "Customer Credit Request"
-
-CREDIT_REQUEST_WORKFLOW_NAME = "Customer Credit Request Approval"
-
-CREDIT_REQUEST_WORKFLOW_STATE_FIELD = "credit_request_state"
-
-CREDIT_REQUEST_DRAFT_STATE = "Customer Credit Request Draft"
-PENDING_CREDIT_APPROVAL_STATE = "Pending Customer Credit Approval"
-CREDIT_REQUEST_APPROVED_STATE = "Customer Credit Request Approved"
-CREDIT_REQUEST_REJECTED_STATE = "Customer Credit Request Rejected"
 
 ACCOUNTING_REVIEWER_ROLE = "Customer Accounting Reviewer"
 CREDIT_APPROVER_ROLE = "Customer Credit Approver"
@@ -82,157 +72,11 @@ CUSTOMER_PERMISSIONS: dict[str, dict[str, int]] = {
     CREDIT_APPROVER_ROLE: {"read": 1},
 }
 
-CREDIT_REQUEST_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
-    {
-        "state": CREDIT_REQUEST_DRAFT_STATE,
-        "doc_status": "0",
-        "allow_edit": "Sales User",
-        "send_email": 0,
-    },
-    {
-        "state": CREDIT_REQUEST_DRAFT_STATE,
-        "doc_status": "0",
-        "allow_edit": "Sales Manager",
-        "send_email": 0,
-    },
-    {
-        "state": CREDIT_REQUEST_DRAFT_STATE,
-        "doc_status": "0",
-        "allow_edit": ACCOUNTING_REVIEWER_ROLE,
-        "send_email": 0,
-    },
-    {
-        "state": PENDING_CREDIT_APPROVAL_STATE,
-        "doc_status": "0",
-        "allow_edit": CREDIT_APPROVER_ROLE,
-        "send_email": 1,
-    },
-    {
-        "state": CREDIT_REQUEST_APPROVED_STATE,
-        "doc_status": "1",
-        "allow_edit": CREDIT_APPROVER_ROLE,
-        "send_email": 0,
-    },
-    {
-        "state": CREDIT_REQUEST_REJECTED_STATE,
-        "doc_status": "0",
-        "allow_edit": "Sales User",
-        "send_email": 0,
-    },
-    {
-        "state": CREDIT_REQUEST_REJECTED_STATE,
-        "doc_status": "0",
-        "allow_edit": "Sales Manager",
-        "send_email": 0,
-    },
-)
-
-
-def _transition(
-    state: str,
-    action: str,
-    next_state: str,
-    allowed: str,
-    *,
-    condition: str = "",
-    allow_self_approval: int = 0,
-) -> dict[str, Any]:
-    return {
-        "state": state,
-        "action": action,
-        "next_state": next_state,
-        "allowed": allowed,
-        "condition": condition,
-        "allow_self_approval": allow_self_approval,
-        "send_email_to_creator": 0,
-    }
-
-
-CREDIT_REQUEST_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
-    _transition(
-        CREDIT_REQUEST_DRAFT_STATE,
-        "Request credit approval",
-        PENDING_CREDIT_APPROVAL_STATE,
-        "Sales User",
-        allow_self_approval=1,
-    ),
-    _transition(
-        CREDIT_REQUEST_DRAFT_STATE,
-        "Request credit approval",
-        PENDING_CREDIT_APPROVAL_STATE,
-        "Sales Manager",
-        allow_self_approval=1,
-    ),
-    _transition(
-        CREDIT_REQUEST_DRAFT_STATE,
-        "Request credit approval",
-        PENDING_CREDIT_APPROVAL_STATE,
-        ACCOUNTING_REVIEWER_ROLE,
-        allow_self_approval=1,
-    ),
-    _transition(
-        PENDING_CREDIT_APPROVAL_STATE,
-        "Approve credit request",
-        CREDIT_REQUEST_APPROVED_STATE,
-        CREDIT_APPROVER_ROLE,
-    ),
-    _transition(
-        PENDING_CREDIT_APPROVAL_STATE,
-        "Reject credit request",
-        CREDIT_REQUEST_REJECTED_STATE,
-        CREDIT_APPROVER_ROLE,
-    ),
-)
-
-WORKFLOW_STATE_STYLES = {
-    CREDIT_REQUEST_DRAFT_STATE: "",
-    PENDING_CREDIT_APPROVAL_STATE: "Warning",
-    CREDIT_REQUEST_APPROVED_STATE: "Success",
-    CREDIT_REQUEST_REJECTED_STATE: "Danger",
-}
-
-WORKFLOW_ACTIONS = tuple(sorted({transition["action"] for transition in CREDIT_REQUEST_WORKFLOW_TRANSITIONS}))
-
-STATE_COMPARISON_FIELDS = (
-    "state",
-    "doc_status",
-    "allow_edit",
-    "send_email",
-    "update_field",
-    "update_value",
-    "evaluate_as_expression",
-)
-TRANSITION_COMPARISON_FIELDS = (
-    "state",
-    "action",
-    "next_state",
-    "allowed",
-    "condition",
-    "allow_self_approval",
-    "send_email_to_creator",
-)
-CHECK_FIELDS = {
-    "send_email",
-    "evaluate_as_expression",
-    "allow_self_approval",
-    "send_email_to_creator",
-}
-
 
 def ensure_configuration() -> None:
     ensure_roles()
     ensure_role_profiles()
     ensure_customer_permissions()
-    ensure_workflow_masters()
-    ensure_workflow(
-        workflow_name=CREDIT_REQUEST_WORKFLOW_NAME,
-        document_type=CREDIT_REQUEST_DOCTYPE,
-        workflow_state_field=CREDIT_REQUEST_WORKFLOW_STATE_FIELD,
-        states=CREDIT_REQUEST_WORKFLOW_STATES,
-        transitions=CREDIT_REQUEST_WORKFLOW_TRANSITIONS,
-        send_email_alert=1,
-        is_active=0,
-    )
     assign_customer_role_holders(require_users=False)
     frappe.clear_cache(doctype=CUSTOMER_DOCTYPE)
     frappe.clear_cache(doctype=CREDIT_REQUEST_DOCTYPE)
@@ -395,112 +239,3 @@ def _ensure_customer_permission_copy_marker() -> None:
             **{fieldname: 0 for fieldname in PERMISSION_FIELDS},
         }
     ).insert(ignore_permissions=True)
-
-
-def ensure_workflow_masters() -> None:
-    for state_name, style in WORKFLOW_STATE_STYLES.items():
-        if frappe.db.exists("Workflow State", state_name):
-            state = cast(Document, frappe.get_doc("Workflow State", state_name))
-            if state.get("style") != style:
-                state.set("style", style)
-                state.save(ignore_permissions=True)
-            continue
-        frappe.get_doc(
-            {
-                "doctype": "Workflow State",
-                "workflow_state_name": state_name,
-                "style": style,
-            }
-        ).insert(ignore_permissions=True)
-
-    for action_name in WORKFLOW_ACTIONS:
-        if not frappe.db.exists("Workflow Action Master", action_name):
-            frappe.get_doc(
-                {
-                    "doctype": "Workflow Action Master",
-                    "workflow_action_name": action_name,
-                }
-            ).insert(ignore_permissions=True)
-
-
-def ensure_workflow(
-    *,
-    workflow_name: str,
-    document_type: str,
-    workflow_state_field: str,
-    states: Sequence[dict[str, Any]],
-    transitions: Sequence[dict[str, Any]],
-    send_email_alert: int,
-    is_active: int,
-) -> None:
-    if is_active:
-        conflicting_workflows = frappe.get_all(
-            "Workflow",
-            filters={"document_type": document_type, "is_active": 1, "name": ["!=", workflow_name]},
-            pluck="name",
-        )
-        if conflicting_workflows:
-            frappe.throw(
-                _("Cannot activate {0}; {1} is already active for {2}.").format(
-                    workflow_name,
-                    ", ".join(conflicting_workflows),
-                    document_type,
-                )
-            )
-
-    if frappe.db.exists("Workflow", workflow_name):
-        workflow = cast(Document, frappe.get_doc("Workflow", workflow_name))
-    else:
-        workflow = cast(
-            Document,
-            frappe.get_doc(
-                {
-                    "doctype": "Workflow",
-                    "workflow_name": workflow_name,
-                    "document_type": document_type,
-                }
-            ),
-        )
-
-    changed = workflow.is_new()
-    scalar_values = {
-        "document_type": document_type,
-        "is_active": is_active,
-        "override_status": 0,
-        "send_email_alert": send_email_alert,
-        "enable_action_confirmation": 1,
-        "workflow_state_field": workflow_state_field,
-    }
-    for fieldname, value in scalar_values.items():
-        if workflow.get(fieldname) != value:
-            workflow.set(fieldname, value)
-            changed = True
-    if not _child_rows_match(workflow.get("states", []), states, STATE_COMPARISON_FIELDS):
-        workflow.set("states", list(states))
-        changed = True
-    if not _child_rows_match(workflow.get("transitions", []), transitions, TRANSITION_COMPARISON_FIELDS):
-        workflow.set("transitions", list(transitions))
-        changed = True
-    if not changed:
-        return
-    if workflow.is_new():
-        workflow.insert(ignore_permissions=True)
-    else:
-        workflow.save(ignore_permissions=True)
-
-
-def _child_rows_match(
-    current_rows: Sequence[Any], desired_rows: Sequence[dict[str, Any]], fields: Sequence[str]
-) -> bool:
-    return _normalize_rows(current_rows, fields) == _normalize_rows(desired_rows, fields)
-
-
-def _normalize_rows(rows: Sequence[Any], fields: Sequence[str]) -> list[tuple[Any, ...]]:
-    normalized: list[tuple[Any, ...]] = []
-    for row in rows:
-        values: list[Any] = []
-        for fieldname in fields:
-            value = row.get(fieldname)
-            values.append(int(value or 0) if fieldname in CHECK_FIELDS else value or "")
-        normalized.append(tuple(values))
-    return normalized
