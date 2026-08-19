@@ -105,6 +105,7 @@ def apply_all() -> None:
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
+    quotation.ensure_configuration()
     regulatory.ensure_configuration()
     workspace.ensure_workspace_navigation()
 

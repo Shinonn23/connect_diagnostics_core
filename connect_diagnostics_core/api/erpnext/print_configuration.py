@@ -142,27 +142,7 @@ def _sidebar_fields(document: print_documents.PrintDocument) -> list[dict[str, A
         }
         for definition in document.copies
     )
-    if document.key != "quotation":
-        return fields
-
-    return [
-        *fields,
-        {
-            "fieldname": "override_quotation_validity_text",
-            "label": _("Override validity text"),
-            "fieldtype": "Check",
-        },
-        {
-            "fieldname": "quotation_custom_validity_text",
-            "label": _("Custom Validity Text"),
-            "fieldtype": "Small Text",
-        },
-        {
-            "fieldname": "quotation_delivery_terms",
-            "label": _("Delivery Terms"),
-            "fieldtype": "Small Text",
-        },
-    ]
+    return fields
 
 
 def get_document_print_context(doc: Document | Mapping[str, Any], configuration: str) -> dict[str, Any]:
@@ -194,8 +174,8 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         else False,
         "quotation_signatory_type": _text(values.get("quotation_signatory_type")),
         "sales_representative_employee": _text(values.get("sales_representative_employee")),
-        "override_quotation_validity_text": cint(values.get("override_quotation_validity_text")),
-        "quotation_custom_validity_text": _text(values.get("quotation_custom_validity_text")),
+        "edit_validity_text": cint(values.get("edit_validity_text")),
+        "validity_text": _text(values.get("validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),
     }
     register_print(doc, configuration, context)

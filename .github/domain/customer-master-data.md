@@ -22,10 +22,12 @@
   the no-delivery controls were dropped with the workflow, together with the Address
   and Contact hooks that rewrote them on every save.
 - There is no per-Customer print configuration. Print options — language, show date,
-  Customer Print Name, per-copy-type counts, and the Quotation signatory / validity /
-  delivery fields — are chosen per print in the print sidebar, with static registry
-  defaults only; nothing is stored per Customer. `Print Configuration Template`, its two
-  child tables, and the Customer "Print" tab were removed.
+  Customer Print Name, and per-copy-type counts — are chosen per print in the print
+  sidebar, with static registry defaults only; nothing is stored per Customer. The
+  Quotation signatory type may still be overridden per print; Quotation validity and
+  delivery wording are document fields only (see below), not sidebar overrides.
+  `Print Configuration Template`, its two child tables, and the Customer "Print" tab
+  were removed.
 - `connect_diagnostics_core/setup/print_documents.py` is the single source of truth for
   which documents exist (Quotation, Tax Invoice, Abbreviated Tax Invoice, Receipt),
   their named copies, whether language is selectable, and whether Batch / Serial
@@ -71,10 +73,33 @@
   `Company.quotation_authorized_signatory_employee` and its Quotation override must not
   be reintroduced.
 - The Quotation carries its own `quotation_signatory_type` and
-  `sales_representative_employee` (see `setup/quotation.py`); Customer no longer stores
-  any print or signatory defaults. `print_documents.QUOTATION_EXTRA_FIELDS` /
-  `QUOTATION_DOCUMENT_FIELDS` are what the print sidebar and the document supply for one
-  print, including validity and delivery wording.
+  `sales_representative_employee`, grouped in their own "Signatory" Section (see
+  `setup/quotation.py`); Customer no longer stores any print or signatory defaults.
+  `sales_representative_employee` is filtered in Desk by Role
+  (`SIGNATORY_EMPLOYEE_ROLES`) to match the selected signatory type, via the
+  `signatory_employee_query` Link query — a Desk convenience only, not enforced at
+  submit. Both fields live in their own standalone "Signatory" Tab (immediately
+  after the Details tab), not a Section within Details. `print_documents.QUOTATION_EXTRA_FIELDS`
+  now covers only `quotation_signatory_type`; validity (`edit_validity_text` /
+  `validity_text`) and delivery terms (`delivery_terms_template` /
+  `quotation_delivery_terms`) are document-only fields, required before submit
+  (`validate_signatory_before_submit` / `validate_delivery_terms_before_submit` in
+  `api/erpnext/quotation.py`) and no longer overridable from the print sidebar.
+  `validity_text` is always visible: read-only and kept in sync client-side with
+  the computed "N days from Valid Till" text while `edit_validity_text` is
+  unchecked (`read_only_depends_on`), and becomes free-text editable once checked
+  — the Desk-side preview is Thai-only, distinct from `_validity_text()`'s
+  tri-lingual print-time rendering, since language is a print-sidebar choice, not
+  a stored document field. `edit_validity_text`/`validity_text` are renamed from
+  `override_quotation_validity_text`/`quotation_custom_validity_text` by
+  `patches/v1_0/rename_quotation_validity_fields.py`; do not reintroduce the old
+  names. Delivery Terms picks from the reusable `Delivery Terms Template` DocType
+  (a plain master, seeded with one default row by `quotation.ensure_configuration()`,
+  living in its own Section at the top of the standard "Terms" tab alongside
+  Payment Terms Template and Terms and Conditions) and stays editable afterward —
+  it does not overlap with native Terms and Conditions (`doc.terms`/`tc_name`),
+  which this app's Quotation format renders separately as free-form Remarks
+  ("หมายเหตุ"), a different print section entirely.
 - The single Quotation format renders Thai, English, or Thai / English and configured
   original/copy pages. `show_date` off and a custom validity text are ordinary
   configuration, not separate formats.

@@ -27,8 +27,8 @@ def _configuration(**overrides: Any) -> dict[str, Any]:
     return {
         "language": "Thai",
         "copies": [{"kind": "original", "label": "ต้นฉบับ"}],
-        "override_quotation_validity_text": 0,
-        "quotation_custom_validity_text": "",
+        "edit_validity_text": 0,
+        "validity_text": "",
         "quotation_delivery_terms": "",
         "quotation_signatory_type": quotation.quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
         "sales_representative_employee": "EMP-0001",
@@ -113,8 +113,8 @@ class TestQuotationPrintConfiguration(UnitTestCase):
         """Form 04: free validity text set on this quotation alone."""
         mocked_configuration.return_value = _configuration(
             quotation_signatory_type=quotation.quotation_setup.SIGNATORY_MANAGING_DIRECTOR,
-            override_quotation_validity_text=1,
-            quotation_custom_validity_text="1 ปี นับจากวันที่อนุมัติวัสดุการแพทย์เข้า",
+            edit_validity_text=1,
+            validity_text="1 ปี นับจากวันที่อนุมัติวัสดุการแพทย์เข้า",
             quotation_delivery_terms="ส่งมอบภายใน 30 วัน",
         )
 
@@ -127,8 +127,8 @@ class TestQuotationPrintConfiguration(UnitTestCase):
     @patch.object(quotation, "get_document_print_context")
     def test_custom_validity_override_requires_text(self, mocked_configuration: MagicMock) -> None:
         mocked_configuration.return_value = _configuration(
-            override_quotation_validity_text=1,
-            quotation_custom_validity_text="",
+            edit_validity_text=1,
+            validity_text="",
         )
 
         with self.assertRaises(frappe.ValidationError):
@@ -191,3 +191,53 @@ class TestQuotationPrintConfiguration(UnitTestCase):
             [copy["label"] for copy in context["copies"]],
             ["ต้นฉบับ 1/2", "ต้นฉบับ 2/2", "สำเนา"],
         )
+
+
+class TestValidateSignatoryBeforeSubmit(UnitTestCase):
+    def test_throws_when_sales_representative_type_has_no_employee(self) -> None:
+        doc = FakeQuotation(
+            {
+                "quotation_signatory_type": quotation.quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+                "sales_representative_employee": "",
+            }
+        )
+
+        with self.assertRaises(frappe.ValidationError):
+            quotation.validate_signatory_before_submit(cast(Document, doc))
+
+    def test_throws_when_type_is_empty_since_it_defaults_to_sales_representative(self) -> None:
+        doc = FakeQuotation({"quotation_signatory_type": "", "sales_representative_employee": ""})
+
+        with self.assertRaises(frappe.ValidationError):
+            quotation.validate_signatory_before_submit(cast(Document, doc))
+
+    def test_passes_when_employee_is_set(self) -> None:
+        doc = FakeQuotation(
+            {
+                "quotation_signatory_type": quotation.quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+                "sales_representative_employee": "EMP-0001",
+            }
+        )
+
+        quotation.validate_signatory_before_submit(cast(Document, doc))
+
+    def test_passes_for_managing_director_regardless_of_employee(self) -> None:
+        doc = FakeQuotation(
+            {
+                "quotation_signatory_type": quotation.quotation_setup.SIGNATORY_MANAGING_DIRECTOR,
+                "sales_representative_employee": "",
+            }
+        )
+
+        quotation.validate_signatory_before_submit(cast(Document, doc))
+
+
+class TestValidateDeliveryTermsBeforeSubmit(UnitTestCase):
+    def test_throws_when_delivery_terms_is_empty(self) -> None:
+        with self.assertRaises(frappe.ValidationError):
+            quotation.validate_delivery_terms_before_submit(cast(Document, FakeQuotation()))
+
+    def test_passes_when_delivery_terms_is_set(self) -> None:
+        doc = FakeQuotation({"quotation_delivery_terms": "60 วัน นับถัดจากวันที่ได้รับใบสั่งซื้อ"})
+
+        quotation.validate_delivery_terms_before_submit(cast(Document, doc))

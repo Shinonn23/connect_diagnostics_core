@@ -189,6 +189,12 @@ doc_events = {
     "Company": {
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
+    "Quotation": {
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.quotation.validate_signatory_before_submit",
+            "connect_diagnostics_core.api.erpnext.quotation.validate_delivery_terms_before_submit",
+        ],
+    },
     "Sales Order": {
         "validate": [
             "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
