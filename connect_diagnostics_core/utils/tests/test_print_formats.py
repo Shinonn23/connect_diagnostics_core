@@ -14,6 +14,7 @@ from jinja2 import Environment
 PRINT_FORMAT_ROOT = Path(__file__).parents[2] / "connect_diagnostics_print" / "print_format"
 PRINT_FORMAT_FILES = (
     "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json",
+    "credit_note/credit_note.json",
     "goods_receipt/goods_receipt.json",
     "monthly_count_sheet/monthly_count_sheet.json",
     "purchase_order/purchase_order.json",
@@ -30,6 +31,7 @@ PRINT_FORMAT_FILES = (
 # themselves for the audit log with an explicit register_print call.
 CONFIGURATION_PRINT_FORMATS = (
     "Abbreviated Tax Invoice And Receipt",
+    "Credit Note",
     "Quotation",
     "Receipt",
     "Sales Order",
@@ -56,7 +58,7 @@ class TestPrintFormats(UnitTestCase):
     def test_print_format_json_files_are_valid(self) -> None:
         print_formats = load_print_formats()
 
-        self.assertEqual(len(print_formats), 11)
+        self.assertEqual(len(print_formats), 12)
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
@@ -186,6 +188,7 @@ class TestPrintFormats(UnitTestCase):
         expected_contexts = {
             "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json": "tax_invoice",
             "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json": "abbreviated_tax_invoice",
+            "credit_note/credit_note.json": "tax_invoice",
             "receipt/receipt.json": "receipt",
             "sales_order/sales_order.json": "sales_order",
         }
