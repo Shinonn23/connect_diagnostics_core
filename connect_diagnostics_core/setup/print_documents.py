@@ -113,21 +113,19 @@ TAX_INVOICE_COPIES = (
     ),
 )
 
-# Quotation values the print sidebar may override for one request.
-QUOTATION_EXTRA_FIELDS = (
-    "quotation_signatory_type",
-    "override_quotation_validity_text",
-    "quotation_custom_validity_text",
-    "quotation_delivery_terms",
-)
+# Quotation values the print sidebar may override for one request. Validity
+# text and delivery terms are filled in on the document itself and are no
+# longer overridable per print -- only the signatory type still is.
+QUOTATION_EXTRA_FIELDS = ("quotation_signatory_type",)
 
 # Set on the transaction itself, not on Customer or Template. A non-empty value
 # on the document wins over the resolved default.
 QUOTATION_DOCUMENT_FIELDS = (
     "quotation_signatory_type",
     "sales_representative_employee",
-    "override_quotation_validity_text",
-    "quotation_custom_validity_text",
+    "edit_validity_text",
+    "validity_text",
+    "quotation_delivery_terms",
 )
 
 PRINT_DOCUMENTS: tuple[PrintDocument, ...] = (
@@ -190,8 +188,8 @@ DOCUMENT_BY_KEY: dict[str, PrintDocument] = {document.key: document for document
 SCALAR_DEFAULTS: dict[str, object] = {
     "customer_print_name": "",
     "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
-    "override_quotation_validity_text": 0,
-    "quotation_custom_validity_text": "",
+    "edit_validity_text": 0,
+    "validity_text": "",
     "quotation_delivery_terms": "",
 }
 

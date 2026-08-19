@@ -219,6 +219,7 @@ NAVIGATION_GROUPS = (
         links=(
             NavigationLink("Customer Credit Request", "Customer Credit Request", "DocType"),
             NavigationLink("DKSH Customer", "DKSH Customer", "DocType"),
+            NavigationLink("Delivery Terms Template", "Delivery Terms Template", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Print Log", "Print Log", "DocType"),
         ),
@@ -263,6 +264,7 @@ SIDEBAR_PLACEMENTS = {
             "Customer Credit Request", after_link_to="Sales Invoice", icon="git-pull-request-arrow"
         ),
         SidebarPlacement("DKSH Customer", after_link_to="Customer", section="Setup"),
+        SidebarPlacement("Delivery Terms Template", after_link_to="DKSH Customer", section="Setup"),
         SidebarPlacement("Print Log", section="Reports"),
     ),
     "Stock": (

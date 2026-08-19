@@ -88,11 +88,13 @@ class TestPrintDocumentRegistry(UnitTestCase):
         self.assertEqual(definition.label(print_documents.LANGUAGE_ENGLISH), "Original")
         self.assertEqual(definition.label(print_documents.LANGUAGE_BILINGUAL), "ต้นฉบับ / Original")
 
-    def test_quotation_scalar_defaults_are_present(self) -> None:
-        for fieldname in ("override_quotation_validity_text", "quotation_custom_validity_text"):
+    def test_quotation_document_only_scalar_defaults_are_present(self) -> None:
+        """Validity and delivery terms are document fields, not sidebar overrides."""
+        for fieldname in ("edit_validity_text", "validity_text", "quotation_delivery_terms"):
             with self.subTest(fieldname=fieldname):
                 self.assertIn(fieldname, print_documents.SCALAR_DEFAULTS)
-                self.assertIn(fieldname, print_documents.QUOTATION_EXTRA_FIELDS)
+                self.assertIn(fieldname, print_documents.QUOTATION_DOCUMENT_FIELDS)
+                self.assertNotIn(fieldname, print_documents.QUOTATION_EXTRA_FIELDS)
 
     def test_quotation_carries_the_signatory_on_the_document(self) -> None:
         self.assertEqual(
@@ -100,7 +102,8 @@ class TestPrintDocumentRegistry(UnitTestCase):
             {
                 "quotation_signatory_type",
                 "sales_representative_employee",
-                "override_quotation_validity_text",
-                "quotation_custom_validity_text",
+                "edit_validity_text",
+                "validity_text",
+                "quotation_delivery_terms",
             },
         )
