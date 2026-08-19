@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.44.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.5...v0.44.0) (2026-08-19)
+
+
+### Features
+
+* update Desk-edited print formats; redesign Shipment Box Label sizes ([8c064b4](https://github.com/Shinonn23/connect_diagnostics_core/commit/8c064b46038a59110c1e95e23e00f5a1aec5893e))
+
+
+### Bug Fixes
+
+* pass print_settings into the Shipment Box Label test render context ([6bb77bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/6bb77bf3de4110b9353489cf7bcb52d9ef0d024f))
+
+
+### Tests
+
+* remove print format rendering tests ([594735c](https://github.com/Shinonn23/connect_diagnostics_core/commit/594735c3d3506930145c327e7f76873a6858f9fd))
+
+
+### Documentation
+
+* remove the "never test print formats" rule this branch had added ([3b86a20](https://github.com/Shinonn23/connect_diagnostics_core/commit/3b86a20dca6b73432f94af19af0d5a10ddd7d48b))
+
 ## [0.43.5](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.4...v0.43.5) (2026-08-19)
 
 
