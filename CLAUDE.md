@@ -570,6 +570,12 @@ If a change is truly needed, document the exact reason and get explicit approval
 
 - All new features must include corresponding tests unless the task description explicitly states tests are not needed
 - Test currency-formatting helpers directly, but do not require every Print Format to use `print_currency`; formats may intentionally render numeric amounts without a currency symbol
+- Print Format Jinja/HTML/CSS content (`connect_diagnostics_print/print_format/*`) is not
+  covered by automated tests — the real Jinja print context (`print_settings`, Desk's
+  Print Format Builder normalization, etc.) cannot be faithfully reproduced outside a live
+  render, so a harness-mocked context drifts from production and produces false failures.
+  Do not add or re-add a test file for print format content; verify print formats manually
+  on the DEV site instead.
 - Minimum coverage: one test per hook handler and one per whitelisted API method
 - Test method names must use `test_<expected_behavior>` pattern (e.g., `test_validates_registration_uniqueness`)
 - Test documents created during tests must use descriptive prefixes (e.g., `_Test Registration`) for easy identification and cleanup
