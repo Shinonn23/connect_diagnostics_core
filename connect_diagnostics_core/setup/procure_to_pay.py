@@ -17,51 +17,7 @@ PURCHASE_ORDER = "Purchase Order"
 PURCHASE_RECEIPT = "Purchase Receipt"
 PURCHASE_INVOICE = "Purchase Invoice"
 
-SASIN_USER = "sasin.ba@connectdiagnostics.com"
-ARIRAT_USER = "arirat.ba@connectdiagnostics.com"
-KIATTISAK_USER = "kiattisak.ch@connectdiagnostics.com"
-
-EXECUTIVE_ROLE = "Executive P2P Approver"
-P2P_VERIFIER_ROLE = "P2P Finance Verifier"
-SUPPLIER_ACTIVATOR_ROLE = "Supplier Activator"
 PURCHASE_REQUESTER_ROLE = "Purchase Requester"
-
-EXECUTIVE_PROFILE = "Executive P2P Approver Add-on"
-VERIFIER_PROFILE = "P2P Finance Verifier Add-on"
-ACTIVATOR_PROFILE = "Supplier Activator Add-on"
-
-SUPPLIER_DRAFT = "Supplier Draft"
-SUPPLIER_VERIFICATION = "Pending Supplier Verification"
-SUPPLIER_ACTIVATION = "Pending Supplier Activation"
-SUPPLIER_ACTIVE = "Supplier Active"
-SUPPLIER_LEGACY_ACTIVE = "Supplier Active (Legacy)"
-
-BANK_DRAFT = "Supplier Bank Change Draft"
-BANK_VERIFICATION = "Pending Supplier Bank Verification"
-BANK_APPROVAL = "Pending Supplier Bank Approval"
-BANK_VERIFIED = "Supplier Bank Verified"
-BANK_REJECTED = "Supplier Bank Change Rejected"
-
-MR_DRAFT = "Material Request Draft"
-MR_PENDING = "Pending Material Request Approval"
-MR_APPROVED = "Material Request Approved"
-MR_REJECTED = "Material Request Rejected"
-
-PO_DRAFT = "Purchase Order Draft"
-PO_FINANCE = "Pending Purchase Order Finance Review"
-PO_EXCEPTION = "Pending Purchase Order Exception Approval"
-PO_APPROVED = "Purchase Order Approved"
-PO_REJECTED = "Purchase Order Rejected"
-
-RECEIPT_DRAFT = "Purchase Receipt Draft"
-RECEIPT_CHECK = "Pending Goods Inspection"
-RECEIPT_ACCEPTED = "Purchase Receipt Accepted"
-
-PI_DRAFT = "Purchase Invoice Draft"
-PI_VERIFICATION = "Pending Purchase Invoice Verification"
-PI_EXCEPTION = "Pending Purchase Invoice Exception Approval"
-PI_VERIFIED = "Purchase Invoice Verified"
-PI_REJECTED = "Purchase Invoice Rejected"
 
 CACHE_CLEAR_DOCTYPES = (
     SUPPLIER,
@@ -140,17 +96,11 @@ CUSTOM_FIELDS = {
     ],
 }
 
-_ROLES = (EXECUTIVE_ROLE, P2P_VERIFIER_ROLE, SUPPLIER_ACTIVATOR_ROLE, PURCHASE_REQUESTER_ROLE)
-_PROFILES = {
-    EXECUTIVE_PROFILE: (EXECUTIVE_ROLE,),
-    VERIFIER_PROFILE: (P2P_VERIFIER_ROLE,),
-    ACTIVATOR_PROFILE: (SUPPLIER_ACTIVATOR_ROLE,),
-}
+_ROLES = (PURCHASE_REQUESTER_ROLE,)
 
 
 def ensure_configuration() -> None:
     ensure_roles()
-    ensure_role_profiles()
     assign_role_holders()
     activate_standard_permissions()
     for doctype in CACHE_CLEAR_DOCTYPES:
@@ -170,52 +120,11 @@ def ensure_roles() -> None:
         )
 
 
-def ensure_role_profiles() -> None:
-    for profile_name, roles in _PROFILES.items():
-        if frappe.db.exists("Role Profile", profile_name):
-            profile = cast(Document, frappe.get_doc("Role Profile", profile_name))
-            if tuple(sorted(cast(str, row.role) for row in profile.get("roles", []))) == tuple(sorted(roles)):
-                continue
-            profile.set("roles", [{"role": role} for role in roles])
-            profile.save(ignore_permissions=True)
-            continue
-        frappe.get_doc(
-            {
-                "doctype": "Role Profile",
-                "role_profile": profile_name,
-                "roles": [{"role": role} for role in roles],
-            }
-        ).insert(ignore_permissions=True)
-
-
 def assign_role_holders() -> None:
-    for user, profile in (
-        (SASIN_USER, ACTIVATOR_PROFILE),
-        (KIATTISAK_USER, VERIFIER_PROFILE),
-        (SASIN_USER, EXECUTIVE_PROFILE),
-        (ARIRAT_USER, EXECUTIVE_PROFILE),
-    ):
-        _assign_profile(user, profile)
     for user in frappe.get_all(
         "Employee", filters={"status": "Active", "user_id": ["is", "set"]}, pluck="user_id"
     ):
         _assign_role(cast(str, user), PURCHASE_REQUESTER_ROLE)
-
-
-def _assign_profile(user_name: str, profile_name: str) -> None:
-    if not frappe.db.exists("User", user_name):
-        return
-    user = cast(Document, frappe.get_doc("User", user_name))
-    if not user.get("enabled"):
-        return
-    profiles = {cast(str, row.role_profile) for row in user.get("role_profiles", [])}
-    if profiles:
-        if profile_name not in profiles:
-            user.append("role_profiles", {"role_profile": profile_name})
-            user.save(ignore_permissions=True)
-        return
-    for role_name in _PROFILES[profile_name]:
-        _assign_role(user_name, role_name)
 
 
 def _assign_role(user_name: str, role_name: str) -> None:
