@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Idempotent Regulatory roles, permissions, and Product Registration workflow."""
+"""Idempotent Regulatory roles, permissions, and settings."""
 
 from __future__ import annotations
 
@@ -10,8 +10,6 @@ from typing import cast
 import frappe
 from frappe.model.document import Document
 from frappe.permissions import setup_custom_perms
-
-from connect_diagnostics_core.setup.customer_onboarding import ensure_workflow
 
 REGULATORY_VIEWER = "Regulatory Viewer"
 REGULATORY_OPERATOR = "Regulatory Operator"
@@ -33,85 +31,6 @@ MANAGED_DOCTYPES = (
     REGULATORY_SETTINGS,
     REGULATORY_OVERRIDE,
     REGULATORY_ALERT_LOG,
-)
-
-WORKFLOW_NAME = "Medical Device Product Registration Approval"
-WORKFLOW_STATE_FIELD = "regulatory_workflow_state"
-WORKFLOW_STATES = {
-    "Registration Draft": "Info",
-    "Registration Data Verification": "Warning",
-    "Registration Active": "Success",
-    "Registration Superseded": "Inverse",
-    "Registration Cancelled": "Danger",
-}
-WORKFLOW_ACTIONS = (
-    "Submit for verification",
-    "Activate registration",
-    "Supersede registration",
-    "Cancel registration",
-)
-WORKFLOW_DOCUMENT_STATES = (
-    {
-        "state": "Registration Draft",
-        "doc_status": "0",
-        "allow_edit": REGULATORY_OPERATOR,
-        "update_field": "official_status",
-        "update_value": "Draft",
-    },
-    {
-        "state": "Registration Data Verification",
-        "doc_status": "0",
-        "allow_edit": REGULATORY_APPROVER,
-        "update_field": "official_status",
-        "update_value": "Draft",
-    },
-    {
-        "state": "Registration Active",
-        "doc_status": "0",
-        "allow_edit": REGULATORY_APPROVER,
-        "update_field": "official_status",
-        "update_value": "Active",
-    },
-    {
-        "state": "Registration Superseded",
-        "doc_status": "0",
-        "allow_edit": REGULATORY_APPROVER,
-        "update_field": "official_status",
-        "update_value": "Superseded",
-    },
-    {
-        "state": "Registration Cancelled",
-        "doc_status": "0",
-        "allow_edit": REGULATORY_APPROVER,
-        "update_field": "official_status",
-        "update_value": "Cancelled",
-    },
-)
-WORKFLOW_TRANSITIONS = (
-    {
-        "state": "Registration Draft",
-        "action": "Submit for verification",
-        "next_state": "Registration Data Verification",
-        "allowed": REGULATORY_OPERATOR,
-    },
-    {
-        "state": "Registration Data Verification",
-        "action": "Activate registration",
-        "next_state": "Registration Active",
-        "allowed": REGULATORY_APPROVER,
-    },
-    {
-        "state": "Registration Active",
-        "action": "Supersede registration",
-        "next_state": "Registration Superseded",
-        "allowed": REGULATORY_APPROVER,
-    },
-    {
-        "state": "Registration Active",
-        "action": "Cancel registration",
-        "next_state": "Registration Cancelled",
-        "allowed": REGULATORY_APPROVER,
-    },
 )
 
 PERMISSION_FIELDS = (
@@ -137,17 +56,7 @@ def ensure_configuration() -> None:
     """Create the complete Regulatory setup without assigning users or owners."""
     ensure_roles()
     ensure_permissions()
-    ensure_workflow_masters()
     ensure_settings()
-    ensure_workflow(
-        workflow_name=WORKFLOW_NAME,
-        document_type=PRODUCT_REGISTRATION,
-        workflow_state_field=WORKFLOW_STATE_FIELD,
-        states=WORKFLOW_DOCUMENT_STATES,
-        transitions=WORKFLOW_TRANSITIONS,
-        send_email_alert=0,
-        is_active=1,
-    )
     for doctype in MANAGED_DOCTYPES:
         frappe.clear_cache(doctype=doctype)
 
@@ -219,21 +128,3 @@ def _ensure_permission(doctype: str, role: str, desired: dict[str, int]) -> None
         permission.insert(ignore_permissions=True)
     else:
         permission.save(ignore_permissions=True)
-
-
-def ensure_workflow_masters() -> None:
-    for state_name, style in WORKFLOW_STATES.items():
-        if frappe.db.exists("Workflow State", state_name):
-            state = frappe.get_doc("Workflow State", state_name)
-            if state.get("style") != style:
-                state.set("style", style)
-                state.save(ignore_permissions=True)
-            continue
-        frappe.get_doc(
-            {"doctype": "Workflow State", "workflow_state_name": state_name, "style": style}
-        ).insert(ignore_permissions=True)
-    for action_name in WORKFLOW_ACTIONS:
-        if not frappe.db.exists("Workflow Action Master", action_name):
-            frappe.get_doc({"doctype": "Workflow Action Master", "workflow_action_name": action_name}).insert(
-                ignore_permissions=True
-            )

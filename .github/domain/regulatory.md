@@ -10,9 +10,13 @@
   replacement registration must link its predecessor/successor instead of overwriting
   the historic record. A verified Certificate is the initial activation requirement.
   Do not infer Thai FDA classifications, document requirements, or legal stock policy.
-- `setup/regulatory.py` owns the Regulatory Viewer/Operator/Approver roles,
-  permissions, and the Product Registration workflow. `setup/workspace.py` maintains
-  the independent Regulatory Workspace. Registered Product and Expiry Alert Rule are
+- `setup/regulatory.py` owns the Regulatory Viewer/Operator/Approver roles and
+  permissions. **Workflow: not currently defined by the app** — the Product
+  Registration approval workflow and its `regulatory_workflow_state` field were
+  retired in the custom-workflow reset; the `official_status` field remains as a
+  plain business status (no longer driven by workflow transitions), and a future
+  approval flow starts from a Workflow Behavior Specification. `setup/workspace.py`
+  maintains the independent Regulatory Workspace. Registered Product and Expiry Alert Rule are
   child tables and intentionally have no Desk route.
 - `api/erpnext/regulatory_transactions.py` is the only transaction-policy boundary.
   It resolves regulatory coverage by the transaction date, keeps PO/SO non-blocking,

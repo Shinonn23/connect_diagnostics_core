@@ -13,7 +13,6 @@ from connect_diagnostics_core.api.erpnext import stock_count
 from connect_diagnostics_core.connect_diagnostics_stock.doctype.stock_count.stock_count import (
     StockCount,
 )
-from connect_diagnostics_core.setup.stock_count import APPROVED
 
 COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
@@ -64,7 +63,7 @@ def _stock_adjustment_account() -> str:
     )
 
 
-def _approved_stock_count(**overrides: object) -> StockCount:
+def _submitted_stock_count(**overrides: object) -> StockCount:
     data: dict[str, object] = {
         "doctype": "Stock Count",
         "count_type": stock_count.MONTHLY,
@@ -79,7 +78,6 @@ def _approved_stock_count(**overrides: object) -> StockCount:
     data.update(overrides)
     doc = cast(StockCount, frappe.get_doc(data)).insert(ignore_permissions=True)
     doc.db_set("docstatus", 1, update_modified=False)
-    doc.db_set("count_state", APPROVED, update_modified=False)
     doc.reload()
     return doc
 
@@ -98,7 +96,7 @@ def _item(item_code: str, *, system_qty: float, count_qty: float) -> dict[str, o
 class TestGenerateHoldingTransfer(IntegrationTestCase):
     def setUp(self) -> None:
         _prepare_environment()
-        self.doc = _approved_stock_count()
+        self.doc = _submitted_stock_count()
 
     def test_creates_submitted_material_transfer(self) -> None:
         result = stock_count.generate_holding_transfer(self.doc.name)
@@ -121,12 +119,12 @@ class TestGenerateHoldingTransfer(IntegrationTestCase):
             stock_count.generate_holding_transfer(self.doc.name)
 
     def test_rejects_yearly_count(self) -> None:
-        yearly = _approved_stock_count(count_type=stock_count.YEARLY)
+        yearly = _submitted_stock_count(count_type=stock_count.YEARLY)
         with self.assertRaises(frappe.ValidationError):
             stock_count.generate_holding_transfer(yearly.name)
 
     def test_no_op_when_no_variance(self) -> None:
-        matched = _approved_stock_count(items=[_item("_Test Item", system_qty=10, count_qty=10)])
+        matched = _submitted_stock_count(items=[_item("_Test Item", system_qty=10, count_qty=10)])
         result = stock_count.generate_holding_transfer(matched.name)
         self.assertIsNone(result["data"])
 
@@ -134,7 +132,7 @@ class TestGenerateHoldingTransfer(IntegrationTestCase):
 class TestGenerateStockAdjustment(IntegrationTestCase):
     def setUp(self) -> None:
         _prepare_environment()
-        self.doc = _approved_stock_count(
+        self.doc = _submitted_stock_count(
             count_type=stock_count.YEARLY,
             items=[
                 _item("_Test Item", system_qty=10, count_qty=8),
@@ -165,11 +163,11 @@ class TestGenerateStockAdjustment(IntegrationTestCase):
             stock_count.generate_stock_adjustment(self.doc.name)
 
     def test_rejects_monthly_count(self) -> None:
-        monthly = _approved_stock_count()
+        monthly = _submitted_stock_count()
         with self.assertRaises(frappe.ValidationError):
             stock_count.generate_stock_adjustment(monthly.name)
 
-    def test_rejects_when_not_approved(self) -> None:
+    def test_rejects_when_not_submitted(self) -> None:
         draft = cast(
             StockCount,
             frappe.get_doc(

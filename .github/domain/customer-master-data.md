@@ -79,13 +79,18 @@
   original/copy pages. `show_date` off and a custom validity text are ordinary
   configuration, not separate formats.
 - `Customer Credit Request` is the only route to payment terms and a credit limit,
-  for **every** Customer including `GOV. HOSPITAL`, and is approved by the Customer
-  Credit Approver. It does not depend on a channel field. Customers start on whatever
-  terms they are created with; `Customer.validate` still blocks anyone without the
-  Customer Accounting Reviewer role from editing terms or limits directly.
-- Customer Credit Request approval states and transitions belong to its Frappe
-  Workflow. When that Workflow is inactive, submission bypasses approval and applies
-  the requested credit terms and limit while retaining normal data validation.
+  for **every** Customer including `GOV. HOSPITAL`. It does not depend on a channel
+  field. Customers start on whatever terms they are created with; `Customer.validate`
+  still blocks anyone without the Customer Accounting Reviewer role from editing terms
+  or limits directly.
+- **Workflow: not currently defined by the app.** The custom Customer Credit Request
+  approval workflow was retired in the custom-workflow reset, along with the
+  `credit_request_state` field. Submitting a `Customer Credit Request` applies the
+  requested payment terms and credit limit to the Customer under a row lock — that is
+  the document's intrinsic effect, not a workflow outcome. Standard DocType permissions
+  govern who may submit; the `Customer Accounting Reviewer` and `Customer Credit
+  Approver` roles are kept because they gate Customer read/write, not because of any
+  workflow. A future approval flow starts from a Workflow Behavior Specification.
 - Customer, Item, and Supplier keep their current document names and codes. Do not
   add conversion flags or automatically rename these masters. The DKSH reference codes
   `dksh_item_code`, `supplier_product_code`, `mat_group_code`, `mat_group4_code`, and

@@ -70,14 +70,18 @@ When rules conflict, follow this order:
   (= the `developments` environment). `gh` is authenticated as `Shinonn23`
   (scopes include `repo` + `project`). Run server code via
   `bench --site … console` with `exec(open(f).read(), globals())`.
-- **Salary Slip submission**: submit only through Payroll Entry after every draft slip is
-  reviewed by `HR Manager`; never add a direct Salary Slip submit path. See
+- **Salary Slip submission**: submit only through Payroll Entry; never add a direct
+  Salary Slip submit path. (The former review-workflow gate was removed.) See
   [`.github/domain/thai-payroll.md`](.github/domain/thai-payroll.md).
-- **Approval ownership**: Frappe Workflow is the single owner of approval states,
-  transitions, roles, and approval-required submission. Custom hooks may validate
-  data integrity and process routing, but must not duplicate approval gates. When a
-  managed Workflow is inactive, its documents bypass approval and finalize through
-  the shared workflow bypass helper; Salary Slip still requires Payroll Entry.
+- **Approval ownership**: the app currently owns **no** Frappe Workflow — every
+  app-owned approval/review/verification workflow was removed in the custom-workflow
+  reset, and the baseline is standard ERPNext behavior plus genuine non-workflow
+  validation. Do **not** enforce approval/review/verification states from global
+  document hooks, and do not recreate app-owned workflows ad hoc. A new workflow
+  starts from a written Workflow Behavior Specification and is owned by Frappe
+  Workflow's native states/transitions/conditions (with a transition task only when
+  richer execution is genuinely needed), not by `validate`/`before_submit` hooks. A
+  direct `doc.submit()` bypassing a workflow transition is an accepted limitation.
 - **Operational document naming**: automatically numbered transactional and operational
   DocTypes use `[prefix][YY-BE][MM][####]`; the central registry is
   `connect_diagnostics_core.setup.document_naming`. The month uses the document date,

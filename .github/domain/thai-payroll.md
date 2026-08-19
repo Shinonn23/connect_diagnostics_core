@@ -37,10 +37,12 @@
   SSO/PF paid) flow through Employee Tax Exemption Declarations, enabled by `allow_tax_exemption`.
   The `Employee Welfare Fund` component is seeded **disabled** until it becomes mandatory
   (1 Oct 2026, 0.25%).
-- Salary Slips are submitted only through Payroll Entry. `HR User` prepares slips and an `HR Manager`
-  moves each one from `Salary Slip Draft` to `Salary Slip Reviewed`; Payroll Entry rejects the batch
-  before submission if any draft slip is not reviewed. The individual Salary Slip submit route is
-  blocked so HRMS creates the salary-accrual Journal Entry through its standard Payroll Entry path.
+- Salary Slips are submitted only through Payroll Entry. This one rule is independent of any
+  workflow and survives the custom-workflow reset: `salary_slip.validate_submission` still blocks a
+  direct Salary Slip submit (`frappe.flags.via_payroll_entry` is set only by HRMS's Payroll Entry
+  batch), so HRMS creates the salary-accrual Journal Entry through its standard Payroll Entry path.
+  The former `Salary Slip Review` workflow and its `Salary Slip Reviewed` gate were removed — no
+  review state is required before Payroll Entry submits a slip.
 - Not yet built — do not assume present: per-employee Salary Structure Assignment (base pay),
   historical Salary Slip seeding for mid-year go-live YTD (SSO / income / tax accumulate only from
   submitted slips; HRMS opening fields cover tax only, and only for mid-period joiners), and the

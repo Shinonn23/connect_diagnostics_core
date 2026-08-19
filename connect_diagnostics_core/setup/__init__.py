@@ -24,7 +24,6 @@ from connect_diagnostics_core.setup import (
     item_group,
     journal_entry_account,
     packed_item,
-    payment_approval,
     payroll,
     procure_to_pay,
     purchase_invoice,
@@ -38,7 +37,6 @@ from connect_diagnostics_core.setup import (
     sales_order_item,
     sales_requirements,
     sales_taxes_and_charges,
-    stock_count,
     stock_entry,
     stock_settings,
     storage_location,
@@ -65,7 +63,6 @@ _MODULES = (
     journal_entry_account,
     packed_item,
     payroll,
-    payment_approval,
     procure_to_pay,
     regulatory,
     regulatory_transactions,
@@ -105,12 +102,10 @@ def apply_all() -> None:
     accounting_dimension.ensure_configuration()
     storage_location.ensure_configuration()
     procure_to_pay.ensure_configuration()
-    payment_approval.ensure_configuration()
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
     regulatory.ensure_configuration()
-    stock_count.ensure_configuration()
     workspace.ensure_workspace_navigation()
 
 

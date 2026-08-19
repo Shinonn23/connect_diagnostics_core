@@ -31,7 +31,6 @@ class StockCount(Document):
         adjustments: DF.Table[StockCountAdjustment]
         amended_from: DF.Link | None
         company: DF.Link
-        count_state: DF.Link | None
         count_type: DF.Literal["Cycle Count (Monthly)", "Yearly Count"]
         holding_warehouse: DF.Link | None
         items: DF.Table[StockCountItem]
