@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.44.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.0...v0.44.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* replace Goods Receipt/Sales Order's local date macro with the shared helper ([f9a0f16](https://github.com/Shinonn23/connect_diagnostics_core/commit/f9a0f162aafce6a0681799c8a430bf9bc8cc38e5))
+* sync live-DEV print format content and stop pinning template content in tests ([1416c07](https://github.com/Shinonn23/connect_diagnostics_core/commit/1416c07a779571f6b0af16f6ec943d9705022ce0))
+* sync live-DEV print format content and stop pinning template content in tests ([93be77f](https://github.com/Shinonn23/connect_diagnostics_core/commit/93be77ff2df52586395c58b2168412816ab4bfd0))
+* sync live-DEV print format content that never deployed ([1372a4d](https://github.com/Shinonn23/connect_diagnostics_core/commit/1372a4dcaaba46af1eef77b61eccc7873c4f0bcc))
+
 ## [0.44.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.5...v0.44.0) (2026-08-19)
 
 
