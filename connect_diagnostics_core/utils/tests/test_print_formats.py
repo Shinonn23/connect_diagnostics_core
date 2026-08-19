@@ -47,6 +47,17 @@ LANGUAGE_SELECTABLE_CONFIGURATIONS = ("receipt", "abbreviated_tax_invoice")
 # rule -- both aimed at our own recreated layouts -- do not apply.
 FORM_OVERLAY_PRINT_FORMATS = ("Withholding Tax Cert CD",)
 
+# Shipment Box Label is a small physical label with no room for a closing
+# summary/signature block, so a <footer> element would be empty.
+FOOTER_OPTIONAL_PRINT_FORMATS = ("Shipment Box Label",)
+
+# Shipment Box Label switches its printed paper size (75 x 100 mm / 100 x 180 mm)
+# from the print sidebar. wkhtmltopdf only reads page-width/page-height off
+# .print-format inside <style>, and that value can only be known at render time
+# (it depends on the sidebar's print_settings), so the conditional block must
+# live in the html field rather than the static css field.
+DYNAMIC_STYLE_PRINT_FORMATS = ("Shipment Box Label",)
+
 
 def load_print_formats() -> list[dict[str, Any]]:
     return [
@@ -113,6 +124,8 @@ class TestPrintFormats(UnitTestCase):
 
     def test_templates_do_not_contain_inline_style_blocks(self) -> None:
         for print_format in load_print_formats():
+            if print_format["name"] in DYNAMIC_STYLE_PRINT_FORMATS:
+                continue
             self.assertNotIn("<style", print_format["html"].lower(), print_format["name"])
 
     def test_css_field_contains_no_jinja(self) -> None:
@@ -142,7 +155,8 @@ class TestPrintFormats(UnitTestCase):
             html = print_format["html"].lower()
             self.assertIn("<header", html, print_format["name"])
             self.assertIn("<section", html, print_format["name"])
-            self.assertIn("<footer", html, print_format["name"])
+            if print_format["name"] not in FOOTER_OPTIONAL_PRINT_FORMATS:
+                self.assertIn("<footer", html, print_format["name"])
 
     def test_quotation_uses_customer_configuration_in_one_bilingual_format(self) -> None:
         path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
@@ -269,15 +283,21 @@ class TestPrintFormats(UnitTestCase):
         self.assertEqual(print_format["module"], "Connect Diagnostics Print")
         self.assertEqual(print_format["print_format_type"], "Jinja")
         self.assertEqual(print_format["pdf_generator"], "wkhtmltopdf")
-        self.assertIn("size: 180mm 100mm", print_format["css"])
-        self.assertIn("page-width: 180mm", print_format["css"])
-        self.assertIn("page-height: 100mm", print_format["css"])
-        self.assertIn("margin-top: 0mm", print_format["css"])
-        self.assertIn("margin-right: 0mm", print_format["css"])
-        self.assertIn("margin-bottom: 0mm", print_format["css"])
-        self.assertIn("margin-left: 0mm", print_format["css"])
-        self.assertIn("width: 179mm", print_format["css"])
+        # Page size is selectable at print time (75x100 / 100x180 mm), so the
+        # @page/.print-format dimensions live in a conditional <style> block in
+        # html, not the static css field.
+        self.assertIn("size: 75mm 100mm", print_format["html"])
+        self.assertIn("page-width: 75mm", print_format["html"])
+        self.assertIn("page-height: 100mm", print_format["html"])
+        self.assertIn("size: 100mm 180mm", print_format["html"])
+        self.assertIn("page-width: 100mm", print_format["html"])
+        self.assertIn("page-height: 180mm", print_format["html"])
+        self.assertIn("label-size-75x100", print_format["html"])
+        self.assertIn("label-size-100x180", print_format["html"])
+        self.assertIn("width: 74mm", print_format["css"])
         self.assertIn("height: 99mm", print_format["css"])
+        self.assertIn("width: 99mm", print_format["css"])
+        self.assertIn("height: 179mm", print_format["css"])
         self.assertIn("overflow-wrap: anywhere", print_format["css"])
         self.assertIn("word-break: break-word", print_format["css"])
         self.assertIn("/assets/connect_diagnostics_core/images/cd_logo_v2.jpg", content)
@@ -299,7 +319,7 @@ class TestPrintFormats(UnitTestCase):
 
         self.assertIn("Connect Diagnostics Co., Ltd.", rendered)
         self.assertIn("Bangkok General Hospital", rendered)
-        self.assertIn('<div class="territory">Bangkok</div>', rendered)
+        self.assertRegex(rendered, r'<div class="territory">\s*Bangkok\s*</div>')
         self.assertIn("โทร/Tel. 081-234-5678", rendered)
 
     def test_shipment_box_label_hides_empty_customer_territory(self) -> None:
@@ -381,6 +401,7 @@ class TestPrintFormats(UnitTestCase):
         delivery_address: str = "99 Long recipient address<br>Bangkok 10110",
         pickup_contact: str = "",
         pickup_contact_name: str = "",
+        label_size: str = "75 x 100 mm",
         values: dict[tuple[str, str, str], str] | None = None,
     ) -> str:
         class FakeDatabase:
@@ -417,6 +438,9 @@ class TestPrintFormats(UnitTestCase):
         return environment.from_string(print_format["html"]).render(
             doc=doc,
             frappe=SimpleNamespace(db=FakeDatabase(values or {})),
+            # The print sidebar's Print Settings, as read by print_settings.<field>
+            # in production (frappe.www.printview.get_print_settings).
+            print_settings=SimpleNamespace(custom_shipment_label_size=label_size),
             # Registered as a Jinja method in hooks.py; a no-op here because the
             # harness renders outside a request.
             register_print=lambda *args, **kwargs: "",
