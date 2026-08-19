@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.43.5](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.4...v0.43.5) (2026-08-19)
+
+
+### Bug Fixes
+
+* register Credit Note in the print-format test suite ([8de1a94](https://github.com/Shinonn23/connect_diagnostics_core/commit/8de1a946578cc276c6cb828164d437aec4dfa44a))
+* render POS received/change fields on the abbreviated tax invoice ([cec50bf](https://github.com/Shinonn23/connect_diagnostics_core/commit/cec50bf5ad1e4a0a5f1bccdb783f04ed1a704bb5))
+* resolve braced autoname hyphen-token bug, POS print gap, and doc fixes ([8c331a0](https://github.com/Shinonn23/connect_diagnostics_core/commit/8c331a0178214cf333ac967b3e89be6a192bcbb3))
+* resolve braced autoname tokens never matching hyphenated names ([5fdee97](https://github.com/Shinonn23/connect_diagnostics_core/commit/5fdee97845a8d6645c1e857305e425e4f0834e00))
+
+
+### Documentation
+
+* correct the bench path and dev site name ([2c978ca](https://github.com/Shinonn23/connect_diagnostics_core/commit/2c978ca1b79836efc74cb54472dd4c134e0f40d7))
+
 ## [0.43.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.3...v0.43.4) (2026-08-19)
 
 
