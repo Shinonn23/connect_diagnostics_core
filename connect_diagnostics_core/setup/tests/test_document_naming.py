@@ -85,8 +85,35 @@ class TestDocumentNaming(UnitTestCase):
 
         self.assertEqual(
             autoname[2],
-            "format:ARQ{YY-BE}{MM-DOC}{####}",
+            "format:ARQ{YYBE}{MMDOC}{####}",
         )
+
+    def test_autoname_patterns_match_frappes_braced_params_regex(self) -> None:
+        """Regression: {YY-BE}/{MM-DOC} contain "-", which Frappe's
+        BRACED_PARAMS_PATTERN never matches, leaving every AUTONAME_PREFIXES
+        DocType's name as the literal unsubstituted format string.
+        """
+        from frappe.model.naming import BRACED_PARAMS_PATTERN
+
+        setters = document_naming.PROPERTY_SETTERS["Attendance Request"]
+        autoname = next(setter for setter in setters if setter[0] is None)
+
+        self.assertEqual(
+            BRACED_PARAMS_PATTERN.findall(autoname[2]),
+            ["{YYBE}", "{MMDOC}", "{####}"],
+        )
+
+    def test_document_month_accepts_the_braced_autoname_alias(self) -> None:
+        doc = SimpleNamespace(get=lambda field: {"posting_date": "2026-07-31"}.get(field))
+
+        self.assertEqual(document_naming.parse_document_month(doc, "MMDOC"), "07")
+
+    def test_buddhist_year_accepts_the_braced_autoname_alias(self) -> None:
+        doc = SimpleNamespace(
+            get=lambda field: {"purchase_date": "2027-01-01", "creation": "2026-12-31"}.get(field)
+        )
+
+        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YYBE"), "70")
 
     def test_sales_invoice_selects_credit_note_for_returns(self) -> None:
         doc = SimpleNamespace(

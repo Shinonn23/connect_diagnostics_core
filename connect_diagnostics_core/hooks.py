@@ -159,6 +159,10 @@ naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
     "MM-DOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
+    # Hyphen-free aliases: Frappe's braced-autoname regex cannot match "-" inside
+    # {...}, so `format:` autoname strings use these instead of YY-BE/MM-DOC.
+    "YYBE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
+    "MMDOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
 }
 
 # Document Events

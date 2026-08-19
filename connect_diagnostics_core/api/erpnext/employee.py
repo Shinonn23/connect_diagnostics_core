@@ -33,7 +33,7 @@ def parse_buddhist_era_naming_series_variable(doc: Any, variable: str) -> str | 
     if variable == "YYYY-BE":
         return str(buddhist_year)
 
-    if variable == "YY-BE":
+    if variable in ("YY-BE", "YYBE"):
         return f"{buddhist_year % 100:02d}"
 
     return None

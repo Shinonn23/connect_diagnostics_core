@@ -15,6 +15,13 @@ from frappe.utils import get_datetime, getdate, today
 DATE_TOKEN = "MM-DOC"
 SERIES_PATTERN = f"YY-BE.{DATE_TOKEN}.####"
 
+# Frappe's braced-autoname regex (BRACED_PARAMS_PATTERN in frappe.model.naming)
+# never matches a "-" inside {...}, so the dot-separated tokens above cannot be
+# reused inside a `format:` autoname string. These hyphen-free aliases exist only
+# for that braced form; the dot-separated series tokens are untouched.
+AUTONAME_YEAR_TOKEN = "YYBE"
+AUTONAME_DATE_TOKEN = "MMDOC"
+
 # These are intentionally explicit.  The registry is the source of truth for
 # every operational DocType, including DocTypes owned by installed apps.
 NAMING_SERIES_PREFIXES: dict[str, tuple[str, ...]] = {
@@ -200,14 +207,19 @@ def property_setters() -> dict[str, list[tuple[str | None, str, str, str]]]:
 
     for doctype, prefix in AUTONAME_PREFIXES.items():
         setters.setdefault(doctype, []).append(
-            (None, "autoname", f"format:{prefix}{{YY-BE}}{{{DATE_TOKEN}}}{{####}}", "Data")
+            (
+                None,
+                "autoname",
+                f"format:{prefix}{{{AUTONAME_YEAR_TOKEN}}}{{{AUTONAME_DATE_TOKEN}}}{{####}}",
+                "Data",
+            )
         )
     return setters
 
 
 def parse_document_month(doc: Any, variable: str) -> str | None:
     """Return the document month for the custom naming token."""
-    if variable != DATE_TOKEN:
+    if variable not in (DATE_TOKEN, AUTONAME_DATE_TOKEN):
         return None
     return f"{_document_date(doc).month:02d}"
 
