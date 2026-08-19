@@ -64,7 +64,7 @@ When rules conflict, follow this order:
   owner / release approver is GitHub `Shinonn23` (Siwat). The exact promotion gating
   each role enforces lives in the `/promote-uat`, `/promote-prod`, and `/test-result`
   skills.
-- **Bench**: `/home/frappe/frappe-bench`, dev site `dev.erp.connectdiacnostics.local`
+- **Bench**: `/home/erp/frappe`, dev site `deverp.connectdiagnostics.net`
   (= the `developments` environment). `gh` is authenticated as `Shinonn23`
   (scopes include `repo` + `project`). Run server code via
   `bench --site … console` with `exec(open(f).read(), globals())`.
