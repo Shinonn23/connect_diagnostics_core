@@ -80,9 +80,10 @@
   keep the original signature **and** `allow_guest=True`. The Print button loads the
   `/printview` route instead and cannot be overridden, so it is detected server-side from
   `frappe.form_dict.trigger_print` while the template renders.
-- Coverage is every app-owned Print Format. The four configuration-driven formats record
-  themselves through the print context; the rest call `{{ register_print(doc) }}`. That call
-  must sit **outside** any leading `{# ... #}` comment, or it is silently swallowed.
+- Coverage is not mandated for every app-owned Print Format. Configuration-driven formats
+  record themselves through the print context; others may opt in with an explicit
+  `{{ register_print(doc) }}` call. When present, that call must sit **outside** any leading
+  `{# ... #}` comment, or it is silently swallowed.
 - Previews are deliberately not recorded, and neither are emailed PDFs.
 - **Two deliberate deviations from the general rules, both required by the feature.** A print
   render is a GET that Frappe does not commit, so the insert calls `frappe.db.commit()` inside

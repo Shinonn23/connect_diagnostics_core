@@ -585,3 +585,11 @@ If a change is truly needed, document the exact reason and get explicit approval
   - THB currency rounding (2 decimal places, banker's rounding)
   - Thai tax ID (13-digit) format and checksum validation
   - Buddhist year (BE) vs Gregorian year (CE) conversion
+- Do not pin exact template wording, labels, or CSS class names in a test for content
+  that is edited live through Desk (Print Format `html`/`css`, and similarly-edited
+  content elsewhere). Test structural and security invariants instead (valid JSON,
+  `standard`/`module` ownership, no Jinja in a verbatim-appended field, no forbidden
+  patterns) — never a literal string that a legitimate content edit will change. A
+  test like this previously made every Desk edit to a Print Format fail CI; see
+  `connect_diagnostics_core/utils/tests/test_print_formats.py` for the surviving
+  structural tests.
