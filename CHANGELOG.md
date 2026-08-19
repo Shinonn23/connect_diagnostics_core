@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.43.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.3...v0.43.4) (2026-08-19)
+
+
+### Code Refactoring
+
+* delete app-owned Workflow records from the database ([a8a135c](https://github.com/Shinonn23/connect_diagnostics_core/commit/a8a135ceaec3db378118933d0660833bde675557))
+* remove workflow-derived enforcement from document hooks ([9fc273d](https://github.com/Shinonn23/connect_diagnostics_core/commit/9fc273d920527301d072711eee1bf34ab6b0c59f))
+* remove workflow-only roles, profiles, and approval permissions ([e81c0ff](https://github.com/Shinonn23/connect_diagnostics_core/commit/e81c0ffa9440cceb03fc2f4b28b1f9a9ef3fb185))
+* remove workflow-state custom fields ([5acdb1f](https://github.com/Shinonn23/connect_diagnostics_core/commit/5acdb1f7171c1e8acc2aee6fbb2e0ea132508bd8))
+* remove workflow-state fields from app-owned DocTypes ([df84f49](https://github.com/Shinonn23/connect_diagnostics_core/commit/df84f49e73d8a21b4a72d4be0694caa68130c08f))
+* reset custom workflow architecture to a workflow-free baseline ([01e8796](https://github.com/Shinonn23/connect_diagnostics_core/commit/01e87962b97a263930534d1cf324837703216323))
+* stop provisioning app-owned Workflows ([54f958a](https://github.com/Shinonn23/connect_diagnostics_core/commit/54f958aca19e5e6ade8cfc14718d5dd21154d132))
+
+
+### Documentation
+
+* describe the workflow-free baseline and guard against regressions ([c2f93e9](https://github.com/Shinonn23/connect_diagnostics_core/commit/c2f93e9adc3703d503c2dada982d5202daa37277))
+
 ## [0.43.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.43.2...v0.43.3) (2026-08-18)
 
 
