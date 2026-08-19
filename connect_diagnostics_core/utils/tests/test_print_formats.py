@@ -45,6 +45,18 @@ LANGUAGE_SELECTABLE_CONFIGURATIONS = ("receipt", "abbreviated_tax_invoice")
 # rule -- both aimed at our own recreated layouts -- do not apply.
 FORM_OVERLAY_PRINT_FORMATS = ("Withholding Tax Cert CD",)
 
+# Formats with no closing summary/signature block, so a <footer> element would
+# be empty. Goods Receipt and Sales Order are single flowing documents; Shipment
+# Box Label is a small physical label with no room for one.
+FOOTER_OPTIONAL_PRINT_FORMATS = ("Goods Receipt", "Sales Order", "Shipment Box Label")
+
+# Shipment Box Label switches its printed paper size (75 x 100 mm / 100 x 180 mm)
+# from the print sidebar. wkhtmltopdf only reads page-width/page-height off
+# .print-format inside <style>, and that value can only be known at render time
+# (it depends on the sidebar's print_settings), so the conditional block must
+# live in the html field rather than the static css field.
+DYNAMIC_STYLE_PRINT_FORMATS = ("Shipment Box Label",)
+
 
 def load_print_formats() -> list[dict[str, Any]]:
     return [
@@ -111,6 +123,8 @@ class TestPrintFormats(UnitTestCase):
 
     def test_templates_do_not_contain_inline_style_blocks(self) -> None:
         for print_format in load_print_formats():
+            if print_format["name"] in DYNAMIC_STYLE_PRINT_FORMATS:
+                continue
             self.assertNotIn("<style", print_format["html"].lower(), print_format["name"])
 
     def test_css_field_contains_no_jinja(self) -> None:
@@ -140,7 +154,8 @@ class TestPrintFormats(UnitTestCase):
             html = print_format["html"].lower()
             self.assertIn("<header", html, print_format["name"])
             self.assertIn("<section", html, print_format["name"])
-            self.assertIn("<footer", html, print_format["name"])
+            if print_format["name"] not in FOOTER_OPTIONAL_PRINT_FORMATS:
+                self.assertIn("<footer", html, print_format["name"])
 
     def test_quotation_uses_customer_configuration_in_one_bilingual_format(self) -> None:
         path = PRINT_FORMAT_ROOT / "quotation/quotation.json"
