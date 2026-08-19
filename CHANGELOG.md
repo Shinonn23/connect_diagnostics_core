@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.44.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.1...v0.44.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* restore POS received/change rows lost by the live-DEV print format sync ([b79ffc4](https://github.com/Shinonn23/connect_diagnostics_core/commit/b79ffc46d27707ad63d01926b1a08ea07353c731))
+* restore POS received/change rows lost by the live-DEV print format sync ([38345a2](https://github.com/Shinonn23/connect_diagnostics_core/commit/38345a2b45f4e6693220a8f4f145eaed49d8a2e7))
+
 ## [0.44.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.0...v0.44.1) (2026-08-19)
 
 
