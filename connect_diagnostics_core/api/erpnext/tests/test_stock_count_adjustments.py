@@ -16,6 +16,7 @@ from connect_diagnostics_core.connect_diagnostics_stock.doctype.stock_count.stoc
 
 COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
+SECOND_WAREHOUSE = "_Test Stock Count Second - _TC"
 HOLDING_WAREHOUSE = "_Test Stock Count Holding - _TC"
 
 # IntegrationTestCase rolls the whole class's DB changes back in a class cleanup,
@@ -68,7 +69,7 @@ def _submitted_stock_count(**overrides: object) -> StockCount:
         "doctype": "Stock Count",
         "count_type": stock_count.MONTHLY,
         "company": COMPANY,
-        "warehouse": WAREHOUSE,
+        "warehouses": [{"warehouse": WAREHOUSE}],
         "posting_date": "2026-08-12",
         "posting_time": "10:00:00",
         "selection_method": "Manual",
@@ -82,15 +83,25 @@ def _submitted_stock_count(**overrides: object) -> StockCount:
     return doc
 
 
-def _item(item_code: str, *, system_qty: float, count_qty: float) -> dict[str, object]:
+def _item(
+    item_code: str, *, system_qty: float, count_qty: float, warehouse: str = WAREHOUSE
+) -> dict[str, object]:
     return {
         "item_code": item_code,
-        "warehouse": WAREHOUSE,
+        "warehouse": warehouse,
         "stock_uom": "_Test UOM",
         "system_qty": system_qty,
         "count_qty": count_qty,
         "valuation_rate": 100,
     }
+
+
+def _ensure_second_warehouse() -> str:
+    if not frappe.db.exists("Warehouse", SECOND_WAREHOUSE):
+        frappe.get_doc(
+            {"doctype": "Warehouse", "warehouse_name": "_Test Stock Count Second", "company": COMPANY}
+        ).insert(ignore_permissions=True)
+    return SECOND_WAREHOUSE
 
 
 class TestGenerateHoldingTransfer(IntegrationTestCase):
@@ -128,6 +139,25 @@ class TestGenerateHoldingTransfer(IntegrationTestCase):
         result = stock_count.generate_holding_transfer(matched.name)
         self.assertIsNone(result["data"])
 
+    def test_creates_per_row_warehouse_transfer_across_multiple_warehouses(self) -> None:
+        second = _ensure_second_warehouse()
+        doc = _submitted_stock_count(
+            warehouses=[{"warehouse": WAREHOUSE}, {"warehouse": second}],
+            items=[
+                _item("_Test Item", system_qty=10, count_qty=8, warehouse=WAREHOUSE),
+                _item("_Test Item 2", system_qty=5, count_qty=3, warehouse=second),
+            ],
+        )
+
+        result = stock_count.generate_holding_transfer(doc.name)
+
+        entry = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["stock_entry"]))
+        self.assertFalse(entry.from_warehouse)  # rows span two warehouses: no single header value
+        self.assertEqual(entry.to_warehouse, HOLDING_WAREHOUSE)
+        source_by_item = {row.item_code: row.s_warehouse for row in entry.items}
+        self.assertEqual(source_by_item["_Test Item"], WAREHOUSE)
+        self.assertEqual(source_by_item["_Test Item 2"], second)
+
 
 class TestGenerateStockAdjustment(IntegrationTestCase):
     def setUp(self) -> None:
@@ -157,6 +187,25 @@ class TestGenerateStockAdjustment(IntegrationTestCase):
         entry_types = {row.entry_type for row in self.doc.adjustments}
         self.assertEqual(entry_types, {"Material Receipt", "Material Issue"})
 
+    def test_posts_per_row_warehouse_across_multiple_warehouses(self) -> None:
+        second = _ensure_second_warehouse()
+        doc = _submitted_stock_count(
+            count_type=stock_count.YEARLY,
+            warehouses=[{"warehouse": WAREHOUSE}, {"warehouse": second}],
+            items=[
+                _item("_Test Item", system_qty=10, count_qty=12, warehouse=WAREHOUSE),
+                _item("_Test Item 2", system_qty=5, count_qty=7, warehouse=second),
+            ],
+        )
+
+        result = stock_count.generate_stock_adjustment(doc.name)
+
+        receipt = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["receipt_entry"]))
+        self.assertFalse(receipt.to_warehouse)  # rows span two warehouses: no single header value
+        target_by_item = {row.item_code: row.t_warehouse for row in receipt.items}
+        self.assertEqual(target_by_item["_Test Item"], WAREHOUSE)
+        self.assertEqual(target_by_item["_Test Item 2"], second)
+
     def test_rejects_second_generation(self) -> None:
         stock_count.generate_stock_adjustment(self.doc.name)
         with self.assertRaises(frappe.ValidationError):
@@ -175,7 +224,7 @@ class TestGenerateStockAdjustment(IntegrationTestCase):
                     "doctype": "Stock Count",
                     "count_type": stock_count.YEARLY,
                     "company": COMPANY,
-                    "warehouse": WAREHOUSE,
+                    "warehouses": [{"warehouse": WAREHOUSE}],
                     "posting_date": "2026-08-12",
                     "posting_time": "10:00:00",
                     "items": [_item("_Test Item", system_qty=10, count_qty=8)],

@@ -461,6 +461,7 @@ in the same change when a domain's architecture, behavior, or constraints change
 | Regulatory module | [`.github/domain/regulatory.md`](.github/domain/regulatory.md) |
 | DKSH module | [`.github/domain/dksh.md`](.github/domain/dksh.md) |
 | Print formats & audit log | [`.github/domain/print.md`](.github/domain/print.md) |
+| Stock Count | [`.github/domain/stock-count.md`](.github/domain/stock-count.md) |
 
 ### Custom Fields
 

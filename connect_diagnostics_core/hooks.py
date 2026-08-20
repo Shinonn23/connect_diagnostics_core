@@ -207,6 +207,7 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+            "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
         ],
     },
     "Payment Entry": {
@@ -235,19 +236,31 @@ doc_events = {
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+            "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
         ],
     },
     "Stock Entry": {
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+            "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
         ],
     },
     "Delivery Note": {
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+            "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
         ],
+    },
+    "Purchase Invoice": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
+    },
+    "Stock Reconciliation": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
+    },
+    "Pick List": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
     },
     "Item": {
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
