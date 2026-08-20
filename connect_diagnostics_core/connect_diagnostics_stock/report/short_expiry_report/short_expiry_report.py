@@ -65,13 +65,6 @@ def _get_columns() -> list[ReportColumn]:
             "options": "Warehouse",
             "width": 130,
         },
-        {
-            "label": _("Storage Location"),
-            "fieldname": "storage_location",
-            "fieldtype": "Link",
-            "options": "Storage Location",
-            "width": 130,
-        },
     ]
 
 
@@ -91,7 +84,6 @@ def _get_data(filters: ReportFilters, as_of_date: Any) -> list[ReportRow]:
         "company": filters.company,
         "as_of_date": as_of_date,
         "warehouse": filters.get("warehouse") or None,
-        "storage_location": filters.get("storage_location") or None,
         "item": filters.get("item") or None,
     }
 
@@ -101,7 +93,7 @@ def _get_data(filters: ReportFilters, as_of_date: Any) -> list[ReportRow]:
             """
             SELECT
                 sle.item_code, i.item_name, i.min_remaining_shelf_life,
-                sle.warehouse, sle.storage_location,
+                sle.warehouse,
                 sbe.batch_no, sbe.serial_no,
                 b.expiry_date,
                 SUM(sbe.qty) AS qty
@@ -116,9 +108,8 @@ def _get_data(filters: ReportFilters, as_of_date: Any) -> list[ReportRow]:
                 AND IFNULL(i.disabled, 0) = 0
                 AND b.expiry_date IS NOT NULL
                 AND (%(warehouse)s IS NULL OR sle.warehouse = %(warehouse)s)
-                AND (%(storage_location)s IS NULL OR sle.storage_location = %(storage_location)s)
                 AND (%(item)s IS NULL OR sle.item_code = %(item)s)
-            GROUP BY sle.item_code, sle.warehouse, sle.storage_location, sbe.batch_no, sbe.serial_no
+            GROUP BY sle.item_code, sle.warehouse, sbe.batch_no, sbe.serial_no
             HAVING qty > 0.000001
             ORDER BY b.expiry_date ASC
             """,

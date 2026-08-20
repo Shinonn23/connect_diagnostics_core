@@ -4,7 +4,7 @@
 from frappe.model.document import Document
 
 
-class StorageLocation(Document):
+class StockCountWarehouse(Document):
     # begin: auto-generated types
     # This code is auto-generated. Do not modify anything in this block.
 
@@ -13,9 +13,9 @@ class StorageLocation(Document):
     if TYPE_CHECKING:
         from frappe.types import DF
 
-        location_code: DF.Data
-        location_name: DF.Data | None
-        warehouse: DF.Link | None
-        zone: DF.Data | None
+        parent: DF.Data
+        parentfield: DF.Data
+        parenttype: DF.Data
+        warehouse: DF.Link
     # end: auto-generated types
     pass

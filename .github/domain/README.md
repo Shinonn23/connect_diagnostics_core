@@ -19,3 +19,4 @@ file here in the same change (this replaces keeping the detail in `CLAUDE.md` /
 | Regulatory module | [regulatory.md](regulatory.md) |
 | DKSH module | [dksh.md](dksh.md) |
 | Print formats & audit log | [print.md](print.md) |
+| Stock Count | [stock-count.md](stock-count.md) |

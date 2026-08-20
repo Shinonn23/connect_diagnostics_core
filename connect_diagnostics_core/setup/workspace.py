@@ -65,6 +65,7 @@ SIDEBAR_ITEM_FIELDS = (
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
+    "Stock": frozenset({("DocType", "Storage Location")}),
     "ERPNext Settings": frozenset(
         {
             ("DocType", "Repost Accounting Ledger Settings"),
@@ -81,6 +82,7 @@ RETIRED_SIDEBAR_LINKS = {
 }
 RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
+    "Stock": frozenset({("DocType", "Storage Location")}),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
     "Financial Reports": frozenset(
         {
@@ -173,11 +175,11 @@ REGULATORY_WORKSPACE_GROUPS = (
 REGULATORY_LINKS = tuple(link for group in REGULATORY_WORKSPACE_GROUPS for link in group.links)
 
 
-# Stock Count's counting + two-tier approval workflow is a distinct operating loop
-# from day-to-day Stock (see the workspace-navigation rule in CLAUDE.md), so it gets
-# its own independent Workspace instead of crowding the existing Stock Workspace.
-# General stock reports/masters (Storage Location, expiry, goods receipt) stay in
-# the existing Stock Workspace since they are not specific to counting.
+# Stock Count's counting + role-gated submit permissions are a distinct operating
+# loop from day-to-day Stock (see the workspace-navigation rule in CLAUDE.md), so it
+# gets its own independent Workspace instead of crowding the existing Stock
+# Workspace. General stock reports/masters (expiry, goods receipt) stay in the
+# existing Stock Workspace since they are not specific to counting.
 STOCK_COUNT_WORKSPACE = "Stock Counting"
 # Deliberately not "Stock Count": Frappe's route-conflict check slugifies every Page,
 # Workspace, and DocType name and rejects duplicates, and the "Stock Count" DocType
@@ -231,7 +233,6 @@ NAVIGATION_GROUPS = (
             NavigationLink("Product Group", "Product Group", "DocType"),
             NavigationLink("Regulation Class", "Regulation Class", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
-            NavigationLink("Storage Location", "Storage Location", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
             NavigationLink("Goods Receipt Report", "Goods Receipt Report", "Report", "Purchase Receipt"),
@@ -275,7 +276,6 @@ SIDEBAR_PLACEMENTS = {
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
         SidebarPlacement("Regulation Class", after_link_to="Product Group", section="Setup"),
         SidebarPlacement("Storage Condition", after_link_to="Regulation Class", section="Setup"),
-        SidebarPlacement("Storage Location", after_link_to="Storage Condition", section="Setup"),
     ),
     "Buying": (
         SidebarPlacement(

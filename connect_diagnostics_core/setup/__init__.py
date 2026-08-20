@@ -39,7 +39,6 @@ from connect_diagnostics_core.setup import (
     sales_taxes_and_charges,
     stock_entry,
     stock_settings,
-    storage_location,
     supplier,
     uom,
     workspace,
@@ -100,7 +99,6 @@ def apply_all() -> None:
                     validate_fields_for_doctype=False,
                 )
     accounting_dimension.ensure_configuration()
-    storage_location.ensure_configuration()
     procure_to_pay.ensure_configuration()
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()

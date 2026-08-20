@@ -24,7 +24,6 @@ class StockCountItem(Document):
         serial_and_batch_bundle: DF.Link | None
         serial_no: DF.SmallText | None
         stock_uom: DF.Link | None
-        storage_location: DF.Link | None
         system_qty: DF.Float
         valuation_rate: DF.Currency
         variance_qty: DF.Float
