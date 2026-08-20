@@ -1,19 +1,34 @@
 """Custom field / property setter definitions for Item."""
 
+from __future__ import annotations
+
+import json
+
+import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
 CUSTOM_FIELDS = {
     "Item": [
+        {
+            "fieldname": "regulatory_tab",
+            "label": "Regulatory",
+            "fieldtype": "Tab Break",
+            "insert_after": "barcodes",
+            "is_system_generated": 1,
+        },
         {
             "fieldname": "medical_device_regulatory_section",
             "label": "Medical Device Regulatory",
             "fieldtype": "Section Break",
-            "insert_after": "regulation_class",
+            "insert_after": "regulatory_tab",
+            "depends_on": "eval:doc.is_medical_device",
             "is_system_generated": 1,
         },
         {
             "fieldname": "is_medical_device",
             "label": "Is Medical Device",
             "fieldtype": "Check",
-            "insert_after": "medical_device_regulatory_section",
+            "insert_after": "has_variants",
             "is_system_generated": 1,
         },
         {
@@ -22,7 +37,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Select",
             "options": "Required\nExempt\nNot Applicable",
             "default": "Not Applicable",
-            "insert_after": "is_medical_device",
+            "insert_after": "medical_device_regulatory_section",
             "is_system_generated": 1,
         },
         {
@@ -46,6 +61,7 @@ CUSTOM_FIELDS = {
             "label": "Current Regulatory Coverage",
             "fieldtype": "Section Break",
             "insert_after": "regulatory_owner",
+            "depends_on": "eval:doc.is_medical_device",
             "is_system_generated": 1,
         },
         {
@@ -83,6 +99,26 @@ CUSTOM_FIELDS = {
             "read_only": 1,
             "no_copy": 1,
             "insert_after": "current_registration_expiry",
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "opening_tab",
+            "label": "Opening",
+            "fieldtype": "Tab Break",
+            "insert_after": "current_registration_status",
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "opening_balance_section",
+            "label": "Opening Balance",
+            "fieldtype": "Section Break",
+            "insert_after": "opening_tab",
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "opening_column_break",
+            "fieldtype": "Column Break",
+            "insert_after": "opening_balance_section",
             "is_system_generated": 1,
         },
         {
@@ -201,3 +237,65 @@ PROPERTY_SETTERS = {
         ("item_code", "reqd", "1", "Check"),
     ],
 }
+
+# Standard ERPNext fields relocated into the "Opening" tab (see opening_balance_section /
+# opening_column_break above). Frappe only supports repositioning a *standard* DocField via
+# a DocType-level `field_order` Property Setter (the same mechanism Customize Form uses) —
+# there is no per-field `insert_after` override for non-custom fields. `ensure_configuration`
+# below computes that order dynamically from live meta so it stays correct across ERPNext
+# upgrades instead of freezing a static field list.
+_OPENING_STOCK_FIELDS = ("opening_stock",)
+_OPENING_VALUATION_FIELDS = ("valuation_rate", "standard_rate")
+
+
+def ensure_configuration() -> None:
+    """Move Opening Stock / Valuation Rate / Standard Selling Rate into the Opening tab."""
+    doctype = "Item"
+    meta = frappe.get_meta(doctype)
+    current_order = [field.fieldname for field in meta.fields if field.fieldname]
+    required = (
+        *_OPENING_STOCK_FIELDS,
+        *_OPENING_VALUATION_FIELDS,
+        "opening_balance_section",
+        "opening_column_break",
+    )
+    if not all(fieldname in current_order for fieldname in required):
+        return
+
+    desired_order = _reordered_for_opening_tab(current_order)
+    if desired_order == current_order:
+        return
+
+    _set_field_order(doctype, desired_order)
+
+
+def _reordered_for_opening_tab(current_order: list[str]) -> list[str]:
+    moved = {*_OPENING_STOCK_FIELDS, *_OPENING_VALUATION_FIELDS}
+    remaining = [fieldname for fieldname in current_order if fieldname not in moved]
+
+    section_index = remaining.index("opening_balance_section")
+    remaining[section_index + 1 : section_index + 1] = list(_OPENING_STOCK_FIELDS)
+
+    column_index = remaining.index("opening_column_break")
+    remaining[column_index + 1 : column_index + 1] = list(_OPENING_VALUATION_FIELDS)
+
+    return remaining
+
+
+def _set_field_order(doctype: str, order: list[str]) -> None:
+    value = json.dumps(order)
+    name = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "field_order"}, "name")
+    if name:
+        property_setter = frappe.get_doc("Property Setter", name)
+        property_setter.value = value
+        property_setter.save(ignore_permissions=True)
+        return
+    make_property_setter(
+        doctype,
+        None,
+        "field_order",
+        value,
+        "Small Text",
+        for_doctype=True,
+        validate_fields_for_doctype=False,
+    )

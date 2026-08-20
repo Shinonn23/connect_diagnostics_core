@@ -99,6 +99,7 @@ def apply_all() -> None:
                     validate_fields_for_doctype=False,
                 )
     accounting_dimension.ensure_configuration()
+    item.ensure_configuration()
     procure_to_pay.ensure_configuration()
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()

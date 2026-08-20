@@ -130,6 +130,8 @@ def validate_item_classification(item: Document) -> None:
     if not is_medical_device:
         item.update(
             {
+                "medical_device_category": "",
+                "regulatory_owner": "",
                 "current_medical_device_registration": "",
                 "current_newcode": "",
                 "current_registration_expiry": "",

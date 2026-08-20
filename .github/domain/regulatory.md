@@ -28,3 +28,14 @@
   Alert Log; recipient roles/users come from the alert rule, never Item rows. Regulatory
   Script Reports use the read-only `regulatory_reporting.py` helpers. Standard Frappe Data
   Import is enabled for masters; use the preflight API before writing a production import.
+- On the Item form (`setup/item.py`), "Medical Device Regulatory" and "Current
+  Regulatory Coverage" live in their own "Regulatory" tab and are gated by
+  `depends_on: eval:doc.is_medical_device`; `Is Medical Device` itself sits in the
+  Variants tab, right after `Has Variants`. `validate_item_classification` clears
+  `medical_device_category`, `regulatory_owner`, and the four `current_*` coverage
+  fields to blank whenever `is_medical_device` is unchecked — `regulatory_registration_requirement`
+  keeps its existing "Not Applicable" enforcement rather than going blank. Opening
+  Stock / Valuation Rate / Standard Selling Rate move into their own "Opening" tab via
+  a dynamically computed `field_order` Property Setter (`item.ensure_configuration`,
+  called from `setup.apply_all`) — Frappe only supports repositioning a *standard*
+  field through that DocType-level mechanism, not per-field `insert_after`.
