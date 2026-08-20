@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.47.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.46.0...v0.47.0) (2026-08-20)
+
+
+### Features
+
+* reorganize Item medical device regulatory and opening tabs ([8e17ac2](https://github.com/Shinonn23/connect_diagnostics_core/commit/8e17ac224022a8ff0e3defacc5ec3d23837a429f))
+* reorganize Item medical device regulatory and opening tabs ([a264eb0](https://github.com/Shinonn23/connect_diagnostics_core/commit/a264eb05680211ae22d1c721fbc5e6e681e9a2e3))
+
 ## [0.46.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.45.0...v0.46.0) (2026-08-20)
 
 
