@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.46.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.45.0...v0.46.0) (2026-08-20)
+
+
+### Features
+
+* freeze stock transactions for items under active Stock Count ([9b75503](https://github.com/Shinonn23/connect_diagnostics_core/commit/9b75503267c804face7d20ebc4789776310f467b))
+
+
+### Code Refactoring
+
+* retire Storage Location doctype, use native Warehouse tree for Stock Count ([710df59](https://github.com/Shinonn23/connect_diagnostics_core/commit/710df591dd048d379ecb98c5c6bb121008b9f754))
+* retire Storage Location, use native Warehouse tree for Stock Count ([1ba8299](https://github.com/Shinonn23/connect_diagnostics_core/commit/1ba829990df695037d8366b3aaf113ba5c244302))
+
 ## [0.45.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.2...v0.45.0) (2026-08-19)
 
 
