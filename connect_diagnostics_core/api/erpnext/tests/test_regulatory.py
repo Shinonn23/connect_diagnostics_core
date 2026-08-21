@@ -86,7 +86,7 @@ class TestRegulatoryResolver(UnitTestCase):
 
         self.assertEqual(
             dashboard["non_standard_fieldnames"],
-            {"Medical Device Product Registration": "current_medical_device_registration"},
+            {"Medical Device Product Registration": "item_code"},
         )
         self.assertEqual(
             dashboard["transactions"],
