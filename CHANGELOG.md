@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.47.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.0...v0.47.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* correct Item Connections link field for Product Registration ([15652b3](https://github.com/Shinonn23/connect_diagnostics_core/commit/15652b39b40feadd0baf799ee4b2554e4b867700))
+* correct Item Connections link field for Product Registration ([7c0247c](https://github.com/Shinonn23/connect_diagnostics_core/commit/7c0247cc2da299b0f55e31cf088f0d9c811a08bb))
+
 ## [0.47.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.46.0...v0.47.0) (2026-08-20)
 
 
