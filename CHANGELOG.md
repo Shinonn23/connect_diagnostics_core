@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.47.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.1...v0.47.2) (2026-08-22)
+
+
+### Bug Fixes
+
+* include max_storage_days in shelf life reorder test fixtures ([72c8348](https://github.com/Shinonn23/connect_diagnostics_core/commit/72c8348e7ef6f59b51213a7dcf73404458768e31))
+
+
+### Code Refactoring
+
+* reorder Item shelf life fields after Serial No Series ([a4ce922](https://github.com/Shinonn23/connect_diagnostics_core/commit/a4ce9227ddbc8ab250525d0ac7ba474803637005))
+* retire Regulation Class doctype and orphaned Item fields ([2b867c5](https://github.com/Shinonn23/connect_diagnostics_core/commit/2b867c5b0331886a5b4ce583307c5dc615ce0be8))
+* retire Regulation Class doctype and remove orphaned Item fields ([01dc46b](https://github.com/Shinonn23/connect_diagnostics_core/commit/01dc46b6aa35d1ce7af269ffe1199c75868c9610))
+
 ## [0.47.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.0...v0.47.1) (2026-08-21)
 
 
