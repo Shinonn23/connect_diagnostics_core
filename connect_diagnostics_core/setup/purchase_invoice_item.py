@@ -27,19 +27,6 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
             "options": "Territory",
         },
-        {
-            "fieldname": "withholding_tax_type",
-            "label": "Withholding Tax Type",
-            "fieldtype": "Link",
-            "insert_after": "item_tax_template",
-            "description": "Default Withholding Tax Type setup on Item",
-            "fetch_from": "item_code.withholding_tax_type_pay_supplier",
-            "fetch_if_empty": 1,
-            "is_system_generated": 1,
-            "options": "Withholding Tax Type",
-            "print_hide": 1,
-            "read_only": 1,
-        },
     ],
 }
 

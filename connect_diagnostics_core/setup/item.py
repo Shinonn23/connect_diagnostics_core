@@ -122,40 +122,23 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
         },
         {
-            "fieldname": "column_break_lhwzh",
-            "fieldtype": "Column Break",
-            "insert_after": "withholding_tax_type",
+            "fieldname": "shelf_life_section",
+            "label": "Shelf Life",
+            "fieldtype": "Section Break",
+            "insert_after": "serial_no_series",
             "is_system_generated": 1,
         },
         {
-            "fieldname": "height",
-            "label": "Height",
-            "fieldtype": "Float",
-            "insert_after": "width",
-        },
-        {
-            "fieldname": "length",
-            "label": "Length",
-            "fieldtype": "Float",
-            "insert_after": "height",
+            "fieldname": "min_remaining_shelf_life",
+            "label": "Min Remaining Shelf Life",
+            "fieldtype": "Int",
+            "insert_after": "shelf_life_section",
         },
         {
             "fieldname": "max_storage_days",
             "label": "Max Storage Days",
             "fieldtype": "Int",
             "insert_after": "min_remaining_shelf_life",
-        },
-        {
-            "fieldname": "min_remaining_shelf_life",
-            "label": "Min Remaining Shelf Life",
-            "fieldtype": "Int",
-            "insert_after": "shelf_life_in_days",
-        },
-        {
-            "fieldname": "model",
-            "label": "Model",
-            "fieldtype": "Data",
-            "insert_after": "stock_uom",
         },
         {
             "fieldname": "product_group",
@@ -165,24 +148,11 @@ CUSTOM_FIELDS = {
             "options": "Product Group",
         },
         {
-            "fieldname": "regulation_class",
-            "label": "Regulation Class",
-            "fieldtype": "Link",
-            "insert_after": "image",
-            "options": "Regulation Class",
-        },
-        {
             "fieldname": "storage_condition",
             "label": "Storage Condition",
             "fieldtype": "Link",
             "insert_after": "valuation_method",
             "options": "Storage Condition",
-        },
-        {
-            "fieldname": "width",
-            "label": "Width",
-            "fieldtype": "Float",
-            "insert_after": "weight_per_unit",
         },
         {
             "fieldname": "is_deposit_item",
@@ -191,40 +161,6 @@ CUSTOM_FIELDS = {
             "insert_after": "is_stock_item",
             "depends_on": "eval:!doc.is_stock_item",
             "is_system_generated": 1,
-        },
-        {
-            "fieldname": "section_break_6buh1",
-            "label": "Thai Tax",
-            "fieldtype": "Section Break",
-            "insert_after": "item_tax_section_break",
-            "is_system_generated": 1,
-        },
-        {
-            "fieldname": "withholding_tax_type",
-            "label": "Withholding Tax Type (Customer)",
-            "fieldtype": "Link",
-            "insert_after": "section_break_6buh1",
-            "description": "Select withholding tax type for service amount withheld when recevice from customer.",
-            "is_system_generated": 1,
-            "options": "Withholding Tax Type",
-        },
-        {
-            "fieldname": "withholding_tax_type_pay_individual",
-            "label": "Withholding Tax Type (Individual)",
-            "fieldtype": "Link",
-            "insert_after": "withholding_tax_type_pay_supplier",
-            "description": "Select withholding tax type for service amount to be withheld when pay to individual.",
-            "is_system_generated": 1,
-            "options": "Withholding Tax Type",
-        },
-        {
-            "fieldname": "withholding_tax_type_pay_supplier",
-            "label": "Withholding Tax Type (Supplier)",
-            "fieldtype": "Link",
-            "insert_after": "column_break_lhwzh",
-            "description": "Select withholding tax type for service amount to be withheld when pay to supplier.",
-            "is_system_generated": 1,
-            "options": "Withholding Tax Type",
         },
     ],
 }
@@ -238,32 +174,49 @@ PROPERTY_SETTERS = {
     ],
 }
 
-# Standard ERPNext fields relocated into the "Opening" tab (see opening_balance_section /
-# opening_column_break above). Frappe only supports repositioning a *standard* DocField via
-# a DocType-level `field_order` Property Setter (the same mechanism Customize Form uses) —
-# there is no per-field `insert_after` override for non-custom fields. `ensure_configuration`
-# below computes that order dynamically from live meta so it stays correct across ERPNext
-# upgrades instead of freezing a static field list.
+# Fields relocated via a DocType-level `field_order` Property Setter (the same mechanism
+# Customize Form uses). This is required for standard DocFields, which have no per-field
+# `insert_after` override at all — but it is *also* required for our own Custom Fields once
+# they already exist on a site: CustomField.validate() only recomputes `idx` from
+# `insert_after` when the field is newly inserted (frappe.custom.doctype.custom_field
+# .custom_field.CustomField.validate), so editing `insert_after` in CUSTOM_FIELDS above is a
+# no-op for a field that was created by an earlier version of this file. `ensure_configuration`
+# below computes the desired order dynamically from live meta so it stays correct across
+# ERPNext upgrades instead of freezing a static field list.
 _OPENING_STOCK_FIELDS = ("opening_stock",)
 _OPENING_VALUATION_FIELDS = ("valuation_rate", "standard_rate")
+# Kept out of the "Serial Nos / Batches" section: that section is specifically about how
+# batches/serials are identified and created, while these are general per-item thresholds
+# used regardless of whether batching is even enabled (min_remaining_shelf_life drives
+# short_expiry_report; max_storage_days is the same kind of warehousing threshold).
+_SHELF_LIFE_FIELDS = ("shelf_life_section", "min_remaining_shelf_life", "max_storage_days")
+_SHELF_LIFE_ANCHOR = "serial_no_series"
 
 
 def ensure_configuration() -> None:
-    """Move Opening Stock / Valuation Rate / Standard Selling Rate into the Opening tab."""
+    """Move Opening Stock / Valuation Rate / Standard Selling Rate into the Opening tab, and
+    the Shelf Life fields to directly follow Serial No Series — the last field of the core
+    "Serial Nos / Batches" section, so Shelf Life starts cleanly after it instead of nesting
+    inside that section."""
     doctype = "Item"
     meta = frappe.get_meta(doctype)
-    current_order = [field.fieldname for field in meta.fields if field.fieldname]
-    required = (
+    live_order = [field.fieldname for field in meta.fields if field.fieldname]
+    desired_order = live_order
+
+    opening_required = (
         *_OPENING_STOCK_FIELDS,
         *_OPENING_VALUATION_FIELDS,
         "opening_balance_section",
         "opening_column_break",
     )
-    if not all(fieldname in current_order for fieldname in required):
-        return
+    if all(fieldname in desired_order for fieldname in opening_required):
+        desired_order = _reordered_for_opening_tab(desired_order)
 
-    desired_order = _reordered_for_opening_tab(current_order)
-    if desired_order == current_order:
+    shelf_life_required = (*_SHELF_LIFE_FIELDS, _SHELF_LIFE_ANCHOR)
+    if all(fieldname in desired_order for fieldname in shelf_life_required):
+        desired_order = _relocated_after_anchor(desired_order, _SHELF_LIFE_FIELDS, _SHELF_LIFE_ANCHOR)
+
+    if desired_order == live_order:
         return
 
     _set_field_order(doctype, desired_order)
@@ -278,6 +231,16 @@ def _reordered_for_opening_tab(current_order: list[str]) -> list[str]:
 
     column_index = remaining.index("opening_column_break")
     remaining[column_index + 1 : column_index + 1] = list(_OPENING_VALUATION_FIELDS)
+
+    return remaining
+
+
+def _relocated_after_anchor(current_order: list[str], fields: tuple[str, ...], anchor: str) -> list[str]:
+    moved = set(fields)
+    remaining = [fieldname for fieldname in current_order if fieldname not in moved]
+
+    anchor_index = remaining.index(anchor)
+    remaining[anchor_index + 1 : anchor_index + 1] = list(fields)
 
     return remaining
 

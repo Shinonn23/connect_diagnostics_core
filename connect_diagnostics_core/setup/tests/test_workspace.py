@@ -1039,7 +1039,6 @@ class TestWorkspaceNavigation(UnitTestCase):
                 sidebar_section(workspace.NAVIGATION_LABEL),
                 sidebar_link("DKSH Item", child=1),
                 sidebar_link("Product Group", child=1),
-                sidebar_link("Regulation Class", child=1),
                 sidebar_link("Storage Condition", child=1),
                 sidebar_link("Back Orders", child=1),
                 sidebar_link("Pick List"),
@@ -1063,10 +1062,10 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(sidebar["items"][pick_list_index + 1]["child"], 0)
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
-            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 5]],
-            ["DKSH Item", "Product Group", "Regulation Class", "Storage Condition"],
+            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 4]],
+            ["DKSH Item", "Product Group", "Storage Condition"],
         )
-        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 5]))
+        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 4]))
 
     def test_existing_workspace_card_links_are_reordered_by_priority(self) -> None:
         workspace_doc = FakeDocument(
@@ -1098,14 +1097,6 @@ class TestWorkspaceNavigation(UnitTestCase):
                         "label": "DKSH Item",
                         "link_type": "DocType",
                         "link_to": "DKSH Item",
-                    }
-                ),
-                frappe._dict(
-                    {
-                        "type": "Link",
-                        "label": "Regulation Class",
-                        "link_type": "DocType",
-                        "link_to": "Regulation Class",
                     }
                 ),
                 frappe._dict(
