@@ -17,6 +17,7 @@ class TestRelocatedAfterAnchor(UnitTestCase):
             "min_remaining_shelf_life",
             "serial_no_series",
             "shelf_life_section",
+            "max_storage_days",
             "variants_section",
         ]
 
@@ -31,6 +32,7 @@ class TestRelocatedAfterAnchor(UnitTestCase):
                 "serial_no_series",
                 "shelf_life_section",
                 "min_remaining_shelf_life",
+                "max_storage_days",
                 "variants_section",
             ],
         )
@@ -41,6 +43,7 @@ class TestRelocatedAfterAnchor(UnitTestCase):
             "serial_no_series",
             "shelf_life_section",
             "min_remaining_shelf_life",
+            "max_storage_days",
             "variants_section",
         ]
 
@@ -73,6 +76,7 @@ class TestEnsureConfigurationShelfLifeReorder(UnitTestCase):
                 "min_remaining_shelf_life",
                 "serial_no_series",
                 "shelf_life_section",
+                "max_storage_days",
                 "variants_section",
             ]
         )
@@ -89,6 +93,7 @@ class TestEnsureConfigurationShelfLifeReorder(UnitTestCase):
                 "serial_no_series",
                 "shelf_life_section",
                 "min_remaining_shelf_life",
+                "max_storage_days",
                 "variants_section",
             ],
         )
