@@ -65,7 +65,7 @@ SIDEBAR_ITEM_FIELDS = (
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
-    "Stock": frozenset({("DocType", "Storage Location")}),
+    "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset(
         {
             ("DocType", "Repost Accounting Ledger Settings"),
@@ -82,7 +82,7 @@ RETIRED_SIDEBAR_LINKS = {
 }
 RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
-    "Stock": frozenset({("DocType", "Storage Location")}),
+    "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
     "Financial Reports": frozenset(
         {
@@ -231,7 +231,6 @@ NAVIGATION_GROUPS = (
         links=(
             NavigationLink("DKSH Item", "DKSH Item", "DocType"),
             NavigationLink("Product Group", "Product Group", "DocType"),
-            NavigationLink("Regulation Class", "Regulation Class", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
@@ -274,8 +273,7 @@ SIDEBAR_PLACEMENTS = {
         SidebarPlacement("Goods Receipt Report", after_link_to="Short Expiry Report", icon="package-check"),
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
-        SidebarPlacement("Regulation Class", after_link_to="Product Group", section="Setup"),
-        SidebarPlacement("Storage Condition", after_link_to="Regulation Class", section="Setup"),
+        SidebarPlacement("Storage Condition", after_link_to="Product Group", section="Setup"),
     ),
     "Buying": (
         SidebarPlacement(
