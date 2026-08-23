@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.47.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.2...v0.47.3) (2026-08-23)
+
+
+### Documentation
+
+* migrate repository guidance to Codex ([9dc5746](https://github.com/Shinonn23/connect_diagnostics_core/commit/9dc5746d34b1ba2499b316fad9b2731d39603522))
+* migrate repository guidance to Codex ([0100bb8](https://github.com/Shinonn23/connect_diagnostics_core/commit/0100bb8e14ba7ba41191624adb2c441bc2ff8d81))
+
 ## [0.47.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.1...v0.47.2) (2026-08-22)
 
 
