@@ -15,7 +15,7 @@
   `connect_diagnostics_dksh/reference.py`, so every master is built the same way:
   `validate_reference(doc, *, code_fields, link_field, master_doctype)` trims the codes and
   rejects a second reference pointing at the same CD master; `inject_connection(data, *,
-  reference_doctype, link_field, group_label)` is the generic `override_doctype_dashboards`
+reference_doctype, link_field, group_label)` is the generic `override_doctype_dashboards`
   helper that surfaces the master under the CD form's Connections. `DKSH Item` and
   `api/erpnext/item.py::get_item_dashboard_data` both delegate here.
 - `DKSH Customer` is the reference master for customers that carry a 9-digit DKSH code

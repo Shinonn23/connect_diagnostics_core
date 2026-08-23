@@ -20,12 +20,7 @@ labels: ["enhancement", "P2-Medium"]
 
 - [ ]
 
-### Manual test steps (ticked on the DEV site after merge)
-
-> The team merges first and tests on `developments`. Tick each box as it passes.
-> See [WORKFLOW.md](../WORKFLOW.md).
-
-**Prerequisites:**
+### Delivery criteria
 
 - [ ] **Step 1** — _expected:_
 - [ ] **Step 2** — _expected:_

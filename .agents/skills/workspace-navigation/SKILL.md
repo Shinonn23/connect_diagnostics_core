@@ -28,6 +28,9 @@ $workspace-navigation <Module, DocType, or feature>
 4. Search hooks, patches, API callers, client scripts, templates, and jobs for
    the feature so navigation does not duplicate an existing entry point.
 
+Read [`references/desktop-icons.md`](references/desktop-icons.md) when the change adds,
+regroups, or edits a Desk Desktop Icon.
+
 ## Placement Rules
 
 - For an existing ERPNext domain, retain the Connect Diagnostics Workspace card

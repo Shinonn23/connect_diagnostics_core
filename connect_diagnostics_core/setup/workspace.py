@@ -176,7 +176,7 @@ REGULATORY_LINKS = tuple(link for group in REGULATORY_WORKSPACE_GROUPS for link 
 
 
 # Stock Count's counting + role-gated submit permissions are a distinct operating
-# loop from day-to-day Stock (see the workspace-navigation rule in CLAUDE.md), so it
+# loop from day-to-day Stock (see the workspace-navigation skill), so it
 # gets its own independent Workspace instead of crowding the existing Stock
 # Workspace. General stock reports/masters (expiry, goods receipt) stay in the
 # existing Stock Workspace since they are not specific to counting.
@@ -900,7 +900,7 @@ def _ensure_regulatory_sidebar(sidebar: Document) -> bool:
             for index, row in enumerate(rows)
             if index not in managed_indexes and index not in section_rows
         ]
-        desired_rows: list[Document] = [cast(Document, row) for row in custom_rows]
+        desired_rows: list[Document] = [row for row in custom_rows]
         expected_section_ranges: list[range] = []
         for expected_section_index, expected_section in enumerate(expected):
             if expected_section.get("type") != "Section Break":
@@ -1102,7 +1102,7 @@ def _regulatory_sidebar_section_replacements(
                 [
                     cast(Document, frappe._dict(expected[expected_index])),
                     *[cast(Document, frappe._dict(child)) for child in expected_children],
-                    *[cast(Document, child) for child in custom_children],
+                    *[child for child in custom_children],
                 ],
             )
     return replacements

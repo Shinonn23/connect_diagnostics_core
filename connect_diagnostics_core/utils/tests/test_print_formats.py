@@ -118,5 +118,5 @@ class TestPrintFormats(UnitTestCase):
 
     # Content/wording assertions for specific templates were intentionally removed
     # here: those formats are edited live through Desk, and pinning exact strings
-    # made every legitimate content edit fail CI. See CLAUDE.md's Testing section
+    # made every legitimate content edit fail CI. See connect_diagnostics_core/AGENTS.md's Testing section
     # for the rule this follows.

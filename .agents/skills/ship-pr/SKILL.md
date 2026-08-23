@@ -1,13 +1,12 @@
 ---
 name: ship-pr
-description: From the current work branch, open a ready-to-merge PR into `developments` with a conventional title, issue references, tests, and CI; dispatch manual testing only after merge and verified DEV deployment. Use when the user says "ship", "open a PR", "ready to merge", or finishes a feature/fix.
+description: From the current work branch, open a ready-to-merge PR into `developments` with a conventional title, issue references, and CI. Use when the user says "ship", "open a PR", "ready to merge", or finishes a feature/fix.
 ---
 
 # Ship PR
 
-Turn the current work branch into a **ready-to-merge** PR into `developments`
-and prepare its post-deployment manual testing for `newyodsapad`. Follows the project rules in
-`AGENTS.md` and `.github/WORKFLOW.md`.
+Turn the current work branch into a **ready-to-merge** PR into `developments`.
+Follows the project rules in `AGENTS.md` and `.github/workflow.md`.
 
 ## Preconditions
 
@@ -22,35 +21,20 @@ and prepare its post-deployment manual testing for `newyodsapad`. Follows the pr
 
 1. **Identify the issue(s)** this branch addresses. Infer from the branch name,
    commit messages, or ask the user. You may have **one or many** issues.
-2. **Read each issue** (`gh issue view <n> --json title,body,labels`) and extract
-   its **Manual test steps** (`- [ ]` task-list). You aggregate these into the PR
-   and the test task so the same verification steps follow the change through delivery.
-3. **Decide the PR title type** = the branch `<type>` (Conventional Commits).
+2. **Decide the PR title type** = the branch `<type>` (Conventional Commits).
    Ensure every commit also follows Conventional Commits because Release Please
    calculates the cumulative release from merged commit messages, not the PR
    title. For `revert`, warn the user that an inverse version requires a
    `Release-As: X.Y.Z` commit-body trailer.
-4. **Push** the branch: `git push -u origin <branch>`.
-5. **Open the PR into `developments`** with `gh pr create --base developments`:
+3. **Push** the branch: `git push -u origin <branch>`.
+4. **Open the PR into `developments`** with `gh pr create --base developments`:
    - Title: `<type>: <summary>`
    - Body: fill `.github/pull_request_template.md`. Use **`Refs #<n>`** for every
-     issue (NEVER `Closes #`). Paste the aggregated manual-test table.
-6. **Report readiness.** Poll CI: `gh pr checks <PR#>`. "Ready to merge" =
+     issue (NEVER `Closes #`).
+5. **Report readiness.** Poll CI: `gh pr checks <PR#>`. "Ready to merge" =
    `Server` + `Frappe Linter` green and 1 review present. Do **not** auto-merge
    (branch protection + human review). Tell the user the exact blockers if any.
-7. **Dispatch only after merge and deployment.** Read the PR state with
-   `gh pr view <PR#> --json state,mergedAt`. Run the `dispatch-test` skill only
-   when the PR is merged and its deployment to the DEV site has been explicitly
-   verified. Merging into `developments` no longer deploys on its own — DEV is
-   deployed when the Release PR merges and its `vX.Y.Z` release is published — so a
-   merged PR normally sits undeployed until the batch is released. That is expected,
-   not a stalled deployment: report it as pending rather than waiting on it. Otherwise
-   leave source issues in **Dev review**, report manual-test dispatch as the pending
-   post-deployment action, and do not create or update test tasks or testing board
-   fields.
 
 ## Output
 
-Report: PR url + title, CI status, and any blockers to "ready to merge". If merge
-and DEV deployment are verified, also report the test-task issue url and source
-issues moved to testing; otherwise report that dispatch remains pending.
+Report: PR URL + title, CI status, and any blockers to "ready to merge".
