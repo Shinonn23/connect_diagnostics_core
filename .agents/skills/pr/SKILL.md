@@ -28,7 +28,6 @@ $pr
    - `Refs #<n>` for every related issue, or `None` when no issue exists; never
      use `Closes #<n>`
    - Type of change
-   - Manual test instructions
    - Screenshots when the change affects UI
 5. Create the PR with `gh pr create --base developments`. Do not substitute a
    generic body or invent an issue reference. An issue-less PR must explicitly

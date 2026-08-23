@@ -114,7 +114,7 @@
   requested payment terms and credit limit to the Customer under a row lock — that is
   the document's intrinsic effect, not a workflow outcome. Standard DocType permissions
   govern who may submit; the `Customer Accounting Reviewer` and `Customer Credit
-  Approver` roles are kept because they gate Customer read/write, not because of any
+Approver` roles are kept because they gate Customer read/write, not because of any
   workflow. A future approval flow starts from a Workflow Behavior Specification.
 - Customer, Item, and Supplier keep their current document names and codes. Do not
   add conversion flags or automatically rename these masters. The DKSH reference codes

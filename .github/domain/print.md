@@ -10,7 +10,7 @@
   `after_migrate` remove every
   `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
   `Connect Diagnostics Stock`, `Connect Diagnostics Accounting`, or `Connect Diagnostics
-  Print`) or an ERPNext Thailand module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or
+Print`) or an ERPNext Thailand module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or
   `Petty Cash`). Retired formats are removed explicitly; `Sales Invoice Print` is retired and
   Sales Invoice defaults to `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is
   owned by ERPNext Thailand; the app-owned Thai WHT certificate is the separately named
@@ -29,7 +29,7 @@
   that overlay an official government form scan — `Withholding Tax Cert CD` positions its fields
   over the Revenue Department form image from `erpnext_thailand`, so the background-image and
   semantic-sectioning rules do not apply to it. `Shipment Box
-  Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
+Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
   and recipient details, and shows the recipient Customer's Territory only when present.
 - When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
   time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
@@ -56,7 +56,7 @@
   `setup_additional_settings`, so unrelated doctypes keep the native sidebar untouched. This
   scoping is deliberate — do not make the stripping global.
 - A provider is `{ name, applies_to(view), load?(view)→Promise, build?(view,data)→[df],
-  render?(view,data), on_error?(view,reason), section_label?, prefix? }`. Declarative providers
+render?(view,data), on_error?(view,reason), section_label?, prefix? }`. Declarative providers
   return field descriptors (engine renders + wires them via `cd_add_setting`); imperative
   providers own their DOM. Value transport stays Frappe's own (`additional_settings` →
   `print_settings`), shared by preview and print/PDF.

@@ -26,10 +26,7 @@ labels: ["bug", "P1-High"]
 - **Expected:**
 - **Actual:**
 
-### Manual test steps (verify the fix on the DEV site after merge)
-
-> Merge first, then test on `developments`. Tick each box as it passes.
-> See [WORKFLOW.md](../WORKFLOW.md).
+### Acceptance criteria
 
 - [ ] **Reproduce no longer happens** — _expected:_
 - [ ] **Regression check** — _expected:_

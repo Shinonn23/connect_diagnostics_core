@@ -12,7 +12,7 @@
   `from_storage_location` / `rejected_storage_location` Custom Fields on every
   stock transaction doctype plus Stock Ledger Entry and Stock Closing Balance.
   The dimension was un-registered (`frappe.delete_doc("Inventory Dimension",
-  "Storage Location", ...)`, whose `on_trash()` deletes the generated Custom
+"Storage Location", ...)`, whose `on_trash()` deletes the generated Custom
   Field records) and its orphaned columns dropped explicitly — deleting a
   Custom Field does not drop the underlying column, so schema-changing patches
   in this app always pair a field/dimension removal with an explicit
@@ -27,34 +27,34 @@
   mirroring `remove_alias_name_doctype.py`). All four patches read/write via
   raw SQL or `frappe.db.exists` guards rather than the ORM where the source
   field is already gone from DocType meta, and all run in `[post_model_sync]`
-  like every other patch in this app — Frappe's schema sync only *adds*
+  like every other patch in this app — Frappe's schema sync only _adds_
   columns for JSON field changes, it never drops one, so the orphaned source
   data is still there for a `post_model_sync` patch to read.
 
 ## Stock Count scope
 
 - `Stock Count.warehouses` is a `Table MultiSelect` (options: `Stock Count
-  Warehouse`, a one-field `warehouse` Link child table) — a count can span
+Warehouse`, a one-field `warehouse` Link child table) — a count can span
   several warehouses/locations at once, following the idiomatic Frappe
   multi-select pattern (compare `erpnext.manufacturing.doctype
-  .production_plan_material_request_warehouse`).
-- `Stock Count Item.warehouse` stays a plain Link: each count *line* is always
+.production_plan_material_request_warehouse`).
+- `Stock Count Item.warehouse` stays a plain Link: each count _line_ is always
   exactly one leaf warehouse, even when the header selects several. Duplicate
   detection (`validate_duplicate_lines`) keys on
   `(item_code, warehouse, batch_no, serial_no)`.
 - `selection_method` (monthly cycle counts only — yearly counts always cover
   every selected warehouse):
-  - `Manual` — hand-pick any number of items across all selected warehouses.
-  - `Random by Count` / `Random by Percentage` — sample at the count-line
-    grain (item + warehouse + batch/serial is one unit) across all selected
-    warehouses.
-  - `Random by Warehouse` — picks one of the selected warehouses at random
-    (`random.choice`, done in `fetch_items` *before* querying, not inside
-    `_apply_selection`), then every item in that one warehouse is a candidate
-    — no further sub-sampling and no extra required field. This replaced the
-    old "Random by Zone", which sampled within a Storage Location's `zone`
-    field; there is no replacement grouping concept, since a warehouse is now
-    itself the finest location grain.
+    - `Manual` — hand-pick any number of items across all selected warehouses.
+    - `Random by Count` / `Random by Percentage` — sample at the count-line
+      grain (item + warehouse + batch/serial is one unit) across all selected
+      warehouses.
+    - `Random by Warehouse` — picks one of the selected warehouses at random
+      (`random.choice`, done in `fetch_items` _before_ querying, not inside
+      `_apply_selection`), then every item in that one warehouse is a candidate
+      — no further sub-sampling and no extra required field. This replaced the
+      old "Random by Zone", which sampled within a Storage Location's `zone`
+      field; there is no replacement grouping concept, since a warehouse is now
+      itself the finest location grain.
 - `_leaf_warehouses()` in `api/erpnext/stock_count.py` expands every selected
   warehouse that is a group (`is_group`) into its descendant leaves via
   `get_descendants_of`, then dedupes preserving order — so selecting a parent
@@ -81,15 +81,15 @@
 ## Stock movement freeze during a count
 
 - `api/erpnext/stock_count_freeze.py` blocks stock-moving transactions
-  against whatever a *draft* (`docstatus=0`) Stock Count has already fetched
+  against whatever a _draft_ (`docstatus=0`) Stock Count has already fetched
   lines for. Hooked as `before_submit` on `Stock Entry`, `Delivery Note`,
   `Purchase Receipt`, `Sales Invoice`, `Purchase Invoice`, `Stock
-  Reconciliation`, and `Pick List` — submission is the point stock actually
+Reconciliation`, and `Pick List` — submission is the point stock actually
   moves, matching this app's existing `regulatory_transactions.py` convention
   of gating at `before_submit` rather than `validate`.
 - Freeze granularity differs by count type: a **Monthly cycle count** freezes
   only the exact `(item_code, warehouse)` pairs present in its `Stock Count
-  Item` rows; a **Yearly count** freezes every item in each of its selected
+Item` rows; a **Yearly count** freezes every item in each of its selected
   `Stock Count Warehouse` rows (whole warehouse), since a yearly count already
   covers the entire warehouse and per-item checking there would be redundant.
   Both checks additionally require the Stock Count to already have at least
@@ -100,7 +100,7 @@
   checks both `s_warehouse` and `t_warehouse` per row (either side changing
   quantity can invalidate a count); `Delivery Note`/`Sales Invoice` check
   `warehouse` and `target_warehouse` (internal transfer); `Purchase
-  Receipt`/`Purchase Invoice` check `warehouse` and `rejected_warehouse`.
+Receipt`/`Purchase Invoice` check `warehouse` and `rejected_warehouse`.
 - This is a hard block with **no bypass** — no settings doctype, no
   role-based override, no approval document. If an emergency-movement
   exception process is needed later, design it as its own change; do not
@@ -110,8 +110,8 @@
 
 - Stock Count's submit gate is role permission only (`Stock Manager` /
   `Accounts Manager` / `System Manager` can submit), matching this app's
-  documented no-app-owned-workflow baseline — see CLAUDE.md's "Approval
-  ownership" bullet. A prior "Stock Count Approval" Frappe Workflow was
+  documented no-app-owned-workflow baseline — see `connect_diagnostics_core/AGENTS.md`.
+  A prior "Stock Count Approval" Frappe Workflow was
   removed app-wide in the custom-workflow reset; do not reintroduce a
   `count_state`-style field or workflow-state check here. `stock_count.js`
   gates the "Generate Holding Transfer" / "Generate Stock Adjustment" buttons

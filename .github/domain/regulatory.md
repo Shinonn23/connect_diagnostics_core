@@ -37,5 +37,5 @@
   keeps its existing "Not Applicable" enforcement rather than going blank. Opening
   Stock / Valuation Rate / Standard Selling Rate move into their own "Opening" tab via
   a dynamically computed `field_order` Property Setter (`item.ensure_configuration`,
-  called from `setup.apply_all`) — Frappe only supports repositioning a *standard*
+  called from `setup.apply_all`) — Frappe only supports repositioning a _standard_
   field through that DocType-level mechanism, not per-field `insert_after`.

@@ -33,7 +33,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide covering:
 
 - Code style and conventions
 - Branch and PR rules
-- AI-assisted development workflow (Claude Code commands and pipeline)
+- AI-assisted development workflow (Codex skills and pipeline)
 
 Quick setup:
 
