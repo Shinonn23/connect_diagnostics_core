@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.47.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.3...v0.47.4) (2026-08-25)
+
+
+### Bug Fixes
+
+* **print-format:** keep Credit Note format editable ([f7ddc97](https://github.com/Shinonn23/connect_diagnostics_core/commit/f7ddc9785458f637727f5b1cb2baaf3da4684cb2))
+* **print-format:** use credit note reason field ([210a81c](https://github.com/Shinonn23/connect_diagnostics_core/commit/210a81cf91a2863feb802bd44fa1ed86ea8f2e93))
+* use credit note reason field ([7c4c0fe](https://github.com/Shinonn23/connect_diagnostics_core/commit/7c4c0fe2646f3eede8a296f907ee57080b88fbcf))
+
 ## [0.47.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.2...v0.47.3) (2026-08-23)
 
 
