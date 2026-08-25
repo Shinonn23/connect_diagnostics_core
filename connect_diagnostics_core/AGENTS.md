@@ -99,6 +99,11 @@ deduplicating `job_id` for long work.
 
 - App-owned `doctype/**/*.json` files are code-managed and may be edited directly, but their
   schema, controller, tests, and migrations must remain consistent.
+- Whenever a Frappe JSON schema is changed, update its top-level `modified` value in the same
+  change. Use the current Frappe system timezone (`System Settings.time_zone`, verified with
+  `bench --site <site> execute frappe.utils.get_system_timezone`) and the format
+  `YYYY-MM-DD HH:MM:SS.ffffff`; do not leave a stale timestamp or use the developer machine's
+  local timezone implicitly.
 - Do not directly edit `# begin/end: auto-generated types` blocks or module-level `__init__.py`
   files. Frappe manages those generated artifacts; use the proper Frappe mechanism and commit
   the generated result.
