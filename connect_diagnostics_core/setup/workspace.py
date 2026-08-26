@@ -64,6 +64,15 @@ SIDEBAR_ITEM_FIELDS = (
 )
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
+    "Taxes": frozenset(
+        {
+            ("DocType", "Tax Withholding Category"),
+            ("DocType", "Tax Withholding Group"),
+            ("DocType", "Lower Deduction Certificate"),
+            ("Report", "TDS Computation Summary"),
+            ("Report", "Tax Withholding Details"),
+        }
+    ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
     "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset(
@@ -81,6 +90,13 @@ RETIRED_SIDEBAR_LINKS = {
     ),
 }
 RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
+    "Invoicing": frozenset(
+        {
+            ("DocType", "Tax Withholding Category"),
+            ("DocType", "Tax Withholding Group"),
+            ("DocType", "Lower Deduction Certificate"),
+        }
+    ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
     "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
@@ -311,6 +327,17 @@ def ensure_workspace_navigation() -> None:
             sidebar_changed = True
         if sidebar_changed:
             _save_without_export(sidebar)
+    _retire_tds_sidebar_links()
+
+
+def _retire_tds_sidebar_links() -> None:
+    """Remove core TDS links from the ERPNext Taxes sidebar when it exists."""
+    sidebar_name = "Taxes"
+    if not frappe.db.exists("Workspace Sidebar", sidebar_name):
+        return
+    sidebar = frappe.get_doc("Workspace Sidebar", sidebar_name)
+    if _remove_retired_sidebar_links(sidebar, sidebar_name):
+        _save_without_export(sidebar)
 
 
 def ensure_regulatory_workspace() -> None:

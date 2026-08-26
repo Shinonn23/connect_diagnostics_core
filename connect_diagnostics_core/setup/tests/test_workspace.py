@@ -69,6 +69,15 @@ def sidebar_documents() -> dict[str, FakeDocument]:
             ],
         ),
         "Invoicing": FakeDocument(name="Invoicing", items=[sidebar_link("Account")]),
+        "Taxes": FakeDocument(
+            name="Taxes",
+            items=[
+                sidebar_link("Tax Withholding Category"),
+                sidebar_link("Tax Withholding Group"),
+                sidebar_link("TDS Computation Summary", link_type="Report"),
+                sidebar_link("Tax Category"),
+            ],
+        ),
         "Selling": FakeDocument(
             name="Selling",
             items=[
@@ -118,12 +127,12 @@ def sidebar_documents() -> dict[str, FakeDocument]:
     }
 
 
-def sidebar_link(link_to: str, *, child: int = 0) -> frappe._dict:
+def sidebar_link(link_to: str, *, child: int = 0, link_type: str = "DocType") -> frappe._dict:
     return frappe._dict(
         {
             "type": "Link",
             "label": link_to,
-            "link_type": "DocType",
+            "link_type": link_type,
             "link_to": link_to,
             "child": child,
         }
@@ -232,6 +241,25 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
         self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
         self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
+
+    def test_tds_links_are_removed_from_the_taxes_sidebar(self) -> None:
+        workspaces = workspace_documents()
+        sidebars = sidebar_documents()
+
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
+        ):
+            workspace.ensure_workspace_navigation()
+
+        self.assertEqual(
+            [row["link_to"] for row in sidebars["Taxes"]["items"]],
+            ["Tax Category"],
+        )
 
     def test_sync_is_idempotent_and_preserves_existing_navigation(self) -> None:
         workspaces = workspace_documents()
