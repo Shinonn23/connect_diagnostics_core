@@ -111,10 +111,16 @@ jinja = {
 # ------------
 
 # before_install = "connect_diagnostics_core.install.before_install"
-after_install = "connect_diagnostics_core.setup.after_install"
+after_install = [
+    "connect_diagnostics_core.setup.after_install",
+    "connect_diagnostics_core.setup.tds.apply_configuration",
+]
 after_sync = "connect_diagnostics_core.setup.after_sync"
 before_migrate = "connect_diagnostics_core.setup.before_migrate"
-after_migrate = "connect_diagnostics_core.setup.after_migrate"
+after_migrate = [
+    "connect_diagnostics_core.setup.after_migrate",
+    "connect_diagnostics_core.setup.tds.apply_configuration",
+]
 
 # Uninstallation
 # ------------
@@ -174,12 +180,18 @@ naming_series_variables = {
 doc_events = {
     "*": {"before_naming": "connect_diagnostics_core.setup.document_naming.set_operational_naming_series"},
     "Customer": {
-        "before_validate": "connect_diagnostics_core.api.erpnext.customer.before_validate",
+        "before_validate": [
+            "connect_diagnostics_core.api.erpnext.customer.before_validate",
+            "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+        ],
         "before_naming": "connect_diagnostics_core.naming.customer.set_naming_series",
         "autoname": "connect_diagnostics_core.naming.customer.set_customer_code",
         "validate": "connect_diagnostics_core.api.erpnext.customer.validate",
         "on_update": "connect_diagnostics_core.api.erpnext.customer.on_update",
         "after_insert": "connect_diagnostics_core.api.erpnext.customer.link_source_dksh_customer",
+    },
+    "Supplier": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
     },
     "Customer Credit Request": {
         "before_validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.before_validate",
@@ -203,6 +215,7 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
     },
     "Sales Invoice": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
@@ -211,6 +224,7 @@ doc_events = {
         ],
     },
     "Payment Entry": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     "Salary Slip": {
@@ -254,7 +268,17 @@ doc_events = {
         ],
     },
     "Purchase Invoice": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
+    },
+    "Purchase Invoice Item": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+    },
+    "Sales Invoice Item": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+    },
+    "Journal Entry": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
     },
     "Stock Reconciliation": {
         "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
@@ -263,7 +287,19 @@ doc_events = {
         "before_submit": "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
     },
     "Item": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "validate": "connect_diagnostics_core.api.erpnext.item.validate",
+    },
+    "Lower Deduction Certificate": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+    },
+    "Tax Withholding Category": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_doctype",
+        "before_insert": "connect_diagnostics_core.api.erpnext.tds_guard.block_doctype",
+    },
+    "Tax Withholding Group": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_doctype",
+        "before_insert": "connect_diagnostics_core.api.erpnext.tds_guard.block_doctype",
     },
     "Employee": {
         "validate": "connect_diagnostics_core.api.erpnext.employee.normalize_national_id",
