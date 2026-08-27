@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.setup import employee
@@ -82,3 +84,102 @@ class TestEmployeeCustomFields(UnitTestCase):
 
         self.assertTrue(THAI_PAYROLL_FIELDS.keys().isdisjoint(required))
         self.assertTrue(NATIONAL_ID_FIELDS.keys().isdisjoint(required))
+
+    def test_signature_field_is_configured_without_duplicating_the_standard_field(self) -> None:
+        fieldnames = [field["fieldname"] for field in self._employee_fields()]
+        signature_setters = [
+            setter
+            for setter in employee.PROPERTY_SETTERS["Employee"]
+            if setter[0] == employee.SIGNATURE_FIELD
+        ]
+
+        self.assertNotIn(employee.SIGNATURE_FIELD, fieldnames)
+        self.assertEqual(
+            signature_setters,
+            [(employee.SIGNATURE_FIELD, "label", "Employee Signature", "Data")],
+        )
+
+
+class TestEmployeeSignatureLayout(UnitTestCase):
+    def _meta_with(self, fieldnames: list[str]) -> MagicMock:
+        meta = MagicMock()
+        meta.fields = [MagicMock(fieldname=fieldname) for fieldname in fieldnames]
+        return meta
+
+    def test_relocates_signature_after_approver_fields(self) -> None:
+        current_order = [
+            "default_shift",
+            employee.SIGNATURE_FIELD,
+            employee.SIGNATURE_ANCHOR,
+            "company_details_section",
+        ]
+
+        reordered = employee._relocated_after_anchor(
+            current_order,
+            (employee.SIGNATURE_FIELD,),
+            employee.SIGNATURE_ANCHOR,
+        )
+
+        self.assertEqual(
+            reordered,
+            [
+                "default_shift",
+                employee.SIGNATURE_ANCHOR,
+                employee.SIGNATURE_FIELD,
+                "company_details_section",
+            ],
+        )
+
+    def test_relocation_is_idempotent(self) -> None:
+        current_order = [
+            "default_shift",
+            employee.SIGNATURE_ANCHOR,
+            employee.SIGNATURE_FIELD,
+            "company_details_section",
+        ]
+
+        self.assertEqual(
+            employee._relocated_after_anchor(
+                current_order,
+                (employee.SIGNATURE_FIELD,),
+                employee.SIGNATURE_ANCHOR,
+            ),
+            current_order,
+        )
+
+    def test_skips_configuration_when_signature_or_anchor_is_missing(self) -> None:
+        meta = self._meta_with(["default_shift", "company_details_section"])
+
+        with (
+            patch.object(employee.frappe, "get_meta", return_value=meta),
+            patch.object(employee, "_set_field_order") as set_field_order,
+        ):
+            employee.ensure_configuration()
+
+        set_field_order.assert_not_called()
+
+    def test_persists_reordered_signature_field_order(self) -> None:
+        meta = self._meta_with(
+            [
+                "default_shift",
+                employee.SIGNATURE_FIELD,
+                employee.SIGNATURE_ANCHOR,
+                "company_details_section",
+            ]
+        )
+
+        with (
+            patch.object(employee.frappe, "get_meta", return_value=meta),
+            patch.object(employee, "_set_field_order") as set_field_order,
+        ):
+            employee.ensure_configuration()
+
+        set_field_order.assert_called_once_with(
+            "Employee",
+            [
+                "default_shift",
+                employee.SIGNATURE_ANCHOR,
+                employee.SIGNATURE_FIELD,
+                "company_details_section",
+            ],
+        )

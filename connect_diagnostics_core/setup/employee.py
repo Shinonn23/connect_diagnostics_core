@@ -3,6 +3,16 @@
 
 """Custom field / property setter definitions for Employee."""
 
+from __future__ import annotations
+
+import json
+
+import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+SIGNATURE_FIELD = "signature_cvru"
+SIGNATURE_ANCHOR = "shift_request_approver"
+
 CUSTOM_FIELDS = {
     "Employee": [
         {
@@ -210,5 +220,53 @@ PROPERTY_SETTERS = {
         ("naming_series", "default", "YY-BE.MM.###", "Text"),
         ("naming_series", "options", "YY-BE.MM.###\nC.YY-BE.MM.###", "Text"),
         ("naming_series", "reqd", "1", "Check"),
+        (SIGNATURE_FIELD, "label", "Employee Signature", "Data"),
     ],
 }
+
+
+def ensure_configuration() -> None:
+    """Place the Employee signature after the app-managed approver fields."""
+    doctype = "Employee"
+    meta = frappe.get_meta(doctype)
+    live_order = [field.fieldname for field in meta.fields if field.fieldname]
+
+    if SIGNATURE_FIELD not in live_order or SIGNATURE_ANCHOR not in live_order:
+        return
+
+    desired_order = _relocated_after_anchor(live_order, (SIGNATURE_FIELD,), SIGNATURE_ANCHOR)
+    if desired_order == live_order:
+        return
+
+    _set_field_order(doctype, desired_order)
+
+
+def _relocated_after_anchor(current_order: list[str], fields: tuple[str, ...], anchor: str) -> list[str]:
+    """Move fields directly after an existing anchor while preserving other fields."""
+    moved = set(fields)
+    remaining = [fieldname for fieldname in current_order if fieldname not in moved]
+
+    anchor_index = remaining.index(anchor)
+    remaining[anchor_index + 1 : anchor_index + 1] = list(fields)
+    return remaining
+
+
+def _set_field_order(doctype: str, order: list[str]) -> None:
+    """Persist a DocType-level field-order Property Setter idempotently."""
+    value = json.dumps(order)
+    name = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "field_order"}, "name")
+    if name:
+        property_setter = frappe.get_doc("Property Setter", name)
+        property_setter.value = value
+        property_setter.save(ignore_permissions=True)
+        return
+
+    make_property_setter(
+        doctype,
+        None,
+        "field_order",
+        value,
+        "Small Text",
+        for_doctype=True,
+        validate_fields_for_doctype=False,
+    )

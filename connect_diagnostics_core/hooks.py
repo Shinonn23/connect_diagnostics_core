@@ -176,6 +176,7 @@ workflow_methods = [
 # before_install = "connect_diagnostics_core.install.before_install"
 after_install = [
     "connect_diagnostics_core.setup.after_install",
+    "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
@@ -183,6 +184,7 @@ after_sync = "connect_diagnostics_core.setup.after_sync"
 before_migrate = "connect_diagnostics_core.setup.before_migrate"
 after_migrate = [
     "connect_diagnostics_core.setup.after_migrate",
+    "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
