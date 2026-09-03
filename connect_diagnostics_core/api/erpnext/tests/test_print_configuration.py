@@ -220,9 +220,7 @@ class TestPrintOptions(UnitTestCase):
     def test_quotation_sidebar_exposes_signatory_and_company_managers(
         self, _get_value: MagicMock, _get_managers: MagicMock
     ) -> None:
-        quotation_doc = FakeDocument(
-            {"doctype": "Quotation", "name": "SAL-QTN-0001"}
-        )
+        quotation_doc = FakeDocument({"doctype": "Quotation", "name": "SAL-QTN-0001"})
         result = self._options(quotation_doc, "Quotation")
 
         fields = {field["fieldname"]: field for field in result["data"]["fields"]}

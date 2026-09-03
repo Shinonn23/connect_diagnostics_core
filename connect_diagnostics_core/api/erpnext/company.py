@@ -64,7 +64,9 @@ def validate_quotation_authorized_signatories(doc: Document, _method: str | None
         if not employee:
             continue
         if employee in seen:
-            frappe.throw(_("Employee {0} is listed more than once as an authorized signatory.").format(employee))
+            frappe.throw(
+                _("Employee {0} is listed more than once as an authorized signatory.").format(employee)
+            )
         seen.add(employee)
         validate_quotation_authorized_signatory_employee(employee, cast(str, doc.name))
 
@@ -76,17 +78,15 @@ def validate_quotation_authorized_signatory_employee(employee: str, company: str
     if not employee or not company:
         frappe.throw(_("An Employee and Company are required for an authorized signatory."))
 
-    details = cast(
-        dict[str, Any] | None,
-        frappe.db.get_value(
-            "Employee",
-            employee,
-            ["company", "status", "user_id"],
-            as_dict=True,
-        ),
+    details_value = frappe.db.get_value(
+        "Employee",
+        employee,
+        ["company", "status", "user_id"],
+        as_dict=True,
     )
-    if not details:
+    if not details_value:
         frappe.throw(_("Employee {0} does not exist.").format(employee))
+    details = cast(dict[str, Any], details_value)
     if _text(details.get("status")) != "Active":
         frappe.throw(_("Employee {0} must be Active to sign a quotation.").format(employee))
     if _text(details.get("company")) != company:

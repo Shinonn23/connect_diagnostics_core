@@ -99,9 +99,10 @@ def get_print_options(doctype: str, docname: str, print_format: str | None = Non
     values = get_default_configuration(document)
     manager_signatories: list[dict[str, Any]] = []
     if document.key == "quotation":
-        quotation_values = frappe.db.get_value(
-            "Quotation", docname, ["company", "quotation_signatory_type"], as_dict=True
-        ) or {}
+        quotation_values = (
+            frappe.db.get_value("Quotation", docname, ["company", "quotation_signatory_type"], as_dict=True)
+            or {}
+        )
         signatory_type = _text(quotation_values.get("quotation_signatory_type"))
         if signatory_type:
             values["quotation_signatory_type"] = signatory_type
@@ -148,7 +149,8 @@ def _sidebar_fields(
                     "fieldname": "manager_signatory_employee",
                     "label": _("Manager Signatory"),
                     "fieldtype": "Select",
-                    "options": "\n" + "\n".join(
+                    "options": "\n"
+                    + "\n".join(
                         _text(row.get("employee")) for row in manager_signatories if row.get("employee")
                     ),
                     "option_labels": {

@@ -249,9 +249,12 @@ def _request_audit_values(doctype: str, name: str) -> dict[str, Any]:
     if doctype != "Quotation":
         return values
 
-    quotation_values = frappe.db.get_value(
-        "Quotation", name, ["quotation_signatory_type", "sales_representative_employee"], as_dict=True
-    ) or {}
+    quotation_values = (
+        frappe.db.get_value(
+            "Quotation", name, ["quotation_signatory_type", "sales_representative_employee"], as_dict=True
+        )
+        or {}
+    )
     signatory_type = _text(settings.get("cd_quotation_signatory_type")) or _text(
         quotation_values.get("quotation_signatory_type")
     )

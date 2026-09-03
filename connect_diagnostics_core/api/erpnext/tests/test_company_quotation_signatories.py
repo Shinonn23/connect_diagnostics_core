@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import company
@@ -14,14 +15,17 @@ from connect_diagnostics_core.api.erpnext import company
 
 class TestCompanyAuthorizedSignatories(UnitTestCase):
     def test_duplicate_rows_are_rejected_before_employee_validation(self) -> None:
-        doc = frappe._dict(
-            {
-                "name": "COMP-0001",
-                "quotation_authorized_signatories": [
-                    frappe._dict({"employee": "EMP-0001"}),
-                    frappe._dict({"employee": "EMP-0001"}),
-                ],
-            }
+        doc = cast(
+            Document,
+            frappe._dict(
+                {
+                    "name": "COMP-0001",
+                    "quotation_authorized_signatories": [
+                        frappe._dict({"employee": "EMP-0001"}),
+                        frappe._dict({"employee": "EMP-0001"}),
+                    ],
+                }
+            ),
         )
 
         with patch.object(company, "validate_quotation_authorized_signatory_employee") as mocked_validate:
