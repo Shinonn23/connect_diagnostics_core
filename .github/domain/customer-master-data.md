@@ -41,6 +41,10 @@
   `print_configuration.get_print_options` and sends them as request-only `settings`
   overrides, with a Reset to default action. Overrides affect preview, print, and PDF for
   that request only; they never save Customer or the source document.
+- Quotation's sidebar adds `Signatory` (Sales Representative or Managing Director). A
+  Managing Director selection requires `Manager Signatory`, populated only from the
+  Company's `Quotation Authorized Signatories` table. Active Sales Managers without an
+  Employee `Quotation E-Signature` remain visible as unavailable and cannot be printed.
 - Sales Invoice prints the named copies Original, Customer Copy, Accounting Copy, and
   Sales Copy, plus a Batch / Serial visibility option. All four default to one page set
   each. Sales Invoice is Thai-only: the registry fixes its language and any row value
@@ -60,27 +64,28 @@
   standard `schedule_date` field plus Incoterm and Currency, and uses Item Code,
   Description, QTY, UOM, Unit Price, and Amount columns without warehouse or
   item-level discount columns.
-- Quotation carries its own signatory: `Quotation.sales_representative_employee` is the
-  Employee who issues that offer, defaulted from the logged-in user. It prints in the
-  contact block on every form and signs the document when the signatory is a Sales
-  Representative. Do not resolve the signatory from the Customer Sales Team — Quotation
-  has no `sales_team` table, and the retired `Sales Person.employee` chain picked an
-  arbitrary first row.
+- Quotation carries its own Sales Contact: `Quotation.sales_representative_employee` is
+  the Employee who issues that offer, defaulted from the logged-in user. It prints in the
+  contact block on every form. The signatory is either that Employee (Sales
+  Representative) or a request-only Managing Director chosen from the Company's
+  `quotation_authorized_signatories` table. Do not resolve either person from Customer
+  Sales Team — Quotation has no `sales_team` table.
+- The Company allow-list accepts only Active Employees in the same Company who have the
+  `Sales Manager` role. The Employee's `quotation_signature` field is required at print
+  time; missing signatures are shown as unavailable in the sidebar and block Print/PDF,
+  while Preview remains usable for correcting settings. Duplicate rows are rejected.
 - The caption under the signature line is a fixed literal per signatory type, held in
-  `setup/quotation.py` as `SIGNATORY_CAPTIONS`; it is never `Employee.designation`. A
-  Managing Director quotation prints an **empty** name by design so the director signs
-  and writes the name by hand, and therefore resolves no Employee at all. The retired
-  `Company.quotation_authorized_signatory_employee` and its Quotation override must not
-  be reintroduced.
+  `setup/quotation.py` as `SIGNATORY_CAPTIONS`; it is never `Employee.designation`.
 - The Quotation carries its own `quotation_signatory_type` and
   `sales_representative_employee`, grouped in their own "Signatory" Section (see
   `setup/quotation.py`); Customer no longer stores any print or signatory defaults.
   `sales_representative_employee` is filtered in Desk by Role
-  (`SIGNATORY_EMPLOYEE_ROLES`) to match the selected signatory type, via the
-  `signatory_employee_query` Link query — a Desk convenience only, not enforced at
-  submit. Both fields live in their own standalone "Signatory" Tab (immediately
+  (`SIGNATORY_EMPLOYEE_ROLES`) via the `signatory_employee_query` Link query — a Desk convenience only, filtering the
+  Sales Contact to Active Sales Users/Managers in the selected Company; it is not
+  enforced at submit. Both fields live in their own standalone "Signatory" Tab (immediately
   after the Details tab), not a Section within Details. `print_documents.QUOTATION_EXTRA_FIELDS`
-  now covers only `quotation_signatory_type`; validity (`edit_validity_text` /
+  now covers `quotation_signatory_type` and the request-only
+  `manager_signatory_employee`; validity (`edit_validity_text` /
   `validity_text`) and delivery terms (`delivery_terms_template` /
   `quotation_delivery_terms`) are document-only fields, required before submit
   (`validate_signatory_before_submit` / `validate_delivery_terms_before_submit` in

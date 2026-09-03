@@ -72,6 +72,13 @@ class TestEmployeeCustomFields(UnitTestCase):
         self.assertNotIn("default", field)
         self.assertTrue(field.get("description"))
 
+    def test_quotation_signature_is_a_signature_without_a_default(self) -> None:
+        field = self._field("quotation_signature")
+
+        self.assertEqual(field["fieldtype"], "Signature")
+        self.assertNotIn("default", field)
+        self.assertTrue(field.get("description"))
+
     def test_no_property_setter_makes_thai_payroll_fields_required(self) -> None:
         required = {
             fieldname

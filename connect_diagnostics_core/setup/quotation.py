@@ -22,15 +22,20 @@ SIGNATORY_CAPTIONS: dict[str, tuple[str, str]] = {
     SIGNATORY_MANAGING_DIRECTOR: ("กรรมการผู้จัดการ", "Managing Director"),
 }
 
-# Managing Director quotations print an empty name so the director signs and
-# writes the name by hand, so only these types resolve an Employee name.
-SIGNATORY_PRINTS_NAME = frozenset({SIGNATORY_SALES_REPRESENTATIVE})
+# Both signatory types resolve an Employee.  The selected Managing Director is
+# still request-only (the Quotation stores the Sales Representative separately).
+SIGNATORY_PRINTS_NAME = frozenset(SIGNATORY_TYPES)
 
-# Roles allowed to be picked as sales_representative_employee for each
-# signatory type, filtering the Desk Employee picker. Not enforced server-side
-# at submit -- see validate_signatory_before_submit in api/erpnext/quotation.py.
+# Roles allowed to be picked as sales_representative_employee. This is the
+# Quotation's Sales Contact in both signatory modes; a Managing Director is
+# selected independently from the Company's authorized-signatory table. Not
+# enforced server-side at submit -- see validate_signatory_before_submit in
+# api/erpnext/quotation.py.
 SIGNATORY_EMPLOYEE_ROLES: dict[str, tuple[str, ...]] = {
     SIGNATORY_SALES_REPRESENTATIVE: ("Sales User", "Sales Manager"),
+    # Retained for callers that inspect the legacy role map; the Manager
+    # Signatory itself is now selected from the Company allow-list instead of
+    # this Quotation Link field.
     SIGNATORY_MANAGING_DIRECTOR: ("Sales Manager",),
 }
 
@@ -42,6 +47,16 @@ DOCUMENT_LANGUAGE_OPTIONS = ("Thai", "English", "Thai / English")
 DEFAULT_DELIVERY_TERMS_TEMPLATE = "60 วัน นับถัดจากวันที่ได้รับใบสั่งซื้อ"
 
 CUSTOM_FIELDS = {
+    "Company": [
+        {
+            "fieldname": "quotation_authorized_signatories",
+            "label": "Quotation Authorized Signatories",
+            "fieldtype": "Table",
+            "options": "Quotation Authorized Signatory",
+            "insert_after": "company_description",
+            "description": "Active Sales Managers allowed to sign Quotations for this Company.",
+        },
+    ],
     "Quotation": [
         {
             # A standalone tab, immediately after the Details tab and before

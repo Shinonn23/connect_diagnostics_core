@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 from typing import cast
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.model.document import Document
-from frappe.tests import IntegrationTestCase
+from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import quotation
 from connect_diagnostics_core.setup import quotation as quotation_setup
@@ -34,6 +35,7 @@ class TestSignatoryEmployeeQuery(IntegrationTestCase):
         if not (department_row and employment_type):
             self.skipTest("No Department/Employment Type exists on this site to attach a test Employee to")
         company = cast(str, department_row.company)
+        self.company = company
         department = cast(str, department_row.name)
 
         sales_user = self._make_user(TEST_SALES_USER_EMAIL, ("Sales User",))
@@ -94,30 +96,61 @@ class TestSignatoryEmployeeQuery(IntegrationTestCase):
             "name",
             0,
             20,
-            {"quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE},
+            {
+                "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+                "company": self.company,
+            },
         )
 
         names = [row[0] for row in results]
         self.assertIn(self.sales_employee, names)
         self.assertNotIn(self.other_employee, names)
 
-    def test_managing_director_type_excludes_the_sales_user_only_employee(self) -> None:
+    def test_managing_director_keeps_the_sales_contact_query(self) -> None:
         results = quotation.signatory_employee_query(
             "Employee",
             "",
             "name",
             0,
             20,
-            {"quotation_signatory_type": quotation_setup.SIGNATORY_MANAGING_DIRECTOR},
+            {
+                "quotation_signatory_type": quotation_setup.SIGNATORY_MANAGING_DIRECTOR,
+                "company": self.company,
+            },
         )
 
         names = [row[0] for row in results]
-        self.assertNotIn(self.sales_employee, names)
+        self.assertIn(self.sales_employee, names)
         self.assertNotIn(self.other_employee, names)
 
     def test_unknown_signatory_type_returns_no_results(self) -> None:
         results = quotation.signatory_employee_query(
-            "Employee", "", "name", 0, 20, {"quotation_signatory_type": ""}
+            "Employee", "", "name", 0, 20, {"quotation_signatory_type": "Not a type"}
         )
 
         self.assertEqual(results, [])
+
+
+class TestSignatoryEmployeeQuerySQL(UnitTestCase):
+    @patch.object(quotation.frappe.db, "exists", return_value=True)
+    @patch.object(quotation.frappe.db, "sql", return_value=[])
+    @patch.object(quotation, "get_match_cond", return_value="")
+    def test_permission_condition_uses_the_real_employee_table_name(
+        self, _match_cond: MagicMock, mocked_sql: MagicMock, _exists: MagicMock
+    ) -> None:
+        quotation.signatory_employee_query(
+            "Employee",
+            "sales",
+            "name",
+            0,
+            20,
+            {
+                "quotation_signatory_type": quotation_setup.SIGNATORY_SALES_REPRESENTATIVE,
+                "company": "COMP-0001",
+            },
+        )
+
+        query, values = mocked_sql.call_args.args
+        self.assertIn("`tabEmployee`.company", query)
+        self.assertNotIn(" e.", query)
+        self.assertEqual(values["company"], "COMP-0001")

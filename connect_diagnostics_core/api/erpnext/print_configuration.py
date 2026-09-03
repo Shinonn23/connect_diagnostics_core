@@ -23,7 +23,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
 
+from connect_diagnostics_core.api.erpnext import company as company_api
 from connect_diagnostics_core.setup import print_documents
+from connect_diagnostics_core.setup import quotation as quotation_setup
 
 SIDEBAR_PREFIX = "cd_"
 COPY_FIELD_PREFIX = "copy_"
@@ -83,10 +85,10 @@ def get_document_configuration(doc: Document | Mapping[str, Any], configuration:
 def get_print_options(doctype: str, docname: str, print_format: str | None = None) -> dict[str, Any]:
     """Return the print sidebar controls and their default values for one print.
 
-    Static registry data only — the fields a document offers and their registry
-    defaults. There is no per-Customer configuration: every print is chosen fresh
-    in the sidebar. Returns an empty set for a doctype/format that is not a
-    configured print document.
+    Registry controls and document-scoped defaults. There is no per-Customer
+    configuration: every print is chosen fresh in the sidebar. Quotation's
+    authorized manager choices are read from its Company allow-list. Returns an
+    empty set for an unconfigured doctype/format.
     """
     frappe.has_permission(doctype, "read", docname, throw=True)
     document = print_documents.get_document(
@@ -94,16 +96,33 @@ def get_print_options(doctype: str, docname: str, print_format: str | None = Non
     )
     if not document:
         return {"data": {"fields": [], "values": {}}, "message": ""}
+    values = get_default_configuration(document)
+    manager_signatories: list[dict[str, Any]] = []
+    if document.key == "quotation":
+        quotation_values = (
+            frappe.db.get_value("Quotation", docname, ["company", "quotation_signatory_type"], as_dict=True)
+            or {}
+        )
+        signatory_type = _text(quotation_values.get("quotation_signatory_type"))
+        if signatory_type:
+            values["quotation_signatory_type"] = signatory_type
+        manager_signatories = company_api.get_quotation_authorized_signatories(
+            _text(quotation_values.get("company"))
+        )
     return {
         "data": {
-            "fields": _sidebar_fields(document),
-            "values": get_default_configuration(document),
+            "fields": _sidebar_fields(document, manager_signatories),
+            "values": values,
+            "manager_signatories": manager_signatories,
         },
         "message": _("Print options loaded."),
     }
 
 
-def _sidebar_fields(document: print_documents.PrintDocument) -> list[dict[str, Any]]:
+def _sidebar_fields(
+    document: print_documents.PrintDocument,
+    manager_signatories: Sequence[Mapping[str, Any]] = (),
+) -> list[dict[str, Any]]:
     """Build the sidebar controls for one document from the registry."""
     fields: list[dict[str, Any]] = [
         {
@@ -117,6 +136,36 @@ def _sidebar_fields(document: print_documents.PrintDocument) -> list[dict[str, A
             "fieldtype": "Check",
         },
     ]
+    if document.key == "quotation":
+        fields.extend(
+            [
+                {
+                    "fieldname": "quotation_signatory_type",
+                    "label": _("Signatory"),
+                    "fieldtype": "Select",
+                    "options": "\n".join(quotation_setup.SIGNATORY_TYPES),
+                },
+                {
+                    "fieldname": "manager_signatory_employee",
+                    "label": _("Manager Signatory"),
+                    "fieldtype": "Select",
+                    "options": "\n"
+                    + "\n".join(
+                        _text(row.get("employee")) for row in manager_signatories if row.get("employee")
+                    ),
+                    "option_labels": {
+                        _text(row.get("employee")): _text(row.get("name")) or _text(row.get("employee"))
+                        for row in manager_signatories
+                        if row.get("employee")
+                    },
+                    "depends_on": "eval:cd_quotation_signatory_type=='Managing Director'",
+                    "mandatory_depends_on": "eval:cd_quotation_signatory_type=='Managing Director'",
+                    "description": _(
+                        "Only Employees in this Company's authorized signatory list can be selected."
+                    ),
+                },
+            ]
+        )
     if document.language_selectable:
         fields.append(
             {
@@ -173,12 +222,24 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         if document.offers_batch_serial
         else False,
         "quotation_signatory_type": _text(values.get("quotation_signatory_type")),
+        "manager_signatory_employee": _text(values.get("manager_signatory_employee")),
         "sales_representative_employee": _text(values.get("sales_representative_employee")),
         "edit_validity_text": cint(values.get("edit_validity_text")),
         "validity_text": _text(values.get("validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),
     }
-    register_print(doc, configuration, context)
+    if document.key == "quotation":
+        context["signatory_employee"] = (
+            context["manager_signatory_employee"]
+            if context["quotation_signatory_type"] == quotation_setup.SIGNATORY_MANAGING_DIRECTOR
+            else context["sales_representative_employee"]
+        )
+    # Quotation resolves its Employee/E-Signature after this shared context is
+    # built, so its own API registers only after readiness validation. This
+    # prevents an attempted print with a missing signatory from creating an
+    # audit row.
+    if configuration != "quotation":
+        register_print(doc, configuration, context)
     return context
 
 

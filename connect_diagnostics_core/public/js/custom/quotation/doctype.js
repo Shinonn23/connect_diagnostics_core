@@ -18,7 +18,10 @@ async function set_sales_representative_default(frm) {
 function set_sales_representative_query(frm) {
 	frm.set_query("sales_representative_employee", () => ({
 		query: "connect_diagnostics_core.api.erpnext.quotation.signatory_employee_query",
-		filters: { quotation_signatory_type: frm.doc.quotation_signatory_type },
+		filters: {
+			quotation_signatory_type: frm.doc.quotation_signatory_type,
+			company: frm.doc.company,
+		},
 	}));
 }
 
