@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.48.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.4...v0.48.0) (2026-09-03)
+
+
+### Features
+
+* disable ERPNext core TDS on Thai sites ([46d9ee9](https://github.com/Shinonn23/connect_diagnostics_core/commit/46d9ee997aac23851ef073a1f194dd7f25e07907))
+* disable ERPNext core TDS on Thai sites ([50f2681](https://github.com/Shinonn23/connect_diagnostics_core/commit/50f2681beb4f1aa1ee99279eb519b70335eb7e2a))
+
+
+### Bug Fixes
+
+* **tds:** force-clear legacy TDS during migration ([4df3ef5](https://github.com/Shinonn23/connect_diagnostics_core/commit/4df3ef5e81036659ea74d6ada71e98c76b908733))
+* **tds:** force-clear legacy TDS during migration ([56d92a0](https://github.com/Shinonn23/connect_diagnostics_core/commit/56d92a07a690aca7ce78accbee8e739dd226bc9d))
+
+
+### Documentation
+
+* require JSON schema modified timestamps ([0b785b7](https://github.com/Shinonn23/connect_diagnostics_core/commit/0b785b77259a3684e49a434b695896b660d0de6f))
+
 ## [0.47.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.3...v0.47.4) (2026-08-25)
 
 
