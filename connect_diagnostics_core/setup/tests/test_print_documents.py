@@ -107,3 +107,7 @@ class TestPrintDocumentRegistry(UnitTestCase):
                 "quotation_delivery_terms",
             },
         )
+
+    def test_quotation_manager_signatory_is_request_only(self) -> None:
+        self.assertIn("manager_signatory_employee", print_documents.QUOTATION_EXTRA_FIELDS)
+        self.assertEqual(print_documents.SCALAR_DEFAULTS["manager_signatory_employee"], "")

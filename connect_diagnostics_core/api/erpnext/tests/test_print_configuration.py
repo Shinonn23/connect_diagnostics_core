@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests import UnitTestCase
@@ -195,6 +195,46 @@ class TestPrintOptions(UnitTestCase):
         result = self._options(sales_invoice(), "Tax Invoice Delivery Note and Invoice")
 
         self.assertEqual(result["data"]["values"]["copy_original"], 1)
+
+    @patch.object(
+        print_configuration.company_api,
+        "get_quotation_authorized_signatories",
+        return_value=[
+            {
+                "employee": "EMP-MANAGER",
+                "name": "Managing Director",
+                "ready": True,
+            },
+            {
+                "employee": "EMP-NO-SIGNATURE",
+                "name": "Second Manager",
+                "ready": False,
+            },
+        ],
+    )
+    @patch.object(
+        print_configuration.frappe.db,
+        "get_value",
+        return_value={"company": "COMP-0001", "quotation_signatory_type": "Managing Director"},
+    )
+    def test_quotation_sidebar_exposes_signatory_and_company_managers(
+        self, _get_value: MagicMock, _get_managers: MagicMock
+    ) -> None:
+        quotation_doc = FakeDocument(
+            {"doctype": "Quotation", "name": "SAL-QTN-0001"}
+        )
+        result = self._options(quotation_doc, "Quotation")
+
+        fields = {field["fieldname"]: field for field in result["data"]["fields"]}
+        self.assertIn("quotation_signatory_type", fields)
+        self.assertIn("manager_signatory_employee", fields)
+        self.assertTrue(fields["manager_signatory_employee"]["options"].startswith("\n"))
+        self.assertEqual(
+            fields["manager_signatory_employee"]["option_labels"]["EMP-MANAGER"],
+            "Managing Director",
+        )
+        self.assertEqual(result["data"]["values"]["quotation_signatory_type"], "Managing Director")
+        self.assertEqual(len(result["data"]["manager_signatories"]), 2)
 
     def test_empty_for_an_unregistered_format(self) -> None:
         doc = FakeDocument({"doctype": "Delivery Note", "name": "MAT-DN-0001"})

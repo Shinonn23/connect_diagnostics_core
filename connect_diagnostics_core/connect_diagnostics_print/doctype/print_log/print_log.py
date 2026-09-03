@@ -28,5 +28,9 @@ class PrintLog(Document):
         print_format: DF.Link | None
         reference_doctype: DF.Link
         reference_name: DF.DynamicLink
+        show_date: DF.Check
+        signatory_employee: DF.Link | None
+        signatory_type: DF.Data | None
     # end: auto-generated types
+
     pass

@@ -39,6 +39,10 @@ Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, 
 - Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
   amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
   do not define local money-formatting macros in Print Formats.
+- The Quotation format keeps one A4 layout for all four combinations of `Show Date` and
+  signatory type. Its Sales Representative comes from the Quotation; a Managing Director
+  comes from the Company's authorized-signatory table. Both require an Employee
+  `quotation_signature` for Print/PDF, while Preview remains available to repair settings.
 
 ## Print sidebar engine
 
@@ -85,6 +89,8 @@ render?(view,data), on_error?(view,reason), section_label?, prefix? }`. Declarat
   `{{ register_print(doc) }}` call. When present, that call must sit **outside** any leading
   `{# ... #}` comment, or it is silently swallowed.
 - Previews are deliberately not recorded, and neither are emailed PDFs.
+- Quotation audit rows also retain `show_date`, `signatory_type`, and
+  `signatory_employee` for both the Print and PDF channels.
 - **Two deliberate deviations from the general rules, both required by the feature.** A print
   render is a GET that Frappe does not commit, so the insert calls `frappe.db.commit()` inside
   a read request; enqueuing was rejected because an audit trail must not disappear when

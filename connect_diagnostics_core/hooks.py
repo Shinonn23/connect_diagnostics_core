@@ -51,6 +51,7 @@ page_js = {
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
+    "Company": "public/js/custom/company/doctype.js",
     "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
@@ -199,6 +200,7 @@ doc_events = {
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
     },
     "Company": {
+        "validate": "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
         "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
     "Quotation": {

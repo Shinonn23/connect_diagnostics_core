@@ -1,3 +1,6 @@
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
 """Custom field / property setter definitions for Employee."""
 
 CUSTOM_FIELDS = {
@@ -188,6 +191,13 @@ CUSTOM_FIELDS = {
             "fieldtype": "Data",
             "insert_after": "national_id_display",
             "is_system_generated": 1,
+        },
+        {
+            "fieldname": "quotation_signature",
+            "label": "Quotation E-Signature",
+            "fieldtype": "Signature",
+            "insert_after": "social_security_id",
+            "description": "Signature image used when this Employee signs a Quotation.",
         },
     ],
 }
