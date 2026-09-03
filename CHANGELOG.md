@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.49.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.48.0...v0.49.0) (2026-09-03)
+
+
+### Features
+
+* add quotation print signatures ([d5bfb79](https://github.com/Shinonn23/connect_diagnostics_core/commit/d5bfb7995eec7cbd6763590989c98bd3568db1f3))
+* add quotation print signatures ([dbdba29](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbdba29fcd7dbed7334cff71652e8092e10cf5b3))
+
+
+### Bug Fixes
+
+* satisfy quotation signature CI checks ([163eafa](https://github.com/Shinonn23/connect_diagnostics_core/commit/163eafae9312e5a9db814a296e8b15941a0dc3e7))
+
 ## [0.48.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.4...v0.48.0) (2026-09-03)
 
 
