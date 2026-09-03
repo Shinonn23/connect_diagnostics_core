@@ -5,30 +5,26 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-import frappe
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import clear_legacy_tds_values as patch_module
 
 
 class TestClearLegacyTDSValues(UnitTestCase):
-    def test_protected_submitted_documents_stop_before_any_clear(self) -> None:
-        protected = [{"doctype": "Purchase Invoice", "name": "PI-0001", "docstatus": 1}]
+    def test_submitted_documents_are_force_cleared_and_committed(self) -> None:
+        submitted = {"doctype": "Purchase Invoice", "name": "PI-0001", "docstatus": 1}
 
         with (
-            patch.object(patch_module, "_find_candidates", return_value=protected),
-            patch.object(patch_module, "_has_ledger_evidence", return_value=True),
+            patch.object(patch_module, "_find_candidates", return_value=[submitted]),
             patch.object(patch_module, "_clear_candidate") as mocked_clear,
-            patch.object(patch_module.frappe, "throw", side_effect=frappe.ValidationError),
             patch.object(patch_module.frappe.db, "commit") as mocked_commit,
         ):
-            with self.assertRaises(frappe.ValidationError):
-                patch_module.execute()
+            patch_module.execute()
 
-        mocked_clear.assert_not_called()
-        mocked_commit.assert_not_called()
+        mocked_clear.assert_called_once_with(submitted)
+        mocked_commit.assert_called_once_with()
 
-    def test_unprotected_documents_are_cleared_and_committed(self) -> None:
+    def test_draft_documents_are_cleared_and_committed(self) -> None:
         candidates = [
             {"doctype": "Supplier", "name": "SUP-0001", "docstatus": 0},
             {"doctype": "Purchase Invoice", "name": "PI-0001", "docstatus": 0},
@@ -36,7 +32,6 @@ class TestClearLegacyTDSValues(UnitTestCase):
 
         with (
             patch.object(patch_module, "_find_candidates", return_value=candidates),
-            patch.object(patch_module, "_has_ledger_evidence", return_value=False),
             patch.object(patch_module, "_clear_candidate") as mocked_clear,
             patch.object(patch_module.frappe.db, "commit") as mocked_commit,
         ):

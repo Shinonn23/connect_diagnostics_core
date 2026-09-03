@@ -3,10 +3,11 @@
 
 """Rollback marker for clear_legacy_tds_values.
 
-The forward patch intentionally removes unposted legacy TDS values and draft
-Tax Withholding Entry rows.  Those values are not recoverable by a code rollback;
-restore them from the database backup taken before migration.  This module is
-kept as an explicit one-way rollback marker for the repository patch convention.
+The forward patch intentionally removes legacy TDS values and Tax Withholding
+Entry rows, including from submitted documents.  Those values are not
+recoverable by a code rollback; restore them from the database backup taken
+before migration.  This module is kept as an explicit one-way rollback marker
+for the repository patch convention.
 """
 
 from __future__ import annotations
