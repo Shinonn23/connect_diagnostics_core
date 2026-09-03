@@ -1,12 +1,11 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Clear unposted ERPNext core TDS values before the Thai TDS guard is enabled.
+"""Force-clear ERPNext core TDS values before the Thai TDS guard is enabled.
 
-Submitted documents with explicit TDS evidence stop the migration.  The patch
-does not guess from ordinary GL entries: only Tax Withholding Entry rows,
-``is_tax_withholding_account`` rows, or the core TDS GL remark are treated as
-evidence that an old document needs accounting review.
+This patch intentionally clears legacy TDS values from all matching documents,
+including submitted documents.  It does not migrate the old TDS evidence to a
+Thai Withholding Tax Type.
 """
 
 from __future__ import annotations
@@ -14,7 +13,6 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from frappe import _
 
 from connect_diagnostics_core.setup.tds import TDS_FIELDS, TDS_LAYOUT_FIELDS
 
@@ -30,22 +28,16 @@ SCANNED_DOCTYPES = (
 )
 TDS_ENTRY_DOCTYPE = "Tax Withholding Entry"
 TDS_ENTRY_FIELD = "tax_withholding_entries"
-TDS_LEDGER_CHILDREN = {
-    "Purchase Invoice": ("Purchase Taxes and Charges",),
-    "Sales Invoice": ("Sales Taxes and Charges",),
-    "Journal Entry": ("Journal Entry Account",),
-}
 
 
 def execute() -> None:
     candidates = _find_candidates()
-    protected = [
-        candidate
-        for candidate in candidates
-        if candidate.get("docstatus") == 1 and _has_ledger_evidence(candidate)
-    ]
-    if protected:
-        _raise_for_protected_documents(protected)
+    submitted_count = sum(candidate.get("docstatus") == 1 for candidate in candidates)
+    if submitted_count:
+        frappe.logger(__name__).warning(
+            "Force-clearing legacy core TDS values from %s submitted document(s).",
+            submitted_count,
+        )
 
     cleared = 0
     for candidate in candidates:
@@ -105,53 +97,6 @@ def _get_tds_entry_parents(doctype: str) -> list[str]:
     )
 
 
-def _has_ledger_evidence(candidate: dict[str, Any]) -> bool:
-    doctype = str(candidate["doctype"])
-    name = str(candidate["name"])
-
-    if _has_submitted_tds_entry(doctype, name):
-        return True
-    for child_doctype in TDS_LEDGER_CHILDREN.get(doctype, ()):
-        if frappe.db.exists("DocType", child_doctype) and frappe.db.exists(
-            child_doctype,
-            {
-                "parent": name,
-                "parenttype": doctype,
-                "is_tax_withholding_account": 1,
-            },
-        ):
-            return True
-    return bool(
-        frappe.get_all(
-            "GL Entry",
-            filters={
-                "voucher_type": doctype,
-                "voucher_no": name,
-                "remarks": "TDS Deducted",
-            },
-            pluck="name",
-            limit_page_length=1,
-        )
-    )
-
-
-def _has_submitted_tds_entry(doctype: str, name: str) -> bool:
-    if not frappe.db.exists("DocType", TDS_ENTRY_DOCTYPE):
-        return False
-    return bool(
-        frappe.get_all(
-            TDS_ENTRY_DOCTYPE,
-            filters={
-                "parent": name,
-                "parenttype": doctype,
-                "parentfield": TDS_ENTRY_FIELD,
-            },
-            pluck="name",
-            limit_page_length=1,
-        )
-    )
-
-
 def _clear_candidate(candidate: dict[str, Any]) -> None:
     doctype = str(candidate["doctype"])
     name = str(candidate["name"])
@@ -174,20 +119,6 @@ def _clear_candidate(candidate: dict[str, Any]) -> None:
             TDS_ENTRY_DOCTYPE,
             {"parent": name, "parenttype": doctype, "parentfield": TDS_ENTRY_FIELD},
         )
-
-
-def _raise_for_protected_documents(protected: list[dict[str, Any]]) -> None:
-    references = ", ".join(f"{row['doctype']}: {row['name']}" for row in protected[:20])
-    if len(protected) > 20:
-        references += f", and {len(protected) - 20} more"
-    frappe.throw(
-        _(
-            "Migration stopped: submitted documents contain legacy ERPNext TDS evidence. "
-            "Move them to Thai Withholding Tax Type before enabling the Thai Desk Guard. "
-            "Documents: {0}"
-        ).format(references),
-        title=_("Legacy TDS data requires review"),
-    )
 
 
 def _is_set(value: object) -> bool:
