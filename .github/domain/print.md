@@ -31,14 +31,18 @@ Print`) or an ERPNext Thailand module (`Thai Tax`, `Thai Billing`, `Thai Deposit
   semantic-sectioning rules do not apply to it. `Shipment Box
 Label` is a 180 × 100 mm landscape Shipment format that uses `cd_logo_v2.jpg`, splits sender
   and recipient details, and shows the recipient Customer's Territory only when present.
-- When modifying an app-owned Print Format JSON, update its `modified` timestamp to the current
-  time. Frappe imports a standard record only when the source is newer, so an unchanged timestamp
-  leaves the deployed format stale after `bench migrate`. The Sales Invoice format also has an
-  explicit `sync_sales_invoice_print_format` migration so sites that already ran an earlier
-  configuration migration receive the current HTML/CSS.
+- Print Formats are self-contained JSON fixtures. Keep all Jinja HTML in the `html` field and all
+  format-specific CSS in the `css` field; do not depend on external component templates or shared
+  Print Format stylesheets. Update `modified` whenever either field changes so `bench migrate`
+  imports the new record. The Sales Invoice format also has an explicit
+  `sync_sales_invoice_print_format` migration so sites that already ran an earlier configuration
+  migration receive the current HTML/CSS.
 - Use the registered `format_money(amount, blank_zero=False)` Jinja helper for plain numeric
   amounts. Keep `print_currency` where a template intentionally renders a currency-aware value;
   do not define local money-formatting macros in Print Formats.
+- Use page groups produced by `get_print_item_pages`; `get_print_page_metrics` verifies a fixed
+  table budget and reports the exact overflowing row indexes. The paginator must split whole rows
+  before rendering; CSS must never hide an unmeasured overflow.
 - The Quotation format keeps one A4 layout for all four combinations of `Show Date` and
   signatory type. Its Sales Representative comes from the Quotation; a Managing Director
   comes from the Company's authorized-signatory table. Both require an Employee

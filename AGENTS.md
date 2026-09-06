@@ -66,6 +66,16 @@ client scripts, templates, jobs, and tests. Check hooks and scheduled events bef
 existing function. Reuse existing utilities and stop to ask when the required behavior cannot
 be verified.
 
+## Print Format rendering
+
+- When inspecting or comparing any Print Format visually, render it through Frappe's native
+  Chrome/Chromium PDF renderer with the real site assets, fonts, print media, and document
+  settings. Do not use standalone/file-based browser screenshots as the source of truth.
+- The DEV Bench must have Frappe's bundled headless Chromium and all runtime libraries listed
+  in its `deb.deps` installed before Chrome rendering is considered verified.
+- Treat the Frappe `printview`/PDF output as the visual baseline; verify borders, typography,
+  assets, pagination, and page dimensions from the actual Desk/site route.
+
 ## Reporting discovered issues
 
 Bugs outside the current scope are reported, not fixed or silently commented in place:
