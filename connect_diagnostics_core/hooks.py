@@ -250,7 +250,6 @@ doc_events = {
     },
     "Company": {
         "validate": "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
-        "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
     "Quotation": {
         "before_submit": [
@@ -367,7 +366,7 @@ standard_queries = {
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
-company_data_to_be_ignored = ["Accounting Department"]
+company_data_to_be_ignored = []
 
 # Scheduled Tasks
 # ---------------
@@ -400,12 +399,6 @@ override_whitelisted_methods = {
     "erpnext_thailand.utils.get_address_by_tax_id": (
         "connect_diagnostics_core.api.frappe.address.get_address_by_tax_id"
     ),
-}
-
-extend_doctype_class = {
-    "Payroll Entry": [
-        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryAccountingDimensionMixin",
-    ],
 }
 
 # each overriding function accepts a `data` argument;
@@ -492,4 +485,5 @@ fixtures = [
             ]
         ],
     },
+    {"doctype": "Accounting Dimension"},
 ]

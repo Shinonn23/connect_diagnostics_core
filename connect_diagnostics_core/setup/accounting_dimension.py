@@ -23,14 +23,9 @@ class DimensionSpec:
 # Sales/Purchase transaction doctypes, so ERPNext's `validate_fieldname_conflict`
 # leaves those untouched and only creates the field where it is still missing —
 # most importantly GL Entry and Journal Entry Account, so the value reaches the ledger.
-DEPARTMENT_DIMENSION = DimensionSpec("Accounting Department", "department", "Department")
+DEPARTMENT_DIMENSION = DimensionSpec("Department", "department", "Department")
 TERRITORY_DIMENSION = DimensionSpec("Territory", "territory", "Territory")
 DIMENSIONS = (DEPARTMENT_DIMENSION, TERRITORY_DIMENSION)
-
-# Consumed by PayrollEntryAccountingDimensionMixin: Payroll Entry has a native
-# `department` (its HR-Department employee filter) that must not leak into this
-# Accounting-Department dimension field on generated Journal Entry rows.
-DEPARTMENT_DIMENSION_FIELDNAME = DEPARTMENT_DIMENSION.fieldname
 
 
 def ensure_configuration() -> None:
