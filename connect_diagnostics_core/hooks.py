@@ -44,7 +44,6 @@ page_js = {
     "print": [
         "public/js/custom/print/engine.js",
         "public/js/custom/print/providers/print_options.js",
-        "public/js/custom/print/providers/shipment_label_size.js",
     ]
 }
 

@@ -22,10 +22,14 @@
 	// connect_diagnostics_core/setup/print_documents.py: PRINT_DOCUMENTS.
 	// (Abbreviated Tax Invoice is a Sales Invoice format, already covered here.)
 	const SUPPORTED_DOCTYPES = ["Quotation", "Sales Order", "Sales Invoice", "Payment Entry"];
+	const SHIPMENT_DOCTYPE = "Shipment";
+	const SHIPMENT_LABEL_FORMAT = "Shipment Box Label";
 
 	frappe.provide("connect_diagnostics.print").register({
 		name: "print_options",
-		applies_to: (view) => SUPPORTED_DOCTYPES.includes(view.frm.doc.doctype),
+		applies_to: (view) =>
+			SUPPORTED_DOCTYPES.includes(view.frm.doc.doctype) ||
+			(view.frm.doc.doctype === SHIPMENT_DOCTYPE && view.selected_format() === SHIPMENT_LABEL_FORMAT),
 		load: (view) =>
 			frappe.xcall("connect_diagnostics_core.api.erpnext.print_configuration.get_print_options", {
 				doctype: view.frm.doc.doctype,
@@ -57,7 +61,12 @@
 					fieldname: `cd_${df.fieldname}`,
 					change: () => {
 						this.additional_settings[field.df.fieldname] = field.get_value();
-						this.preview();
+						if (df.copy_option) {
+							this.cd_sync_copy_option(df.copy_option);
+						}
+						if (this.cd_validate_print_options(false)) {
+							this.preview();
+						}
 					},
 				},
 				true,
@@ -67,9 +76,70 @@
 			this.__cd_print_option_controls[df.fieldname] = field;
 		}
 
+		this.cd_sync_all_copy_options();
 		this.cd_prepare_manager_signatory_control();
 
 		this.cd_add_print_option_reset();
+	};
+
+	PrintView.prototype.cd_sync_all_copy_options = function () {
+		for (const field of Object.values(this.__cd_print_option_controls || {})) {
+			const option = field.df.copy_option;
+			if (option) {
+				this.cd_sync_copy_option(option);
+			}
+		}
+	};
+
+	PrintView.prototype.cd_sync_copy_option = function (copyKey) {
+		const enabled = this.__cd_print_option_controls?.[`copy_${copyKey}_enabled`];
+		if (!enabled) {
+			return;
+		}
+		const checked = Boolean(Number(enabled.get_value() || 0));
+		const count = this.__cd_print_option_controls?.[`copy_${copyKey}`];
+		const text = this.__cd_print_option_controls?.[`copy_${copyKey}_label`];
+		count?.$wrapper?.toggle(checked);
+		text?.$wrapper?.toggle(checked);
+		if (!checked) {
+			if (count) {
+				count.set_input("");
+				this.additional_settings[count.df.fieldname] = "";
+			}
+			if (text) {
+				text.set_input("");
+				this.additional_settings[text.df.fieldname] = "";
+			}
+		} else if (count && !Number(count.get_value() || 0)) {
+			const defaultCount = this.__cd_print_option_defaults?.[count.df.fieldname] || 1;
+			count.set_input(defaultCount);
+			this.additional_settings[count.df.fieldname] = defaultCount;
+		}
+	};
+
+	PrintView.prototype.cd_validate_print_options = function (showMessage = true) {
+		for (const [fieldname, field] of Object.entries(this.__cd_print_option_controls || {})) {
+			if (!field.df.copy_option || !Number(field.get_value() || 0)) {
+				continue;
+			}
+			const count = this.__cd_print_option_controls?.[`copy_${fieldname}`];
+			if (!count || Number(count.get_value() || 0) < 1) {
+				if (showMessage) {
+					frappe.msgprint(__("Enter at least one copy for the selected option."));
+				}
+				return false;
+			}
+			if (fieldname === "custom") {
+				const text = this.__cd_print_option_controls?.copy_custom_label?.get_value?.();
+				if (!String(text || "").trim()) {
+					if (showMessage) {
+						frappe.msgprint(__("Enter text for the custom copy before printing."));
+					}
+					return false;
+				}
+			}
+		}
+		return true;
 	};
 
 	PrintView.prototype.cd_prepare_manager_signatory_control = function () {
@@ -128,10 +198,14 @@
 		const originalPrintit = PrintView.prototype.printit;
 		const originalRenderPdf = PrintView.prototype.render_pdf;
 		PrintView.prototype.printit = function (...args) {
-			return this.cd_validate_quotation_signatory() ? originalPrintit.apply(this, args) : undefined;
+			return this.cd_validate_quotation_signatory() && this.cd_validate_print_options()
+				? originalPrintit.apply(this, args)
+				: undefined;
 		};
 		PrintView.prototype.render_pdf = function (...args) {
-			return this.cd_validate_quotation_signatory() ? originalRenderPdf.apply(this, args) : undefined;
+			return this.cd_validate_quotation_signatory() && this.cd_validate_print_options()
+				? originalRenderPdf.apply(this, args)
+				: undefined;
 		};
 		PrintView.prototype.__cd_signatory_guard_ready = true;
 	}
@@ -149,6 +223,7 @@
 				this.additional_settings[field.df.fieldname] = value;
 			}
 			this.cd_prepare_manager_signatory_control();
+			this.cd_sync_all_copy_options();
 			this.preview();
 		});
 	};

@@ -13,6 +13,7 @@ import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
 from PIL import ImageFont
 from pythainlp.util import bahttext
 
@@ -95,6 +96,12 @@ def get_sales_invoice_print_context(doc: Document | Mapping[str, Any]) -> dict[s
         traceability_font_size_mm,
         compact_traceability,
     ) = _sales_invoice_layout(print_format)
+    if configuration in {"tax_invoice", "full_receipt"}:
+        print_context["show_delivery_note"] = bool(
+            cint(print_context.get("show_delivery_note")) and _has_delivery_note(doc)
+        )
+    else:
+        print_context["show_delivery_note"] = False
     items = [
         _prepare_print_item(
             row,
@@ -111,6 +118,11 @@ def get_sales_invoice_print_context(doc: Document | Mapping[str, Any]) -> dict[s
         "item_pages": item_pages,
         "item_page_count": len(item_pages),
     }
+
+
+def _has_delivery_note(doc: Document | Mapping[str, Any]) -> bool:
+    """Return whether any Sales Invoice item is linked to a Delivery Note."""
+    return any(str(row.get("delivery_note") or "").strip() for row in (doc.get("items") or []))
 
 
 def _prepare_print_item(

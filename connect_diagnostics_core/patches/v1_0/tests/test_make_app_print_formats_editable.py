@@ -18,7 +18,7 @@ class TestMakeAppPrintFormatsEditable(UnitTestCase):
         mocked_get_all: MagicMock,
         mocked_set_value: MagicMock,
     ) -> None:
-        mocked_get_all.return_value = ["Quotation", "Tax Invoice Delivery Note and Invoice"]
+        mocked_get_all.return_value = ["Quotation", "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ"]
 
         make_app_print_formats_editable.execute()
 
@@ -33,7 +33,7 @@ class TestMakeAppPrintFormatsEditable(UnitTestCase):
                 call("Print Format", "Quotation", "standard", "No", update_modified=False),
                 call(
                     "Print Format",
-                    "Tax Invoice Delivery Note and Invoice",
+                    "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ",
                     "standard",
                     "No",
                     update_modified=False,

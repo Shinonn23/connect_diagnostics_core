@@ -13,6 +13,9 @@ from frappe.tests import UnitTestCase
 from PIL import Image, ImageDraw
 
 from connect_diagnostics_core.api.erpnext import print_configuration
+from connect_diagnostics_core.connect_diagnostics_print.print_format.quotation import (
+    settings as quotation_print_settings,
+)
 from connect_diagnostics_core.setup import print_action_fields, print_documents
 
 
@@ -68,15 +71,15 @@ class TestRegistryDefaults(UnitTestCase):
         self.assertEqual(defaults["copy_original"], 1)
         self.assertEqual(defaults["copy_copy"], 0)
 
-    def test_tax_invoice_defaults_print_all_four_named_copies(self) -> None:
+    def test_sales_invoice_defaults_keep_company_copy_and_unchecked_options(self) -> None:
         document = print_documents.DOCUMENT_BY_KEY["tax_invoice"]
 
         defaults = print_configuration.get_default_configuration(document)
 
-        self.assertEqual(defaults["copy_original"], 1)
-        self.assertEqual(defaults["copy_customer"], 1)
-        self.assertEqual(defaults["copy_accounting"], 1)
-        self.assertEqual(defaults["copy_sales"], 1)
+        self.assertEqual(defaults["copy_company"], 1)
+        self.assertEqual(defaults["copy_customer_original_enabled"], 0)
+        self.assertEqual(defaults["copy_customer_original"], 1)
+        self.assertEqual(defaults["copy_custom_enabled"], 0)
         self.assertEqual(defaults["show_batch_serial"], 1)
 
     def test_unknown_configuration_is_rejected(self) -> None:
@@ -88,20 +91,52 @@ class TestPrintContext(ContextHarness):
     def test_copies_expand_named_rows_into_page_sets(self) -> None:
         context = print_configuration.get_document_print_context(sales_invoice(), "tax_invoice")
 
-        self.assertEqual(
-            [copy["kind"] for copy in context["copies"]],
-            ["original", "customer", "accounting", "sales"],
-        )
-        self.assertEqual(context["original_count"], 1)
-        self.assertEqual(context["copy_count"], 3)
+        self.assertEqual([copy["kind"] for copy in context["copies"]], ["company"])
+        self.assertEqual(context["original_count"], 0)
+        self.assertEqual(context["copy_count"], 1)
 
-    def test_a_sidebar_copy_count_of_zero_removes_that_page_set(self) -> None:
+    def test_company_copy_cannot_be_removed_by_a_request_override(self) -> None:
         doc = sales_invoice()
-        doc.flags.print_settings = {"cd_copy_accounting": 0}
+        doc.flags.print_settings = {"cd_copy_company": 0}
 
         context = print_configuration.get_document_print_context(doc, "tax_invoice")
 
-        self.assertNotIn("accounting", [copy["kind"] for copy in context["copies"]])
+        self.assertEqual([copy["kind"] for copy in context["copies"]], ["company"])
+
+    def test_selected_sales_invoice_copies_expand_with_company_copy(self) -> None:
+        doc = sales_invoice()
+        doc.flags.print_settings = {
+            "cd_copy_customer_original_enabled": 1,
+            "cd_copy_customer_copy_enabled": 1,
+            "cd_copy_customer_copy": 2,
+            "cd_copy_custom_enabled": 1,
+            "cd_copy_custom_label": "สำหรับคลัง",
+        }
+
+        context = print_configuration.get_document_print_context(doc, "tax_invoice")
+
+        self.assertEqual(
+            [copy["kind"] for copy in context["copies"]],
+            ["company", "customer_original", "customer_copy", "customer_copy", "custom"],
+        )
+        self.assertIn("สำหรับคลัง", [copy["label"] for copy in context["copies"]])
+
+    def test_a_sidebar_copy_count_of_zero_removes_that_page_set(self) -> None:
+        doc = sales_invoice()
+        doc.flags.print_settings = {
+            "cd_copy_accounting_copy_enabled": 1,
+            "cd_copy_accounting_copy": 0,
+        }
+
+        with self.assertRaises(frappe.ValidationError):
+            print_configuration.get_document_print_context(doc, "tax_invoice")
+
+    def test_custom_copy_requires_text(self) -> None:
+        doc = sales_invoice()
+        doc.flags.print_settings = {"cd_copy_custom_enabled": 1}
+
+        with self.assertRaises(frappe.ValidationError):
+            print_configuration.get_document_print_context(doc, "tax_invoice")
 
     def test_a_repeated_copy_is_numbered(self) -> None:
         doc = payment_entry()
@@ -301,15 +336,17 @@ class TestPrintOptions(UnitTestCase):
             return print_configuration.get_print_options(doc["doctype"], doc["name"], print_format)
 
     def test_offers_one_control_per_named_copy(self) -> None:
-        result = self._options(sales_invoice(), "Tax Invoice Delivery Note and Invoice")
+        result = self._options(sales_invoice(), "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
 
         fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
-        self.assertIn("copy_original", fieldnames)
-        self.assertIn("copy_accounting", fieldnames)
+        self.assertIn("copy_customer_original_enabled", fieldnames)
+        self.assertIn("copy_accounting_copy", fieldnames)
+        self.assertNotIn("copy_company", fieldnames)
+        self.assertIn("copy_custom_label", fieldnames)
         self.assertIn("show_batch_serial", fieldnames)
 
     def test_hides_language_for_a_thai_only_document(self) -> None:
-        result = self._options(sales_invoice(), "Tax Invoice Delivery Note and Invoice")
+        result = self._options(sales_invoice(), "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
 
         fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
         self.assertNotIn("language", fieldnames)
@@ -322,12 +359,42 @@ class TestPrintOptions(UnitTestCase):
         self.assertNotIn("show_batch_serial", fieldnames)
 
     def test_includes_registry_default_values(self) -> None:
-        result = self._options(sales_invoice(), "Tax Invoice Delivery Note and Invoice")
+        result = self._options(sales_invoice(), "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
 
-        self.assertEqual(result["data"]["values"]["copy_original"], 1)
+        self.assertEqual(result["data"]["values"]["copy_company"], 1)
+        self.assertEqual(result["data"]["values"]["copy_customer_original_enabled"], 0)
 
     @patch.object(
-        print_configuration.company_api,
+        print_configuration.frappe,
+        "get_all",
+        return_value=[{"name": "SINV-ITEM-0001"}],
+    )
+    def test_delivery_note_option_is_available_only_for_linked_tax_invoice(self, _get_all: MagicMock) -> None:
+        result = self._options(sales_invoice(), "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
+
+        fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
+        self.assertIn("show_delivery_note", fieldnames)
+        self.assertEqual(result["data"]["values"]["show_delivery_note"], 1)
+
+    def test_delivery_note_option_is_not_available_for_an_unlinked_tax_invoice(self) -> None:
+        result = self._options(sales_invoice(), "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
+
+        fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
+        self.assertNotIn("show_delivery_note", fieldnames)
+
+    @patch.object(
+        print_configuration.frappe,
+        "get_all",
+        return_value=[{"name": "SINV-ITEM-0001"}],
+    )
+    def test_delivery_note_option_is_available_on_the_full_receipt_format(self, _get_all: MagicMock) -> None:
+        result = self._options(sales_invoice(), "ใบเสร็จรับเงิน ใบกำกับภาษี ใบส่งของ")
+
+        fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
+        self.assertIn("show_delivery_note", fieldnames)
+
+    @patch.object(
+        quotation_print_settings.company_api,
         "get_quotation_authorized_signatories",
         return_value=[
             {
@@ -343,7 +410,7 @@ class TestPrintOptions(UnitTestCase):
         ],
     )
     @patch.object(
-        print_configuration.frappe.db,
+        quotation_print_settings.frappe.db,
         "get_value",
         return_value={"company": "COMP-0001", "quotation_signatory_type": "Managing Director"},
     )
@@ -371,10 +438,28 @@ class TestPrintOptions(UnitTestCase):
 
         self.assertEqual(result["data"]["fields"], [])
 
+    def test_shipment_label_options_are_served_by_the_shared_provider_api(self) -> None:
+        shipment = FakeDocument({"doctype": "Shipment", "name": "SHP-0001"})
+
+        result = self._options(shipment, "Shipment Box Label")
+
+        self.assertEqual(
+            result["data"]["fields"],
+            [
+                {
+                    "fieldname": "custom_shipment_label_size",
+                    "label": "Shipment Label Size",
+                    "fieldtype": "Select",
+                    "options": "75 x 100 mm\n100 x 180 mm",
+                }
+            ],
+        )
+        self.assertEqual(result["data"]["values"]["custom_shipment_label_size"], "75 x 100 mm")
+
     def test_checks_read_permission(self) -> None:
         with patch.object(print_configuration.frappe, "has_permission") as mocked_permission:
             print_configuration.get_print_options(
-                "Sales Invoice", "ACC-SINV-0001", "Tax Invoice Delivery Note and Invoice"
+                "Sales Invoice", "ACC-SINV-0001", "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ"
             )
 
         mocked_permission.assert_called_once_with("Sales Invoice", "read", "ACC-SINV-0001", throw=True)

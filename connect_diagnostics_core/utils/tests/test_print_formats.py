@@ -13,8 +13,11 @@ from connect_diagnostics_core.setup import print_action_fields
 
 PRINT_FORMAT_ROOT = Path(__file__).parents[2] / "connect_diagnostics_print" / "print_format"
 PRINT_FORMAT_FILES = (
-    "abbreviated_tax_invoice_and_receipt/abbreviated_tax_invoice_and_receipt.json",
-    "credit_note/credit_note.json",
+    "ใบเสร็จรับเงิน_ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน_ใบกำกับภาษีอย่างย่อ.json",
+    "ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ/ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ.json",
+    "ใบแจ้งหนี้เงินมัดจำ/ใบแจ้งหนี้เงินมัดจำ.json",
+    "ใบเพิ่มหนี้/ใบเพิ่มหนี้.json",
+    "ใบลดหนี้/ใบลดหนี้.json",
     "goods_receipt/goods_receipt.json",
     "material_issue/material_issue.json",
     "material_request/material_request.json",
@@ -24,7 +27,7 @@ PRINT_FORMAT_FILES = (
     "receipt/receipt.json",
     "sales_order/sales_order.json",
     "shipment_box_label/shipment_box_label.json",
-    "tax_invoice_delivery_note_and_invoice/tax_invoice_delivery_note_and_invoice.json",
+    "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ/ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ.json",
     "withholding_tax_cert_cd/withholding_tax_cert_cd.json",
     "yearly_count_sheet/yearly_count_sheet.json",
 )
@@ -40,6 +43,21 @@ FORM_OVERLAY_PRINT_FORMATS = ("Withholding Tax Cert CD",)
 # (it depends on the sidebar's print_settings), so the conditional block must
 # live in the html field rather than the static css field.
 DYNAMIC_STYLE_PRINT_FORMATS = ("Shipment Box Label",)
+TAX_INVOICE_FORMAT = "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ"
+ABBREVIATED_TAX_INVOICE_FORMAT = "ใบเสร็จรับเงิน ใบกำกับภาษีอย่างย่อ"
+CREDIT_NOTE_FORMAT = "ใบลดหนี้"
+THAI_INVOICE_FORMATS = (
+    ABBREVIATED_TAX_INVOICE_FORMAT,
+    "ใบเสร็จรับเงิน ใบกำกับภาษี ใบส่งของ",
+    "ใบแจ้งหนี้เงินมัดจำ",
+    "ใบเพิ่มหนี้",
+    CREDIT_NOTE_FORMAT,
+    TAX_INVOICE_FORMAT,
+)
+DELIVERY_NOTE_TITLE_FORMATS = (
+    "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ/ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ.json",
+    "ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ/ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ.json",
+)
 
 
 def load_print_formats() -> list[dict[str, Any]]:
@@ -52,7 +70,7 @@ class TestPrintFormats(UnitTestCase):
     def test_print_format_json_files_are_valid(self) -> None:
         print_formats = load_print_formats()
 
-        self.assertEqual(len(print_formats), 14)
+        self.assertEqual(len(print_formats), 17)
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
@@ -83,8 +101,8 @@ class TestPrintFormats(UnitTestCase):
     def test_configuration_print_formats_are_newer_than_their_pre_configuration_versions(self) -> None:
         previous_timestamps = {
             "Quotation": "2026-07-30 22:50:00.000000",
-            "Tax Invoice Delivery Note and Invoice": "2026-07-13 02:55:13.159262",
-            "Abbreviated Tax Invoice And Receipt": "2026-07-15 01:06:43.299275",
+            TAX_INVOICE_FORMAT: "2026-07-13 02:55:13.159262",
+            ABBREVIATED_TAX_INVOICE_FORMAT: "2026-07-15 01:06:43.299275",
             "Receipt": "2026-07-03 15:30:00.000000",
         }
 
@@ -92,6 +110,46 @@ class TestPrintFormats(UnitTestCase):
         for name, previous in previous_timestamps.items():
             with self.subTest(name=name):
                 self.assertGreater(formats[name]["modified"], previous)
+
+    def test_delivery_note_title_formats_use_the_request_context_and_updated_metadata(self) -> None:
+        for relative_path in DELIVERY_NOTE_TITLE_FORMATS:
+            print_format = json.loads((PRINT_FORMAT_ROOT / relative_path).read_text())
+            with self.subTest(name=print_format["name"]):
+                self.assertIn("print_context.show_delivery_note", print_format["html"])
+                self.assertIn("/ใบส่งของ", print_format["html"])
+                self.assertIn("overflow-wrap: anywhere", print_format["css"])
+                self.assertGreater(print_format["modified"], "2026-09-06 16:52:40.948966")
+
+    def test_invoice_signature_footers_keep_notes_in_the_single_summary_term(self) -> None:
+        expected_names = {
+            "ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ/ใบเสร็จรับเงิน_ใบกำกับภาษี_ใบส่งของ.json": "ใบเสร็จรับเงิน ใบกำกับภาษี ใบส่งของ",
+            "ใบแจ้งหนี้เงินมัดจำ/ใบแจ้งหนี้เงินมัดจำ.json": "ใบแจ้งหนี้เงินมัดจำ",
+            "ใบเพิ่มหนี้/ใบเพิ่มหนี้.json": "ใบเพิ่มหนี้",
+            "ใบลดหนี้/ใบลดหนี้.json": "ใบลดหนี้",
+            "ใบเสร็จรับเงิน_ใบกำกับภาษีอย่างย่อ/ใบเสร็จรับเงิน_ใบกำกับภาษีอย่างย่อ.json": "ใบเสร็จรับเงิน ใบกำกับภาษีอย่างย่อ",
+            "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ/ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ.json": "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ",
+        }
+        for relative_path, expected_name in expected_names.items():
+            print_format = json.loads((PRINT_FORMAT_ROOT / relative_path).read_text())
+            html = print_format["html"]
+            with self.subTest(name=print_format["name"]):
+                self.assertEqual(print_format["name"], expected_name)
+                self.assertNotIn("_", print_format["name"])
+                self.assertNotIn("-", print_format["name"])
+                self.assertEqual(html.count('<div class="summary-term">'), 1)
+                self.assertIn("terms-heading", html)
+                self.assertIn("signature-only-footer", html)
+                self.assertIn("signature-company", html)
+                self.assertIn("current_print_page", html)
+                self.assertNotIn('<div class="approval-notes">', html)
+                self.assertNotIn('<div class="approval-column">', html)
+
+                if relative_path in DELIVERY_NOTE_TITLE_FORMATS:
+                    self.assertIn("delivery-signatures", html)
+                    self.assertIn("compact-signatures", html)
+                    self.assertIn("{% if print_context.show_delivery_note %}", html)
+                elif print_format["name"] == CREDIT_NOTE_FORMAT:
+                    self.assertIn("three-signatures", html)
 
     def test_templates_do_not_define_money_macros(self) -> None:
         for print_format in load_print_formats():
@@ -120,8 +178,8 @@ class TestPrintFormats(UnitTestCase):
     def test_invoice_item_cells_override_global_print_padding(self) -> None:
         formats = {print_format["name"]: print_format for print_format in load_print_formats()}
         invoice_formats = (
-            "Abbreviated Tax Invoice And Receipt",
-            "Tax Invoice Delivery Note and Invoice",
+            ABBREVIATED_TAX_INVOICE_FORMAT,
+            TAX_INVOICE_FORMAT,
         )
         for name in invoice_formats:
             with self.subTest(name=name):
@@ -129,20 +187,15 @@ class TestPrintFormats(UnitTestCase):
                 self.assertIn(".cd-invoice .item-lines td", css)
                 self.assertIn("padding: 0 !important;", css)
                 self.assertIn("padding-right: 1.05mm !important;", css)
-                self.assertIn("margin-top: 0 !important;", css)
-                self.assertIn("margin-bottom: 0 !important;", css)
-                self.assertIn("margin-left: 0 !important;", css)
-                self.assertIn("margin-right: 0 !important;", css)
+                self.assertIn("--cd-fs-label", css)
+                self.assertIn("grand-total", formats[name]["html"])
 
         transaction_formats = (
-            "Abbreviated Tax Invoice And Receipt",
-            "Credit Note",
             "Goods Receipt",
             "Purchase Order",
             "Quotation",
             "Receipt",
             "Sales Order",
-            "Tax Invoice Delivery Note and Invoice",
         )
         for name in transaction_formats:
             with self.subTest(name=name):
@@ -153,15 +206,21 @@ class TestPrintFormats(UnitTestCase):
                 self.assertIn("font-size: 5.821mm !important;", print_format["css"])
                 self.assertIn("Grand Total", print_format["html"])
 
+        for name in ("ใบแจ้งหนี้เงินมัดจำ", "ใบเพิ่มหนี้", CREDIT_NOTE_FORMAT):
+            with self.subTest(name=name):
+                print_format = formats[name]
+                self.assertIn("--cd-fs-label", print_format["css"])
+                self.assertIn("grand-total", print_format["html"])
+
         content_pagination = {
-            "Abbreviated Tax Invoice And Receipt": "get_sales_invoice_print_context",
-            "Credit Note": "get_sales_invoice_print_context",
+            ABBREVIATED_TAX_INVOICE_FORMAT: "get_sales_invoice_print_context",
+            CREDIT_NOTE_FORMAT: "get_sales_invoice_print_context",
             "Goods Receipt": 'get_print_item_pages(doc, "goods_receipt")',
             "Purchase Order": 'get_print_item_pages(doc, "purchase_order", 29.0)',
             "Quotation": 'get_print_item_pages(doc, "quotation")',
             "Receipt": "get_sales_invoice_print_context",
             "Sales Order": 'get_print_item_pages(doc, "sales_order")',
-            "Tax Invoice Delivery Note and Invoice": "get_sales_invoice_print_context",
+            TAX_INVOICE_FORMAT: "get_sales_invoice_print_context",
         }
         for name, pagination_call in content_pagination.items():
             with self.subTest(name=name):
@@ -182,10 +241,10 @@ class TestPrintFormats(UnitTestCase):
 
     def test_action_slots_bind_to_employee_backed_print_context(self) -> None:
         expected_actions = {
-            "Abbreviated Tax Invoice And Receipt": ("received", "delivered", "authorized", "checked"),
-            "Tax Invoice Delivery Note and Invoice": ("received", "delivered", "authorized", "checked"),
+            ABBREVIATED_TAX_INVOICE_FORMAT: ("received", "delivered", "authorized", "checked"),
+            TAX_INVOICE_FORMAT: ("received", "delivered", "authorized", "checked"),
             "Receipt": ("received", "delivered", "authorized", "checked"),
-            "Credit Note": ("return_received", "warehouse_checked", "authorized"),
+            CREDIT_NOTE_FORMAT: ("return_received", "warehouse_checked", "authorized"),
             "Goods Receipt": ("received", "checked", "authorized"),
             "Material Request": ("submit", "checked", "authorized"),
             "Material Issue": ("submit", "checked", "authorized"),
@@ -220,10 +279,10 @@ class TestPrintFormats(UnitTestCase):
 
     def test_action_slots_do_not_fallback_to_document_owner(self) -> None:
         expected_formats = (
-            "Abbreviated Tax Invoice And Receipt",
-            "Tax Invoice Delivery Note and Invoice",
+            ABBREVIATED_TAX_INVOICE_FORMAT,
+            TAX_INVOICE_FORMAT,
             "Receipt",
-            "Credit Note",
+            CREDIT_NOTE_FORMAT,
             "Purchase Order",
             "Quotation",
             "Material Request",
@@ -237,10 +296,13 @@ class TestPrintFormats(UnitTestCase):
 
     def test_signature_slots_have_a_visible_snapshot_or_fallback_line(self) -> None:
         expected_slots = {
-            "Abbreviated Tax Invoice And Receipt": 4,
-            "Tax Invoice Delivery Note and Invoice": 4,
+            ABBREVIATED_TAX_INVOICE_FORMAT: 2,
+            "ใบเสร็จรับเงิน ใบกำกับภาษี ใบส่งของ": 6,
+            "ใบแจ้งหนี้เงินมัดจำ": 2,
+            "ใบเพิ่มหนี้": 2,
+            TAX_INVOICE_FORMAT: 6,
             "Receipt": 4,
-            "Credit Note": 3,
+            CREDIT_NOTE_FORMAT: 3,
             "Goods Receipt": 3,
             "Purchase Order": 2,
             "Sales Order": 3,
@@ -264,29 +326,38 @@ class TestPrintFormats(UnitTestCase):
             css = print_format["css"]
             compact_css = "".join(css.split())
             with self.subTest(name=name):
-                self.assertEqual(html.count("signature-placeholder"), slot_count)
-                self.assertEqual(html.count("action-signature-image"), slot_count)
+                if name in THAI_INVOICE_FORMATS:
+                    self.assertEqual(html.count("signature_row(") - 1, slot_count)
+                    self.assertEqual(html.count("action-signature-image"), 1)
+                else:
+                    self.assertEqual(html.count("signature-placeholder"), slot_count)
+                    self.assertEqual(html.count("action-signature-image"), slot_count)
                 self.assertIn("signature-role", html)
                 self.assertTrue(any(marker in html for marker in date_caption_classes))
-                self.assertIn("border:0!important", css.replace(" ", ""))
-                if name != "Withholding Tax Cert CD":
-                    self.assertTrue("object-fit:contain" in css or "object-fit: contain" in css)
-                self.assertTrue("transform:scale(1)" in css or "transform: scale(1)" in css)
-                if name != "Withholding Tax Cert CD":
-                    if name in ("Material Request", "Material Issue"):
-                        self.assertIn("width: 36mm !important", css)
-                        self.assertIn("height: 10.5mm !important", css)
-                        self.assertIn("object-fit: contain !important", css)
-                        self.assertIn("width: 36mm !important", css)
-                        self.assertIn("height: 0 !important", css)
-                    else:
-                        self.assertIn("width:36mm!important", compact_css)
-                        self.assertTrue(
-                            "height:10.5mm!important" in compact_css
-                            or "height:10.50mm!important" in compact_css
-                        )
-                        self.assertIn("object-fit:contain!important", compact_css)
-                        self.assertIn("height:0!important", compact_css)
+                if name in THAI_INVOICE_FORMATS:
+                    self.assertIn(".signature-only-footer", css)
+                    self.assertIn("border-bottom", css)
+                    self.assertIn("object-fit: contain", css)
+                else:
+                    self.assertIn("border:0!important", css.replace(" ", ""))
+                    if name != "Withholding Tax Cert CD":
+                        self.assertTrue("object-fit:contain" in css or "object-fit: contain" in css)
+                    self.assertTrue("transform:scale(1)" in css or "transform: scale(1)" in css)
+                    if name != "Withholding Tax Cert CD":
+                        if name in ("Material Request", "Material Issue"):
+                            self.assertIn("width: 36mm !important", css)
+                            self.assertIn("height: 10.5mm !important", css)
+                            self.assertIn("object-fit: contain !important", css)
+                            self.assertIn("width: 36mm !important", css)
+                            self.assertIn("height: 0 !important", css)
+                        else:
+                            self.assertIn("width:36mm!important", compact_css)
+                            self.assertTrue(
+                                "height:10.5mm!important" in compact_css
+                                or "height:10.50mm!important" in compact_css
+                            )
+                            self.assertIn("object-fit:contain!important", compact_css)
+                            self.assertIn("height:0!important", compact_css)
 
     # Content/wording assertions for specific templates were intentionally removed
     # here: those formats are edited live through Desk, and pinning exact strings

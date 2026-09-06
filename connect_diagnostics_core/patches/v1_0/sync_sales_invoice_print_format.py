@@ -13,6 +13,6 @@ def execute() -> None:
     frappe.reload_doc(
         "Connect Diagnostics Print",
         "print_format",
-        "tax_invoice_delivery_note_and_invoice",
+        "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ",
         force=True,
     )

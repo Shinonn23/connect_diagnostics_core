@@ -7,15 +7,8 @@
   There is no per-Customer print configuration: print options are chosen per print in the
   print sidebar (see **Print sidebar engine**), with static registry defaults only.
 - Print Formats are app-owned and editable through Desk (`standard = "No"`): `after_sync` and
-  `after_migrate` remove every
-  `Print Format` whose module is not one of the app modules (`Connect Diagnostics Core`,
-  `Connect Diagnostics Stock`, `Connect Diagnostics Accounting`, or `Connect Diagnostics
-Print`) or an ERPNext Thailand module (`Thai Tax`, `Thai Billing`, `Thai Deposit`, or
-  `Petty Cash`). Retired formats are removed explicitly; `Sales Invoice Print` is retired and
-  Sales Invoice defaults to `Tax Invoice Delivery Note and Invoice`. `Withholding Tax Cert` is
-  owned by ERPNext Thailand; the app-owned Thai WHT certificate is the separately named
-  `Withholding Tax Cert CD`, so the two coexist and neither overwrites the other. Do not add a
-  Print Format fixture that restores records from other modules.
+  `after_migrate` remove every `Print Format` whose module is not `Connect Diagnostics Print`.
+  Do not add a Print Format fixture that restores records from another module.
 - The `css` field is appended verbatim; only `html` is rendered through Jinja. A `{{ ... }}`
   left in `css` is emitted literally and silently breaks whatever it built, so asset paths in
   `css` must be relative (`/assets/...`), never built with `frappe.utils.get_url()`.
