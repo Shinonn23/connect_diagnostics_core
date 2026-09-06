@@ -13,7 +13,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 
 @dataclass(frozen=True)
@@ -84,6 +86,11 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
     "Withholding Tax Cert": (PrintAction("signed", "signed_by", "signed_at", "signed_signature"),),
 }
 
+DEFAULT_PRINT_FORMATS = {
+    "Sales Order": "Sales Order",
+    "Withholding Tax Cert": "Withholding Tax Cert",
+}
+
 
 def get_actions(doctype: str) -> tuple[PrintAction, ...]:
     """Return the registered print actions for a DocType."""
@@ -145,5 +152,16 @@ CUSTOM_FIELDS = {
 
 
 def apply_configuration() -> None:
-    """Create or update the hidden fields during install and migrate."""
+    """Create or update the hidden fields and print defaults during install and migrate."""
     create_custom_fields(CUSTOM_FIELDS, ignore_validate=True)
+    for doctype, print_format in DEFAULT_PRINT_FORMATS.items():
+        make_property_setter(
+            doctype,
+            None,
+            "default_print_format",
+            print_format,
+            "Data",
+            for_doctype=True,
+            validate_fields_for_doctype=False,
+        )
+        frappe.clear_cache(doctype=doctype)

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from frappe.tests import UnitTestCase
 
@@ -35,11 +35,37 @@ class TestPrintActionFields(UnitTestCase):
             fieldnames = [field["fieldname"] for field in fields]
             self.assertEqual(len(fieldnames), len(set(fieldnames)), doctype)
 
+    @patch.object(print_action_fields.frappe, "clear_cache")
+    @patch.object(print_action_fields, "make_property_setter")
     @patch.object(print_action_fields, "create_custom_fields")
-    def test_configuration_is_applied_idempotently_by_the_lifecycle_hook(self, create_custom_fields) -> None:
+    def test_configuration_is_applied_idempotently_by_the_lifecycle_hook(
+        self,
+        create_custom_fields,
+        make_property_setter,
+        clear_cache,
+    ) -> None:
         print_action_fields.apply_configuration()
 
         create_custom_fields.assert_called_once_with(
             print_action_fields.CUSTOM_FIELDS,
             ignore_validate=True,
+        )
+        self.assertEqual(
+            make_property_setter.call_args_list,
+            [
+                call(
+                    doctype,
+                    None,
+                    "default_print_format",
+                    print_format,
+                    "Data",
+                    for_doctype=True,
+                    validate_fields_for_doctype=False,
+                )
+                for doctype, print_format in print_action_fields.DEFAULT_PRINT_FORMATS.items()
+            ],
+        )
+        self.assertEqual(
+            clear_cache.call_args_list,
+            [call(doctype=doctype) for doctype in print_action_fields.DEFAULT_PRINT_FORMATS],
         )

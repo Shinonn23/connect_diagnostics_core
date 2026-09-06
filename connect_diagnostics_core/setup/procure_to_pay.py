@@ -96,6 +96,12 @@ CUSTOM_FIELDS = {
     ],
 }
 
+PROPERTY_SETTERS = {
+    "Purchase Order Item": [
+        ("item_name", "in_list_view", "1", "Check"),
+    ],
+}
+
 _ROLES = (PURCHASE_REQUESTER_ROLE,)
 
 

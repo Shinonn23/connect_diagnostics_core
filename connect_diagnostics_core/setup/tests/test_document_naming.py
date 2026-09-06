@@ -11,36 +11,85 @@ from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.tests import UnitTestCase
 
+from connect_diagnostics_core import hooks
 from connect_diagnostics_core.api.erpnext.employee import parse_buddhist_era_naming_series_variable
-from connect_diagnostics_core.setup import document_naming
+from connect_diagnostics_core.setup import document_naming, purchase_invoice, sales_invoice
 
 
 class TestDocumentNaming(UnitTestCase):
+    def test_property_setters_are_not_synced_as_fixtures(self) -> None:
+        fixture_doctypes = {
+            fixture["doctype"] if isinstance(fixture, dict) else fixture for fixture in hooks.fixtures
+        }
+
+        self.assertNotIn("Property Setter", fixture_doctypes)
+
+    def test_app_registers_only_its_buddhist_year_token(self) -> None:
+        self.assertEqual(
+            hooks.naming_series_variables,
+            {
+                "YYYY-BE": (
+                    "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable"
+                )
+            },
+        )
+
     def test_series_options_render_four_digit_document_numbers(self) -> None:
         options = document_naming.series_options(("SI", "CN"))
 
-        self.assertEqual(options, "SI.YY-BE.MM-DOC.####\nCN.YY-BE.MM-DOC.####")
-        self.assertNotIn("-DATE", options)
+        self.assertEqual(options, "SI.YYYY-BE.MM-DATE.####\nCN.YYYY-BE.MM-DATE.####")
+
+    def test_purchase_invoice_setup_does_not_override_central_naming_options(self) -> None:
+        local_setters = purchase_invoice.PROPERTY_SETTERS["Purchase Invoice"]
+
+        self.assertFalse(
+            any(
+                fieldname == "naming_series" and property_name == "options"
+                for fieldname, property_name, *_ in local_setters
+            )
+        )
+        self.assertEqual(
+            document_naming.series_options(document_naming.NAMING_SERIES_PREFIXES["Purchase Invoice"]),
+            "PI.YYYY-BE.MM-DATE.####",
+        )
+
+    def test_sales_invoice_setup_does_not_override_central_naming_policy(self) -> None:
+        local_setters = sales_invoice.PROPERTY_SETTERS["Sales Invoice"]
+
+        self.assertFalse(
+            any(
+                fieldname == "naming_series" and property_name in {"default", "options"}
+                for fieldname, property_name, *_ in local_setters
+            )
+        )
+
+    def test_every_registered_default_is_available_in_its_options(self) -> None:
+        for doctype in document_naming.NAMING_SERIES_PREFIXES:
+            with self.subTest(doctype=doctype):
+                setters = document_naming.PROPERTY_SETTERS[doctype]
+                default = next(value for field, prop, value, _type in setters if prop == "default")
+                options = next(value for field, prop, value, _type in setters if prop == "options")
+                self.assertIn(default, options.splitlines())
 
     @patch("frappe.model.naming.has_custom_parser")
     def test_series_renders_the_go_live_shape(self, custom_parser: MagicMock) -> None:
         custom_parser.side_effect = lambda token: {
-            "YY-BE": (
+            "YYYY-BE": (
                 "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
             ),
-            "MM-DOC": ("connect_diagnostics_core.setup.document_naming.parse_document_month",),
+            "MM-DATE": ("erpnext_thailand.custom.naming.parse_naming_series_variable",),
         }.get(token)
         doc = SimpleNamespace(
             get=lambda field, default=None: {"posting_date": "2026-07-31"}.get(field, default)
         )
 
         name = parse_naming_series(
-            "SI.YY-BE.MM-DOC.####",
+            "SI.YYYY-BE.MM-DATE.####",
             doc=cast(Document, doc),
             number_generator=lambda _prefix, _digits: "0001",
         )
 
-        self.assertEqual(name, "SI69070001")
+        self.assertEqual(name, "SI2569070001")
 
     def test_document_month_uses_transaction_date(self) -> None:
         doc = SimpleNamespace(get=lambda field: {"posting_date": "2026-07-31"}.get(field))
@@ -69,39 +118,24 @@ class TestDocumentNaming(UnitTestCase):
 
         self.assertEqual(document_naming.parse_document_month(doc, "MM-DOC"), "08")
 
-    def test_buddhist_year_uses_the_same_document_date(self) -> None:
-        doc = SimpleNamespace(
-            get=lambda field: {"purchase_date": "2027-01-01", "creation": "2026-12-31"}.get(field)
-        )
+    @patch(
+        "connect_diagnostics_core.api.erpnext.employee.parse_thailand_naming_series_variable",
+        return_value="2027",
+    )
+    def test_buddhist_year_reuses_erpnext_thailand_date_resolution(self, parse_thailand: MagicMock) -> None:
+        doc = MagicMock()
 
-        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YY-BE"), "70")
+        self.assertEqual(parse_buddhist_era_naming_series_variable(doc, "YYYY-BE"), "2570")
+        parse_thailand.assert_called_once_with(doc, "YYYY-DATE")
 
     def test_unknown_date_token_returns_none(self) -> None:
         self.assertIsNone(document_naming.parse_document_month(MagicMock(), "MM"))
 
-    def test_autoname_patterns_use_document_date_and_four_digits(self) -> None:
+    def test_autoname_patterns_use_the_same_dot_separated_series(self) -> None:
         setters = document_naming.PROPERTY_SETTERS["Attendance Request"]
         autoname = next(setter for setter in setters if setter[0] is None)
 
-        self.assertEqual(
-            autoname[2],
-            "format:ARQ{YYBE}{MMDOC}{####}",
-        )
-
-    def test_autoname_patterns_match_frappes_braced_params_regex(self) -> None:
-        """Regression: {YY-BE}/{MM-DOC} contain "-", which Frappe's
-        BRACED_PARAMS_PATTERN never matches, leaving every AUTONAME_PREFIXES
-        DocType's name as the literal unsubstituted format string.
-        """
-        from frappe.model.naming import BRACED_PARAMS_PATTERN
-
-        setters = document_naming.PROPERTY_SETTERS["Attendance Request"]
-        autoname = next(setter for setter in setters if setter[0] is None)
-
-        self.assertEqual(
-            BRACED_PARAMS_PATTERN.findall(autoname[2]),
-            ["{YYBE}", "{MMDOC}", "{####}"],
-        )
+        self.assertEqual(autoname[2], "ARQ.YYYY-BE.MM-DATE.####")
 
     def test_document_month_accepts_the_braced_autoname_alias(self) -> None:
         doc = SimpleNamespace(get=lambda field: {"posting_date": "2026-07-31"}.get(field))
@@ -124,7 +158,7 @@ class TestDocumentNaming(UnitTestCase):
 
         document_naming.set_operational_naming_series(doc)
 
-        self.assertEqual(doc.naming_series, "CN.YY-BE.MM-DOC.####")
+        self.assertEqual(doc.naming_series, "CN.YYYY-BE.MM-DATE.####")
 
     def test_journal_entry_selects_series_from_voucher_type(self) -> None:
         doc = SimpleNamespace(
@@ -135,7 +169,7 @@ class TestDocumentNaming(UnitTestCase):
 
         document_naming.set_operational_naming_series(doc)
 
-        self.assertEqual(doc.naming_series, "BK.YY-BE.MM-DOC.####")
+        self.assertEqual(doc.naming_series, "BK.YYYY-BE.MM-DATE.####")
 
     @patch.object(document_naming.frappe.db, "get_value", return_value="Pay")
     def test_payment_receipt_selects_payment_series(self, _get_value: MagicMock) -> None:
@@ -147,7 +181,7 @@ class TestDocumentNaming(UnitTestCase):
 
         document_naming.set_operational_naming_series(doc)
 
-        self.assertEqual(doc.naming_series, "RV.YY-BE.MM-DOC.####")
+        self.assertEqual(doc.naming_series, "RV.YYYY-BE.MM-DATE.####")
 
     @patch.object(document_naming.frappe, "clear_cache")
     @patch.object(document_naming, "make_property_setter", create=True)
