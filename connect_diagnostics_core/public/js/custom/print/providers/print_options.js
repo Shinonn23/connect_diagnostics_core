@@ -79,9 +79,6 @@
 			return;
 		}
 
-		const readyByEmployee = Object.fromEntries(
-			(this.__cd_manager_signatories || []).map((row) => [row.employee, row.ready]),
-		);
 		const labelByEmployee = Object.fromEntries(
 			(this.__cd_manager_signatories || []).map((row) => [row.employee, row.name || row.employee]),
 		);
@@ -89,11 +86,6 @@
 			const employee = this.value;
 			if (employee && labelByEmployee[employee]) {
 				$(this).text(labelByEmployee[employee]);
-			}
-			if (employee && readyByEmployee[employee] === false) {
-				$(this)
-					.prop("disabled", true)
-					.text(`${$(this).text()} (${__("Not ready")})`);
 			}
 		});
 
@@ -113,16 +105,16 @@
 		if (this.frm?.doc?.doctype !== "Quotation") {
 			return true;
 		}
+		// Once the Workflow has recorded the action, the stored snapshot is the
+		// source of truth. Missing Employee signature is intentionally non-blocking.
+		if (this.frm.doc.signatory_by || this.frm.doc.signatory_at) {
+			return true;
+		}
 		const signatory = this.__cd_print_option_controls?.quotation_signatory_type?.get_value?.();
 		if (signatory === "Managing Director") {
 			const manager = this.__cd_print_option_controls?.manager_signatory_employee?.get_value?.();
 			if (!manager) {
 				frappe.msgprint(__("Select a Manager Signatory before printing."));
-				return false;
-			}
-			const row = (this.__cd_manager_signatories || []).find((item) => item.employee === manager);
-			if (!row || !row.ready) {
-				frappe.msgprint(__("The selected Manager Signatory is not ready to sign this quotation."));
 				return false;
 			}
 		} else if (signatory === "Sales Representative" && !this.frm.doc.sales_representative_employee) {

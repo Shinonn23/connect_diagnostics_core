@@ -101,6 +101,9 @@ jinja = {
         "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.date.format_date",
         "connect_diagnostics_core.api.erpnext.print_configuration.get_document_print_context",
+        "connect_diagnostics_core.api.erpnext.print_configuration.get_print_action_context",
+        "connect_diagnostics_core.api.erpnext.print_pagination.get_print_item_pages",
+        "connect_diagnostics_core.api.erpnext.print_pagination.get_print_page_metrics",
         "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
         "connect_diagnostics_core.api.frappe.print_log.register_print",
@@ -108,18 +111,70 @@ jinja = {
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
 
+# Workflow Transition Tasks are site-configured on each workflow transition.
+# They snapshot the current Employee and signature without creating or owning
+# any Workflow definition in this app.
+workflow_methods = [
+    {
+        "name": "Capture Print Action: Submit",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_submit_action",
+    },
+    {
+        "name": "Capture Print Action: Received",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_received_action",
+    },
+    {
+        "name": "Capture Print Action: Delivered",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_delivered_action",
+    },
+    {
+        "name": "Capture Print Action: Prepared",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_prepared_action",
+    },
+    {
+        "name": "Capture Print Action: Ordered",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_ordered_action",
+    },
+    {
+        "name": "Capture Print Action: Checked",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_checked_action",
+    },
+    {
+        "name": "Capture Print Action: Authorized",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_authorized_action",
+    },
+    {
+        "name": "Capture Print Action: Return Received",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_return_received_action",
+    },
+    {
+        "name": "Capture Print Action: Warehouse Checked",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_warehouse_checked_action",
+    },
+    {
+        "name": "Capture Print Action: Signatory",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signatory_action",
+    },
+    {
+        "name": "Capture Print Action: Signed",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signed_action",
+    },
+]
+
 # Installation
 # ------------
 
 # before_install = "connect_diagnostics_core.install.before_install"
 after_install = [
     "connect_diagnostics_core.setup.after_install",
+    "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
 after_sync = "connect_diagnostics_core.setup.after_sync"
 before_migrate = "connect_diagnostics_core.setup.before_migrate"
 after_migrate = [
     "connect_diagnostics_core.setup.after_migrate",
+    "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
 

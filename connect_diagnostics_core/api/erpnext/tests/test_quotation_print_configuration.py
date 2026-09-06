@@ -75,6 +75,53 @@ class TestQuotationPrintConfiguration(UnitTestCase):
         )
 
     @patch.object(quotation, "get_document_print_context")
+    def test_workflow_signatory_snapshot_is_used_for_name_signature_and_time(
+        self, mocked_configuration: MagicMock
+    ) -> None:
+        mocked_configuration.return_value = _configuration(
+            sales_representative_employee="",
+            print_actions={
+                "signatory": {
+                    "employee": "EMP-SNAPSHOT",
+                    "name": "Snapshot Signatory",
+                    "signature": "data:image/png;base64,stored-signature",
+                    "acted_at": "2026-09-05 10:30:00",
+                }
+            },
+        )
+
+        context = quotation.get_quotation_print_context(cast(Document, FakeQuotation()))
+
+        self.assertEqual(context["signatory"]["employee"], "EMP-SNAPSHOT")
+        self.assertEqual(context["signatory"]["name"], "Snapshot Signatory")
+        self.assertEqual(context["signatory"]["signature"], "data:image/png;base64,stored-signature")
+        self.assertEqual(context["signatory"]["acted_at"], "2026-09-05 10:30:00")
+
+    @patch.object(quotation, "_is_real_print_or_pdf_request", return_value=True)
+    @patch.object(quotation, "get_document_print_context")
+    def test_snapshot_without_signature_does_not_block_printing(
+        self, mocked_configuration: MagicMock, _mocked_real_print: MagicMock
+    ) -> None:
+        mocked_configuration.return_value = _configuration(
+            sales_representative_employee="",
+            print_actions={
+                "signatory": {
+                    "employee": "EMP-SNAPSHOT",
+                    "name": "No Signature Signatory",
+                    "signature": "",
+                    "acted_at": "2026-09-05 10:30:00",
+                }
+            },
+        )
+
+        context = quotation.get_quotation_print_context(cast(Document, FakeQuotation()))
+
+        self.assertEqual(context["signatory"]["name"], "No Signature Signatory")
+        self.assertEqual(context["signatory"]["acted_at"], "2026-09-05 10:30:00")
+        self.assertFalse(context["signatory"]["signature"])
+        self.assertFalse(context["signatory"]["ready"])
+
+    @patch.object(quotation, "get_document_print_context")
     @patch.object(quotation.frappe.db, "get_value", return_value=SALES_REPRESENTATIVE)
     def test_managing_director_prints_a_blank_name_without_touching_the_database(
         self, mocked_get_value: MagicMock, mocked_configuration: MagicMock

@@ -59,6 +59,7 @@ class TestPrintDocumentRegistry(UnitTestCase):
 
     def test_resolve_document_key_falls_back_to_the_doctype(self) -> None:
         self.assertEqual(print_documents.resolve_document_key("Sales Invoice"), "tax_invoice")
+        self.assertEqual(print_documents.resolve_document_key("Sales Invoice", "Credit Note"), "tax_invoice")
         self.assertEqual(print_documents.resolve_document_key("Payment Entry"), "receipt")
         self.assertEqual(print_documents.resolve_document_key("Quotation"), "quotation")
 

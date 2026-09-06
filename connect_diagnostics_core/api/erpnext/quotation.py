@@ -15,7 +15,10 @@ from frappe.model.document import Document
 from frappe.utils import cint, date_diff
 
 from connect_diagnostics_core.api.erpnext import company as company_api
-from connect_diagnostics_core.api.erpnext.print_configuration import get_document_print_context
+from connect_diagnostics_core.api.erpnext.print_configuration import (
+    get_document_print_context,
+    prepare_signature_for_print,
+)
 from connect_diagnostics_core.setup import quotation as quotation_setup
 
 
@@ -101,6 +104,7 @@ def get_quotation_print_context(doc: Document | Mapping[str, Any]) -> dict[str, 
     language = _text(context.get("language")) or "Thai"
     sales_representative = _text(context.get("sales_representative_employee"))
     manager_signatory = _text(context.get("manager_signatory_employee"))
+    signatory_action = (context.get("print_actions") or {}).get("signatory", {})
 
     result = {
         **context,
@@ -110,12 +114,19 @@ def get_quotation_print_context(doc: Document | Mapping[str, Any]) -> dict[str, 
         "validity_text": _validity_text(doc, context, language),
         "validity_is_custom": bool(cint(context.get("edit_validity_text"))),
         "delivery_terms": _text(context.get("quotation_delivery_terms")),
-        "signatory": _signatory_details(
-            context,
-            sales_representative,
-            manager_signatory,
-            _text(doc.get("company")),
-            language,
+        # New workflow-backed quotations use the immutable action snapshot.
+        # Keep the existing print-sidebar resolution only for legacy quotations
+        # that predate the snapshot fields.
+        "signatory": (
+            _snapshot_signatory_details(context, signatory_action, language)
+            if _action_has_snapshot(signatory_action)
+            else _signatory_details(
+                context,
+                sales_representative,
+                manager_signatory,
+                _text(doc.get("company")),
+                language,
+            )
         ),
         "sales_contact": _employee_details(sales_representative),
         "copies": context["copies"],
@@ -191,6 +202,48 @@ def _signatory_details(
     return details
 
 
+def _snapshot_signatory_details(
+    context: Mapping[str, Any], action: Mapping[str, Any], language: str
+) -> dict[str, Any]:
+    """Build the Quotation signatory from the stored workflow action snapshot."""
+    signatory_type = _text(context.get("quotation_signatory_type"))
+    caption = quotation_setup.SIGNATORY_CAPTIONS.get(signatory_type)
+    if caption is None:
+        frappe.throw(_("Quotation signatory type is required."))
+        raise frappe.ValidationError(signatory_type)  # frappe.throw already raised
+
+    employee = _text(action.get("employee"))
+    name = _text(action.get("name"))
+    signature = _text(action.get("signature"))
+    details = {
+        "employee": employee,
+        "name": name,
+        "phone": "",
+        "signature": signature,
+        "acted_at": action.get("acted_at"),
+        "ready": bool(employee and name and signature),
+        "caption": _caption_text(caption, language),
+        "type": signatory_type,
+    }
+    if not employee:
+        details["reason"] = _("The signatory action has not recorded an Employee.")
+    elif not name:
+        details["reason"] = _("The signatory Employee could not be found.")
+    elif not signature:
+        # A missing Employee signature is deliberately non-blocking. The
+        # action name and time remain valid evidence and the print leaves the
+        # image area empty.
+        details["reason"] = _("The signatory Employee has no signature.")
+    else:
+        details["reason"] = ""
+    return details
+
+
+def _action_has_snapshot(action: Mapping[str, Any]) -> bool:
+    """Return whether a workflow action has written any snapshot value."""
+    return bool(_text(action.get("employee")) or _text(action.get("signature")) or action.get("acted_at"))
+
+
 def _caption_text(caption: tuple[str, str], language: str) -> str:
     thai, english = caption
     if language == "Thai":
@@ -213,7 +266,7 @@ def _employee_details(employee: str) -> dict[str, Any]:
             as_dict=True,
         ),
     )
-    signature = _text(details.get("quotation_signature")) if details else ""
+    signature = prepare_signature_for_print(_text(details.get("quotation_signature"))) if details else ""
     return {
         "employee": employee,
         "name": _text(details.get("employee_name")) if details else "",

@@ -14,17 +14,22 @@ per-Customer print configuration.
 
 from __future__ import annotations
 
+import base64
+from binascii import Error as Base64Error
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from functools import lru_cache
+from io import BytesIO
 from typing import Any, cast
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
+from PIL import Image
 
 from connect_diagnostics_core.api.erpnext import company as company_api
-from connect_diagnostics_core.setup import print_documents
+from connect_diagnostics_core.setup import print_action_fields, print_documents
 from connect_diagnostics_core.setup import quotation as quotation_setup
 
 SIDEBAR_PREFIX = "cd_"
@@ -227,6 +232,7 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         "edit_validity_text": cint(values.get("edit_validity_text")),
         "validity_text": _text(values.get("validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),
+        "print_actions": get_print_action_context(doc),
     }
     if document.key == "quotation":
         context["signatory_employee"] = (
@@ -241,6 +247,113 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
     if configuration != "quotation":
         register_print(doc, configuration, context)
     return context
+
+
+def get_print_action_context(doc: Document | Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Resolve stored Employee links for the action slots in a print format.
+
+    Only fields written on the document are considered. In particular, this
+    does not fall back to ``owner`` or ``modified_by`` because those users are
+    not proof that a particular workflow action occurred.
+    """
+    doctype = _text(doc.get("doctype"))
+    actions = print_action_fields.get_actions(doctype)
+    context = {
+        action.key: {
+            "employee": _text(doc.get(action.employee_field)),
+            "name": "",
+            "signature": prepare_signature_for_print(_text(doc.get(action.signature_field))),
+            "acted_at": doc.get(action.datetime_field),
+        }
+        for action in actions
+    }
+    employee_names = sorted(value["employee"] for value in context.values() if value["employee"])
+    if not employee_names:
+        return context
+
+    employees = {
+        _text(row.get("name")): row
+        for row in frappe.get_all(
+            "Employee",
+            filters={"name": ["in", employee_names]},
+            fields=["name", "employee_name"],
+        )
+    }
+    for value in context.values():
+        employee = employees.get(_text(value.get("employee")))
+        if employee:
+            value["name"] = _text(employee.get("employee_name")) or _text(employee.get("name"))
+
+    # The checked-by box represents the person who submitted the document in
+    # the standard transaction flow. Keep an explicitly stored checked action
+    # as a fallback for legacy documents that predate the submit snapshot.
+    submit = context.get("submit")
+    if submit and submit["employee"] and "checked" in context:
+        context["checked"] = dict(submit)
+    return context
+
+
+@lru_cache(maxsize=128)
+def prepare_signature_for_print(signature: str) -> str:
+    """Crop the signature canvas for display without changing the stored snapshot."""
+    if signature.endswith("/assets/frappe/images/signature-placeholder.png"):
+        return ""
+    if not signature.startswith("data:image/") or ";base64," not in signature:
+        return signature
+
+    _header, encoded = signature.split(",", 1)
+    try:
+        raw = base64.b64decode(encoded, validate=True)
+        if not raw or len(raw) > 2 * 1024 * 1024:
+            return signature
+        image = Image.open(BytesIO(raw)).convert("RGBA")
+        image.load()
+    except (Base64Error, OSError, ValueError):
+        return signature
+
+    alpha = image.getchannel("A")
+    thresholded_alpha = alpha.point(lambda value: 255 if value > 8 else 0)
+    content_box = thresholded_alpha.getbbox()
+    if not content_box:
+        return signature
+
+    # The signature widget's baseline is a long horizontal run. Remove only
+    # rows wider than half of the actual content so ordinary pen strokes stay.
+    baseline_rows: set[int] = set()
+    content_width = content_box[2] - content_box[0]
+    for y in range(content_box[1], content_box[3]):
+        longest_run = 0
+        current_run = 0
+        for x in range(content_box[0], content_box[2]):
+            if cast(int, thresholded_alpha.getpixel((x, y))) > 0:
+                current_run += 1
+                longest_run = max(longest_run, current_run)
+            else:
+                current_run = 0
+        if longest_run >= max(100, content_width // 2):
+            baseline_rows.add(y)
+
+    if baseline_rows:
+        for y in baseline_rows:
+            for x in range(image.width):
+                red, green, blue, _alpha = cast(tuple[int, int, int, int], image.getpixel((x, y)))
+                image.putpixel((x, y), (red, green, blue, 0))
+        thresholded_alpha = image.getchannel("A").point(lambda value: 255 if value > 8 else 0)
+        content_box = thresholded_alpha.getbbox()
+        if not content_box:
+            return signature
+
+    # Keep only a small safety margin around the ink. The source signature
+    # widget has already been cropped above; a large margin would make the
+    # signature look small again when it is fitted into the print slot.
+    left = max(content_box[0] - 2, 0)
+    top = max(content_box[1] - 2, 0)
+    right = min(content_box[2] + 2, image.width)
+    bottom = min(content_box[3] + 2, image.height)
+    cropped = image.crop((left, top, right, bottom))
+    output = BytesIO()
+    cropped.save(output, format="PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(output.getvalue()).decode("ascii")
 
 
 def _copy_contexts(

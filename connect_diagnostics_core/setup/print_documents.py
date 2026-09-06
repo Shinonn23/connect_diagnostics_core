@@ -202,7 +202,12 @@ def get_document(key: str) -> PrintDocument | None:
 
 
 def resolve_document_key(doctype: str, print_format: str = "") -> str:
-    """Return the configuration key for a print format, falling back to the DocType."""
+    """Return a print format key, falling back to the DocType configuration.
+
+    A Credit Note is a Sales Invoice return in ERPNext, so it intentionally uses
+    the Sales Invoice tax-invoice configuration instead of a separate registry
+    entry.
+    """
     if print_format:
         for document in PRINT_DOCUMENTS:
             if print_format in document.print_formats:

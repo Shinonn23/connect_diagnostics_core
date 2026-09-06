@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
-from typing import Any
+import base64
+from io import BytesIO
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests import UnitTestCase
+from PIL import Image, ImageDraw
 
 from connect_diagnostics_core.api.erpnext import print_configuration
-from connect_diagnostics_core.setup import print_documents
+from connect_diagnostics_core.setup import print_action_fields, print_documents
 
 
 class FakeDocument(frappe._dict):
@@ -161,6 +164,133 @@ class TestPrintContext(ContextHarness):
             print_configuration.get_document_print_context(sales_invoice(), "tax_invoice")
 
         mocked_register.assert_called_once()
+
+    def test_print_context_exposes_action_slots(self) -> None:
+        context = print_configuration.get_document_print_context(sales_invoice(), "tax_invoice")
+
+        self.assertEqual(
+            set(context["print_actions"]),
+            {action.key for action in print_action_fields.get_actions("Sales Invoice")},
+        )
+        self.assertEqual(context["print_actions"]["authorized"]["name"], "")
+        self.assertIsNone(context["print_actions"]["authorized"]["acted_at"])
+
+
+class TestPrintActionContext(UnitTestCase):
+    @patch.object(
+        print_configuration.frappe,
+        "get_all",
+        return_value=[
+            {
+                "name": "EMP-0001",
+                "employee_name": "Approved Employee",
+                "quotation_signature": "data:image/png;base64,signature",
+            }
+        ],
+    )
+    def test_resolves_employee_name_and_signature_in_one_query(self, get_all: MagicMock) -> None:
+        action_at = "2026-09-04 09:15:00"
+        doc = sales_invoice(
+            received_by="EMP-0001",
+            received_at=action_at,
+            received_signature="data:image/png;base64,stored-signature",
+            owner="owner@example.com",
+        )
+
+        context = print_configuration.get_print_action_context(doc)
+
+        self.assertEqual(context["received"]["name"], "Approved Employee")
+        self.assertEqual(context["received"]["signature"], "data:image/png;base64,stored-signature")
+        self.assertEqual(context["received"]["acted_at"], action_at)
+        get_all.assert_called_once_with(
+            "Employee",
+            filters={"name": ["in", ["EMP-0001"]]},
+            fields=["name", "employee_name"],
+        )
+
+    @patch.object(
+        print_configuration.frappe,
+        "get_all",
+        return_value=[
+            {
+                "name": "EMP-0001",
+                "employee_name": "Approved Employee",
+                "quotation_signature": "data:image/png;base64,current-signature",
+            }
+        ],
+    )
+    def test_does_not_use_the_employee_signature_when_the_snapshot_is_empty(
+        self, _get_all: MagicMock
+    ) -> None:
+        context = print_configuration.get_print_action_context(
+            sales_invoice(received_by="EMP-0001", received_at="2026-09-04 09:15:00")
+        )
+
+        self.assertEqual(context["received"]["name"], "Approved Employee")
+        self.assertEqual(context["received"]["signature"], "")
+
+    @patch.object(
+        print_configuration.frappe,
+        "get_all",
+        return_value=[{"name": "EMP-0001", "employee_name": "Approved Employee"}],
+    )
+    def test_signature_widget_placeholder_is_rendered_as_missing_signature(self, _get_all: MagicMock) -> None:
+        context = print_configuration.get_print_action_context(
+            sales_invoice(
+                received_by="EMP-0001",
+                received_at="2026-09-04 09:15:00",
+                received_signature="/assets/frappe/images/signature-placeholder.png",
+            )
+        )
+
+        self.assertEqual(context["received"]["name"], "Approved Employee")
+        self.assertEqual(context["received"]["signature"], "")
+
+    @patch.object(
+        print_configuration.frappe,
+        "get_all",
+        return_value=[{"name": "EMP-0001", "employee_name": "Submitter"}],
+    )
+    def test_checked_action_uses_submit_snapshot_for_the_standard_flow(self, _get_all: MagicMock) -> None:
+        context = print_configuration.get_print_action_context(
+            sales_invoice(
+                submit_by="EMP-0001",
+                submit_at="2026-09-04 09:15:00",
+                submit_signature="data:image/png;base64,submit-signature",
+            )
+        )
+
+        self.assertEqual(context["checked"], context["submit"])
+
+    def test_does_not_infer_an_action_from_owner(self) -> None:
+        context = print_configuration.get_print_action_context(
+            sales_invoice(owner="owner@example.com", modified_by="owner@example.com")
+        )
+
+        self.assertEqual(context["received"]["employee"], "")
+        self.assertEqual(context["received"]["name"], "")
+        self.assertEqual(context["received"]["signature"], "")
+
+    def test_crops_signature_canvas_and_removes_capture_baseline_for_print(self) -> None:
+        image = Image.new("RGBA", (240, 100), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        draw.line((75, 25, 145, 55), fill=(80, 80, 80, 255), width=3)
+        draw.line((20, 80, 220, 80), fill=(80, 80, 80, 255), width=2)
+        source = BytesIO()
+        image.save(source, format="PNG")
+        signature = "data:image/png;base64," + base64.b64encode(source.getvalue()).decode("ascii")
+
+        prepared = print_configuration.prepare_signature_for_print(signature)
+        result = Image.open(BytesIO(base64.b64decode(prepared.split(",", 1)[1]))).convert("RGBA")
+        alpha = result.getchannel("A")
+
+        self.assertLess(result.width, image.width)
+        self.assertLess(result.height, image.height)
+        for y in range(result.height):
+            self.assertLess(
+                sum(cast(int, alpha.getpixel((x, y))) > 8 for x in range(result.width)),
+                result.width // 2,
+            )
 
 
 class TestPrintOptions(UnitTestCase):
