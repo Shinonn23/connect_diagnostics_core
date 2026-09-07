@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.50.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.49.0...v0.50.0) (2026-09-07)
+
+
+### Features
+
+* **accounting:** migrate to standard departments ([23fecd3](https://github.com/Shinonn23/connect_diagnostics_core/commit/23fecd3a3ab0e72d3693081ad09ea298734de897))
+* **print:** add action signatures and pagination services ([b5afe6d](https://github.com/Shinonn23/connect_diagnostics_core/commit/b5afe6d323afc539b0b947f0f0e65e675cabb2ab))
+* **print:** localize format settings and layouts ([5928f9a](https://github.com/Shinonn23/connect_diagnostics_core/commit/5928f9af638e594f1f2beac1dcf8a24fb6a205af))
+
+
+### Bug Fixes
+
+* **print:** embed self-contained format layouts ([bbf5b08](https://github.com/Shinonn23/connect_diagnostics_core/commit/bbf5b0882eeaf5f522915f8d068d2e172c873ab5))
+* self-contained print formats ([ecf9a60](https://github.com/Shinonn23/connect_diagnostics_core/commit/ecf9a60f95b00083ac73de86fdacace2fa83f19d))
+
+
+### Code Refactoring
+
+* **setup:** manage configuration in code ([c1f92e1](https://github.com/Shinonn23/connect_diagnostics_core/commit/c1f92e1ef96bb2d9b67647342a8a0d7d19e9968d))
+* **setup:** remove legacy configuration fixtures ([e321cdd](https://github.com/Shinonn23/connect_diagnostics_core/commit/e321cdd2bdbe754324b79395d08cb8d322eb3c18))
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh yarn lockfile ([7d80c7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/7d80c7dd3a8479836a260678d74a72af79d4465e))
+
+
+### Styles
+
+* **print:** normalize self-contained format css ([0ef65d0](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ef65d07790713bd29c779e0271cc90ad662340c))
+
+
+### Tests
+
+* **print:** account for added format fixtures ([0673f25](https://github.com/Shinonn23/connect_diagnostics_core/commit/0673f25f299a38b6c282da49fa30dd1facf15481))
+* **print:** account for all format fixtures ([8580d1e](https://github.com/Shinonn23/connect_diagnostics_core/commit/8580d1ed32a202920c2f83a34e0e2a42d1845057))
+
+
+### Documentation
+
+* **print:** document self-contained format workflow ([f1d857e](https://github.com/Shinonn23/connect_diagnostics_core/commit/f1d857e0fce0574d02b9d52aeadb040b3bd1d7d3))
+
 ## [0.49.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.48.0...v0.49.0) (2026-09-03)
 
 
