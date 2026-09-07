@@ -20,8 +20,9 @@ policy in [`../AGENTS.md`](../AGENTS.md).
   global document hooks or recreate app-owned workflows ad hoc. A new workflow starts from a
   written specification and is owned by Frappe Workflow's native states and transitions.
 - Auto-numbered transactional and operational DocTypes use
-  `[prefix][YY-BE][MM][####]`; the registry is `setup.document_naming`. Month uses the document
-  date, alternate series use business fields, and company abbreviations are not prepended.
+  `[prefix][YYYY-BE][MM-DATE][####]`; the registry is `setup.document_naming`. The Buddhist year
+  and month use ERPNext Thailand's document-date resolution, alternate series use business fields,
+  and company abbreviations are not prepended.
 
 ## Python and Frappe conventions
 
@@ -29,7 +30,7 @@ policy in [`../AGENTS.md`](../AGENTS.md).
   `from __future__ import annotations` when needed.
 - Prefer `cast()` to narrow Frappe/ERPNext types. An unavoidable type ignore must name a
   specific code and reason, for example `# ty: ignore[unresolved-attribute] - runtime custom
-  field (setup/item.py)`; never use a bare ignore.
+field (setup/item.py)`; never use a bare ignore.
 - Use `frappe.throw()` for user-facing errors: English, sentence case, descriptive, and without
   error codes. Use `frappe.utils.now()` / `frappe.utils.today()` for deterministic tests.
 - `frappe.conf[<key>]` is site-scoped. Never read or write the `frappe.conf` object directly,
@@ -39,10 +40,10 @@ policy in [`../AGENTS.md`](../AGENTS.md).
   third-party → frappe → local; do not use wildcard or unused imports.
 - Python files carry this header:
 
-  ```python
-  # Copyright (c) 2026, Siwat Sroisuwan and contributors
-  # For license information, please see license.txt
-  ```
+    ```python
+    # Copyright (c) 2026, Siwat Sroisuwan and contributors
+    # For license information, please see license.txt
+    ```
 
 - The `ty-check` hook uses `../../env/bin/python` by default. CI sets `TY_PYTHON` to the Bench
   interpreter and runs the hook only after Bench installation.
@@ -81,14 +82,14 @@ scripts minimal and delegate business logic to whitelisted Python through `frapp
 
 ## Security and performance
 
-| Area | Rule |
-| --- | --- |
-| SQL | Parameterized only: `frappe.db.sql("... WHERE name=%s", (name,))` |
-| Permissions | Check `frappe.has_permission()` before data access in whitelisted methods |
-| Input | Validate all user inputs server-side |
-| XSS | Escape dynamic content and use Jinja auto-escaping |
-| Secrets | Use site config or environment variables; never hardcode secrets |
-| File uploads | Validate file type and size before processing |
+| Area         | Rule                                                                      |
+| ------------ | ------------------------------------------------------------------------- |
+| SQL          | Parameterized only: `frappe.db.sql("... WHERE name=%s", (name,))`         |
+| Permissions  | Check `frappe.has_permission()` before data access in whitelisted methods |
+| Input        | Validate all user inputs server-side                                      |
+| XSS          | Escape dynamic content and use Jinja auto-escaping                        |
+| Secrets      | Use site config or environment variables; never hardcode secrets          |
+| File uploads | Validate file type and size before processing                             |
 
 Prefer `frappe.db.get_value()` and `frappe.get_all(fields=[…])` over full-document loads. A
 loop containing a query needs a documented reason; nested loops with database access are a

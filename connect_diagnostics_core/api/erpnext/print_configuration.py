@@ -14,18 +14,22 @@ per-Customer print configuration.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+import base64
+from binascii import Error as Base64Error
+from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import lru_cache
+from io import BytesIO
 from typing import Any, cast
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
+from PIL import Image
 
-from connect_diagnostics_core.api.erpnext import company as company_api
-from connect_diagnostics_core.setup import print_documents
-from connect_diagnostics_core.setup import quotation as quotation_setup
+from connect_diagnostics_core.connect_diagnostics_print.print_format.settings import SidebarExtension
+from connect_diagnostics_core.setup import print_action_fields, print_documents
 
 SIDEBAR_PREFIX = "cd_"
 COPY_FIELD_PREFIX = "copy_"
@@ -33,17 +37,24 @@ COPY_FIELD_PREFIX = "copy_"
 
 def get_default_configuration(document: print_documents.PrintDocument) -> dict[str, Any]:
     """Return the registry defaults for one document, before any site data."""
-    values: dict[str, Any] = dict(print_documents.SCALAR_DEFAULTS)
-    values.update(
-        {
-            "enabled": 1,
-            "show_date": 1,
-            "language": print_documents.default_language(document),
-            "show_batch_serial": 1 if document.offers_batch_serial else 0,
-        }
-    )
-    for definition in document.copies:
-        values[_copy_field(definition.key)] = definition.default_count
+    values: dict[str, Any] = {
+        "enabled": 1,
+        **document.defaults,
+    }
+    if document.include_standard_sidebar_fields:
+        values.update(
+            {
+                "show_date": 1,
+                "language": print_documents.default_language(document),
+                "show_batch_serial": 1 if document.offers_batch_serial else 0,
+            }
+        )
+        for definition in document.copies:
+            values[_copy_field(definition.key)] = definition.default_count
+            if definition.selection_mode == "checkbox" and not definition.always_include:
+                values[_copy_enabled_field(definition.key)] = 0
+                if definition.custom_label:
+                    values[_copy_label_field(definition.key)] = ""
     return values
 
 
@@ -73,6 +84,7 @@ def resolve_configuration(doc: Document | Mapping[str, Any], configuration: str)
 
     _apply_document_fields(values, sources, doc, document)
     _apply_print_settings(values, sources, doc, document)
+    _validate_copy_settings(document, values)
     return Resolution(values, sources)
 
 
@@ -97,23 +109,14 @@ def get_print_options(doctype: str, docname: str, print_format: str | None = Non
     if not document:
         return {"data": {"fields": [], "values": {}}, "message": ""}
     values = get_default_configuration(document)
-    manager_signatories: list[dict[str, Any]] = []
-    if document.key == "quotation":
-        quotation_values = (
-            frappe.db.get_value("Quotation", docname, ["company", "quotation_signatory_type"], as_dict=True)
-            or {}
-        )
-        signatory_type = _text(quotation_values.get("quotation_signatory_type"))
-        if signatory_type:
-            values["quotation_signatory_type"] = signatory_type
-        manager_signatories = company_api.get_quotation_authorized_signatories(
-            _text(quotation_values.get("company"))
-        )
+    extension = document.sidebar_extension(docname) if document.sidebar_extension else None
+    if extension:
+        values.update(extension.values)
     return {
         "data": {
-            "fields": _sidebar_fields(document, manager_signatories),
+            "fields": _sidebar_fields(document, extension),
             "values": values,
-            "manager_signatories": manager_signatories,
+            "manager_signatories": list(extension.manager_signatories) if extension else [],
         },
         "message": _("Print options loaded."),
     }
@@ -121,52 +124,28 @@ def get_print_options(doctype: str, docname: str, print_format: str | None = Non
 
 def _sidebar_fields(
     document: print_documents.PrintDocument,
-    manager_signatories: Sequence[Mapping[str, Any]] = (),
+    extension: SidebarExtension | None = None,
 ) -> list[dict[str, Any]]:
     """Build the sidebar controls for one document from the registry."""
-    fields: list[dict[str, Any]] = [
-        {
-            "fieldname": "customer_print_name",
-            "label": _("Customer Print Name"),
-            "fieldtype": "Data",
-        },
-        {
-            "fieldname": "show_date",
-            "label": _("Show Date"),
-            "fieldtype": "Check",
-        },
-    ]
-    if document.key == "quotation":
+    fields: list[dict[str, Any]] = []
+    if document.include_standard_sidebar_fields:
         fields.extend(
             [
                 {
-                    "fieldname": "quotation_signatory_type",
-                    "label": _("Signatory"),
-                    "fieldtype": "Select",
-                    "options": "\n".join(quotation_setup.SIGNATORY_TYPES),
+                    "fieldname": "customer_print_name",
+                    "label": _("Customer Print Name"),
+                    "fieldtype": "Data",
                 },
                 {
-                    "fieldname": "manager_signatory_employee",
-                    "label": _("Manager Signatory"),
-                    "fieldtype": "Select",
-                    "options": "\n"
-                    + "\n".join(
-                        _text(row.get("employee")) for row in manager_signatories if row.get("employee")
-                    ),
-                    "option_labels": {
-                        _text(row.get("employee")): _text(row.get("name")) or _text(row.get("employee"))
-                        for row in manager_signatories
-                        if row.get("employee")
-                    },
-                    "depends_on": "eval:cd_quotation_signatory_type=='Managing Director'",
-                    "mandatory_depends_on": "eval:cd_quotation_signatory_type=='Managing Director'",
-                    "description": _(
-                        "Only Employees in this Company's authorized signatory list can be selected."
-                    ),
+                    "fieldname": "show_date",
+                    "label": _("Show Date"),
+                    "fieldtype": "Check",
                 },
             ]
         )
-    if document.language_selectable:
+    if extension:
+        fields.extend(dict(field) for field in extension.fields)
+    if document.include_standard_sidebar_fields and document.language_selectable:
         fields.append(
             {
                 "fieldname": "language",
@@ -175,7 +154,7 @@ def _sidebar_fields(
                 "options": "\n".join(print_documents.LANGUAGE_OPTIONS),
             }
         )
-    if document.offers_batch_serial:
+    if document.include_standard_sidebar_fields and document.offers_batch_serial:
         fields.append(
             {
                 "fieldname": "show_batch_serial",
@@ -183,14 +162,45 @@ def _sidebar_fields(
                 "fieldtype": "Check",
             }
         )
-    fields.extend(
-        {
-            "fieldname": _copy_field(definition.key),
-            "label": definition.label_th,
-            "fieldtype": "Int",
-        }
-        for definition in document.copies
-    )
+    if document.include_standard_sidebar_fields:
+        for definition in document.copies:
+            if definition.always_include:
+                continue
+            if definition.selection_mode == "checkbox":
+                fields.append(
+                    {
+                        "fieldname": _copy_enabled_field(definition.key),
+                        "label": definition.label_th,
+                        "fieldtype": "Check",
+                        "copy_option": definition.key,
+                    }
+                )
+                if definition.custom_label:
+                    fields.append(
+                        {
+                            "fieldname": _copy_label_field(definition.key),
+                            "label": _("Text"),
+                            "fieldtype": "Data",
+                            "copy_label_for": definition.key,
+                        }
+                    )
+                fields.append(
+                    {
+                        "fieldname": _copy_field(definition.key),
+                        "label": _("Number of copies"),
+                        "fieldtype": "Int",
+                        "copy_count_for": definition.key,
+                        "min": 1,
+                    }
+                )
+                continue
+            fields.append(
+                {
+                    "fieldname": _copy_field(definition.key),
+                    "label": definition.label_th,
+                    "fieldtype": "Int",
+                }
+            )
     return fields
 
 
@@ -227,11 +237,12 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         "edit_validity_text": cint(values.get("edit_validity_text")),
         "validity_text": _text(values.get("validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),
+        "print_actions": get_print_action_context(doc),
     }
     if document.key == "quotation":
         context["signatory_employee"] = (
             context["manager_signatory_employee"]
-            if context["quotation_signatory_type"] == quotation_setup.SIGNATORY_MANAGING_DIRECTOR
+            if context["quotation_signatory_type"] == "Managing Director"
             else context["sales_representative_employee"]
         )
     # Quotation resolves its Employee/E-Signature after this shared context is
@@ -243,6 +254,113 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
     return context
 
 
+def get_print_action_context(doc: Document | Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Resolve stored Employee links for the action slots in a print format.
+
+    Only fields written on the document are considered. In particular, this
+    does not fall back to ``owner`` or ``modified_by`` because those users are
+    not proof that a particular workflow action occurred.
+    """
+    doctype = _text(doc.get("doctype"))
+    actions = print_action_fields.get_actions(doctype)
+    context = {
+        action.key: {
+            "employee": _text(doc.get(action.employee_field)),
+            "name": "",
+            "signature": prepare_signature_for_print(_text(doc.get(action.signature_field))),
+            "acted_at": doc.get(action.datetime_field),
+        }
+        for action in actions
+    }
+    employee_names = sorted(value["employee"] for value in context.values() if value["employee"])
+    if not employee_names:
+        return context
+
+    employees = {
+        _text(row.get("name")): row
+        for row in frappe.get_all(
+            "Employee",
+            filters={"name": ["in", employee_names]},
+            fields=["name", "employee_name"],
+        )
+    }
+    for value in context.values():
+        employee = employees.get(_text(value.get("employee")))
+        if employee:
+            value["name"] = _text(employee.get("employee_name")) or _text(employee.get("name"))
+
+    # The checked-by box represents the person who submitted the document in
+    # the standard transaction flow. Keep an explicitly stored checked action
+    # as a fallback for legacy documents that predate the submit snapshot.
+    submit = context.get("submit")
+    if submit and submit["employee"] and "checked" in context:
+        context["checked"] = dict(submit)
+    return context
+
+
+@lru_cache(maxsize=128)
+def prepare_signature_for_print(signature: str) -> str:
+    """Crop the signature canvas for display without changing the stored snapshot."""
+    if signature.endswith("/assets/frappe/images/signature-placeholder.png"):
+        return ""
+    if not signature.startswith("data:image/") or ";base64," not in signature:
+        return signature
+
+    _header, encoded = signature.split(",", 1)
+    try:
+        raw = base64.b64decode(encoded, validate=True)
+        if not raw or len(raw) > 2 * 1024 * 1024:
+            return signature
+        image = Image.open(BytesIO(raw)).convert("RGBA")
+        image.load()
+    except (Base64Error, OSError, ValueError):
+        return signature
+
+    alpha = image.getchannel("A")
+    thresholded_alpha = alpha.point(lambda value: 255 if value > 8 else 0)
+    content_box = thresholded_alpha.getbbox()
+    if not content_box:
+        return signature
+
+    # The signature widget's baseline is a long horizontal run. Remove only
+    # rows wider than half of the actual content so ordinary pen strokes stay.
+    baseline_rows: set[int] = set()
+    content_width = content_box[2] - content_box[0]
+    for y in range(content_box[1], content_box[3]):
+        longest_run = 0
+        current_run = 0
+        for x in range(content_box[0], content_box[2]):
+            if cast(int, thresholded_alpha.getpixel((x, y))) > 0:
+                current_run += 1
+                longest_run = max(longest_run, current_run)
+            else:
+                current_run = 0
+        if longest_run >= max(100, content_width // 2):
+            baseline_rows.add(y)
+
+    if baseline_rows:
+        for y in baseline_rows:
+            for x in range(image.width):
+                red, green, blue, _alpha = cast(tuple[int, int, int, int], image.getpixel((x, y)))
+                image.putpixel((x, y), (red, green, blue, 0))
+        thresholded_alpha = image.getchannel("A").point(lambda value: 255 if value > 8 else 0)
+        content_box = thresholded_alpha.getbbox()
+        if not content_box:
+            return signature
+
+    # Keep only a small safety margin around the ink. The source signature
+    # widget has already been cropped above; a large margin would make the
+    # signature look small again when it is fitted into the print slot.
+    left = max(content_box[0] - 2, 0)
+    top = max(content_box[1] - 2, 0)
+    right = min(content_box[2] + 2, image.width)
+    bottom = min(content_box[3] + 2, image.height)
+    cropped = image.crop((left, top, right, bottom))
+    output = BytesIO()
+    cropped.save(output, format="PNG", optimize=True)
+    return "data:image/png;base64," + base64.b64encode(output.getvalue()).decode("ascii")
+
+
 def _copy_contexts(
     document: print_documents.PrintDocument,
     values: Mapping[str, Any],
@@ -251,7 +369,16 @@ def _copy_contexts(
     """Expand each named copy into one page-set entry per requested count."""
     copies: list[dict[str, Any]] = []
     for definition in document.copies:
-        count = max(cint(values.get(_copy_field(definition.key))), 0)
+        if definition.always_include:
+            count = definition.default_count
+        elif definition.selection_mode == "checkbox":
+            count = (
+                max(cint(values.get(_copy_field(definition.key))), 0)
+                if cint(values.get(_copy_enabled_field(definition.key)))
+                else 0
+            )
+        else:
+            count = max(cint(values.get(_copy_field(definition.key))), 0)
         label = _text(values.get(_copy_label_field(definition.key))) or definition.label(language)
         for index in range(1, count + 1):
             suffix = f" {index}/{count}" if count > 1 else ""
@@ -311,14 +438,23 @@ def _apply_print_settings(
 
 
 def _overridable_fields(document: print_documents.PrintDocument) -> tuple[str, ...]:
-    return (
-        "customer_print_name",
-        "show_date",
-        *(("language",) if document.language_selectable else ()),
-        *(("show_batch_serial",) if document.offers_batch_serial else ()),
-        *tuple(_copy_field(definition.key) for definition in document.copies),
-        *document.extra_fields,
-    )
+    standard_fields: list[str] = []
+    if document.include_standard_sidebar_fields:
+        standard_fields.extend(("customer_print_name", "show_date"))
+        if document.language_selectable:
+            standard_fields.append("language")
+        if document.offers_batch_serial:
+            standard_fields.append("show_batch_serial")
+        for definition in document.copies:
+            if definition.always_include:
+                continue
+            if definition.selection_mode == "checkbox":
+                standard_fields.extend((_copy_enabled_field(definition.key), _copy_field(definition.key)))
+                if definition.custom_label:
+                    standard_fields.append(_copy_label_field(definition.key))
+            else:
+                standard_fields.append(_copy_field(definition.key))
+    return (*standard_fields, *document.extra_fields)
 
 
 def _copy_field(copy_key: str) -> str:
@@ -327,6 +463,26 @@ def _copy_field(copy_key: str) -> str:
 
 def _copy_label_field(copy_key: str) -> str:
     return f"{COPY_FIELD_PREFIX}{copy_key}_label"
+
+
+def _copy_enabled_field(copy_key: str) -> str:
+    return f"{COPY_FIELD_PREFIX}{copy_key}_enabled"
+
+
+def _validate_copy_settings(
+    document: print_documents.PrintDocument,
+    values: Mapping[str, Any],
+) -> None:
+    """Reject selected copy options without a positive quantity or label."""
+    for definition in document.copies:
+        if definition.selection_mode != "checkbox" or not cint(
+            values.get(_copy_enabled_field(definition.key))
+        ):
+            continue
+        if cint(values.get(_copy_field(definition.key))) < 1:
+            frappe.throw(_("The number of copies for {0} must be at least 1.").format(definition.label_th))
+        if definition.custom_label and not _text(values.get(_copy_label_field(definition.key))):
+            frappe.throw(_("Enter text for the custom copy before printing."))
 
 
 def _document_customer_name(doc: Document | Mapping[str, Any]) -> str:

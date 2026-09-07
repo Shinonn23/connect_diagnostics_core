@@ -85,10 +85,10 @@ def _get_columns() -> list[ReportColumn]:
             "width": 150,
         },
         {
-            "label": _("Accounting Department"),
-            "fieldname": "accounting_department",
+            "label": _("Department"),
+            "fieldname": "department",
             "fieldtype": "Link",
-            "options": "Accounting Department",
+            "options": "Department",
             "width": 170,
         },
         {
@@ -158,7 +158,7 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
         "sales_order": filters.get("sales_order") or None,
         "item": filters.get("item") or None,
         "warehouse": filters.get("warehouse") or None,
-        "accounting_department": filters.get("accounting_department") or None,
+        "department": filters.get("department") or None,
         "territory": filters.get("territory") or None,
     }
 
@@ -176,7 +176,7 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
                 soi.item_code,
                 soi.item_name,
                 soi.warehouse,
-                soi.department AS accounting_department,
+                soi.department,
                 soi.territory,
                 soi.qty,
                 soi.delivered_qty,
@@ -200,7 +200,7 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
                 AND (%(sales_order)s IS NULL OR so.name = %(sales_order)s)
                 AND (%(item)s IS NULL OR soi.item_code = %(item)s)
                 AND (%(warehouse)s IS NULL OR soi.warehouse = %(warehouse)s)
-                AND (%(accounting_department)s IS NULL OR soi.department = %(accounting_department)s)
+                AND (%(department)s IS NULL OR soi.department = %(department)s)
                 AND (%(territory)s IS NULL OR soi.territory = %(territory)s)
             ORDER BY soi.delivery_date ASC, so.name ASC, soi.idx ASC
             """,

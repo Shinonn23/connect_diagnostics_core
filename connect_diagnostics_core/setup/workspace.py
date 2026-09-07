@@ -74,6 +74,9 @@ RETIRED_SIDEBAR_LINKS = {
         }
     ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
+    "Invoicing": frozenset({("DocType", "Accounting Department")}),
+    "HR Setup": frozenset({("DocType", "Accounting Department")}),
+    "Payroll": frozenset({("DocType", "Accounting Department")}),
     "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset(
         {
@@ -95,9 +98,12 @@ RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
             ("DocType", "Tax Withholding Category"),
             ("DocType", "Tax Withholding Group"),
             ("DocType", "Lower Deduction Certificate"),
+            ("DocType", "Accounting Department"),
         }
     ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
+    "HR Setup": frozenset({("DocType", "Accounting Department")}),
+    "Payroll": frozenset({("DocType", "Accounting Department")}),
     "Stock": frozenset({("DocType", "Storage Location"), ("DocType", "Regulation Class")}),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
     "Financial Reports": frozenset(
@@ -228,10 +234,7 @@ NAVIGATION_GROUPS = (
         name="Financial Reports",
         links=(),
     ),
-    NavigationGroup(
-        name="Invoicing",
-        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
-    ),
+    NavigationGroup(name="Invoicing", links=()),
     NavigationGroup(
         name="Selling",
         links=(
@@ -261,19 +264,13 @@ NAVIGATION_GROUPS = (
         name="ERPNext Settings",
         links=(NavigationLink("Backup Settings", "Backup Settings", "DocType"),),
     ),
-    NavigationGroup(
-        name="HR Setup",
-        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
-    ),
-    NavigationGroup(
-        name="Payroll",
-        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
-    ),
+    NavigationGroup(name="HR Setup", links=()),
+    NavigationGroup(name="Payroll", links=()),
 )
 
 SIDEBAR_PLACEMENTS = {
     "Financial Reports": (),
-    "Invoicing": (SidebarPlacement("Accounting Department", after_link_to="Account", icon="building-2"),),
+    "Invoicing": (),
     "Selling": (
         SidebarPlacement("Back Orders", after_link_to="Sales Order", icon="list-todo"),
         SidebarPlacement(
@@ -299,10 +296,8 @@ SIDEBAR_PLACEMENTS = {
         ),
     ),
     "ERPNext Settings": (SidebarPlacement("Backup Settings", section="Other Settings"),),
-    "HR Setup": (SidebarPlacement("Accounting Department", after_link_to="Department", section="Setup"),),
-    "Payroll": (
-        SidebarPlacement("Accounting Department", after_link_to="Salary Structure", section="Setup"),
-    ),
+    "HR Setup": (),
+    "Payroll": (),
 }
 
 

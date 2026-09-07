@@ -75,7 +75,7 @@ class TestRegisterPrint(RecorderHarness):
         self.assertEqual(row["print_format"], "Sales Order")
 
     def test_resolved_copies_are_recorded(self) -> None:
-        self.set_request(trigger_print="1", format="Tax Invoice Delivery Note and Invoice")
+        self.set_request(trigger_print="1", format="ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
         context = {
             "language": "Thai",
             "copies": [

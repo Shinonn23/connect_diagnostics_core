@@ -44,7 +44,6 @@ page_js = {
     "print": [
         "public/js/custom/print/engine.js",
         "public/js/custom/print/providers/print_options.js",
-        "public/js/custom/print/providers/shipment_label_size.js",
     ]
 }
 
@@ -101,6 +100,9 @@ jinja = {
         "connect_diagnostics_core.utils.currency.format_money",
         "connect_diagnostics_core.utils.date.format_date",
         "connect_diagnostics_core.api.erpnext.print_configuration.get_document_print_context",
+        "connect_diagnostics_core.api.erpnext.print_configuration.get_print_action_context",
+        "connect_diagnostics_core.api.erpnext.print_pagination.get_print_item_pages",
+        "connect_diagnostics_core.api.erpnext.print_pagination.get_print_page_metrics",
         "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
         "connect_diagnostics_core.api.frappe.print_log.register_print",
@@ -108,18 +110,70 @@ jinja = {
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
 }
 
+# Workflow Transition Tasks are site-configured on each workflow transition.
+# They snapshot the current Employee and signature without creating or owning
+# any Workflow definition in this app.
+workflow_methods = [
+    {
+        "name": "Capture Print Action: Submit",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_submit_action",
+    },
+    {
+        "name": "Capture Print Action: Received",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_received_action",
+    },
+    {
+        "name": "Capture Print Action: Delivered",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_delivered_action",
+    },
+    {
+        "name": "Capture Print Action: Prepared",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_prepared_action",
+    },
+    {
+        "name": "Capture Print Action: Ordered",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_ordered_action",
+    },
+    {
+        "name": "Capture Print Action: Checked",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_checked_action",
+    },
+    {
+        "name": "Capture Print Action: Authorized",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_authorized_action",
+    },
+    {
+        "name": "Capture Print Action: Return Received",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_return_received_action",
+    },
+    {
+        "name": "Capture Print Action: Warehouse Checked",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_warehouse_checked_action",
+    },
+    {
+        "name": "Capture Print Action: Signatory",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signatory_action",
+    },
+    {
+        "name": "Capture Print Action: Signed",
+        "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signed_action",
+    },
+]
+
 # Installation
 # ------------
 
 # before_install = "connect_diagnostics_core.install.before_install"
 after_install = [
     "connect_diagnostics_core.setup.after_install",
+    "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
 after_sync = "connect_diagnostics_core.setup.after_sync"
 before_migrate = "connect_diagnostics_core.setup.before_migrate"
 after_migrate = [
     "connect_diagnostics_core.setup.after_migrate",
+    "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
 ]
 
@@ -165,12 +219,6 @@ after_migrate = [
 
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
-    "YY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
-    "MM-DOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
-    # Hyphen-free aliases: Frappe's braced-autoname regex cannot match "-" inside
-    # {...}, so `format:` autoname strings use these instead of YY-BE/MM-DOC.
-    "YYBE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
-    "MMDOC": "connect_diagnostics_core.setup.document_naming.parse_document_month",
 }
 
 # Document Events
@@ -201,7 +249,6 @@ doc_events = {
     },
     "Company": {
         "validate": "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
-        "on_update": "connect_diagnostics_core.api.erpnext.company.create_default_accounting_department",
     },
     "Quotation": {
         "before_submit": [
@@ -318,7 +365,7 @@ standard_queries = {
 }
 
 # Exclude master doctypes from ERPNext's Transaction Deletion tool
-company_data_to_be_ignored = ["Accounting Department"]
+company_data_to_be_ignored = []
 
 # Scheduled Tasks
 # ---------------
@@ -351,12 +398,6 @@ override_whitelisted_methods = {
     "erpnext_thailand.utils.get_address_by_tax_id": (
         "connect_diagnostics_core.api.frappe.address.get_address_by_tax_id"
     ),
-}
-
-extend_doctype_class = {
-    "Payroll Entry": [
-        "connect_diagnostics_core.api.erpnext.payroll_entry.PayrollEntryAccountingDimensionMixin",
-    ],
 }
 
 # each overriding function accepts a `data` argument;
@@ -430,9 +471,7 @@ export_python_type_annotations = True
 # ignore_translatable_strings_from = []
 
 fixtures = [
-    {"doctype": "Property Setter", "filters": [["module", "=", "Connect Diagnostics Core"]]},
     {"doctype": "Address Template", "filters": [["name", "=", "Thailand"]]},
-    {"doctype": "Terms and Conditions"},
     {
         "doctype": "Email Template",
         "filters": [
@@ -443,4 +482,5 @@ fixtures = [
             ]
         ],
     },
+    {"doctype": "Accounting Dimension"},
 ]

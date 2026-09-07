@@ -7,6 +7,9 @@ import re
 from typing import Any, cast
 
 import frappe
+from erpnext_thailand.custom.naming import (
+    parse_naming_series_variable as parse_thailand_naming_series_variable,
+)
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
@@ -27,11 +30,13 @@ def _get_series_date(doc: Any):
 
 
 def parse_buddhist_era_naming_series_variable(doc: Any, variable: str) -> str | None:
+    if variable == "YYYY-BE":
+        gregorian_year = parse_thailand_naming_series_variable(doc, "YYYY-DATE")
+        return str(int(gregorian_year) + BUDDHIST_ERA_YEAR_OFFSET) if gregorian_year else None
+
+    # Retained for old Employee series and the historical broken-autoname backfill.
     series_date = _get_series_date(doc)
     buddhist_year = series_date.year + BUDDHIST_ERA_YEAR_OFFSET
-
-    if variable == "YYYY-BE":
-        return str(buddhist_year)
 
     if variable in ("YY-BE", "YYBE"):
         return f"{buddhist_year % 100:02d}"

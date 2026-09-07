@@ -46,14 +46,8 @@ class TestEmployeeCustomFields(UnitTestCase):
             with self.subTest(fieldname=fieldname):
                 self.assertEqual(self._field(fieldname)["fieldtype"], fieldtype)
 
-    def test_accounting_department_follows_payroll_cost_center(self) -> None:
-        field = self._field("accounting_department")
-        self.assertEqual(field["insert_after"], "payroll_cost_center")
-        self.assertEqual(field["options"], "Accounting Department")
-        self.assertEqual(field["fetch_from"], "department.accounting_department")
-
     def test_thai_payroll_insert_after_chain_is_contiguous(self) -> None:
-        self.assertEqual(self._field("thai_payroll_section")["insert_after"], "accounting_department")
+        self.assertEqual(self._field("thai_payroll_section")["insert_after"], "payroll_cost_center")
         self.assertEqual(self._field("social_security_eligible")["insert_after"], "thai_payroll_section")
         self.assertEqual(self._field("provident_fund_rate")["insert_after"], "social_security_eligible")
 

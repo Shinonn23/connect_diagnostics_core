@@ -84,7 +84,7 @@ CUSTOM_FIELDS = {
             "label": "Health Insurance",
             "fieldtype": "Section Break",
             "insert_after": "health_details",
-            "collapsible": 1,
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
@@ -114,16 +114,6 @@ CUSTOM_FIELDS = {
             "options": "Cost Center",
         },
         {
-            "fieldname": "accounting_department",
-            "label": "Accounting Department",
-            "fieldtype": "Link",
-            "insert_after": "payroll_cost_center",
-            "fetch_from": "department.accounting_department",
-            "fetch_if_empty": 1,
-            "is_system_generated": 1,
-            "options": "Accounting Department",
-        },
-        {
             "fieldname": "salary_cb",
             "fieldtype": "Column Break",
             "insert_after": "salary_mode",
@@ -141,8 +131,8 @@ CUSTOM_FIELDS = {
             "fieldname": "thai_payroll_section",
             "label": "Thai Payroll",
             "fieldtype": "Section Break",
-            "insert_after": "accounting_department",
-            "collapsible": 1,
+            "insert_after": "payroll_cost_center",
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
@@ -165,7 +155,7 @@ CUSTOM_FIELDS = {
             "label": "National ID & Social Security",
             "fieldtype": "Section Break",
             "insert_after": "place_of_issue",
-            "collapsible": 1,
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
