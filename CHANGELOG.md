@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.51.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.50.0...v0.51.0) (2026-09-08)
+
+
+### Features
+
+* add material request dispatch lifecycle ([15ee743](https://github.com/Shinonn23/connect_diagnostics_core/commit/15ee743299f25857f3ef85fe9f301baec2d84519))
+* add material request dispatch lifecycle ([195b9e8](https://github.com/Shinonn23/connect_diagnostics_core/commit/195b9e8e8df5c0058630498d94b8200ce1df7f8a))
+
+
+### Bug Fixes
+
+* **dispatch:** address review controls for returnable fulfillment ([9240e8b](https://github.com/Shinonn23/connect_diagnostics_core/commit/9240e8bbd00e68d7337323058e98d2bbc9ff7f01))
+
 ## [0.50.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.49.0...v0.50.0) (2026-09-07)
 
 
