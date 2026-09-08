@@ -148,5 +148,5 @@ jobs:
                   fi
 
                   cd "$bench_path"
-                  "$bench_executable" update --reset
+                  "$bench_executable" update --apps connect_diagnostics_core --reset
                   REMOTE_SCRIPT

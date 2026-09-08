@@ -73,7 +73,8 @@ work branch ──PR──▶ developments ──PR──▶ user-acceptance-tes
 
 ## 5. Automated DEV and UAT deployment
 
-`deploy.yml` connects as `erp` over SSH and runs `bench update --reset` after
+`deploy.yml` connects as `erp` over SSH and runs
+`bench update --apps connect_diagnostics_core --reset` after
 updates to the deployed branches:
 
 | Trigger branch            | GitHub Environment | Host             |
@@ -105,7 +106,7 @@ of `bench`, `node`, `npm`, and `yarn`. It waits up to 60 minutes for an
 environment-local deployment lock and runs from the Bench root:
 
 ```sh
-cd "$BENCH_PATH" && bench update --reset
+cd "$BENCH_PATH" && bench update --apps connect_diagnostics_core --reset
 ```
 
 DEV and UAT use separate concurrency groups. `cancel-in-progress` is disabled,
