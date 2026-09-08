@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.51.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.0...v0.51.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deploy:** scope bench update to core app ([0ad43f2](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ad43f2a66e759e5bc27ea364e62f19c1a2e816c))
+* **deploy:** scope bench update to core app ([d5a7b89](https://github.com/Shinonn23/connect_diagnostics_core/commit/d5a7b898d138c57e35b9145f98787a2372cc220d))
+
 ## [0.51.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.50.0...v0.51.0) (2026-09-08)
 
 
