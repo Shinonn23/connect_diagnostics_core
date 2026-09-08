@@ -105,6 +105,8 @@ jinja = {
         "connect_diagnostics_core.api.erpnext.print_pagination.get_print_page_metrics",
         "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
+        "connect_diagnostics_core.api.erpnext.dispatch.get_dispatch_label_rows",
+        "connect_diagnostics_core.utils.qr.get_qr_svg_code",
         "connect_diagnostics_core.api.frappe.print_log.register_print",
     ],
     # "filters": "connect_diagnostics_core.utils.jinja_filters"
@@ -157,6 +159,14 @@ workflow_methods = [
     {
         "name": "Capture Print Action: Signed",
         "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signed_action",
+    },
+    {
+        "name": "Validate Material Request: Submit for Approval",
+        "method": "connect_diagnostics_core.api.erpnext.material_request.validate_submit_for_approval",
+    },
+    {
+        "name": "Validate Material Request: Close",
+        "method": "connect_diagnostics_core.api.erpnext.material_request.validate_close",
     },
 ]
 
@@ -248,7 +258,10 @@ doc_events = {
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
     },
     "Company": {
-        "validate": "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
+            "connect_diagnostics_core.api.erpnext.company.validate_borrow_configuration",
+        ],
     },
     "Quotation": {
         "before_submit": [
@@ -285,7 +298,20 @@ doc_events = {
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
     },
     "Material Request": {
-        "validate": "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
+            "connect_diagnostics_core.api.erpnext.material_request.validate",
+        ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel",
+    },
+    "Asset Movement": {
+        "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_asset_movement",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+    },
+    "Quality Inspection": {
+        "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_quality_inspection",
+        "before_submit": "connect_diagnostics_core.api.erpnext.material_request.before_submit_quality_inspection",
+        "on_submit": "connect_diagnostics_core.api.erpnext.material_request.on_submit_quality_inspection",
     },
     "Purchase Order": {
         "validate": [
@@ -303,11 +329,13 @@ doc_events = {
         ],
     },
     "Stock Entry": {
+        "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_stock_entry",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_count_freeze.validate_transaction",
         ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
     },
     "Delivery Note": {
         "before_submit": [
@@ -351,7 +379,10 @@ doc_events = {
         "before_insert": "connect_diagnostics_core.api.erpnext.tds_guard.block_doctype",
     },
     "Employee": {
-        "validate": "connect_diagnostics_core.api.erpnext.employee.normalize_national_id",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.employee.normalize_national_id",
+            "connect_diagnostics_core.api.erpnext.employee.validate_borrow_warehouse",
+        ],
     },
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
@@ -406,6 +437,7 @@ override_whitelisted_methods = {
 override_doctype_dashboards = {
     "Item": "connect_diagnostics_core.api.erpnext.item.get_item_dashboard_data",
     "Customer": "connect_diagnostics_core.api.erpnext.customer.get_customer_dashboard_data",
+    "Material Request": "connect_diagnostics_core.api.erpnext.material_request.get_dashboard_data",
 }
 
 # exempt linked doctypes from being automatically cancelled

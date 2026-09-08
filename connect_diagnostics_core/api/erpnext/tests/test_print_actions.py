@@ -129,15 +129,38 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
             "quotation_signature": "data:image/png;base64,signature",
         },
     )
-    def test_material_documents_share_submit_snapshot_writer(
+    def test_stock_entry_uses_submit_snapshot_writer(
         self, _get_value: MagicMock, _msgprint: MagicMock, _now_datetime: MagicMock
     ) -> None:
-        for doctype in ("Material Request", "Stock Entry"):
+        doc = FakeDocument({"doctype": "Stock Entry"})
+
+        print_actions.capture_submit_action(cast(Document, doc))
+
+        self.assertEqual(doc["submit_by"], "EMP-0001")
+        self.assertEqual(doc["submit_at"], datetime(2026, 9, 5, 10, 30, 0))
+        self.assertEqual(doc["submit_signature"], "data:image/png;base64,signature")
+
+    @patch.object(print_actions, "now_datetime", return_value=datetime(2026, 9, 5, 10, 30, 0))
+    @patch.object(print_actions.frappe, "msgprint")
+    @patch.object(
+        print_actions.frappe.db,
+        "get_value",
+        return_value={
+            "name": "EMP-0001",
+            "employee_name": "C-Level Approver",
+            "quotation_signature": "data:image/png;base64,signature",
+        },
+    )
+    def test_material_request_and_capitalization_use_authorized_snapshot_writer(
+        self, _get_value: MagicMock, _msgprint: MagicMock, _now_datetime: MagicMock
+    ) -> None:
+        for doctype in ("Material Request", "Asset Capitalization"):
             doc = FakeDocument({"doctype": doctype})
 
-            print_actions.capture_submit_action(cast(Document, doc))
+            print_actions.capture_authorized_action(cast(Document, doc))
 
             with self.subTest(doctype=doctype):
-                self.assertEqual(doc["submit_by"], "EMP-0001")
-                self.assertEqual(doc["submit_at"], datetime(2026, 9, 5, 10, 30, 0))
-                self.assertEqual(doc["submit_signature"], "data:image/png;base64,signature")
+                self.assertEqual(doc["authorized_by"], "EMP-0001")
+                self.assertEqual(doc["authorized_at"], datetime(2026, 9, 5, 10, 30, 0))
+                self.assertEqual(doc["authorized_signature"], "data:image/png;base64,signature")
+                self.assertNotIn("submit_by", doc)

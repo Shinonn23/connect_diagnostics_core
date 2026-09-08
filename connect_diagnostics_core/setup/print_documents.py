@@ -8,12 +8,6 @@ from __future__ import annotations
 from importlib import import_module
 from typing import cast
 
-from connect_diagnostics_core.connect_diagnostics_print.print_format.quotation.settings import (
-    PRINT_DOCUMENT as QUOTATION,
-)
-from connect_diagnostics_core.connect_diagnostics_print.print_format.receipt.settings import (
-    PRINT_DOCUMENT as RECEIPT,
-)
 from connect_diagnostics_core.connect_diagnostics_print.print_format.sales_order.settings import (
     PRINT_DOCUMENT as SALES_ORDER,
 )
@@ -43,6 +37,12 @@ def _load_print_document(module: str) -> PrintDocument:
     return cast(PrintDocument, import_module(module).PRINT_DOCUMENT)
 
 
+QUOTATION = _load_print_document(
+    "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบเสนอราคา.settings"
+)
+RECEIPT = _load_print_document(
+    "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบเสร็จรับเงิน.settings"
+)
 TAX_INVOICE = _load_print_document(
     "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ.settings"
 )

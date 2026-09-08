@@ -11,6 +11,13 @@ from connect_diagnostics_core.setup import print_action_fields
 
 
 class TestPrintActionFields(UnitTestCase):
+    def test_material_request_and_capitalization_keep_only_authorized_snapshot(self) -> None:
+        for doctype in ("Material Request", "Asset Capitalization"):
+            self.assertEqual(
+                [action.key for action in print_action_fields.PRINT_ACTIONS[doctype]],
+                ["authorized"],
+            )
+
     def test_action_definitions_have_hidden_employee_and_datetime_fields(self) -> None:
         for doctype, actions in print_action_fields.PRINT_ACTIONS.items():
             fields = {field["fieldname"]: field for field in print_action_fields.CUSTOM_FIELDS[doctype]}

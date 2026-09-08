@@ -74,8 +74,9 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
     ),
     "Quotation": (PrintAction("signatory", "signatory_by", "signatory_at", "signatory_signature"),),
     "Material Request": (
-        PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
-        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Asset Capitalization": (
         PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
     ),
     "Stock Entry": (

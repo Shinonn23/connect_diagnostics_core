@@ -11,7 +11,7 @@ from connect_diagnostics_core.connect_diagnostics_print.print_format.settings im
 PRINT_DOCUMENT = PrintDocument(
     key="receipt",
     label="Receipt",
-    print_formats=("Receipt",),
+    print_formats=("ใบเสร็จรับเงิน",),
     doctypes=("Payment Entry",),
     language_selectable=True,
     offers_batch_serial=False,

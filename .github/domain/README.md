@@ -19,3 +19,4 @@ file here in the same change (this replaces keeping domain detail in `AGENTS.md`
 | DKSH module                          | [dksh.md](dksh.md)                                   |
 | Print formats & audit log            | [print.md](print.md)                                 |
 | Stock Count                          | [stock-count.md](stock-count.md)                     |
+| Material Request, asset & dispatch   | [material-request-asset-dispatch.md](material-request-asset-dispatch.md)       |

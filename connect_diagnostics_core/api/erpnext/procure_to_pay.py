@@ -10,4 +10,4 @@ from frappe.model.document import Document
 
 def validate_material_request(doc: Document, _method: str | None = None) -> None:
     if not doc.get("purchase_reason"):
-        frappe.throw(_("Purchase Reason is required."))
+        frappe.throw(_("Request Reason is required."))
