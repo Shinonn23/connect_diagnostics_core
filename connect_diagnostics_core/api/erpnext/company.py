@@ -13,6 +13,76 @@ from frappe.model.document import Document
 
 AUTHORIZED_SIGNATORY_DOCTYPE = "Quotation Authorized Signatory"
 AUTHORIZED_SIGNATORY_ROLE = "Sales Manager"
+BORROW_CONFIGURATION_FIELDS = (
+    "borrow_in_transit_warehouse",
+    "return_qa_hold_warehouse",
+    "return_repair_warehouse",
+    "return_qa_hold_location",
+    "return_repair_location",
+)
+
+
+def validate_borrow_configuration(doc: Document, _method: str | None = None) -> None:
+    """Validate the Company-owned warehouses and Locations used by returns."""
+    warehouses = (
+        "borrow_in_transit_warehouse",
+        "return_qa_hold_warehouse",
+        "return_repair_warehouse",
+    )
+    for fieldname in warehouses:
+        warehouse = doc.get(fieldname)
+        if warehouse:
+            _validate_leaf_warehouse(warehouse, cast(str, doc.name), fieldname)
+
+    for fieldname in ("return_qa_hold_location", "return_repair_location"):
+        location = doc.get(fieldname)
+        if location:
+            location_group = frappe.db.get_value("Location", location, "is_group")
+            if location_group is None or location_group:
+                frappe.throw(_("{0} must be a leaf Location.").format(_field_label(fieldname)))
+
+
+def validate_returnable_configuration(company: str, responsible_employee: str) -> None:
+    """Require all return-loop masters before a returnable MR is approved."""
+    company_doc = frappe.db.get_value("Company", company, list(BORROW_CONFIGURATION_FIELDS), as_dict=True)
+    if not company_doc:
+        frappe.throw(_("Company {0} does not exist.").format(company))
+    for fieldname in BORROW_CONFIGURATION_FIELDS:
+        if not company_doc.get(fieldname):
+            frappe.throw(
+                _("{0} is required for returnable Material Requests.").format(_field_label(fieldname))
+            )
+    for fieldname in (
+        "borrow_in_transit_warehouse",
+        "return_qa_hold_warehouse",
+        "return_repair_warehouse",
+    ):
+        _validate_leaf_warehouse(cast(str, company_doc.get(fieldname)), company, fieldname)
+    for fieldname in ("return_qa_hold_location", "return_repair_location"):
+        location_group = frappe.db.get_value("Location", company_doc.get(fieldname), "is_group")
+        if location_group is None or location_group:
+            frappe.throw(_("{0} must be a leaf Location.").format(_field_label(fieldname)))
+
+    employee = frappe.db.get_value(
+        "Employee", responsible_employee, ["status", "company", "borrow_warehouse"], as_dict=True
+    )
+    if not employee or employee.status != "Active" or employee.company != company:
+        frappe.throw(_("Responsible Employee must be active and belong to the Material Request company."))
+    _validate_leaf_warehouse(employee.borrow_warehouse, company, "borrow_warehouse")
+
+
+def _validate_leaf_warehouse(warehouse: str | None, company: str, fieldname: str) -> None:
+    if not warehouse:
+        frappe.throw(_("{0} is required for returnable Material Requests.").format(_field_label(fieldname)))
+    details = frappe.db.get_value("Warehouse", warehouse, ["company", "is_group", "disabled"], as_dict=True)
+    if not details or details.company != company:
+        frappe.throw(_("{0} must belong to Company {1}.").format(_field_label(fieldname), company))
+    if details.disabled or details.is_group:
+        frappe.throw(_("{0} must be an active leaf Warehouse.").format(_field_label(fieldname)))
+
+
+def _field_label(fieldname: str) -> str:
+    return fieldname.replace("_", " ").title()
 
 
 def validate_quotation_authorized_signatories(doc: Document, _method: str | None = None) -> None:

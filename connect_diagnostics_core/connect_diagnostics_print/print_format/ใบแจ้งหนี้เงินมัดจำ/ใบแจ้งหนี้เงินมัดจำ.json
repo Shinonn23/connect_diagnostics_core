@@ -20,7 +20,7 @@
 	"margin_left": 15.0,
 	"margin_right": 15.0,
 	"margin_top": 15.0,
-	"modified": "2026-09-06 20:24:46.967252",
+	"modified": "2026-09-07 08:17:07.223375",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Print",
 	"name": "\u0e43\u0e1a\u0e41\u0e08\u0e49\u0e07\u0e2b\u0e19\u0e35\u0e49\u0e40\u0e07\u0e34\u0e19\u0e21\u0e31\u0e14\u0e08\u0e33",
@@ -33,5 +33,5 @@
 	"print_format_type": "Jinja",
 	"raw_printing": 0,
 	"show_section_headings": 0,
-	"standard": "No"
+	"standard": "Yes"
 }

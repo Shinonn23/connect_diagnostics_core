@@ -64,7 +64,7 @@ def quotation_sidebar_extension(docname: str) -> SidebarExtension:
 PRINT_DOCUMENT = PrintDocument(
     key="quotation",
     label="Quotation",
-    print_formats=("Quotation",),
+    print_formats=("ใบเสนอราคา",),
     doctypes=("Quotation",),
     language_selectable=True,
     offers_batch_serial=False,

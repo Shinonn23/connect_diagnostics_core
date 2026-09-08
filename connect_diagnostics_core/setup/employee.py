@@ -39,6 +39,14 @@ CUSTOM_FIELDS = {
             "options": "Shift Type",
         },
         {
+            "fieldname": "borrow_warehouse",
+            "label": "Borrow Warehouse",
+            "fieldtype": "Link",
+            "insert_after": "default_shift",
+            "description": "Leaf warehouse used while this Employee is responsible for borrowed stock.",
+            "options": "Warehouse",
+        },
+        {
             "fieldname": "employment_type",
             "label": "Employment Type",
             "fieldtype": "Link",

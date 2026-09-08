@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import base64
+from importlib import import_module
 from io import BytesIO
 from typing import Any, cast
 from unittest.mock import MagicMock, patch
@@ -13,10 +14,11 @@ from frappe.tests import UnitTestCase
 from PIL import Image, ImageDraw
 
 from connect_diagnostics_core.api.erpnext import print_configuration
-from connect_diagnostics_core.connect_diagnostics_print.print_format.quotation import (
-    settings as quotation_print_settings,
-)
 from connect_diagnostics_core.setup import print_action_fields, print_documents
+
+quotation_print_settings = import_module(
+    "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบเสนอราคา.settings"
+)
 
 
 class FakeDocument(frappe._dict):
@@ -352,7 +354,7 @@ class TestPrintOptions(UnitTestCase):
         self.assertNotIn("language", fieldnames)
 
     def test_offers_language_where_it_is_selectable(self) -> None:
-        result = self._options(payment_entry(), "Receipt")
+        result = self._options(payment_entry(), "ใบเสร็จรับเงิน")
 
         fieldnames = [field["fieldname"] for field in result["data"]["fields"]]
         self.assertIn("language", fieldnames)
@@ -418,7 +420,7 @@ class TestPrintOptions(UnitTestCase):
         self, _get_value: MagicMock, _get_managers: MagicMock
     ) -> None:
         quotation_doc = FakeDocument({"doctype": "Quotation", "name": "SAL-QTN-0001"})
-        result = self._options(quotation_doc, "Quotation")
+        result = self._options(quotation_doc, "ใบเสนอราคา")
 
         fields = {field["fieldname"]: field for field in result["data"]["fields"]}
         self.assertIn("quotation_signatory_type", fields)

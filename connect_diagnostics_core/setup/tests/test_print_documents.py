@@ -7,12 +7,6 @@ from importlib import import_module
 
 from frappe.tests import UnitTestCase
 
-from connect_diagnostics_core.connect_diagnostics_print.print_format.quotation import (
-    settings as quotation_settings,
-)
-from connect_diagnostics_core.connect_diagnostics_print.print_format.receipt import (
-    settings as receipt_settings,
-)
 from connect_diagnostics_core.connect_diagnostics_print.print_format.sales_order import (
     settings as sales_order_settings,
 )
@@ -21,6 +15,12 @@ from connect_diagnostics_core.connect_diagnostics_print.print_format.shipment_bo
 )
 from connect_diagnostics_core.setup import print_documents
 
+quotation_settings = import_module(
+    "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบเสนอราคา.settings"
+)
+receipt_settings = import_module(
+    "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบเสร็จรับเงิน.settings"
+)
 tax_invoice_settings = import_module(
     "connect_diagnostics_core.connect_diagnostics_print.print_format.ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ.settings"
 )
@@ -131,6 +131,16 @@ class TestPrintDocumentRegistry(UnitTestCase):
         self.assertEqual(print_documents.resolve_document_key("Sales Invoice", "Credit Note"), "tax_invoice")
         self.assertEqual(print_documents.resolve_document_key("Payment Entry"), "receipt")
         self.assertEqual(print_documents.resolve_document_key("Quotation"), "quotation")
+
+    def test_resolve_document_key_uses_renamed_thai_formats(self) -> None:
+        self.assertEqual(
+            print_documents.resolve_document_key("Quotation", "ใบเสนอราคา"),
+            "quotation",
+        )
+        self.assertEqual(
+            print_documents.resolve_document_key("Payment Entry", "ใบเสร็จรับเงิน"),
+            "receipt",
+        )
 
     def test_resolve_document_key_returns_empty_for_unregistered_input(self) -> None:
         self.assertEqual(print_documents.resolve_document_key("Delivery Note"), "")
