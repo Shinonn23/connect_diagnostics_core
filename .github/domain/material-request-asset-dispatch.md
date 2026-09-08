@@ -143,7 +143,8 @@ snapshot จนกว่าจะ cancel/reverse downstream ตาม native lif
 
 Transition task สำหรับ Close บังคับให้ทุก Item มี route และมี downstream อย่างน้อย
 หนึ่งเอกสาร Returnable usages ต้องมี Delivered Outbound และ outstanding เป็นศูนย์
-Customer Demo ต้องผ่าน return movement และ QA ตามชนิด line ก่อน Close
+ซึ่งคำนวณจาก Return ที่ผ่าน QA แล้ว, Return to Origin, Settlement หรือ Write-off
+ที่ submit แล้วตามชนิด line; จึงไม่บังคับ Accepted QA หากมีหลักฐาน resolution อื่นครบ
 
 ## 5. Dispatch
 
@@ -159,6 +160,7 @@ child table. Parent เก็บ Company/MR, Outbound/Return/Retry, original tri
 - Returnable Stock route ใช้ native Outward `Source → Borrow In Transit` และ End Transit
   `Transit → Borrow Warehouse`; หนึ่ง MR มีหนึ่ง Outward cycle และ Outward ต้องครบ 100%
 - Asset route อ้าง submitted Asset Movement ของ MR และต้องมี Asset; ไม่มี custom Asset Transit
+  และการยืนยัน Dispatch ต้อง re-fetch/lock แล้วใช้ Movement เดิม ไม่สร้าง Movement ซ้ำ
 - Customer Demo Stock/Asset ต้องตรงกับ route จาก cost snapshot
 - Return แต่ละเที่ยวใช้ native Return Outward `Borrow Warehouse → Transit` และ End Transit
   `Transit → QA Hold`; Batch/Serial identity ของเที่ยวคืนอาจต่างจากเที่ยวออก
@@ -167,6 +169,8 @@ child table. Parent เก็บ Company/MR, Outbound/Return/Retry, original tri
 - Asset เดียวกันอยู่ใน active outstanding Outbound ได้เพียงชุดเดียว
 - Retry ใช้ Outward เดิม, อ้าง Failed Outbound และไม่เพิ่ม outstanding
 - Failed Outbound ใช้ `Return to Origin` เพื่อสร้าง native End Transit กลับ source เดิมและตั้ง MR เป็น Stopped
+- Failed Return ใช้ `Return to Origin` ได้หลังสร้าง Return Outward แล้ว โดยสร้าง native reversal
+  กลับ Borrow Warehouse/Location เดิม, คืน Asset ให้ Responsible Employee และเปิดให้สร้าง Return ใหม่
 - ไม่มี partial line status; คืนบางส่วนด้วย Return Dispatch แยก
 
 Submit Outbound/Return/Retry เปลี่ยน logistics status เป็น Dispatched. หลัง submit
@@ -215,8 +219,9 @@ Retry ไม่เพิ่มยอด; Cancelled Dispatch ไม่ถูก�
 `settled_qty`, `written_off_qty` และแยก Asset ครอบคลุม Employee Borrow, Customer Demo
 และ Customer Loan พร้อม due date/overdue days
 
-Filters: Company, As-of Date, Usage, Responsible Employee, Customer, Material
-Request และ Overdue Only
+As-of Date ครอบคลุม Dispatch/inspection/resolution timestamps ด้วย จึงไม่ดึงเหตุการณ์ที่
+ถูกบันทึกภายหลังวันประวัติศาสตร์นั้นเข้ามาคำนวณ Filters: Company, As-of Date, Usage,
+Responsible Employee, Customer, Material Request และ Overdue Only
 
 ## 8. UI, Print และ Navigation
 
@@ -235,6 +240,7 @@ Forward patches:
 1. หยุด migrate หากพบ prototype usage `Customer Demo / Loan`; ผู้ใช้ต้องแยกค่าเอง
 2. เพิ่ม fields แบบ null-safe โดยไม่ backfill destination/route/cost
 3. Rename `Demo Return Inspection` และ child เป็น Borrowed Asset Return Inspection พร้อม rollback
+   โดยรันก่อน `post_model_sync` และลบ target table ที่ model sync สร้างไว้เฉพาะเมื่อว่าง
 4. เพิ่ม transit/return controls และลบ MR Submit/Checked snapshot fields หลัง backup
 
 Rollback patches คืน schema ของ fields ได้ แต่ค่าที่ลบต้องกู้จาก backup. ไม่มี patch

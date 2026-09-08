@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import Any, cast
 
 import frappe
@@ -518,27 +517,60 @@ def _validate_end_transit_entry(doc: Any, material_request: str) -> None:
     expected = frappe.get_all(
         "Stock Entry Detail",
         filters={"parent": doc.outgoing_stock_entry, "material_request": material_request},
-        fields=["name", "material_request_item", "transfer_qty", "t_warehouse"],
+        fields=["name", "material_request_item", "transfer_qty", "s_warehouse", "t_warehouse"],
     )
     source_names = {row.name for row in expected}
     actual = {row.get("ste_detail"): row for row in doc.get("items", [])}
     if set(actual) != source_names:
         frappe.throw(_("End Transit Stock Entry must complete every Outward Stock Entry row exactly once."))
 
+    recovery_transfer = None
     if source.return_dispatch_transfer:
         transfer = frappe.db.get_value(
             "Dispatch Transfer", source.return_dispatch_transfer, ["parent"], as_dict=True
         )
         target = frappe.db.get_value("Company", doc.company, "return_qa_hold_warehouse")
+        if transfer and frappe.db.get_value("Dispatch", transfer.parent, "delivery_status") == "Failed":
+            employee = frappe.db.get_value("Material Request", material_request, "responsible_employee")
+            target = frappe.db.get_value("Employee", employee, "borrow_warehouse") if employee else None
         if not transfer or not target:
-            frappe.throw(_("Return End Transit Stock Entry requires a Return QA Hold Warehouse."))
+            frappe.throw(_("Return End Transit Stock Entry requires a controlled destination Warehouse."))
+    elif doc.get("return_dispatch_transfer"):
+        recovery_transfer = frappe.db.get_value(
+            "Dispatch Transfer", doc.return_dispatch_transfer, ["parent"], as_dict=True
+        )
+        recovery_dispatch = (
+            frappe.db.get_value(
+                "Dispatch",
+                recovery_transfer.parent,
+                ["dispatch_type", "delivery_status", "material_request"],
+                as_dict=True,
+            )
+            if recovery_transfer
+            else None
+        )
+        if (
+            not recovery_transfer
+            or not recovery_dispatch
+            or recovery_dispatch.dispatch_type != "Outbound"
+            or recovery_dispatch.delivery_status not in {"Failed", "Dispatched"}
+            or recovery_dispatch.material_request != material_request
+        ):
+            frappe.throw(_("Recovery End Transit Stock Entry must reference a failed Outbound Dispatch."))
     else:
         employee = frappe.db.get_value("Material Request", material_request, "responsible_employee")
         target = frappe.db.get_value("Employee", employee, "borrow_warehouse") if employee else None
         if not target:
             frappe.throw(_("End Transit Stock Entry requires the responsible Employee Borrow Warehouse."))
 
-    if doc.get("to_warehouse") != target or any(
+    if recovery_transfer:
+        expected_sources = {row.name: row.s_warehouse for row in expected}
+        if any(row.get("t_warehouse") != expected_sources.get(name) for name, row in actual.items()):
+            frappe.throw(_("Recovery End Transit Stock Entry must return each row to its source Warehouse."))
+        targets = {row.get("t_warehouse") for row in doc.get("items", [])}
+        if doc.get("to_warehouse") and targets != {doc.get("to_warehouse")}:
+            frappe.throw(_("Recovery End Transit Stock Entry header must match its row destinations."))
+    elif doc.get("to_warehouse") != target or any(
         row.get("t_warehouse") != target for row in doc.get("items", [])
     ):
         frappe.throw(_("End Transit Stock Entry must use the controlled destination Warehouse."))
@@ -728,9 +760,6 @@ def validate_close(doc: Document) -> None:
     )
     if any(float(row.get("outstanding_qty") or 0) > 0 for row in outstanding):
         frappe.throw(_("All borrowed or demo items must be returned before closing."))
-
-    if usage in RETURNABLE_USAGES:
-        _validate_borrowed_asset_return_inspections(doc)
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1158,75 +1187,3 @@ def _row_has_active_downstream(doc: Document, row_name: str) -> bool:
 
 def _has_downstream_document(doc: Document) -> bool:
     return any(_row_has_active_downstream(doc, row.name) for row in doc.get("items"))
-
-
-def _validate_borrowed_asset_return_inspections(doc: Document) -> None:
-    returned = frappe.db.sql(
-        """
-        SELECT dt.name, dt.material_request_item, dt.item_code, dt.asset,
-            dt.reference_doctype, dt.reference_name, dt.end_transit_stock_entry_detail,
-            d.end_transit_stock_entry
-        FROM `tabDispatch Transfer` dt
-        INNER JOIN `tabDispatch` d ON d.name = dt.parent
-        WHERE d.material_request = %s
-            AND d.dispatch_type = 'Return'
-            AND d.docstatus = 1
-            AND d.delivery_status = 'Delivered'
-        """,
-        (doc.name,),
-        as_dict=True,
-    )
-    returned_by_item: dict[str, list[Any]] = {}
-    for transfer in returned:
-        returned_by_item.setdefault(transfer.material_request_item, []).append(transfer)
-
-    for row in doc.get("items"):
-        transfers = returned_by_item.get(row.name, [])
-        if not transfers:
-            frappe.throw(_("Row #{0}: Delivered return evidence is required.").format(row.idx))
-        if row.get("fulfillment_route") == "Stock Entry":
-            _validate_stock_return_inspection(row, transfers)
-        elif row.get("fulfillment_route") in ASSET_ROUTES:
-            _validate_asset_return_inspection(row, transfers)
-
-
-def _validate_stock_return_inspection(row: Document, transfers: Iterable[Any]) -> None:
-    for transfer in transfers:
-        if transfer.reference_doctype != "Stock Entry":
-            frappe.throw(_("Row #{0}: A submitted return Stock Entry is required.").format(row.idx))
-        if not frappe.db.exists(
-            "Quality Inspection",
-            {
-                "docstatus": 1,
-                "status": "Accepted",
-                "reference_type": "Stock Entry",
-                "reference_name": transfer.end_transit_stock_entry or transfer.reference_name,
-                "child_row_reference": transfer.end_transit_stock_entry_detail,
-                "item_code": transfer.item_code,
-            },
-        ):
-            frappe.throw(
-                _("Row #{0}: An accepted Quality Inspection is required for return {1}.").format(
-                    row.idx, transfer.reference_name
-                )
-            )
-
-
-def _validate_asset_return_inspection(row: Document, transfers: Iterable[Any]) -> None:
-    for transfer in transfers:
-        if transfer.reference_doctype != "Asset Movement" or not transfer.asset:
-            frappe.throw(_("Row #{0}: A submitted return Asset Movement is required.").format(row.idx))
-        if not frappe.db.exists(
-            "Borrowed Asset Return Inspection",
-            {
-                "docstatus": 1,
-                "inspection_result": "Accepted",
-                "return_dispatch_transfer": transfer.name,
-                "asset": transfer.asset,
-            },
-        ):
-            frappe.throw(
-                _("Row #{0}: An accepted Borrowed Asset Return Inspection is required for Asset {1}.").format(
-                    row.idx, transfer.asset
-                )
-            )

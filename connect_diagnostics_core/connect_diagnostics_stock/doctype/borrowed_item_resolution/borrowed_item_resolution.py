@@ -8,7 +8,7 @@ from typing import Any
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, now_datetime
+from frappe.utils import flt, getdate, now_datetime
 
 RETURNABLE_USAGES = frozenset({"Employee Borrow", "Customer Demo", "Customer Loan"})
 
@@ -19,11 +19,19 @@ class BorrowedItemResolution(Document):
         if self.get("resolution_type") not in {"Settlement", "Write-off"}:
             frappe.throw(_("Resolution Type must be Settlement or Write-off."))
         self._validate_items()
-        self._validate_not_already_resolved()
+        self._validate_outstanding_quantities()
         if self.get("resolution_type") == "Settlement":
             self._validate_settlement()
         elif self.get("resolution_type") == "Write-off":
             self._validate_write_off()
+
+    def before_submit(self) -> None:
+        """Serialize resolutions for each Material Request item before the final check."""
+        item_names = {row.get("material_request_item") for row in self.get("items", [])}
+        for item_name in item_names:
+            if item_name:
+                frappe.db.get_value("Material Request Item", item_name, "name", for_update=True)
+        self._validate_outstanding_quantities()
 
     def before_cancel(self) -> None:
         if self.get("stock_entry") or frappe.db.exists(
@@ -158,44 +166,37 @@ class BorrowedItemResolution(Document):
         if not valid:
             frappe.throw(_("Row {0}: Damaged stock requires a rejected QA inspection.").format(row.idx))
 
-    def _validate_not_already_resolved(self) -> None:
-        existing = frappe.db.sql(
-            """
-            SELECT ri.material_request_item, ri.asset, COALESCE(SUM(ri.qty), 0) AS qty
-            FROM `tabBorrowed Item Resolution Item` ri
-            INNER JOIN `tabBorrowed Item Resolution` r ON r.name = ri.parent
-            WHERE r.material_request = %s AND r.docstatus = 1 AND r.name != %s
-            GROUP BY ri.material_request_item, ri.asset
-            """,
-            (self.get("material_request"), self.name or ""),
-            as_dict=True,
+    def _validate_outstanding_quantities(self) -> None:
+        """Ensure settlement/write-off quantity is backed by current outstanding dispatches."""
+        from connect_diagnostics_core.connect_diagnostics_stock.report.outstanding_borrowed_items.outstanding_borrowed_items import (
+            get_outstanding_rows,
         )
-        existing_by_key = {
-            (row.material_request_item, row.asset or ""): float(row.qty or 0) for row in existing
+
+        outstanding_rows = get_outstanding_rows(
+            {
+                "company": self.get("company"),
+                "material_request": self.get("material_request"),
+                "as_of_date": getdate(),
+            }
+        )
+        outstanding_by_key = {
+            (result.get("material_request_item"), result.get("asset") or ""): flt(
+                result.get("outstanding_qty")
+            )
+            for result in outstanding_rows
         }
-        current_by_key: dict[tuple[str, str], float] = {}
+        requested_by_key: dict[tuple[str, str], float] = {}
         for row in self.get("items", []):
             key = (row.get("material_request_item"), row.get("asset") or "")
-            current_by_key[key] = current_by_key.get(key, 0.0) + float(row.get("qty") or 0)
+            requested_by_key[key] = requested_by_key.get(key, 0.0) + flt(row.get("qty"))
 
         for row in self.get("items", []):
-            item = frappe.db.get_value(
-                "Material Request Item",
-                row.get("material_request_item"),
-                ["stock_qty", "fulfillment_route"],
-                as_dict=True,
-            )
-            if not item:
-                continue
             key = (row.get("material_request_item"), row.get("asset") or "")
-            limit = (
-                1.0
-                if item.get("fulfillment_route") in {"Existing Asset", "Stock Capitalization"}
-                else float(item.get("stock_qty") or 0)
-            )
-            if existing_by_key.get(key, 0.0) + current_by_key[key] > limit + 0.00001:
+            if requested_by_key[key] > outstanding_by_key.get(key, 0.0) + 0.00001:
                 frappe.throw(
-                    _("Row {0}: The item has already been resolved in another Resolution.").format(row.idx)
+                    _(
+                        "Row {0}: Resolution quantity {1} exceeds the current outstanding quantity {2}."
+                    ).format(row.idx, requested_by_key[key], outstanding_by_key.get(key, 0.0))
                 )
 
     def _validate_settlement(self) -> None:

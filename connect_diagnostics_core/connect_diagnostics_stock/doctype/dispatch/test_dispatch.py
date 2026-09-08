@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from inspect import getsource
 from typing import cast
 from unittest.mock import MagicMock, patch
 
@@ -65,6 +66,58 @@ class TestDispatch(UnitTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             Dispatch._validate_asset_transfer(doc, cast(Document, row), frappe._dict(allocated_asset="AST-1"))
+
+    def test_asset_movement_is_mirrored_to_dispatch_and_all_asset_rows(self) -> None:
+        first = MagicMock()
+        first.get.side_effect = {
+            "asset": "AST-1",
+            "reference_name": "AM-1",
+            "original_source_location": "LOC-1",
+        }.get
+        second = MagicMock()
+        second.get.side_effect = {
+            "asset": "AST-2",
+            "reference_name": "AM-1",
+            "original_source_location": "LOC-2",
+        }.get
+        values = {"transfers": [first, second]}
+        doc = MagicMock()
+        doc.get.side_effect = values.get
+        doc.set.side_effect = values.__setitem__
+
+        Dispatch._set_asset_movement(doc)
+
+        self.assertEqual(values["asset_movement"], "AM-1")
+        first.set.assert_called_once_with("asset_movement", "AM-1")
+        second.set.assert_called_once_with("asset_movement", "AM-1")
+
+    @patch.object(frappe.db, "sql", return_value=[[1]])
+    def test_failed_return_remains_reserved_until_recovery(self, sql: MagicMock) -> None:
+        doc = MagicMock()
+        doc.get.side_effect = {"dispatch_type": "Return", "name": "DSP-RETURN"}.get
+        row = frappe._dict(
+            idx=1,
+            material_request_item="MRI-1",
+            item_code="ITEM-1",
+            asset=None,
+            qty=1,
+            against_dispatch_transfer="ROW-OUT",
+        )
+        original = frappe._dict(
+            parent="DSP-OUT",
+            material_request_item="MRI-1",
+            item_code="ITEM-1",
+            asset=None,
+            qty=1,
+        )
+
+        with patch.object(frappe.db, "get_value", return_value=original):
+            with self.assertRaises(frappe.ValidationError):
+                Dispatch._validate_against_outbound(doc, cast(Document, row))
+        self.assertIn(
+            "d.delivery_status IN ('Dispatched', 'Failed', 'Delivered')",
+            getsource(Dispatch._validate_against_outbound),
+        )
 
     @patch.object(frappe, "get_all")
     def test_return_stock_entry_must_reverse_original_warehouses(self, get_all: MagicMock) -> None:

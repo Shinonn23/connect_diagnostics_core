@@ -32,6 +32,7 @@ class Dispatch(Document):
         if not self.get("dispatched_at"):
             self.set("dispatched_at", now_datetime())
         self._set_outward_stock_entry()
+        self._set_asset_movement()
 
     def before_cancel(self) -> None:
         frappe.throw(
@@ -51,6 +52,25 @@ class Dispatch(Document):
             frappe.throw(_("One Dispatch must use one Stock Entry movement cycle."))
         if entries and not self.get("outward_stock_entry"):
             self.set("outward_stock_entry", next(iter(entries)))
+
+    def _set_asset_movement(self) -> None:
+        """Require one submitted Asset Movement and mirror it into the child rows."""
+        asset_rows = [row for row in self.get("transfers", []) if row.get("asset")]
+        if not asset_rows:
+            return
+        if any(not row.get("reference_name") for row in asset_rows):
+            frappe.throw(_("Every Asset Dispatch row must reference a submitted Asset Movement."))
+        if any(not row.get("original_source_location") for row in asset_rows):
+            frappe.throw(_("Every Asset Dispatch row must retain its original source Location."))
+        movements = {row.get("reference_name") for row in asset_rows if row.get("reference_name")}
+        if not movements:
+            frappe.throw(_("Asset Dispatch rows must reference a submitted Asset Movement."))
+        if len(movements) != 1:
+            frappe.throw(_("One Dispatch must use one Asset Movement for all Asset rows."))
+        movement = next(iter(movements))
+        self.set("asset_movement", movement)
+        for row in asset_rows:
+            row.set("asset_movement", movement)
 
     def _validate_outbound_completeness(self) -> None:
         """Require one complete outbound cycle for every routed MR item."""
@@ -375,19 +395,35 @@ class Dispatch(Document):
             frappe.throw(
                 _("Row #{0}: Asset Movement must be submitted and linked to this request.").format(row.idx)
             )
-        if not frappe.db.exists(
+        movement_item = frappe.db.get_value(
             "Asset Movement Item",
             {"parent": row.get("reference_name"), "asset": row.get("asset")},
-        ):
+            ["name", "source_location", "target_location", "from_employee", "to_employee"],
+            as_dict=True,
+        )
+        if not movement_item:
             frappe.throw(_("Row #{0}: Asset is not present in the Asset Movement.").format(row.idx))
-        if is_return_dispatch and movement.purpose not in {"Receipt", "Issue"}:
-            frappe.throw(
-                _("Row #{0}: Return requires an Asset Movement with purpose Receipt.").format(row.idx)
+        if is_return_dispatch:
+            qa_location = frappe.db.get_value("Company", self.get("company"), "return_qa_hold_location")
+            if movement.purpose != "Receipt" or movement_item.target_location != qa_location:
+                frappe.throw(
+                    _(
+                        "Row #{0}: Return must use a submitted Receipt Asset Movement into the QA Hold Location."
+                    ).format(row.idx)
+                )
+        else:
+            employee = frappe.db.get_value(
+                "Material Request", self.get("material_request"), "responsible_employee"
             )
-        if not is_return_dispatch and movement.purpose == "Receipt":
-            frappe.throw(
-                _("Row #{0}: Outbound or Retry cannot use a Receipt Asset Movement.").format(row.idx)
-            )
+            if movement.purpose != "Issue" or movement_item.to_employee != employee:
+                frappe.throw(
+                    _(
+                        "Row #{0}: Outbound Asset Movement must be a submitted Issue to the Responsible Employee."
+                    ).format(row.idx)
+                )
+            source_location = frappe.db.get_value("Asset", row.get("asset"), "location")
+            if source_location and not row.get("original_source_location"):
+                row.set("original_source_location", source_location)
 
     def _validate_against_outbound(self, row: Document) -> None:
         original = frappe.db.get_value(
@@ -402,6 +438,7 @@ class Dispatch(Document):
                 "uom",
                 "reference_doctype",
                 "reference_name",
+                "original_source_location",
             ],
             as_dict=True,
         )
@@ -420,6 +457,13 @@ class Dispatch(Document):
                 frappe.throw(
                     _("Row #{0}: Retry must reuse the original movement and quantity.").format(row.idx)
                 )
+            if row.get("asset"):
+                source_location = original.get("original_source_location")
+                if not source_location:
+                    frappe.throw(
+                        _("Row {0}: The original outbound Asset source Location is missing.").format(row.idx)
+                    )
+                row.set("original_source_location", source_location)
             return
 
         if (
@@ -440,6 +484,7 @@ class Dispatch(Document):
             WHERE dt.against_dispatch_transfer = %s
                 AND d.dispatch_type = 'Return'
                 AND d.docstatus = 1
+                AND d.delivery_status IN ('Dispatched', 'Failed', 'Delivered')
                 AND d.name != %s
             """,
             (row.get("against_dispatch_transfer"), self.name or ""),
@@ -482,11 +527,15 @@ class Dispatch(Document):
             if source:
                 row.set("original_source_warehouse", source)
         elif row.get("asset"):
-            source_location = frappe.db.get_value("Asset", row.get("asset"), "location")
+            source_location = original.get("original_source_location")
             if source_location:
                 row.set("original_source_location", source_location)
                 if not row.get("planned_final_location"):
                     row.set("planned_final_location", source_location)
+            else:
+                frappe.throw(
+                    _("Row {0}: The original outbound Asset source Location is missing.").format(row.idx)
+                )
         if not row.get("planned_final_warehouse"):
             row.set("planned_final_warehouse", row.get("original_source_warehouse"))
         if row.get("planned_final_warehouse"):

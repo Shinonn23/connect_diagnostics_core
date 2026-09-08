@@ -25,6 +25,10 @@ class TestOutstandingBorrowedItems(UnitTestCase):
         self.assertIn("d.dispatch_type = 'Return'", query)
         self.assertIn("d.dispatch_type = 'Outbound'", query)
         self.assertNotIn("dispatch_type = 'Retry'", query)
+        self.assertIn("qi.modified <= %(as_of_datetime)s", query)
+        self.assertIn("bari.modified <= %(as_of_datetime)s", query)
+        self.assertIn("d.delivery_confirmed_at <= %(as_of_datetime)s", query)
+        self.assertIn("r.modified <= %(as_of_datetime)s", query)
 
     @patch.object(outstanding_borrowed_items.frappe.db, "sql", return_value=[])
     def test_filters_are_parameterized(self, sql: MagicMock) -> None:

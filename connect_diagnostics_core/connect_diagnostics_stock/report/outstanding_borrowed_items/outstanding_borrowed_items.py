@@ -49,11 +49,13 @@ def get_outstanding_rows(filters: dict[str, Any]) -> list[ReportRow]:
                         (dt.reference_doctype = 'Stock Entry' AND EXISTS (
                             SELECT 1 FROM `tabQuality Inspection` qi
                             WHERE qi.docstatus = 1 AND qi.status = 'Accepted'
+                                AND qi.modified <= %(as_of_datetime)s
                                 AND qi.return_dispatch_transfer = dt.name
                                 AND qi.child_row_reference = dt.end_transit_stock_entry_detail
                         )) OR (dt.reference_doctype = 'Asset Movement' AND EXISTS (
                             SELECT 1 FROM `tabBorrowed Asset Return Inspection` bari
                             WHERE bari.docstatus = 1 AND bari.inspection_result = 'Accepted'
+                                AND bari.modified <= %(as_of_datetime)s
                                 AND bari.return_dispatch_transfer = dt.name
                         ))
                     ) THEN dt.qty ELSE 0 END) AS returned_qty,
@@ -61,11 +63,13 @@ def get_outstanding_rows(filters: dict[str, Any]) -> list[ReportRow]:
                         (dt.reference_doctype = 'Stock Entry' AND EXISTS (
                             SELECT 1 FROM `tabQuality Inspection` qi
                             WHERE qi.docstatus = 1 AND qi.status = 'Accepted'
+                                AND qi.modified <= %(as_of_datetime)s
                                 AND qi.return_dispatch_transfer = dt.name
                                 AND qi.child_row_reference = dt.end_transit_stock_entry_detail
                         )) OR (dt.reference_doctype = 'Asset Movement' AND EXISTS (
                             SELECT 1 FROM `tabBorrowed Asset Return Inspection` bari
                             WHERE bari.docstatus = 1 AND bari.inspection_result = 'Accepted'
+                                AND bari.modified <= %(as_of_datetime)s
                                 AND bari.return_dispatch_transfer = dt.name
                         ))
                     ) THEN dt.qty ELSE 0 END) AS pending_qa_qty
@@ -82,13 +86,17 @@ def get_outstanding_rows(filters: dict[str, Any]) -> list[ReportRow]:
                     SUM(CASE WHEN r.resolution_type = 'Write-off' THEN ri.qty ELSE 0 END) AS written_off_qty
                 FROM `tabBorrowed Item Resolution Item` ri
                 INNER JOIN `tabBorrowed Item Resolution` r ON r.name = ri.parent
-                WHERE r.docstatus = 1 AND r.resolution_date <= %(as_of_date)s
+                WHERE r.docstatus = 1
+                    AND r.resolution_date <= %(as_of_date)s
+                    AND r.modified <= %(as_of_datetime)s
                 GROUP BY ri.material_request_item, ri.asset
             ), outbound AS (
                 SELECT d.material_request, dt.material_request_item, dt.asset,
                     dt.item_code, dt.uom, d.dispatched_at,
                     dt.qty AS outbound_qty,
-                    CASE WHEN d.delivery_status = 'Returned to Origin' THEN dt.qty ELSE 0 END
+                    CASE WHEN d.delivery_status = 'Returned to Origin'
+                        AND d.delivery_confirmed_at <= %(as_of_datetime)s
+                        THEN dt.qty ELSE 0 END
                         AS returned_to_origin_qty,
                     COALESCE(ar.returned_qty, 0) AS returned_qty,
                     COALESCE(ar.pending_qa_qty, 0) AS pending_qa_qty,

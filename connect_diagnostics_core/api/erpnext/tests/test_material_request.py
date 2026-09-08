@@ -11,6 +11,9 @@ from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import material_request
+from connect_diagnostics_core.connect_diagnostics_stock.report.outstanding_borrowed_items import (
+    outstanding_borrowed_items,
+)
 
 
 class FakeMaterialRequest(frappe._dict):
@@ -315,3 +318,73 @@ class TestMaterialRequest(UnitTestCase):
         self.assertIn("Dispatch", items)
         self.assertIn("Borrowed Asset Return Inspection", items)
         self.assertIn("Quality Inspection", items)
+
+    @patch.object(outstanding_borrowed_items, "get_outstanding_rows", return_value=[])
+    @patch.object(material_request, "_has_downstream_document", return_value=True)
+    @patch.object(material_request, "_validate_routes")
+    @patch.object(material_request.frappe.db, "exists", return_value=True)
+    def test_returnable_request_can_close_after_settlement_or_write_off_without_qa_acceptance(
+        self,
+        _exists: MagicMock,
+        _routes: MagicMock,
+        _downstream: MagicMock,
+        _outstanding: MagicMock,
+    ) -> None:
+        for resolution_type in ("Settlement", "Write-off"):
+            doc = FakeMaterialRequest(
+                name="MR-1",
+                company="_Test Company",
+                request_usage="Customer Demo",
+                items=[frappe._dict(idx=1, fulfillment_route="Stock Entry")],
+                resolution_type=resolution_type,
+            )
+
+            material_request.validate_close(cast(Document, doc))
+
+    @patch.object(material_request.frappe.db, "exists", return_value=False)
+    @patch.object(material_request.frappe, "get_all")
+    @patch.object(material_request.frappe.db, "get_value")
+    def test_failed_outbound_recovery_end_transit_returns_each_row_to_source(
+        self, get_value: MagicMock, get_all: MagicMock, _exists: MagicMock
+    ) -> None:
+        def values(doctype: str, _name: str, fields: object, **_kwargs: object) -> object:
+            if doctype == "Stock Entry":
+                return frappe._dict(
+                    docstatus=1,
+                    company="_Test Company",
+                    add_to_transit=1,
+                    return_dispatch_transfer=None,
+                    to_warehouse="Transit - TC",
+                )
+            if doctype == "Company":
+                return "Transit - TC"
+            if doctype == "Dispatch Transfer":
+                return frappe._dict(parent="DSP-OUT", material_request="MR-1")
+            if doctype == "Dispatch":
+                return frappe._dict(
+                    dispatch_type="Outbound", delivery_status="Failed", material_request="MR-1"
+                )
+            return None
+
+        get_value.side_effect = values
+        get_all.return_value = [
+            frappe._dict(
+                name="SED-1", material_request_item="MRI-1", transfer_qty=2, s_warehouse="Stores - TC"
+            )
+        ]
+        doc = FakeMaterialRequest(
+            company="_Test Company",
+            outgoing_stock_entry="SE-RECOVERY",
+            return_dispatch_transfer="ROW-OUT",
+            to_warehouse="Stores - TC",
+            items=[
+                FakeRow(
+                    ste_detail="SED-1",
+                    transfer_qty=2,
+                    s_warehouse="Transit - TC",
+                    t_warehouse="Stores - TC",
+                )
+            ],
+        )
+
+        material_request._validate_end_transit_entry(doc, "MR-1")

@@ -88,13 +88,16 @@ def report_dispatch_failure(dispatch: str, company: str, failure_note: str) -> d
 
 @frappe.whitelist(methods=["POST"])
 def return_dispatch_to_origin(dispatch: str, company: str, reason: str) -> dict[str, Any]:
-    """Recover failed transit stock to its exact source and stop the MR."""
+    """Recover a failed journey to its pre-trip native stock and asset state."""
     doc = _locked_dispatch(dispatch, company, allowed_statuses=("Failed", "Dispatched"))
-    if doc.get("dispatch_type") != "Outbound":
-        frappe.throw(_("Only an Outbound Dispatch can be returned to origin."))
+    if doc.get("dispatch_type") not in {"Outbound", "Return"}:
+        frappe.throw(_("Only an Outbound or Return Dispatch can be returned to origin."))
+    if doc.get("dispatch_type") == "Return" and doc.get("delivery_status") != "Failed":
+        frappe.throw(_("Only a failed Return Dispatch can be returned to origin."))
     if not reason or not reason.strip():
         frappe.throw(_("Return to Origin reason is required."))
 
+    _lock_dispatch_transfers(doc)
     _create_return_to_origin(doc)
     doc.set("delivery_status", "Returned to Origin")
     doc.set("delivery_note", reason)
@@ -102,9 +105,10 @@ def return_dispatch_to_origin(dispatch: str, company: str, reason: str) -> dict[
     doc.set("delivery_confirmed_at", now_datetime())
     doc.flags.dispatch_action = "return_origin"
     doc.save()
-    frappe.db.set_value(
-        "Material Request", doc.get("material_request"), "status", "Stopped", update_modified=False
-    )
+    if doc.get("dispatch_type") == "Outbound":
+        frappe.db.set_value(
+            "Material Request", doc.get("material_request"), "status", "Stopped", update_modified=False
+        )
     return {"data": doc.as_dict(), "message": _("Dispatch returned to origin.")}
 
 
@@ -209,11 +213,11 @@ def _confirm_delivery(
 
 
 def _create_delivery_movements(doc: Document) -> None:
-    """Create each native movement before saving the delivery state."""
+    """Complete native transit and verify submitted Asset Movements before saving the POD."""
     if not isinstance(doc, Document):
         return
     _create_end_transit_stock_entry(doc)
-    _create_asset_delivery_movement(doc)
+    _validate_asset_delivery_movements(doc)
 
 
 def _create_end_transit_stock_entry(doc: Document) -> None:
@@ -268,49 +272,60 @@ def _delivery_warehouse(doc: Document) -> str:
         if not warehouse:
             frappe.throw(_("Return QA Hold Warehouse is required before confirming a return."))
         return cast(str, warehouse)
-    employee = frappe.db.get_value("Material Request", doc.get("material_request"), "responsible_employee")
+    employee = None
+    if doc.get("dispatch_type") == "Return":
+        employee = frappe.db.get_value(
+            "Material Request", doc.get("material_request"), "responsible_employee"
+        )
     warehouse = frappe.db.get_value("Employee", employee, "borrow_warehouse") if employee else None
     if not warehouse:
         frappe.throw(_("Responsible Employee Borrow Warehouse is required before confirming delivery."))
     return cast(str, warehouse)
 
 
-def _create_asset_delivery_movement(doc: Document) -> None:
+def _validate_asset_delivery_movements(doc: Document) -> None:
+    """Re-fetch and lock the submitted Asset Movement used by this Dispatch."""
     asset_rows = [row for row in doc.get("transfers", []) if row.get("asset")]
-    if not asset_rows or doc.get("asset_movement"):
+    if not asset_rows:
         return
-    movement = frappe.new_doc("Asset Movement")
-    movement.update(
-        {
-            "company": doc.get("company"),
-            "purpose": "Receipt" if doc.get("dispatch_type") == "Return" else "Issue",
-            "transaction_date": now_datetime(),
-            "reference_doctype": "Dispatch",
-            "reference_name": doc.name,
-            "material_request": doc.get("material_request"),
-        }
+    movement_names = {row.get("reference_name") for row in asset_rows if row.get("reference_name")}
+    if len(movement_names) != 1:
+        frappe.throw(_("A Dispatch must use one submitted Asset Movement for its Asset rows."))
+    movement_name = cast(str, next(iter(movement_names)))
+    movement = frappe.db.get_value(
+        "Asset Movement",
+        movement_name,
+        ["company", "material_request", "docstatus", "purpose"],
+        as_dict=True,
+        for_update=True,
     )
-    if doc.get("dispatch_type") == "Return":
-        location = frappe.db.get_value("Company", doc.get("company"), "return_qa_hold_location")
-        if not location:
-            frappe.throw(_("Return QA Hold Location is required before confirming a return."))
-        for row in asset_rows:
-            movement.append("assets", {"asset": row.get("asset"), "target_location": location})
-    else:
-        employee = frappe.db.get_value(
-            "Material Request", doc.get("material_request"), "responsible_employee"
-        )
-        for row in asset_rows:
-            movement.append("assets", {"asset": row.get("asset"), "to_employee": employee})
-    movement.insert()
-    movement.submit()
-    doc.set("asset_movement", movement.name)
-    for row in asset_rows:
-        row.set("asset_movement", movement.name)
+    expected_purpose = "Receipt" if doc.get("dispatch_type") == "Return" else "Issue"
+    if (
+        not movement
+        or movement.docstatus != 1
+        or movement.company != doc.get("company")
+        or movement.material_request != doc.get("material_request")
+        or movement.purpose != expected_purpose
+    ):
+        frappe.throw(_("The Dispatch Asset Movement must be submitted and match this journey."))
+    for transfer in asset_rows:
+        if not frappe.db.exists(
+            "Asset Movement Item", {"parent": movement_name, "asset": transfer.get("asset")}
+        ):
+            frappe.throw(
+                _("Asset {0} is missing from the Dispatch Asset Movement.").format(transfer.get("asset"))
+            )
 
 
 def _create_return_to_origin(doc: Document) -> None:
-    if not isinstance(doc, Document) or doc.get("recovery_stock_entry"):
+    if not isinstance(doc, Document):
+        return
+    _create_recovery_stock_entry(doc)
+    _create_recovery_asset_movement(doc)
+
+
+def _create_recovery_stock_entry(doc: Document) -> None:
+    if doc.get("recovery_stock_entry"):
         return
     stock_rows = [row for row in doc.get("transfers", []) if row.get("reference_doctype") == "Stock Entry"]
     if not stock_rows:
@@ -321,14 +336,15 @@ def _create_return_to_origin(doc: Document) -> None:
     from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
 
     recovery = make_stock_in_entry(cast(str, next(iter(outward_names))))
+    if doc.get("dispatch_type") == "Outbound":
+        recovery.set("return_dispatch_transfer", stock_rows[0].name)
     source_details = frappe.get_all(
         "Stock Entry Detail",
         filters={"parent": next(iter(outward_names))},
         fields=["material_request_item", "s_warehouse"],
     )
     source_by_item = {
-        row.material_request_item: row.original_source_warehouse
-        or next(
+        row.material_request_item: next(
             (
                 detail.s_warehouse
                 for detail in source_details
@@ -350,6 +366,54 @@ def _create_return_to_origin(doc: Document) -> None:
     recovery.insert()
     recovery.submit()
     doc.set("recovery_stock_entry", recovery.name)
+
+
+def _create_recovery_asset_movement(doc: Document) -> None:
+    if doc.get("recovery_asset_movement"):
+        return
+    asset_rows = [row for row in doc.get("transfers", []) if row.get("asset")]
+    if not asset_rows:
+        return
+    employee = None
+    if doc.get("dispatch_type") == "Return":
+        employee = frappe.db.get_value(
+            "Material Request", doc.get("material_request"), "responsible_employee"
+        )
+    movement = frappe.new_doc("Asset Movement")
+    movement.update(
+        {
+            "company": doc.get("company"),
+            "purpose": "Receipt",
+            "transaction_date": now_datetime(),
+            "reference_doctype": "Dispatch",
+            "reference_name": doc.name,
+            "material_request": doc.get("material_request"),
+        }
+    )
+    for row in asset_rows:
+        source_location = row.get("original_source_location")
+        if not source_location:
+            frappe.throw(
+                _("Original source Location is required to recover Asset {0}.").format(row.get("asset"))
+            )
+        movement_row: dict[str, Any] = {
+            "asset": row.get("asset"),
+            "target_location": source_location,
+        }
+        if doc.get("dispatch_type") == "Return":
+            if not employee:
+                frappe.throw(_("Responsible Employee is required to recover a failed Return Asset."))
+            movement_row["to_employee"] = employee
+        movement.append("assets", movement_row)
+    movement.insert()
+    movement.submit()
+    doc.set("recovery_asset_movement", movement.name)
+
+
+def _lock_dispatch_transfers(doc: Document) -> None:
+    for transfer in doc.get("transfers", []):
+        if transfer.get("name"):
+            frappe.db.get_value("Dispatch Transfer", transfer.get("name"), "name", for_update=True)
 
 
 def _locked_dispatch(

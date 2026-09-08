@@ -25,6 +25,7 @@
 		"end_transit_stock_entry",
 		"asset_movement",
 		"recovery_stock_entry",
+		"recovery_asset_movement",
 		"delivery_address_section",
 		"delivery_address",
 		"transport_section",
@@ -186,6 +187,14 @@
 			"read_only": 1
 		},
 		{
+			"fieldname": "recovery_asset_movement",
+			"fieldtype": "Link",
+			"label": "Recovery Asset Movement",
+			"options": "Asset Movement",
+			"allow_on_submit": 1,
+			"read_only": 1
+		},
+		{
 			"fieldname": "delivery_address_section",
 			"fieldtype": "Section Break",
 			"label": "Delivery Address"
@@ -291,7 +300,7 @@
 	"index_web_pages_for_search": 1,
 	"is_submittable": 1,
 	"links": [],
-	"modified": "2026-09-07 09:15:00.000000",
+	"modified": "2026-09-08 14:55:00.000000",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Stock",
 	"name": "Dispatch",
