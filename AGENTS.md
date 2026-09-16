@@ -3,8 +3,10 @@
 This is the sole repository-wide policy file. Codex loads it for work in this repository;
 the scoped Frappe rules in [`connect_diagnostics_core/AGENTS.md`](connect_diagnostics_core/AGENTS.md)
 apply to the app package. Procedural steps live in the repository skills, workflow narrative
-lives in [`.github/workflow.md`](.github/workflow.md), and per-domain design records live in
-[`.github/domain/`](.github/domain/). Read the relevant record before working in that area.
+lives in [`.github/workflow.md`](.github/workflow.md), stable domain references live in
+[`docs/domains/`](docs/domains/), and active or paused work lives in
+[`.github/tasks/`](.github/tasks/). Read the relevant reference and task record before working
+in that area.
 
 ## Rule priority
 
@@ -51,6 +53,60 @@ The complete delivery and promotion procedure is [`.github/workflow.md`](.github
 - Done means the pinned pre-commit command passes, relevant tests pass (or are explicitly
   waived in writing), and the requested change is fully implemented. State any human-only
   verification that remains.
+
+## Multi-agent engineering protocol
+
+For non-trivial engineering work, work as a coordinated team. The primary agent is the tech
+lead, integration owner, and communication broker. It owns the single task register: task graph,
+owner, scope, file ownership, dependencies, status, review state, integration, and final
+validation. Do not create a shared status file merely for agent coordination.
+
+- Treat work as non-trivial when it crosses modules, changes a data model, DocType, hook,
+  permission, transaction, migration, or has material regression risk. Explore and decompose it
+  before implementation.
+- Use the project agents deliberately: `architect` plans and decomposes, `explorer` gathers
+  read-only evidence, `worker` implements one bounded task, and `reviewer` independently reviews
+  plans or changes.
+- Every substantial task follows this loop: owner creates a domain plan → an independent agent
+  reviews the plan → owner resolves findings and revises it → parent marks the plan ready → work
+  begins. A plan is ready only when its goal, acceptance criteria, owned files, dependencies,
+  risks, tests, and rollback or migration impact are known or explicitly deferred.
+- If an owner's plan is too broad to have exclusive file ownership, contains independent
+  subsystems, cannot state acceptance criteria, or exceeds the current agent's domain knowledge,
+  the owner must decompose it into child tasks. Each child gets a bounded goal, owner, file scope,
+  dependencies, acceptance criteria, and plan-review state before implementation. Do not pass a
+  vague task to another agent.
+- Agents may delegate only when a bounded, independent subproblem benefits materially and a
+  concurrency slot is available. Prefer recursive delegation for read-heavy investigation; be
+  conservative with write-heavy delegation.
+- The runtime permits at most three spawned agents concurrently. Treat this as a shared budget
+  across every level of the agent tree; schedule work in waves and do not saturate it without a
+  clear benefit.
+- Before parallel edits, assign each active worker exclusive ownership of its files. Read-only
+  agents may inspect any file. Serialize tasks that need to edit the same file.
+- Every agent reports material state transitions to its direct parent using this compact format:
+
+  ```text
+  TASK_UPDATE
+  id: <stable task id>
+  status: proposed | planning | plan_review | ready | active | blocked | completed | code_review | accepted
+  owner: <agent role/name>
+  scope: <bounded goal and owned files>
+  evidence: <plan, commands, findings, or test result>
+  dependencies: <open or resolved ids>
+  next: <next concrete action>
+  blocker: <none or specific blocker>
+  ```
+
+  The parent updates its task register, assigns or queues follow-up work, and sends only the
+  relevant status and dependency changes to affected children. A child must report a conflict,
+  changed assumption, or scope expansion before continuing.
+- No self-approval: an implementing worker cannot be the final reviewer of its own changes.
+  For substantial changes, independently review the original request, relevant architecture,
+  final diff, and test evidence. P0/P1 findings block completion; resolve or explicitly accept
+  P2 findings, then re-review fixes before final integration.
+- Do not use delegation merely to create activity. Small, isolated work may be completed by a
+  single agent when delegation would add more coordination cost than value.
 
 ## Long-running commands
 
