@@ -16,5 +16,7 @@ exec(open("/absolute/path/to/script.py").read(), globals())
 
 Use the site-scoped Frappe APIs and database transaction controls in the script. Do not put
 site-specific values in module-level state, hardcode credentials, or make schema changes from
-the console. Schema and custom-field changes belong in the app's code-managed setup modules and
-patches, then run through the normal migration workflow.
+the console. For third-party DocTypes, create or edit Custom Fields and Property Setters in
+Customize Form, then use its `Export Customizations` action to write the selected module's
+`custom/<doctype>.json` with `Sync on Migrate` enabled. Data migrations still belong in the
+app's patches and must run through the normal migration workflow.

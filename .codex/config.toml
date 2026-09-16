@@ -1,2 +1,10 @@
 [features]
 hooks = true
+
+[agents]
+enabled = true
+# Allow larger coordinated test runs; the host may still enforce a lower live-session cap.
+max_concurrent_threads_per_session = 32
+default_subagent_model = "gpt-5.6-terra"
+default_subagent_reasoning_effort = "medium"
+interrupt_message = true

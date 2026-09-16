@@ -52,7 +52,7 @@ This project enforces conventions through [`AGENTS.md`](AGENTS.md) and the scope
 | ------------- | --------------------------- | -------------------------------------------------------------- |
 | API handlers  | `api/<system>/<doctype>.py` | Whitelisted methods + hook functions                           |
 | DocTypes      | `cd_stock/doctype/`         | Code-managed custom DocTypes                                   |
-| Custom fields | `cd_stock/custom/*.json`    | Field additions to standard DocTypes                           |
+| Custom fields | `<module>/custom/*.json`    | Customize Form exports for standard DocTypes                    |
 | Commands      | `commands/`                 | Custom `bench` CLI commands                                    |
 | Tests         | `tests/` or co-located      | `UnitTestCase` / `IntegrationTestCase` suites (`frappe.tests`) |
 

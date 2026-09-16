@@ -1,11 +1,13 @@
-# Domain knowledge
+# Stable domain knowledge
 
-Per-domain architecture and design records for `connect_diagnostics_core`. These
-are the authoritative "why it is built this way" notes kept outside the policy files so the
-session-start context stays small. Read the relevant file **before** working in that area.
+Per-domain architecture and design records for `connect_diagnostics_core`. These are stable
+"why it is built this way" references, not implementation backlogs. Read the relevant file
+before changing that area, then read the matching active record in `.github/tasks/` when one
+exists.
 
-When a domain's architecture, behavior, or constraints change, update the matching
-file here in the same change (this replaces keeping domain detail in `AGENTS.md`).
+When stable architecture, behavior, or constraints change, update the matching file here in
+the same change. Put unfinished work, blockers, ownership, and test evidence in
+`.github/tasks/` instead.
 
 | Domain                               | File                                                 |
 | ------------------------------------ | ---------------------------------------------------- |
@@ -18,5 +20,7 @@ file here in the same change (this replaces keeping domain detail in `AGENTS.md`
 | Regulatory module                    | [regulatory.md](regulatory.md)                       |
 | DKSH module                          | [dksh.md](dksh.md)                                   |
 | Print formats & audit log            | [print.md](print.md)                                 |
-| Stock Count                          | [stock-count.md](stock-count.md)                     |
-| Material Request, asset & dispatch   | [material-request-asset-dispatch.md](material-request-asset-dispatch.md)       |
+| Stock custom reset                   | [stock-count.md](stock-count.md)                     |
+
+Item Request / Asset Fulfillment v11 remains active and is tracked in
+[`../../.github/tasks/item-request-v11/`](../../.github/tasks/item-request-v11/).

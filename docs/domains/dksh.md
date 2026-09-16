@@ -27,7 +27,8 @@ reference_doctype, link_field, group_label)` is the generic `override_doctype_da
 - **Convert to CD Customer.** When a `DKSH Customer` has no `customer`, the form
   (`public/js/custom/dksh_customer/doctype.js`) offers **Convert to CD Customer**, which
   opens a **prefilled New Customer form** (name, tax id, branch code, and the read-only
-  provenance field `source_dksh_customer` from `setup/customer.py`); the user types the CD
+  provenance field `custom_source_dksh_customer` from the exported Customer Customize Form
+  `custom/*.json`); the user types the CD
   Customer Code (the document name) and saves. Customer `after_insert`
   (`link_source_dksh_customer`) then links the DKSH Customer back under a row lock — only
   when it is still unclaimed, so it is idempotent — and, when the DKSH Customer carries an
