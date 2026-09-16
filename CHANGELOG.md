@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.51.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.1...v0.51.2) (2026-09-16)
+
+
+### Miscellaneous Chores
+
+* **codex:** configure agents and task records ([58dfd45](https://github.com/Shinonn23/connect_diagnostics_core/commit/58dfd458f02d89669d1de6032a5b9fe98c344614))
+* configure Codex agents and task records ([6ee9e33](https://github.com/Shinonn23/connect_diagnostics_core/commit/6ee9e33615b301c9e02e1f39fa2552c1eddaeba6))
+
 ## [0.51.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.0...v0.51.1) (2026-09-08)
 
 
