@@ -11,3 +11,5 @@ frappe-semgrep-rules
 typings
 
 tmp/
+
+.serena/

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any, Literal, cast
+from typing import Any, cast
 
 import frappe
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -251,16 +251,15 @@ def _line_key(line: dict[str, Any]) -> _LineKey:
 
 @frappe.whitelist()
 def generate_holding_transfer(stock_count: str) -> dict[str, Any]:
-    """Monthly only: move every mismatched line into the holding warehouse.
+    """Monthly only: create a native holding-transfer draft.
 
-    A single Material Transfer (P&L-neutral: same asset account both sides) isolates
-    short/mismatched stock for investigation. This never touches valuation, so it
-    only requires Stock Manager approval — no accounting sign-off needed.
+    The draft is deliberately not submitted here. Native Stock Entry Workflow
+    approval and posting remain the only source of stock effects.
     """
     doc = _load_submitted_stock_count(stock_count, MONTHLY)
     if not doc.holding_warehouse:
         frappe.throw(_("Set a Holding Warehouse before generating the transfer."))
-    if any(row.entry_type == "Material Transfer" for row in doc.adjustments):
+    if any(row.entry_type == "Material Transfer" and row.stock_entry for row in doc.adjustments):
         frappe.throw(_("A holding transfer has already been generated for this Stock Count."))
 
     rows = [row for row in doc.items if abs(row.variance_qty or 0.0) > _VARIANCE_EPSILON]
@@ -285,51 +284,76 @@ def generate_holding_transfer(stock_count: str) -> dict[str, Any]:
             _stock_entry_row(row, s_warehouse=row.warehouse, t_warehouse=doc.holding_warehouse),
         )
     entry.insert(ignore_permissions=True)
-    entry.submit()
     entry_name = cast(str, entry.name)
 
-    _append_adjustment(doc, "Material Transfer", entry_name, _("{0} mismatched line(s)").format(len(rows)))
+    _append_adjustment(
+        doc, "Material Transfer", entry_name, None, _("{0} mismatched line(s)").format(len(rows))
+    )
     doc.save(ignore_permissions=True)
 
     return {
         "data": {"stock_entry": entry_name, "count": len(rows)},
-        "message": _("Created holding transfer {0} for {1} line(s).").format(entry_name, len(rows)),
+        "message": _(
+            "Created holding transfer draft {0} for {1} line(s); submit it through its Workflow."
+        ).format(entry_name, len(rows)),
     }
 
 
 @frappe.whitelist()
 def generate_stock_adjustment(stock_count: str) -> dict[str, Any]:
-    """Yearly only: post the counted variance to the General Ledger.
+    """Yearly only: create one native Stock Reconciliation draft.
 
-    Overage becomes a Material Receipt, shortage a Material Issue, both against the
-    company's Stock Adjustment account (same account Stock Reconciliation uses) —
-    this only runs after both Stock Manager and Accounts Manager approval.
+    The Count endpoint never creates a parallel receipt/issue posting engine or
+    submits a reconciliation. Native Stock Reconciliation Workflow owns review,
+    submit, ledger and GL effects.
     """
     doc = _load_submitted_stock_count(stock_count, YEARLY)
-    if any(row.entry_type in ("Material Receipt", "Material Issue") for row in doc.adjustments):
+    if any(row.stock_reconciliation for row in doc.adjustments):
         frappe.throw(_("A stock adjustment has already been generated for this Stock Count."))
 
-    expense_account, cost_center = _adjustment_accounts(doc.company)
-    surplus = [row for row in doc.items if (row.variance_qty or 0.0) > _VARIANCE_EPSILON]
-    shortage = [row for row in doc.items if (row.variance_qty or 0.0) < -_VARIANCE_EPSILON]
-    if not surplus and not shortage:
+    rows = [row for row in doc.items if abs(row.variance_qty or 0.0) > _VARIANCE_EPSILON]
+    if not rows:
         return {"data": None, "message": _("No variance; nothing to adjust.")}
 
-    result: dict[str, Any] = {}
-    if surplus:
-        result["receipt_entry"] = _make_adjustment_entry(
-            doc, "Material Receipt", surplus, expense_account, cost_center, warehouse_side="t"
+    reconciliation = frappe.new_doc("Stock Reconciliation")
+    reconciliation.set("company", doc.company)
+    reconciliation.set("purpose", "Stock Reconciliation")
+    reconciliation.set("posting_date", doc.posting_date)
+    reconciliation.set("posting_time", doc.posting_time)
+    reconciliation.set("set_posting_time", 1)
+    reconciliation.set("stock_count", doc.name)
+    reconciliation.set(
+        "remarks",
+        _("Generated from {0}; native review and posting required.").format(doc.name),
+    )
+    for row in rows:
+        reconciliation.append(
+            "items",
+            {
+                "item_code": row.item_code,
+                "warehouse": row.warehouse,
+                "qty": row.count_qty,
+                "valuation_rate": row.valuation_rate,
+                "use_serial_batch_fields": int(bool(row.batch_no or row.serial_no)),
+                "batch_no": row.batch_no,
+                "serial_no": row.serial_no,
+            },
         )
-    if shortage:
-        result["issue_entry"] = _make_adjustment_entry(
-            doc, "Material Issue", shortage, expense_account, cost_center, warehouse_side="s"
-        )
+    reconciliation.insert(ignore_permissions=True)
+    reconciliation_name = cast(str, reconciliation.name)
+    _append_adjustment(
+        doc,
+        "Stock Reconciliation",
+        None,
+        reconciliation_name,
+        _("Variance: {0} line(s)").format(len(rows)),
+    )
     doc.save(ignore_permissions=True)
 
     return {
-        "data": result,
-        "message": _("Posted stock adjustment for {0} surplus and {1} shortage line(s).").format(
-            len(surplus), len(shortage)
+        "data": {"stock_reconciliation": reconciliation_name, "count": len(rows)},
+        "message": _("Created native Stock Reconciliation {0}; submit it through its Workflow.").format(
+            reconciliation_name
         ),
     }
 
@@ -345,55 +369,6 @@ def _load_submitted_stock_count(stock_count: str, expected_count_type: str) -> A
     if doc.docstatus != 1:
         frappe.throw(_("The Stock Count must be submitted before generating adjustments."))
     return doc
-
-
-def _adjustment_accounts(company: str) -> tuple[str, str]:
-    expense_account = frappe.get_cached_value("Company", company, "stock_adjustment_account")
-    cost_center = frappe.get_cached_value("Company", company, "cost_center")
-    if not expense_account:
-        frappe.throw(_("Set a Stock Adjustment Account on Company {0}.").format(company))
-    return expense_account, cost_center
-
-
-def _make_adjustment_entry(
-    doc: Any,
-    stock_entry_type: str,
-    rows: list[Any],
-    expense_account: str,
-    cost_center: str,
-    *,
-    warehouse_side: Literal["s", "t"],
-) -> str:
-    entry = cast(StockEntry, frappe.new_doc("Stock Entry"))
-    entry.stock_entry_type = stock_entry_type
-    entry.company = doc.company
-    warehouses = {row.warehouse for row in rows}
-    if len(warehouses) == 1:
-        only_warehouse = warehouses.pop()
-        if warehouse_side == "s":
-            entry.from_warehouse = only_warehouse
-        else:
-            entry.to_warehouse = only_warehouse
-    entry.posting_date = doc.posting_date
-    entry.posting_time = doc.posting_time
-    entry.set_posting_time = 1
-    entry.stock_count = doc.name  # ty: ignore[unresolved-attribute] - runtime-injected custom field (setup/stock_entry.py)
-    entry.remarks = _("Auto-generated from {0} (Yearly Count / {1})").format(doc.name, stock_entry_type)
-    for row in rows:
-        if warehouse_side == "s":
-            item_row = _stock_entry_row(row, s_warehouse=row.warehouse)
-        else:
-            item_row = _stock_entry_row(row, t_warehouse=row.warehouse)
-        item_row["expense_account"] = expense_account
-        item_row["cost_center"] = cost_center
-        entry.append("items", item_row)
-    entry.insert(ignore_permissions=True)
-    entry.submit()
-    entry_name = cast(str, entry.name)
-
-    label = "Overage" if stock_entry_type == "Material Receipt" else "Shortage"
-    _append_adjustment(doc, stock_entry_type, entry_name, _("{0}: {1} line(s)").format(label, len(rows)))
-    return entry_name
 
 
 def _stock_entry_row(
@@ -422,5 +397,19 @@ def _stock_entry_row(
     return item_row
 
 
-def _append_adjustment(doc: Any, entry_type: str, stock_entry: str, remarks: str) -> None:
-    doc.append("adjustments", {"entry_type": entry_type, "stock_entry": stock_entry, "remarks": remarks})
+def _append_adjustment(
+    doc: Any,
+    entry_type: str,
+    stock_entry: str | None,
+    stock_reconciliation: str | None,
+    remarks: str,
+) -> None:
+    doc.append(
+        "adjustments",
+        {
+            "entry_type": entry_type,
+            "stock_entry": stock_entry,
+            "stock_reconciliation": stock_reconciliation,
+            "remarks": remarks,
+        },
+    )

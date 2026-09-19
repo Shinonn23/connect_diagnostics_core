@@ -82,6 +82,9 @@ RETIRED_SIDEBAR_LINKS = {
             ("DocType", "Storage Location"),
             ("DocType", "Regulation Class"),
             ("DocType", "Demo Return Inspection"),
+            ("DocType", "Item Request"),
+            ("DocType", "Requestable Item"),
+            ("DocType", "Fulfillment Site"),
         }
     ),
     "ERPNext Settings": frozenset(
@@ -115,6 +118,9 @@ RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
             ("DocType", "Storage Location"),
             ("DocType", "Regulation Class"),
             ("DocType", "Demo Return Inspection"),
+            ("DocType", "Item Request"),
+            ("DocType", "Requestable Item"),
+            ("DocType", "Fulfillment Site"),
         }
     ),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),

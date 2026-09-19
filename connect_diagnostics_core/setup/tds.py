@@ -186,11 +186,11 @@ def ensure_report_permissions() -> None:
             order_by="creation asc",
         )
         if custom_role_names:
-            custom_role = cast(Document, frappe.get_doc("Custom Role", custom_role_names[0]))
+            custom_role = frappe.get_doc("Custom Role", custom_role_names[0])
             for duplicate in custom_role_names[1:]:
                 frappe.delete_doc("Custom Role", duplicate, force=True, ignore_permissions=True)
         else:
-            custom_role = cast(Document, frappe.get_doc({"doctype": "Custom Role", "report": report_name}))
+            custom_role = frappe.get_doc({"doctype": "Custom Role", "report": report_name})
 
         desired_ref_doctype = frappe.db.get_value("Report", report_name, "ref_doctype") or ""
         desired_roles = [{"role": ADMINISTRATOR}]
@@ -207,24 +207,21 @@ def ensure_report_permissions() -> None:
 
 
 def _create_blocking_permission(doctype: str) -> str:
-    permission = cast(
-        Document,
-        frappe.get_doc(
-            {
-                "doctype": "Custom DocPerm",
-                "parent": doctype,
-                "role": "All",
-                "permlevel": 0,
-                **{fieldname: 0 for fieldname in PERMISSION_FIELDS},
-            }
-        ),
+    permission = frappe.get_doc(
+        {
+            "doctype": "Custom DocPerm",
+            "parent": doctype,
+            "role": "All",
+            "permlevel": 0,
+            **{fieldname: 0 for fieldname in PERMISSION_FIELDS},
+        }
     )
     permission.insert(ignore_permissions=True)
     return cast(str, permission.name)
 
 
 def _zero_permission(permission_name: str) -> None:
-    permission = cast(Document, frappe.get_doc("Custom DocPerm", permission_name))
+    permission = frappe.get_doc("Custom DocPerm", permission_name)
     changed = False
     for fieldname in PERMISSION_FIELDS:
         if permission.get(fieldname) != 0:

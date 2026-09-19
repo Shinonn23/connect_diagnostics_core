@@ -1,0 +1,50 @@
+{
+	"custom_fields": [
+		{
+			"allow_on_submit": 1,
+			"dt": "Stock Entry",
+			"fieldname": "workflow_state",
+			"fieldtype": "Link",
+			"hidden": 1,
+			"label": "Workflow State",
+			"no_copy": 1,
+			"options": "Workflow State"
+		},
+		{
+			"allow_on_submit": 0,
+			"description": "Request the narrowly scoped native Freeze Exception route.",
+			"dt": "Stock Entry",
+			"fieldname": "custom_freeze_exception",
+			"fieldtype": "Check",
+			"insert_after": "workflow_state",
+			"label": "Freeze Exception",
+			"no_copy": 1
+		},
+		{
+			"allow_on_submit": 0,
+			"dt": "Stock Entry",
+			"fieldname": "custom_freeze_exception_reason",
+			"fieldtype": "Small Text",
+			"insert_after": "custom_freeze_exception",
+			"label": "Freeze Exception Reason",
+			"mandatory_depends_on": "eval:doc.custom_freeze_exception",
+			"no_copy": 1
+		},
+		{
+			"allow_on_submit": 0,
+			"description": "Server-captured Freeze scope accepted by the native Emergency approval.",
+			"dt": "Stock Entry",
+			"fieldname": "custom_freeze_exception_reconciliation_scope",
+			"fieldtype": "Long Text",
+			"insert_after": "custom_freeze_exception_reason",
+			"label": "Freeze Exception Reconciliation Scope",
+			"no_copy": 1,
+			"read_only": 1
+		}
+	],
+	"property_setters": [],
+	"custom_perms": [],
+	"links": [],
+	"doctype": "Stock Entry",
+	"sync_on_migrate": 1
+}

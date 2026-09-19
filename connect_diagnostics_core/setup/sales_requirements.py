@@ -41,7 +41,7 @@ CUSTOM_FIELDS = {
 def ensure_configuration() -> None:
     """Create the override Role, keeping an existing one enabled."""
     if frappe.db.exists("Role", OVERRIDE_ROLE):
-        role = cast(Document, frappe.get_doc("Role", OVERRIDE_ROLE))
+        role = frappe.get_doc("Role", OVERRIDE_ROLE)
         changed = False
         for fieldname, value in {"disabled": 0, "desk_access": 1, "is_custom": 1}.items():
             if role.get(fieldname) != value:

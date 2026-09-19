@@ -11,12 +11,12 @@ frappe.ui.form.on("Stock Count", {
 
 		const is_submitted = frm.doc.docstatus === 1;
 		if (is_submitted && frm.doc.count_type === "Cycle Count (Monthly)") {
-			frm.add_custom_button(__("Generate Holding Transfer"), function () {
+			frm.add_custom_button(__("Create Holding Transfer Draft"), function () {
 				frm.events.run_generate(frm, "generate_holding_transfer");
 			});
 		}
 		if (is_submitted && frm.doc.count_type === "Yearly Count") {
-			frm.add_custom_button(__("Generate Stock Adjustment"), function () {
+			frm.add_custom_button(__("Create Stock Reconciliation Draft"), function () {
 				frm.events.run_generate(frm, "generate_stock_adjustment");
 			});
 		}

@@ -290,7 +290,7 @@ def _set_field_order(doctype: str, order: list[str]) -> None:
     name = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "field_order"}, "name")
     if name:
         property_setter = frappe.get_doc("Property Setter", name)
-        property_setter.value = value
+        property_setter.set("value", value)
         property_setter.save(ignore_permissions=True)
         return
     make_property_setter(

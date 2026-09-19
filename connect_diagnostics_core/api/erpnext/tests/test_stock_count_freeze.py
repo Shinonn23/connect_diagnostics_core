@@ -3,134 +3,72 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from unittest.mock import patch
 
 import frappe
-from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
 from frappe.model.document import Document
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests import UnitTestCase
 
-from connect_diagnostics_core.api.erpnext import stock_count, stock_count_freeze
-
-COMPANY = "_Test Company"
-WAREHOUSE = "_Test Warehouse - _TC"
-OTHER_WAREHOUSE = "_Test Warehouse 1 - _TC"
+from connect_diagnostics_core.api.erpnext import stock_reconciliation_freeze
 
 
-def _draft_stock_count(**overrides: object) -> Document:
-    data: dict[str, object] = {
-        "doctype": "Stock Count",
-        "count_type": stock_count.MONTHLY,
-        "company": COMPANY,
-        "warehouses": [{"warehouse": WAREHOUSE}],
-        "posting_date": "2026-08-12",
-        "posting_time": "10:00:00",
-        "selection_method": "Manual",
-        "items": [{"item_code": "_Test Item", "warehouse": WAREHOUSE, "system_qty": 0}],
-    }
-    data.update(overrides)
-    return frappe.get_doc(data).insert(ignore_permissions=True)
+def _doc(**fields: object) -> Document:
+    return frappe.get_doc({"doctype": "Stock Entry", **fields})
 
 
-def _receipt_entry(item_code: str, warehouse: str) -> StockEntry:
-    entry = cast(StockEntry, frappe.new_doc("Stock Entry"))
-    entry.stock_entry_type = "Material Receipt"
-    entry.company = COMPANY
-    entry.posting_date = "2026-08-12"
-    entry.posting_time = "11:00:00"
-    entry.set_posting_time = 1
-    entry.append(
-        "items",
-        {
-            "item_code": item_code,
-            "qty": 1,
-            "uom": "_Test UOM",
-            "stock_uom": "_Test UOM",
-            "conversion_factor": 1,
-            "basic_rate": 10,
-            "t_warehouse": warehouse,
-        },
-    )
-    return entry.insert(ignore_permissions=True)
-
-
-def _dict_doc(**fields: Any) -> Any:
-    return frappe._dict(fields)
-
-
-class TestRowsToCheck(UnitTestCase):
-    def test_extracts_item_warehouse_pairs_for_stock_entry(self) -> None:
-        doc = _dict_doc(
-            doctype="Stock Entry",
-            items=[
-                _dict_doc(item_code="ITEM-A", s_warehouse="WH-1", t_warehouse=""),
-                _dict_doc(item_code="ITEM-B", s_warehouse="", t_warehouse="WH-2"),
-            ],
+class TestStockReconciliationFreeze(UnitTestCase):
+    def test_extracts_item_warehouse_pairs(self) -> None:
+        pairs, warehouses = stock_reconciliation_freeze._rows_to_check(
+            _doc(
+                items=[
+                    {"item_code": "ITEM-A", "s_warehouse": "WH-1", "t_warehouse": ""},
+                    {"item_code": "ITEM-B", "s_warehouse": "", "t_warehouse": "WH-2"},
+                ]
+            )
         )
-        pairs, warehouses = stock_count_freeze._rows_to_check(doc)
         self.assertEqual(pairs, {("ITEM-A", "WH-1"), ("ITEM-B", "WH-2")})
         self.assertEqual(warehouses, {"WH-1", "WH-2"})
 
     def test_unmapped_doctype_yields_nothing(self) -> None:
-        doc = _dict_doc(doctype="Journal Entry", items=[])
-        pairs, warehouses = stock_count_freeze._rows_to_check(doc)
-        self.assertEqual(pairs, set())
-        self.assertEqual(warehouses, set())
+        doc = frappe.get_doc({"doctype": "Journal Entry", "items": []})
+        self.assertEqual(stock_reconciliation_freeze._rows_to_check(doc), (set(), set()))
 
+    def test_native_reconciliation_scope_blocks_matching_item_and_warehouse(self) -> None:
+        rows = [frappe._dict(item_code="ITEM-A", warehouse="WH-1", reconciliation="SR-1")]
+        with patch.object(stock_reconciliation_freeze.frappe.db, "sql", return_value=rows):
+            messages = stock_reconciliation_freeze._check_item_level({("ITEM-A", "WH-1")})
+        self.assertIn("SR-1", messages[0])
 
-class TestValidateTransactionSkipsWhenNotMovingStock(UnitTestCase):
-    def test_sales_invoice_without_update_stock_is_skipped(self) -> None:
-        doc = _dict_doc(doctype="Sales Invoice", update_stock=0)
-        # Should return immediately without touching the database.
-        stock_count_freeze.validate_transaction(doc)
+    def test_native_reconciliation_scope_does_not_block_unmatched_item(self) -> None:
+        rows = [frappe._dict(item_code="ITEM-A", warehouse="WH-1", reconciliation="SR-1")]
+        with patch.object(stock_reconciliation_freeze.frappe.db, "sql", return_value=rows):
+            messages = stock_reconciliation_freeze._check_item_level({("ITEM-B", "WH-1")})
+        self.assertEqual(messages, [])
 
+    def test_native_reconciliation_scope_blocks_warehouse_level_match(self) -> None:
+        rows = [frappe._dict(warehouse="WH-1", reconciliation="SR-1")]
+        with patch.object(stock_reconciliation_freeze.frappe.db, "sql", return_value=rows):
+            messages = stock_reconciliation_freeze._check_warehouse_level({"WH-1"})
+        self.assertIn("SR-1", messages[0])
 
-class TestStockCountFreezeIntegration(IntegrationTestCase):
-    def setUp(self) -> None:
-        frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
-
-    def test_monthly_freeze_blocks_matching_item_and_warehouse(self) -> None:
-        count = _draft_stock_count()
-        with self.assertRaises(frappe.ValidationError):
-            _receipt_entry("_Test Item", WAREHOUSE).submit()
-        frappe.delete_doc("Stock Count", count.name, force=True, ignore_permissions=True)
-
-    def test_monthly_freeze_does_not_block_a_different_item(self) -> None:
-        count = _draft_stock_count()
-        entry = _receipt_entry("_Test Item 2", WAREHOUSE)
-        entry.submit()
-        self.assertEqual(entry.docstatus, 1)
-        frappe.delete_doc("Stock Count", count.name, force=True, ignore_permissions=True)
-
-    def test_monthly_freeze_does_not_block_a_different_warehouse(self) -> None:
-        count = _draft_stock_count()
-        entry = _receipt_entry("_Test Item", OTHER_WAREHOUSE)
-        entry.submit()
-        self.assertEqual(entry.docstatus, 1)
-        frappe.delete_doc("Stock Count", count.name, force=True, ignore_permissions=True)
-
-    def test_draft_with_no_fetched_items_does_not_block(self) -> None:
-        count = _draft_stock_count(items=[])
-        entry = _receipt_entry("_Test Item", WAREHOUSE)
-        entry.submit()
-        self.assertEqual(entry.docstatus, 1)
-        frappe.delete_doc("Stock Count", count.name, force=True, ignore_permissions=True)
-
-    def test_freeze_releases_once_stock_count_is_submitted(self) -> None:
-        count = _draft_stock_count()
-        count.db_set("docstatus", 1, update_modified=False)
-        entry = _receipt_entry("_Test Item", WAREHOUSE)
-        entry.submit()
-        self.assertEqual(entry.docstatus, 1)
-        # Submitted (docstatus=1) Stock Counts are left in place -- IntegrationTestCase
-        # rolls back the whole class's DB changes, matching test_stock_count_adjustments.py.
-
-    def test_yearly_freeze_blocks_any_item_in_the_selected_warehouse(self) -> None:
-        count = _draft_stock_count(
-            count_type=stock_count.YEARLY,
-            warehouses=[{"warehouse": WAREHOUSE}],
-            items=[{"item_code": "_Test Item", "warehouse": WAREHOUSE, "system_qty": 0}],
+    def test_non_stock_update_invoice_is_skipped(self) -> None:
+        stock_reconciliation_freeze.validate_transaction(
+            frappe.get_doc({"doctype": "Sales Invoice", "update_stock": 0})
         )
-        with self.assertRaises(frappe.ValidationError):
-            _receipt_entry("_Test Item 2", WAREHOUSE).submit()
-        frappe.delete_doc("Stock Count", count.name, force=True, ignore_permissions=True)
+
+    def test_execution_marker_is_cleared_after_exception_path(self) -> None:
+        doc = _doc(workflow_state="Emergency Stock Movement Submitted")
+        with (
+            patch.dict(
+                stock_reconciliation_freeze.frappe.flags,
+                {"freeze_exception_execution": {"name": doc.name}},
+            ),
+            patch(
+                "connect_diagnostics_core.api.erpnext.stock_entry_workflow.is_authorized_freeze_exception",
+                return_value=True,
+            ),
+        ):
+            stock_reconciliation_freeze.validate_transaction(doc)
+        self.assertIsNone(
+            getattr(stock_reconciliation_freeze.frappe.flags, "freeze_exception_execution", None)
+        )

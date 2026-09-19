@@ -22,6 +22,7 @@ STOCK_ENTRY = "Stock Entry"
 PURCHASE_ORDER = "Purchase Order"
 PURCHASE_RECEIPT = "Purchase Receipt"
 PURCHASE_INVOICE = "Purchase Invoice"
+PAYMENT_ENTRY = "Payment Entry"
 
 PURCHASE_REQUESTER_ROLE = "Purchase Requester"
 C_LEVEL_APPROVER_ROLE = "C-Level Approver"
@@ -40,6 +41,7 @@ CACHE_CLEAR_DOCTYPES = (
     PURCHASE_ORDER,
     PURCHASE_RECEIPT,
     PURCHASE_INVOICE,
+    PAYMENT_ENTRY,
 )
 
 CUSTOM_FIELDS = {
@@ -432,6 +434,16 @@ def activate_standard_permissions() -> None:
         email=1,
     )
     _ensure_material_request_permission("Accounts User", 1, read=1, write=1)
+    # Workflow approval calls ``save`` for draft-to-draft decisions.  Keep the
+    # dedicated approver out of create/submit/cancel rights; Workflow State's
+    # ``allow_edit`` controls the Desk form while this minimal write right lets
+    # Frappe persist the Approve/Reject action.
+    # Preserve the native permissions before adding app-specific roles. Frappe
+    # switches a DocType to its Custom DocPerm table once the first custom row
+    # exists; copying first keeps the native operational roles intact.
+    for doctype in (ASSET_MOVEMENT, STOCK_ENTRY, PAYMENT_ENTRY):
+        setup_custom_perms(doctype)
+    _ensure_permission(PAYMENT_ENTRY, C_LEVEL_APPROVER_ROLE, read=1, write=1)
     for doctype in (ASSET_MOVEMENT, STOCK_ENTRY):
         _ensure_permission(doctype, "Stock User", read=1, write=1, create=1, submit=1, report=1, print=1)
         _ensure_permission(
@@ -446,6 +458,7 @@ def activate_standard_permissions() -> None:
             print=1,
         )
         _ensure_permission(doctype, QUALITY_MANAGER_ROLE, read=1, write=1, create=1, report=1, print=1)
+        _ensure_permission(doctype, C_LEVEL_APPROVER_ROLE, read=1, write=1)
 
 
 def _ensure_material_request_permission(role: str, permlevel: int, **rights: int) -> None:
