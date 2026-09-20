@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.52.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.2...v0.52.0) (2026-09-20)
+
+
+### Features
+
+* **employee:** organize signature field layout ([7549f84](https://github.com/Shinonn23/connect_diagnostics_core/commit/7549f84260a4ecde3ddc98b400cb1a4a63320941))
+* **workflow:** checkpoint baseline implementation ([d4db188](https://github.com/Shinonn23/connect_diagnostics_core/commit/d4db188b5b2ee52194c11ad703690a8baad67c0d))
+
+
+### Code Refactoring
+
+* **workflow:** manage custom fields from setup ([dc3c280](https://github.com/Shinonn23/connect_diagnostics_core/commit/dc3c280c05aaa9313510f34c3d62c9cc6e1a139d))
+
+
+### Miscellaneous Chores
+
+* align task lifecycle and final docs ([699e4c8](https://github.com/Shinonn23/connect_diagnostics_core/commit/699e4c8330b33ce8037bca7906f89e56ebe45508))
+* define local test site contract ([e41be79](https://github.com/Shinonn23/connect_diagnostics_core/commit/e41be791801b58de2ce3ee3915b7f92d5d864338))
+* map workflow implementation branches ([2a64b7c](https://github.com/Shinonn23/connect_diagnostics_core/commit/2a64b7c3184b0e4ee8dac416513d29fd08e7d02d))
+* remove codex git command rules ([4907fab](https://github.com/Shinonn23/connect_diagnostics_core/commit/4907fab159338b303a6a19bc8fca29a5c7fbdca1))
+* restore setup-managed custom fields ([50db04f](https://github.com/Shinonn23/connect_diagnostics_core/commit/50db04f0979dfdfafe6e478ff5360693d51f5885))
+* simplify codex agent workflow ([fece475](https://github.com/Shinonn23/connect_diagnostics_core/commit/fece475e8c402f5e57e3428b5d19a9be6f25f178))
+
 ## [0.51.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.1...v0.51.2) (2026-09-16)
 
 
