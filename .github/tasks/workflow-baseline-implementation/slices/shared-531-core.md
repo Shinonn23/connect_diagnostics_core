@@ -53,7 +53,7 @@ invariant, the worker may own:
 - one dedicated integration test module only if the approved target is available;
 - this slice evidence section.
 
-Explicit exclusions: `hooks.py`, `patches.txt`, all fixtures/custom exports, setup modules,
+Explicit exclusions: `hooks.py`, `patches.txt`, all fixtures/setup-managed custom-field configuration, setup modules,
 migration ordering, retired Stock Count code, domain adapters, site records, and native dependency
 source. A serialized integration task owns any later hook/adapter wiring.
 

@@ -33,7 +33,7 @@
 - `pre-commit run --all-files` ผ่าน; ผลนี้ยังไม่ใช่หลักฐาน business behavior
 - ยังมี Workflow Action ค้าง 7 รายการ: Material Request 2, Purchase Order 3, Stock Count 2
 - runtime มี legacy/competing workflow state/action อยู่ จึงต้องตรวจ collision และ pending document ต่อรายการ
-- source worktree มี dirty และ untracked files จำนวนมาก ทั้ง hooks, patches, setup, custom exports, workflow fixtures และ task records; ห้ามตีความว่าเป็น approved change ทั้งหมด
+- source worktree มี dirty และ untracked files จำนวนมาก ทั้ง hooks, patches, setup-managed Custom Fields, workflow fixtures และ task records; ห้ามตีความว่าเป็น approved change ทั้งหมด
 
 งานที่ต้องแก้จาก decision เรื่อง Equipment:
 

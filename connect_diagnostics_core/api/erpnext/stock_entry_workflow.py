@@ -27,9 +27,9 @@ EMERGENCY_STATES = frozenset(
         "Emergency Stock Movement Cancelled",
     }
 )
-EXCEPTION_FLAG = "custom_freeze_exception"
-EXCEPTION_REASON = "custom_freeze_exception_reason"
-EXCEPTION_SCOPE = "custom_freeze_exception_reconciliation_scope"
+EXCEPTION_FLAG = "freeze_exception"
+EXCEPTION_REASON = "freeze_exception_reason"
+EXCEPTION_SCOPE = "freeze_exception_reconciliation_scope"
 _CRITICAL_FIELDS = ("purpose", "add_to_transit", "outgoing_stock_entry", "items")
 _CRITICAL_ITEM_FIELDS = (
     "item_code",

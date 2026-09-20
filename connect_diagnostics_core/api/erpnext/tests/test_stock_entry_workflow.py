@@ -50,8 +50,8 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Urgent controlled movement",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Urgent controlled movement",
             }
         )
         with patch.object(stock_entry_workflow.frappe.db, "exists", return_value=False):
@@ -65,8 +65,8 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Rejected history must not authorize posting",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Rejected history must not authorize posting",
             }
         )
         with (
@@ -83,9 +83,9 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Native execution task proof",
-                "custom_freeze_exception_reconciliation_scope": "[]",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Native execution task proof",
+                "freeze_exception_reconciliation_scope": "[]",
             }
         )
         with patch.object(stock_entry_workflow.frappe.db, "exists", return_value=True):
@@ -102,9 +102,9 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "New Freeze must not be bypassed",
-                "custom_freeze_exception_reconciliation_scope": "[]",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "New Freeze must not be bypassed",
+                "freeze_exception_reconciliation_scope": "[]",
             }
         )
         current_freeze = [
@@ -137,8 +137,8 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Old approval must not be reused",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Old approval must not be reused",
             }
         )
         with (
@@ -156,8 +156,8 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "add_to_transit": 1,
                 "outgoing_stock_entry": None,
                 "workflow_state": "Emergency Stock Movement Submitted",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Transit must not use direct exception",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Transit must not use direct exception",
             }
         )
         with (
@@ -176,7 +176,7 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 0,
                 "workflow_state": "Stock Transfer Draft",
-                "custom_freeze_exception": 1,
+                "freeze_exception": 1,
             }
         )
         with patch.object(stock_entry_workflow.frappe, "throw") as throw:
@@ -189,8 +189,8 @@ class TestStockEntryWorkflow(UnitTestCase):
                 "purpose": "Material Transfer",
                 "add_to_transit": 1,
                 "workflow_state": "Stock Transfer Draft",
-                "custom_freeze_exception": 1,
-                "custom_freeze_exception_reason": "Urgent controlled movement",
+                "freeze_exception": 1,
+                "freeze_exception_reason": "Urgent controlled movement",
             }
         )
         with patch.object(stock_entry_workflow.frappe, "throw") as throw:

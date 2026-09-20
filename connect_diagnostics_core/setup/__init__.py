@@ -41,6 +41,7 @@ from connect_diagnostics_core.setup import (
     stock_settings,
     supplier,
     uom,
+    workflow_fields,
     workspace,
 )
 from connect_diagnostics_core.setup.print_format import remove_non_app_print_formats
@@ -78,6 +79,7 @@ _MODULES = (
     stock_settings,
     supplier,
     uom,
+    workflow_fields,
 )
 
 

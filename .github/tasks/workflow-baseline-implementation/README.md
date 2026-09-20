@@ -87,7 +87,7 @@ FREEZE-08-SIGNOFF waits for every required WF-01–17 and G0–G4.
 
 - Each task receives exact exclusive files, excluded shared files, test ownership, migration and
   rollback impact before `ready`.
-- One serialized integration owner controls `hooks.py`, `patches.txt`, setup, config exports, and
+- One serialized integration owner controls `hooks.py`, `patches.txt`, setup-managed configuration, and
   migration ordering. The current dirty versions remain contested and excluded.
 - Native Frappe/ERPNext/HRMS source is read-only.
 - A core contract passing does not close its parent Main Task; coverage closes only after every

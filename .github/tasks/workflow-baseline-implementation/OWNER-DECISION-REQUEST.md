@@ -25,7 +25,7 @@ field, patch และ test บางส่วนอยู่แล้ว เพ
 3. policy สำคัญของ approval, identity, scope, delegation, retry, correction และ
    domain side effect ยังไม่มี owner approval;
 4. ยังไม่มี disposition ที่ได้รับอนุญาตสำหรับ dirty `hooks.py`, setup, patches,
-   fixtures และ custom exports;
+   fixtures และ setup-managed Custom Fields;
 5. ยังไม่มีคำตัดสินสำหรับ legacy Workflow Actions ที่ค้างอยู่ จึงห้ามสร้างหรือ
    ลบประวัติแทนเจ้าของธุรกิจ;
 6. G0 ยังไม่ผ่าน และ G1–G4 ยังไม่มีหลักฐานที่ยอมรับได้;
@@ -160,7 +160,7 @@ transaction boundary, lock, permission, privacy และ audit evidence
 - `connect_diagnostics_core/AGENTS.md`;
 - `hooks.py` และ `patches.txt`;
 - `setup/procure_to_pay.py` และ setup tests;
-- `custom/*.json`;
+- `setup/*.py` Custom Field / Property Setter configuration;
 - `fixtures/workflow*.json`;
 - workflow patches, rollback patches และ tests.
 

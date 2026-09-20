@@ -20,10 +20,10 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
         manifest = json.loads(MANIFEST.read_text())
         routes = {route["id"]: route for route in manifest["routes"]}
-        self.assertEqual(manifest["target_scope"], "DEV:local")
+        self.assertEqual(manifest["target_scope"], "DEV:local.test")
         self.assertFalse(manifest["records_are_inert"])
         self.assertEqual(manifest["activation_status"], "enabled-on-dev")
-        self.assertIn("workflow-state-field-export", manifest["activation_prerequisites"])
+        self.assertIn("workflow-state-field-setup", manifest["activation_prerequisites"])
         self.assertIn("executable-permission-contract", manifest["activation_prerequisites"])
         self.assertEqual(set(routes), {f"WF-{number:02d}" for number in range(1, 19)})
         self.assertEqual(routes["WF-08"]["status"], "disabled")

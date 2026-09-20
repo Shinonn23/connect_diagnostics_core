@@ -40,11 +40,11 @@
 | `connect_diagnostics_core/setup/procure_to_pay.py` | `9ffa273a0c242d050346781796ba223fb4b556f5af022e2d696475e07ab59f3b` |
 | `connect_diagnostics_core/setup/tests/test_workflow_reset.py` | `4ca711314259a6d22df6608b1de4e411dd8f11c3c34caf9d0e431f7176e0f301` |
 
-| Untracked path | SHA-256 |
+| Historical untracked path at the 2026-09-17 checkpoint | SHA-256 |
 | --- | --- |
 | `connect_diagnostics_core/custom/asset_movement.json` | `a7132967429b8bd96b01fac62bd01904d9838f46a94c82023193e96b3e00ec4d` |
 | `connect_diagnostics_core/custom/payment_entry.json` | `a695c2b70aabe3e1c7345ddb022cc1bb8c8e5b0a77aad39afcd75c5ce0c18e20` |
-| `connect_diagnostics_core/custom/stock_entry.json` | `f944a8748af026d3cc06891307f29bef1ecc6310887810b33a3ab8090ac929e7` |
+| `connect_diagnostics_core/connect_diagnostics_stock/custom/stock_entry.json` | `f944a8748af026d3cc06891307f29bef1ecc6310887810b33a3ab8090ac929e7` |
 | `connect_diagnostics_core/fixtures/workflow.json` | `86acb281b8239f2ab062d9a3e0c7e1a954dcee6b9056d52ea0cbdb202da4fbc7` |
 | `connect_diagnostics_core/fixtures/workflow_action_master.json` | `862ff7bc6fd89954dacbf1df9a7d4cf876030e6398b81ee083c8a5be6f7416a1` |
 | `connect_diagnostics_core/fixtures/workflow_state.json` | `437fe606c2f5d5ba79452f1ab78b1c187654d650d230a4097b477e5dc06c1bd7` |
@@ -52,7 +52,11 @@
 | `connect_diagnostics_core/patches/v1_0/rollback_remove_legacy_workflow_revise_actions.py` | `92a85076aab085935c4d152c8fd682fa3130f2e5d17939bda163e11088e094ed` |
 | `connect_diagnostics_core/patches/v1_0/tests/test_remove_legacy_workflow_revise_actions.py` | `b9994ecdb4f725b96984b64d0c895a49d92a3ab9090b9b603afd3d5c56d3ad69` |
 
-Recompute every dirty/untracked hash before relying on this checkpoint.
+These `custom/*.json` rows are historical evidence only. Current workflow Custom Fields are
+code-managed by `connect_diagnostics_core/setup/workflow_fields.py`; the old exported JSON files
+are not a source of truth and are removed from the current tree.
+
+Recompute every current-source hash before relying on this checkpoint.
 
 Current canonical-reference hashes after the 2026-09-20 documentation taxonomy rewrite:
 
@@ -92,19 +96,21 @@ The previous `docs/domains/*` hashes are historical only and no longer identify 
 
 ## Reproduction commands
 
-Run only against the approved target and sanitize document/user values before recording output.
+Current verification/re-test commands target the dedicated `local.test` site. The dated
+2026-09-17 audit above remains historical evidence from `local` and must not be treated as a
+current test result.
 
 ```sh
 git branch --show-current
 git rev-parse HEAD
 git status --short
 sha256sum <recorded-source-and-reference-paths>
-bench --site local list-apps
-bench --site local execute "frappe.get_all('Workflow', fields=['name','document_type','is_active'], order_by='name asc')"
-bench --site local execute "frappe.get_all('Workflow Action', filters={'status':'Open'}, fields=['status','reference_doctype'], order_by='reference_doctype asc')"
-bench --site local execute frappe.get_all --kwargs "{'doctype':'Custom DocPerm','filters':{'parent':['in',['Stock Entry','Payment Entry','Asset Movement']]},'fields':['parent','role','permlevel','read','write','create','submit','cancel','amend','report','export','print','email','share'],'order_by':'parent asc,role asc,permlevel asc'}" | sha256sum
-bench --site local execute frappe.get_hooks --kwargs "{'hook':'workflow_methods'}" | sha256sum
-{ bench --site local execute frappe.get_all --kwargs "{'doctype':'Workflow','fields':['name','workflow_name','document_type','is_active','override_status','send_email_alert','enable_action_confirmation','workflow_state_field'],'order_by':'name asc'}"; bench --site local execute frappe.get_all --kwargs "{'doctype':'Workflow Document State','fields':['parent','idx','state','doc_status','update_field','update_value','allow_edit','is_optional_state','avoid_status_override','send_email','evaluate_as_expression'],'order_by':'parent asc,idx asc'}"; bench --site local execute frappe.get_all --kwargs "{'doctype':'Workflow Transition','fields':['parent','idx','state','action','next_state','allowed','allow_self_approval','condition','send_email_to_creator'],'order_by':'parent asc,idx asc'}"; } | sha256sum
+bench --site local.test list-apps
+bench --site local.test execute "frappe.get_all('Workflow', fields=['name','document_type','is_active'], order_by='name asc')"
+bench --site local.test execute "frappe.get_all('Workflow Action', filters={'status':'Open'}, fields=['status','reference_doctype'], order_by='reference_doctype asc')"
+bench --site local.test execute frappe.get_all --kwargs "{'doctype':'Custom DocPerm','filters':{'parent':['in',['Stock Entry','Payment Entry','Asset Movement']]},'fields':['parent','role','permlevel','read','write','create','submit','cancel','amend','report','export','print','email','share'],'order_by':'parent asc,role asc,permlevel asc'}" | sha256sum
+bench --site local.test execute frappe.get_hooks --kwargs "{'hook':'workflow_methods'}" | sha256sum
+{ bench --site local.test execute frappe.get_all --kwargs "{'doctype':'Workflow','fields':['name','workflow_name','document_type','is_active','override_status','send_email_alert','enable_action_confirmation','workflow_state_field'],'order_by':'name asc'}"; bench --site local.test execute frappe.get_all --kwargs "{'doctype':'Workflow Document State','fields':['parent','idx','state','doc_status','update_field','update_value','allow_edit','is_optional_state','avoid_status_override','send_email','evaluate_as_expression'],'order_by':'parent asc,idx asc'}"; bench --site local.test execute frappe.get_all --kwargs "{'doctype':'Workflow Transition','fields':['parent','idx','state','action','next_state','allowed','allow_self_approval','condition','send_email_to_creator'],'order_by':'parent asc,idx asc'}"; } | sha256sum
 ```
 
 The installed Workflow Action schema has no `workflow_name` column. Queries must follow the
