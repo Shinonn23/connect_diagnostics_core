@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.52.0...v0.52.1) (2026-09-20)
+
+
+### Miscellaneous Chores
+
+* enable autonomous agent workflow ([84cf2d5](https://github.com/Shinonn23/connect_diagnostics_core/commit/84cf2d5c5e21c1f885a3e256348546a7bf2e472e))
+
 ## [0.52.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.2...v0.52.0) (2026-09-20)
 
 
