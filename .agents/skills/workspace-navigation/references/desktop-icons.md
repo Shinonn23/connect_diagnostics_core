@@ -72,4 +72,4 @@ must therefore be re-applied idempotently from `after_migrate` (`ensure_desktop_
 `after_migrate` recreates it, discarding user customization. Regulatory avoids this by shipping
 the JSON file. This is a known issue, not part of navigation changes unless explicitly scoped.
 
-Related: `docs/domains/regulatory.md` and the parent `SKILL.md`.
+Related: the repository's current Regulatory documentation and the parent `SKILL.md`.

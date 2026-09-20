@@ -68,15 +68,17 @@ controller, tests, and migrations consistent.
 
 ### Branch naming
 
-Use conventional prefixes with descriptive scope:
+Use the repository branch prefixes from `AGENTS.md` with a lowercase kebab-case summary:
 
 ```
-feature/employee-autoname-thai-year
+feat/employee-autoname-thai-year
 fix/duplicate-registration-validation
-hotfix/ci-broken-lint
+ci/broken-lint
 refactor/api-module-organization
-config/ai
+chore/ai-agent-config
 ```
+
+Do not use `feature/`, `hotfix/`, `config/`, or `codex/` prefixes.
 
 ### Commit messages
 
@@ -172,86 +174,82 @@ the trusted `.codex/` project configuration, hooks, and command rules automatica
 The Notion task-tracker skills are intentionally unsupported in Codex and are not part of this
 repository. Track work through the repository workflow and GitHub references instead.
 
-### Workflow: PLAN → BUILD → TEST → SHIP
+### Workflow: PLAN → ACCEPT
 
-Every feature follows this pipeline. No shortcuts.
+Every substantial implementation follows the same acceptance lifecycle:
 
+```text
+PLAN
+  -> PLAN REVIEW
+  -> READY
+  -> IMPLEMENT
+  -> FOCUSED AUTOMATED TESTS
+  -> CODE REVIEW
+  -> FIX <-> RE-REVIEW
+  -> FINAL AUTOMATED GATES
+  -> COMPUTER USE ACCEPTANCE
+  -> FINAL DOCUMENTATION
+  -> DOCUMENTATION REVIEW
+  -> ACCEPTED
 ```
- ┌─────────┐     ┌─────────┐     ┌──────────┐     ┌──────────┐
- │  PLAN   │────▶│  BUILD  │────▶│   TEST   │────▶│   SHIP   │
- │         │     │         │     │          │     │          │
- │ Discuss │     │ Scaffold│     │ Verify   │     │ Quality  │
- │ Approve │     │ or code │     │ on bench │     │ gate+PR  │
- └─────────┘     └─────────┘     └──────────┘     └──────────┘
-```
 
-**Phase 1 — PLAN**
+The primary Codex agent is the orchestrator. Project roles are `explorer`, `worker`,
+`reviewer`, `browser_tester`, and `doc_writer`; their contracts live in
+`.codex/agents/`.
 
-|        |                                                                                           |
-| ------ | ----------------------------------------------------------------------------------------- |
-| Entry  | You have a feature idea, bug report, or change request                                    |
-| Action | Describe the task. AI explores the codebase, finds existing patterns, and proposes a plan |
-| Exit   | You approve the plan                                                                      |
+**Plan and review**
 
-- Never skip this phase. AI without context produces inconsistent code.
-- Review the proposed file list. If the AI wants to touch files outside the feature scope, push back.
-- If the AI asks a clarification question, answer it — don't say "just figure it out."
+Before implementation, establish the bounded goal, acceptance criteria, dependencies, exact or
+expected file ownership, automated tests, migration/rollback impact, Computer Use coverage, and
+documentation impact. An independent reviewer checks the plan before work is marked ready.
 
-**Phase 2 — BUILD**
+**Implementation and automated validation**
 
-|        |                          |
-| ------ | ------------------------ |
-| Entry  | Plan is approved         |
-| Action | Scaffold or write code   |
-| Exit   | Code passes `ruff check` |
+A worker owns one bounded write scope and implements the approved behavior plus focused tests.
+After focused tests pass, an independent reviewer checks the final diff against the requirement
+and real Frappe/ERPNext behavior. P0/P1 findings block progress and fixes are re-reviewed.
 
-Describe the change and let the assistant follow the existing patterns it found in
-Phase 1 (an API file under `api/<system>/`, a hook wired in `hooks.py`, a `bench` CLI
-command under `commands/`, or a direct edit for a small single-function change). Reuse
-existing utilities — do not create parallel implementations.
-
-After writing code:
-
-1. **Review it** — AI can produce plausible-looking but incorrect code. Read every line.
-2. **Run formatters** — `ruff check --fix <files> && ruff format <files>`
-3. **Run targeted checks** — verify the changed behavior with the appropriate automated tests
-
-**Phase 3 — TEST**
-
-|        |                            |
-| ------ | -------------------------- |
-| Entry  | Implementation is complete |
-| Action | Write tests                |
-| Exit   | All tests pass on bench    |
+Run the final applicable automated gates after integration. The repository-wide quality gate is:
 
 ```bash
-# Specific test
-bench --site test_site run-tests --app connect_diagnostics_core --test test_<name>
-
-# All tests for the app
-bench --site test_site run-tests --app connect_diagnostics_core
-
-# With coverage
-bench --site test_site run-tests --app connect_diagnostics_core --coverage
+uvx --from pre-commit==4.6.1 pre-commit run --all-files
 ```
 
-Minimum requirements:
+Run the relevant Bench tests as required by the task:
 
-- One test per hook handler and one per whitelisted API method
-- Edge cases: empty inputs, boundary values, Thai-specific logic (BE/CE years, tax ID checksum)
-- Tests must clean up after themselves — no leftover data on the test site
+```bash
+bench --site test_site run-tests --app connect_diagnostics_core --test test_<name>
+bench --site test_site run-tests --app connect_diagnostics_core
+```
 
-**Phase 4 — SHIP**
+Do not bypass failing gates.
 
-|        |                                                            |
-| ------ | ---------------------------------------------------------- |
-| Entry  | Tests pass                                                 |
-| Action | `/ship-pr` — opens a ready-to-merge PR into `developments` |
-| Exit   | PR is open on `developments`, CI is green                  |
+**Computer Use acceptance**
 
-Before the PR opens, the gate is: `uvx --from pre-commit==4.6.1 pre-commit run --all-files`
-passes and tests pass. If a gate fails, fix the issue and re-run. Do not bypass gates
-(never `--no-verify`).
+For Desk-visible behavior, workflow transitions, permission boundaries, role handoffs, or visible
+side effects, run the task's acceptance matrix after final automated gates pass. Use
+`browser_tester` through ChatGPT desktop Computer Use. Codex CLI/IDE sessions that do not have
+Computer Use must report this gate as blocked rather than infer a pass.
+
+Record actor/role, route/document, prerequisites, disposable test data, exact actions, expected
+state/result, actual state/result, PASS/FAIL, and durable failure evidence.
+
+**Final documentation**
+
+After runtime acceptance, `doc_writer` updates only current accepted behavior under `docs/`:
+
+- `docs/<module>/behavior.md` for module-wide rules.
+- `docs/<module>/<workflow>/README.md` for accepted processes.
+- Add dedicated permission/data-model/integration/operations files only when justified.
+
+Final docs do not contain TODOs, task state, implementation backlog, temporary evidence, agent
+notes, or speculative future behavior. A reviewer verifies documentation against the accepted
+implementation before the task is marked accepted.
+
+**Ship**
+
+After acceptance, use `/ship-pr` to open the work-branch PR to `developments`. CI and the normal
+repository promotion workflow remain required.
 
 ### Command Reference
 
@@ -296,45 +294,33 @@ These apply to **all code**, regardless of who or what wrote it:
 
 ### Typical Sessions
 
-**New feature:**
+**User-visible feature:**
 
-```
-You: "Add product registration validation with Thai FDA format"
- → AI explores codebase, finds existing patterns, proposes a plan
+```text
+You: provide the approved implementation plan
 
-You: (review and approve plan)
- → AI asks about edge cases — answer them
-
- → AI writes the API file, hooks, and tests — review the output
-
-You: bench --site test_site run-tests --app connect_diagnostics_core
-
-You: /ship-pr
- → AI runs the pre-commit gate + tests, then opens the PR
-```
-
-**Bug fix:**
-
-```
-You: "Product registration allows duplicate registration numbers"
- → AI finds the validation code, identifies the bug, proposes a fix
-
-You: (approve the fix)
- → AI patches the validation logic and adds a regression test
+Main
+ -> explorer verifies code/framework behavior
+ -> reviewer checks the plan
+ -> worker implements + focused tests
+ -> reviewer checks the diff
+ -> final automated gates
+ -> browser_tester runs the Computer Use acceptance matrix
+ -> doc_writer updates docs/<module>/<workflow>/
+ -> reviewer checks final docs
+ -> accepted
 
 You: /ship-pr
- → Pre-commit gate + tests → PR
+ -> PR to developments after acceptance
 ```
 
-**Quick fix + commit:**
+**Backend-only bug fix with no UI impact:**
 
+```text
+Main -> plan/review -> worker -> focused regression test -> reviewer
+     -> final automated gates -> Computer Use N/A with reason
+     -> documentation update if shipped behavior changed -> accepted
 ```
-You: (approve a small fix)
- → AI applies it
 
-You: /review
- → AI reports any defects or missing tests
-
-You: /commit
- → Pre-commit gate passes, Conventional Commit created
-```
+Small isolated changes may use fewer agents when delegation would add coordination cost, but they
+still require the applicable automated gates and cannot self-approve substantial changes.

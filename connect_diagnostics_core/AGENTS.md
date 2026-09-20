@@ -19,9 +19,23 @@ policy in [`../AGENTS.md`](../AGENTS.md).
   `bench --site … console` and `exec(open(f).read(), globals())`.
 - Salary Slips are submitted only through Payroll Entry. Never add a direct Salary Slip submit
   path.
-- The app owns no Frappe Workflow. Do not enforce approval, review, or verification states from
-  global document hooks or recreate app-owned workflows ad hoc. A new workflow starts from a
-  written specification and is owned by Frappe Workflow's native states and transitions.
+- The app may ship explicit, reviewed, filtered fixtures for native `Workflow`, `Workflow State`,
+  and `Workflow Action Master` records only when every record belongs to an approved named route
+  and appears in that route's configuration manifest. These are declarative configuration
+  artifacts: they do not authorize a target, grant permissions, assign approvers or delegated
+  authority, or perform posting effects.
+- Every Workflow fixture set requires an approved specification and revision, an exact allowlist,
+  configuration owner, target and route scope, collision policy, deterministic migrate/re-run
+  behavior, recovery plan, and independent validation. Fixture sync must not silently overwrite,
+  disable, delete, or repurpose an existing site-owned record; unresolved collisions stop the
+  change for owner disposition. Do not create or modify business Workflow records through ad hoc
+  setup, startup, hooks, or runtime code.
+- Native Frappe Workflow owns transitions and Workflow Action owns pending actions. ERPNext/HRMS
+  controllers remain the only owners of posting and transaction effects. Do not introduce a
+  Salary Slip Workflow, a parallel posting engine, or retired Stock Count code; Salary Slips remain
+  submit-through-Payroll-Entry only and native Stock Reconciliation remains the stock-count
+  posting endpoint. This exception does not change the `custom/*.json` rules for third-party
+  Custom Fields/Property Setters or permit arbitrary fixture doctypes.
 - Auto-numbered transactional and operational DocTypes use
   `[prefix][YYYY-BE][MM-DATE][####]`; the registry is `setup.document_naming`. The Buddhist year
   and month use ERPNext Thailand's document-date resolution, alternate series use business fields,
@@ -72,6 +86,16 @@ scripts minimal and delegate business logic to whitelisted Python through `frapp
   Workspace for a genuinely independent major domain. App-owned Desktop Icons are file-managed
   under `desktop_icon/` and `public/icons/`; never create them in setup code. Regrouping another
   app's icon goes through `setup/workspace.py` via `_save_without_export`.
+
+## Documentation impact
+
+- A change to accepted module-wide behavior updates `docs/<module>/behavior.md` after runtime
+  acceptance. A change to an accepted workflow/process updates `docs/<module>/<workflow>/`.
+- Final docs describe current shipped behavior only. Do not copy task backlog, TODOs, temporary
+  evidence, review findings, or unimplemented design from `.github/tasks/` into `docs/`.
+- Documentation is the last implementation gate: automated checks and required Computer Use
+  acceptance pass first, then `doc_writer` updates canonical docs and an independent reviewer
+  verifies them against the accepted implementation.
 
 ## Custom fields
 

@@ -3,10 +3,10 @@
 This is the sole repository-wide policy file. Codex loads it for work in this repository;
 the scoped Frappe rules in [`connect_diagnostics_core/AGENTS.md`](connect_diagnostics_core/AGENTS.md)
 apply to the app package. Procedural steps live in the repository skills, workflow narrative
-lives in [`.github/workflow.md`](.github/workflow.md), stable domain references live in
-[`docs/domains/`](docs/domains/), and active or paused work lives in
-[`.github/tasks/`](.github/tasks/). Read the relevant reference and task record before working
-in that area.
+lives in [`.github/workflow.md`](.github/workflow.md), final accepted product behavior lives in
+[`docs/`](docs/), and active or paused implementation work lives in
+[`.github/tasks/`](.github/tasks/). Read the relevant final documentation and active task record
+before working in that area.
 
 ## Rule priority
 
@@ -56,57 +56,92 @@ The complete delivery and promotion procedure is [`.github/workflow.md`](.github
 
 ## Multi-agent engineering protocol
 
-For non-trivial engineering work, work as a coordinated team. The primary agent is the tech
-lead, integration owner, and communication broker. It owns the single task register: task graph,
-owner, scope, file ownership, dependencies, status, review state, integration, and final
-validation. Do not create a shared status file merely for agent coordination.
+The primary agent is the orchestrator, tech lead, integration owner, and single owner of the task
+register. It plans the work, assigns bounded ownership, integrates results, and decides when each
+gate is satisfied. The repository keeps five specialist roles under `.codex/agents/`:
 
-- Treat work as non-trivial when it crosses modules, changes a data model, DocType, hook,
-  permission, transaction, migration, or has material regression risk. Explore and decompose it
-  before implementation.
-- Use the project agents deliberately: `architect` plans and decomposes, `explorer` gathers
-  read-only evidence, `worker` implements one bounded task, and `reviewer` independently reviews
-  plans or changes.
-- Every substantial task follows this loop: owner creates a domain plan → an independent agent
-  reviews the plan → owner resolves findings and revises it → parent marks the plan ready → work
-  begins. A plan is ready only when its goal, acceptance criteria, owned files, dependencies,
-  risks, tests, and rollback or migration impact are known or explicitly deferred.
-- If an owner's plan is too broad to have exclusive file ownership, contains independent
-  subsystems, cannot state acceptance criteria, or exceeds the current agent's domain knowledge,
-  the owner must decompose it into child tasks. Each child gets a bounded goal, owner, file scope,
-  dependencies, acceptance criteria, and plan-review state before implementation. Do not pass a
-  vague task to another agent.
-- Agents may delegate only when a bounded, independent subproblem benefits materially and a
-  concurrency slot is available. Prefer recursive delegation for read-heavy investigation; be
-  conservative with write-heavy delegation.
-- The runtime permits at most three spawned agents concurrently. Treat this as a shared budget
-  across every level of the agent tree; schedule work in waves and do not saturate it without a
-  clear benefit.
-- Before parallel edits, assign each active worker exclusive ownership of its files. Read-only
-  agents may inspect any file. Serialize tasks that need to edit the same file.
-- Every agent reports material state transitions to its direct parent using this compact format:
+- `explorer` — read-only source/configuration/framework investigation.
+- `worker` — one bounded implementation task with exclusive write ownership and focused tests.
+- `reviewer` — independent plan/code/test/security/lifecycle/documentation review.
+- `browser_tester` — Computer Use acceptance on the approved DEV environment.
+- `doc_writer` — final documentation after runtime acceptance.
 
-  ```text
-  TASK_UPDATE
-  id: <stable task id>
-  status: proposed | planning | plan_review | ready | active | blocked | completed | code_review | accepted
-  owner: <agent role/name>
-  scope: <bounded goal and owned files>
-  evidence: <plan, commands, findings, or test result>
-  dependencies: <open or resolved ids>
-  next: <next concrete action>
-  blocker: <none or specific blocker>
-  ```
+Do not create separate architect or UI-test-author roles. Architecture/decomposition belongs to the
+primary agent, supported by explorers. If automated browser/UI tests are required, a worker writes
+them from the accepted browser evidence.
 
-  The parent updates its task register, assigns or queues follow-up work, and sends only the
-  relevant status and dependency changes to affected children. A child must report a conflict,
-  changed assumption, or scope expansion before continuing.
-- No self-approval: an implementing worker cannot be the final reviewer of its own changes.
-  For substantial changes, independently review the original request, relevant architecture,
-  final diff, and test evidence. P0/P1 findings block completion; resolve or explicitly accept
-  P2 findings, then re-review fixes before final integration.
-- Do not use delegation merely to create activity. Small, isolated work may be completed by a
-  single agent when delegation would add more coordination cost than value.
+For substantial engineering work, use this lifecycle:
+
+```text
+PLAN
+  -> PLAN REVIEW
+  -> READY
+  -> IMPLEMENT
+  -> FOCUSED AUTOMATED TESTS
+  -> CODE REVIEW
+  -> FIX <-> RE-REVIEW
+  -> FINAL AUTOMATED GATES
+  -> COMPUTER USE ACCEPTANCE
+  -> FINAL DOCUMENTATION
+  -> DOCUMENTATION REVIEW
+  -> ACCEPTED
+```
+
+- A task is substantial when it crosses modules or changes a data model, DocType, hook, permission,
+  transaction, migration, workflow, integration, or user-visible behavior with material regression
+  risk.
+- Before implementation, the primary agent records the goal, bounded scope, acceptance criteria,
+  owned files, dependencies, risks, tests, migration/rollback impact, Computer Use coverage, and
+  documentation impact. An independent reviewer must mark the plan ready.
+- Parallel writers require exclusive file ownership. Read-only explorers/reviewers may inspect any
+  file. Serialize work that edits the same file or shared integration surfaces such as `hooks.py`,
+  `patches.txt`, setup/configuration exports, and migration ordering.
+- No self-approval. The implementing worker cannot be final reviewer. P0/P1 findings block the
+  next gate; fixes are re-reviewed.
+- Automated tests are the deterministic correctness gate. Computer Use is an end-to-end acceptance
+  layer for Desk-visible behavior, workflows, permissions, role handoffs, and visible side effects;
+  it never substitutes for automated coverage.
+- Computer Use acceptance runs only after final automated gates pass. Use the ChatGPT desktop
+  Computer Use capability when available. If the current Codex host cannot use Computer Use, the
+  browser tester must mark the gate blocked rather than simulate or claim a pass.
+- Final documentation runs only after runtime acceptance. `doc_writer` writes current shipped
+  behavior under `docs/`; an independent reviewer checks it against accepted code and runtime
+  evidence before the task closes.
+- Agents may delegate only bounded independent work when a concurrency slot is available. The
+  project limit is configured in `.codex/config.toml`; treat it as a shared budget and avoid
+  delegation that adds more coordination cost than value.
+
+Every specialist reports material transitions to its parent using:
+
+```text
+TASK_UPDATE
+id: <stable task id>
+status: proposed | planning | plan_review | ready | active | blocked | completed | code_review | browser_acceptance | documentation | accepted
+owner: <agent role/name>
+scope: <bounded goal and owned files>
+evidence: <plan, commands, findings, test/browser/doc result>
+dependencies: <open or resolved ids>
+next: <next concrete action>
+blocker: <none or specific blocker>
+```
+
+The primary agent updates the task register from these reports. A child must report changed
+assumptions, ownership conflicts, or scope expansion before continuing.
+
+## Documentation system
+
+`docs/` is the canonical final product/operations knowledge base. Organize it by module first:
+
+- `docs/<module>/behavior.md` — module-wide invariants, ownership, shared semantics, and boundaries.
+- `docs/<module>/<workflow>/README.md` — one accepted workflow/process.
+- Add `permissions.md`, `data-model.md`, `integration.md`, or `operations.md` only when the
+  workflow is complex enough to need a separate stable reference.
+
+Final documentation describes only accepted current behavior. It must not contain TODOs, task
+status, implementation backlogs, agent findings, temporary evidence, branch/commit checkpoints,
+speculative future design, or historical working notes. Those belong in `.github/tasks/` while
+work is active and in Git/GitHub history after closure. Do not create a permanent task archive in
+`docs/`.
 
 ## Long-running commands
 
@@ -163,7 +198,8 @@ settings.
 
 ## Codex configuration
 
-Trusted project configuration lives under `.codex/`: `config.toml` for project settings,
-`hooks.json` for deterministic lifecycle checks, and `rules/` for command execution policy.
-Reusable procedures live under `.agents/skills/`. The repository does not keep agent-specific
-policy copies or internal knowledge caches.
+Trusted project configuration lives under `.codex/`: `config.toml` for project settings and
+role registration, `agents/` for the five specialist role contracts, `hooks.json` for deterministic
+lifecycle checks, and `rules/` for command execution policy. Reusable procedures live under
+`.agents/skills/`. `AGENTS.md` remains the repository-wide policy source; agent files specialize
+execution roles and must not contradict it.
