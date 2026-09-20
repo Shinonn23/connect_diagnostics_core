@@ -211,6 +211,7 @@ settings.
 
 Trusted project configuration lives under `.codex/`: `config.toml` for project settings and
 role registration, `agents/` for the five specialist role contracts, `hooks.json` for deterministic
-lifecycle checks, and `rules/` for command execution policy. Reusable procedures live under
-`.agents/skills/`. `AGENTS.md` remains the repository-wide policy source; agent files specialize
-execution roles and must not contradict it.
+lifecycle checks, and `rules/` only for destructive-operation safety policy. Normal Git workflow
+commands such as staging and committing must not be blocked or approval-gated by repository Codex
+rules. Reusable procedures live under `.agents/skills/`. `AGENTS.md` remains the repository-wide
+policy source; agent files specialize execution roles and must not contradict it.
