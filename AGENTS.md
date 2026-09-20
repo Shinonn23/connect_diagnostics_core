@@ -36,6 +36,11 @@ feature work ─PR→ developments ─PR→ user-acceptance-testing ─PR→ pro
   contains `Release-As:`.
 - **Issue ↔ PR:** one issue normally maps to one PR. A PR may reference related issues or
   none (record `None`); use `Refs #<n>`, never `Closes #<n>`.
+- **Workflow-baseline decomposition exception:** branches matching `feat/wf-tsk-*` are child
+  implementation branches of `feat/workflow-baseline-checkpoint-20260919`. Their PR target is the
+  workflow-baseline parent branch, not `developments`; after child integration and full workflow
+  validation, the parent branch is merged into `developments`. The canonical mapping is
+  [`.github/tasks/workflow-baseline-implementation/branches.md`](.github/tasks/workflow-baseline-implementation/branches.md).
 
 The complete delivery and promotion procedure is [`.github/workflow.md`](.github/workflow.md).
 
