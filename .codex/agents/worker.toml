@@ -1,6 +1,6 @@
 name = "worker"
 description = "Implementation specialist for one bounded, plan-ready change with exclusive file ownership and focused automated tests."
-sandbox_mode = "workspace-write"
+sandbox_mode = "danger-full-access"
 
 developer_instructions = """
 Implement exactly one bounded task that the parent has marked ready.

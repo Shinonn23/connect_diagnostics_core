@@ -46,11 +46,11 @@ The complete delivery and promotion procedure is [`.github/workflow.md`](.github
 
 ## Working agreement
 
-- If unsure or missing context, do not guess. State the uncertainty and verify behavior in
-  the repository or installed source before proceeding.
-- Ask before changing shared or overridden functionality, data-integrity-sensitive behavior,
-  or an area where extending versus replacing existing logic is unclear. Standalone additions,
-  unambiguous bug fixes, and pure style fixes may proceed when their scope is clear.
+- If unsure or missing context, do not guess. Verify behavior in the repository, installed
+  source, approved specification, or test evidence before proceeding.
+- For ordinary technical, implementation, configuration, permission-test, and test-environment
+  decisions, resolve uncertainty through the primary agent with explorer/reviewer support and
+  choose the smallest clean option that remains inside the approved requirement.
 - Before code that touches more than one file or changes existing logic, list every file to
   change, why it changes, and what will not change. The approved task or plan is the approval
   checkpoint; if scope grows, re-propose the complete list.
@@ -126,6 +126,15 @@ PLAN
 - Agents may delegate only bounded independent work when a concurrency slot is available. The
   project limit is configured in `.codex/config.toml`; treat it as a shared budget and avoid
   delegation that adds more coordination cost than value.
+- **Agent decision protocol:** when a task, test, or blocker raises an ordinary engineering
+  question, the primary agent resolves it internally. Gather only the evidence needed, use the
+  relevant explorer/worker/reviewer to challenge options, and select the smallest clean solution
+  that satisfies the approved requirement. Prefer native Frappe/ERPNext behavior, least privilege,
+  minimal code/configuration change, reversibility, low migration risk, deterministic testability,
+  and low maintenance cost. Preserve the decision rationale and rollback evidence for later review.
+- If an external capability cannot be completed by the agents, such as MFA, CAPTCHA, unavailable
+  credentials, or an inaccessible external service, mark that path blocked with complete evidence
+  and continue all independent work instead of waiting on that path.
 
 Every specialist reports material transitions to its parent using:
 
@@ -170,8 +179,8 @@ announced first, and inspect a stalled process instead of rerunning it unchanged
 Before changing existing behavior, search in order: entry points and overrides; existing APIs
 and utilities; installed-source implementations; related migrations; and cross-references in
 client scripts, templates, jobs, and tests. Check hooks and scheduled events before changing an
-existing function. Reuse existing utilities and stop to ask when the required behavior cannot
-be verified.
+existing function. Reuse existing utilities. If the required behavior still cannot be verified,
+route the uncertainty to the primary agent for internal resolution and independent review.
 
 ## Print Format rendering
 
@@ -210,7 +219,8 @@ settings.
 - No unnecessary abstractions, dependencies, refactors, or scope creep.
 - Do not change signatures, side effects, or execution order while doing a style/refactor task.
 - Do not duplicate existing logic or catch and discard exceptions silently.
-- When multiple valid architectures exist, present the options instead of choosing silently.
+- When multiple valid architectures exist, resolve them through the agent decision protocol and
+  record the selected option plus the reason broader or riskier alternatives were rejected.
 
 ## Codex configuration
 

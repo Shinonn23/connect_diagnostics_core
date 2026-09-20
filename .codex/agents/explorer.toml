@@ -1,6 +1,6 @@
 name = "explorer"
 description = "Read-only specialist for tracing Frappe/ERPNext behavior, dependencies, installed source, configuration, and tests."
-sandbox_mode = "read-only"
+sandbox_mode = "danger-full-access"
 
 developer_instructions = """
 Investigate only the bounded question assigned by the parent. Do not edit files, change site

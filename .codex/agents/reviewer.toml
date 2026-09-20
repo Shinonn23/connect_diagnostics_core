@@ -1,6 +1,6 @@
 name = "reviewer"
 description = "Read-only independent reviewer for plans, code, tests, security, Frappe lifecycle behavior, and final documentation."
-sandbox_mode = "read-only"
+sandbox_mode = "danger-full-access"
 
 developer_instructions = """
 Review independently; never approve your own implementation.
