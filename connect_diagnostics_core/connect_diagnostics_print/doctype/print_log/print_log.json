@@ -13,6 +13,9 @@
 		"print_format",
 		"channel",
 		"language",
+		"show_date",
+		"signatory_type",
+		"signatory_employee",
 		"copies_section",
 		"copies",
 		"copy_labels"
@@ -75,6 +78,25 @@
 			"read_only": 1
 		},
 		{
+			"fieldname": "show_date",
+			"fieldtype": "Check",
+			"label": "Show Date",
+			"read_only": 1
+		},
+		{
+			"fieldname": "signatory_type",
+			"fieldtype": "Data",
+			"label": "Signatory Type",
+			"read_only": 1
+		},
+		{
+			"fieldname": "signatory_employee",
+			"fieldtype": "Link",
+			"label": "Signatory Employee",
+			"options": "Employee",
+			"read_only": 1
+		},
+		{
 			"fieldname": "copies_section",
 			"fieldtype": "Section Break",
 			"label": "Copies"
@@ -96,7 +118,7 @@
 	"in_create": 1,
 	"index_web_pages_for_search": 0,
 	"links": [],
-	"modified": "2026-08-08 12:00:00.000000",
+	"modified": "2026-09-03 14:47:59.859575",
 	"modified_by": "Administrator",
 	"module": "Connect Diagnostics Print",
 	"name": "Print Log",

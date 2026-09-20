@@ -1,0 +1,182 @@
+{
+	"app": "connect_diagnostics_core",
+	"charts": [],
+	"content": "[{\"type\":\"card\",\"data\":{\"card_name\":\"Main\",\"col\":4,\"managed_by\":\"connect_diagnostics_core\"}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4,\"managed_by\":\"connect_diagnostics_core\"}},{\"type\":\"card\",\"data\":{\"card_name\":\"Setup\",\"col\":4,\"managed_by\":\"connect_diagnostics_core\"}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4,\"managed_by\":\"connect_diagnostics_core\"}}]",
+	"creation": "2026-09-18 13:54:52.496413",
+	"custom_blocks": [],
+	"docstatus": 0,
+	"doctype": "Workspace",
+	"hide_custom": 0,
+	"icon": "shield-check",
+	"idx": 0,
+	"indicator_color": "green",
+	"is_hidden": 0,
+	"label": "Regulatory",
+	"link_type": "DocType",
+	"links": [
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Main",
+			"link_count": 0,
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Card Break"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Product Registration",
+			"link_count": 0,
+			"link_to": "Medical Device Product Registration",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Regulatory Document",
+			"link_count": 0,
+			"link_to": "Medical Device Regulatory Document",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Registration Action",
+			"link_count": 0,
+			"link_to": "Medical Device Registration Action",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Override",
+			"link_count": 0,
+			"link_to": "Medical Device Regulatory Override",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Reports",
+			"link_count": 0,
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Card Break"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 1,
+			"label": "Expiry Summary",
+			"link_count": 0,
+			"link_to": "Medical Device Registration Expiry Summary",
+			"link_type": "Report",
+			"onboard": 0,
+			"report_ref_doctype": "Medical Device Product Registration",
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 1,
+			"label": "Coverage Matrix",
+			"link_count": 0,
+			"link_to": "Medical Device Item Coverage Matrix",
+			"link_type": "Report",
+			"onboard": 0,
+			"report_ref_doctype": "Item",
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 1,
+			"label": "Compliance Gaps",
+			"link_count": 0,
+			"link_to": "Medical Device Compliance Gap",
+			"link_type": "Report",
+			"onboard": 0,
+			"report_ref_doctype": "Item",
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 1,
+			"label": "Renewal Workbench",
+			"link_count": 0,
+			"link_to": "Medical Device Regulatory Renewal Workbench",
+			"link_type": "Report",
+			"onboard": 0,
+			"report_ref_doctype": "Medical Device Registration Action",
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 1,
+			"label": "Affected Business",
+			"link_count": 0,
+			"link_to": "Medical Device Expiring Registration Affected Business",
+			"link_type": "Report",
+			"onboard": 0,
+			"report_ref_doctype": "Medical Device Product Registration",
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Setup",
+			"link_count": 0,
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Card Break"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Establishment Registration",
+			"link_count": 0,
+			"link_to": "Medical Device Establishment Registration",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Settings",
+			"link_count": 0,
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Card Break"
+		},
+		{
+			"hidden": 0,
+			"is_query_report": 0,
+			"label": "Regulatory Settings",
+			"link_count": 0,
+			"link_to": "Medical Device Regulatory Settings",
+			"link_type": "DocType",
+			"onboard": 0,
+			"type": "Link"
+		}
+	],
+	"modified": "2026-09-18 13:54:52.496413",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Regulatory",
+	"number_cards": [],
+	"owner": "Administrator",
+	"public": 1,
+	"quick_lists": [],
+	"roles": [],
+	"sequence_id": 0.0,
+	"shortcuts": [],
+	"title": "Regulatory",
+	"type": "Workspace"
+}

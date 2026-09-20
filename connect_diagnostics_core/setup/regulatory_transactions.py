@@ -30,7 +30,7 @@ def _snapshot_fields() -> list[dict[str, object]]:
             "label": "Medical Device Regulatory Snapshot",
             "fieldtype": "Section Break",
             "insert_after": "item_code",
-            "collapsible": 1,
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {

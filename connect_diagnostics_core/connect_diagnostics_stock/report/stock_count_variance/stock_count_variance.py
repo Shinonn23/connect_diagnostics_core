@@ -56,13 +56,6 @@ def _get_columns() -> list[ReportColumn]:
         },
         {"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 160},
         {
-            "label": _("Storage Location"),
-            "fieldname": "storage_location",
-            "fieldtype": "Link",
-            "options": "Storage Location",
-            "width": 130,
-        },
-        {
             "label": _("Batch No"),
             "fieldname": "batch_no",
             "fieldtype": "Link",
@@ -94,7 +87,6 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
         "stock_count": filters.get("stock_count") or None,
         "count_type": filters.get("count_type") or None,
         "warehouse": filters.get("warehouse") or None,
-        "storage_location": filters.get("storage_location") or None,
         "from_posting_date": filters.get("from_posting_date") or None,
         "to_posting_date": filters.get("to_posting_date") or None,
     }
@@ -107,10 +99,9 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
                 sc.name AS stock_count,
                 sc.count_type,
                 sc.posting_date,
-                sc.warehouse,
+                sci.warehouse,
                 sci.item_code,
                 sci.item_name,
-                sci.storage_location,
                 sci.batch_no,
                 sci.serial_no,
                 sci.system_qty,
@@ -127,8 +118,7 @@ def _get_data(filters: ReportFilters) -> list[ReportRow]:
                 AND ABS(sci.variance_qty) > 0.000001
                 AND (%(stock_count)s IS NULL OR sc.name = %(stock_count)s)
                 AND (%(count_type)s IS NULL OR sc.count_type = %(count_type)s)
-                AND (%(warehouse)s IS NULL OR sc.warehouse = %(warehouse)s)
-                AND (%(storage_location)s IS NULL OR sci.storage_location = %(storage_location)s)
+                AND (%(warehouse)s IS NULL OR sci.warehouse = %(warehouse)s)
                 AND (%(from_posting_date)s IS NULL OR sc.posting_date >= %(from_posting_date)s)
                 AND (%(to_posting_date)s IS NULL OR sc.posting_date <= %(to_posting_date)s)
             ORDER BY sc.posting_date DESC, sc.name ASC, sci.idx ASC

@@ -88,7 +88,7 @@ def _skip_auto_test_records_for_app_doctypes() -> None:
     framework to skip the walk. It only suppresses generation for our own
     doctypes, never ERPNext's.
     """
-    for doctype in ("Stock Count", "Stock Count Item", "Stock Count Adjustment", "Storage Location"):
+    for doctype in ("Stock Count", "Stock Count Item", "Stock Count Adjustment", "Stock Count Warehouse"):
         frappe.local.test_objects.setdefault(doctype, [])
 
 
@@ -108,10 +108,10 @@ def _test_employment_type() -> str:
 
 class TestPrintFormatCleanup(UnitTestCase):
     @patch.object(print_format, "frappe")
-    def test_removes_print_formats_not_owned_by_app_or_explicitly_retired(self, frappe_mock: Mock) -> None:
+    def test_removes_every_print_format_outside_the_dedicated_print_module(self, frappe_mock: Mock) -> None:
         frappe_mock.get_all.return_value = [
+            {"name": "App Invoice", "module": "Connect Diagnostics Print"},
             {"name": "Core Invoice", "module": "Connect Diagnostics Core"},
-            {"name": "Accounting Invoice", "module": "Connect Diagnostics Accounting"},
             {"name": "Withholding Tax Cert", "module": "Thai Tax"},
             {"name": "ERPNext Invoice", "module": "Accounts"},
             {"name": "User Format", "module": None},
@@ -124,6 +124,8 @@ class TestPrintFormatCleanup(UnitTestCase):
         self.assertEqual(
             frappe_mock.delete_doc.call_args_list,
             [
+                call("Print Format", "Core Invoice", force=True, ignore_missing=True),
+                call("Print Format", "Withholding Tax Cert", force=True, ignore_missing=True),
                 call("Print Format", "ERPNext Invoice", force=True, ignore_missing=True),
                 call("Print Format", "User Format", force=True, ignore_missing=True),
                 call("Print Format", "Sales Invoice Print", force=True, ignore_missing=True),

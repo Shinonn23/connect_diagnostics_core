@@ -51,7 +51,7 @@ runs:
         # Paths that cannot change how the app behaves at runtime. Everything else --
         # including connect_diagnostics_core/**, DocType JSON, dependency manifests and
         # .github/workflows/** -- deliberately falls through to the full checks.
-        readonly allowlist='^([^/]+\.md|\.github/.*\.md|\.github/ISSUE_TEMPLATE/.*|\.claude/.*|\.agents/.*|\.codex/.*|\.vscode/.*|license\.txt|\.gitignore|\.editorconfig|\.release-please-manifest\.json)$'
+        readonly allowlist='^([^/]+\.md|(.*/)?AGENTS\.md|docs/.*|\.github/.*\.md|\.github/ISSUE_TEMPLATE/.*|\.agents/.*|\.codex/.*|\.vscode/.*|license\.txt|\.gitignore|\.editorconfig|\.release-please-manifest\.json)$'
 
         if impacting=$(printf '%s\n' "$changed" | grep -Ev "$allowlist"); then
           echo "run_full=true" >> "$GITHUB_OUTPUT"

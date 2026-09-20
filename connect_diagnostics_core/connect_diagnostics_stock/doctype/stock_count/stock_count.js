@@ -2,12 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Stock Count", {
-	onload: function (frm) {
-		frm.set_query("storage_location", function () {
-			return { filters: { warehouse: frm.doc.warehouse } };
-		});
-	},
-
 	refresh: function (frm) {
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.add_custom_button(__("Fetch Items"), function () {
@@ -15,14 +9,14 @@ frappe.ui.form.on("Stock Count", {
 			});
 		}
 
-		const is_approved = frm.doc.docstatus === 1 && frm.doc.count_state === "Stock Count Approved";
-		if (is_approved && frm.doc.count_type === "Cycle Count (Monthly)") {
-			frm.add_custom_button(__("Generate Holding Transfer"), function () {
+		const is_submitted = frm.doc.docstatus === 1;
+		if (is_submitted && frm.doc.count_type === "Cycle Count (Monthly)") {
+			frm.add_custom_button(__("Create Holding Transfer Draft"), function () {
 				frm.events.run_generate(frm, "generate_holding_transfer");
 			});
 		}
-		if (is_approved && frm.doc.count_type === "Yearly Count") {
-			frm.add_custom_button(__("Generate Stock Adjustment"), function () {
+		if (is_submitted && frm.doc.count_type === "Yearly Count") {
+			frm.add_custom_button(__("Create Stock Reconciliation Draft"), function () {
 				frm.events.run_generate(frm, "generate_stock_adjustment");
 			});
 		}

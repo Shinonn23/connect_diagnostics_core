@@ -14,12 +14,11 @@
 		"posting_date",
 		"posting_time",
 		"scope_section",
-		"warehouse",
+		"warehouses",
 		"selection_method",
 		"sample_count",
 		"sample_percentage",
 		"column_break_scope",
-		"storage_location",
 		"holding_warehouse",
 		"remarks",
 		"items_section",
@@ -81,21 +80,21 @@
 			"label": "Count Scope"
 		},
 		{
-			"fieldname": "warehouse",
-			"fieldtype": "Link",
+			"fieldname": "warehouses",
+			"fieldtype": "Table MultiSelect",
 			"in_list_view": 1,
-			"label": "Warehouse",
-			"options": "Warehouse",
+			"label": "Warehouses",
+			"options": "Stock Count Warehouse",
 			"reqd": 1
 		},
 		{
 			"default": "Manual",
 			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)'",
-			"description": "How to pick items for a monthly cycle count. Yearly counts always cover the whole warehouse.",
+			"description": "How to pick items for a monthly cycle count. Yearly counts always cover every selected warehouse.",
 			"fieldname": "selection_method",
 			"fieldtype": "Select",
 			"label": "Selection Method",
-			"options": "Manual\nRandom by Count\nRandom by Percentage\nRandom by Zone"
+			"options": "Manual\nRandom by Count\nRandom by Percentage\nRandom by Warehouse"
 		},
 		{
 			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)' && doc.selection_method=='Random by Count'",
@@ -113,14 +112,6 @@
 		{
 			"fieldname": "column_break_scope",
 			"fieldtype": "Column Break"
-		},
-		{
-			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)'",
-			"description": "Restrict the count to one storage location / zone. Required when Selection Method is Random by Zone.",
-			"fieldname": "storage_location",
-			"fieldtype": "Link",
-			"label": "Storage Location",
-			"options": "Storage Location"
 		},
 		{
 			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)'",

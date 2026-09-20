@@ -1,0 +1,18 @@
+{
+	"description": "Protect Frappe-managed generated Python files in this repository.",
+	"hooks": {
+		"PreToolUse": [
+			{
+				"matcher": "^(Bash|apply_patch)$",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/generated_file_guard.py\"",
+						"timeout": 10,
+						"statusMessage": "Checking generated-file protection"
+					}
+				]
+			}
+		]
+	}
+}

@@ -1,5 +1,213 @@
 # Changelog
 
+## [0.52.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.52.0...v0.52.1) (2026-09-20)
+
+
+### Miscellaneous Chores
+
+* enable autonomous agent workflow ([84cf2d5](https://github.com/Shinonn23/connect_diagnostics_core/commit/84cf2d5c5e21c1f885a3e256348546a7bf2e472e))
+
+## [0.52.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.2...v0.52.0) (2026-09-20)
+
+
+### Features
+
+* **employee:** organize signature field layout ([7549f84](https://github.com/Shinonn23/connect_diagnostics_core/commit/7549f84260a4ecde3ddc98b400cb1a4a63320941))
+* **workflow:** checkpoint baseline implementation ([d4db188](https://github.com/Shinonn23/connect_diagnostics_core/commit/d4db188b5b2ee52194c11ad703690a8baad67c0d))
+
+
+### Code Refactoring
+
+* **workflow:** manage custom fields from setup ([dc3c280](https://github.com/Shinonn23/connect_diagnostics_core/commit/dc3c280c05aaa9313510f34c3d62c9cc6e1a139d))
+
+
+### Miscellaneous Chores
+
+* align task lifecycle and final docs ([699e4c8](https://github.com/Shinonn23/connect_diagnostics_core/commit/699e4c8330b33ce8037bca7906f89e56ebe45508))
+* define local test site contract ([e41be79](https://github.com/Shinonn23/connect_diagnostics_core/commit/e41be791801b58de2ce3ee3915b7f92d5d864338))
+* map workflow implementation branches ([2a64b7c](https://github.com/Shinonn23/connect_diagnostics_core/commit/2a64b7c3184b0e4ee8dac416513d29fd08e7d02d))
+* remove codex git command rules ([4907fab](https://github.com/Shinonn23/connect_diagnostics_core/commit/4907fab159338b303a6a19bc8fca29a5c7fbdca1))
+* restore setup-managed custom fields ([50db04f](https://github.com/Shinonn23/connect_diagnostics_core/commit/50db04f0979dfdfafe6e478ff5360693d51f5885))
+* simplify codex agent workflow ([fece475](https://github.com/Shinonn23/connect_diagnostics_core/commit/fece475e8c402f5e57e3428b5d19a9be6f25f178))
+
+## [0.51.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.1...v0.51.2) (2026-09-16)
+
+
+### Miscellaneous Chores
+
+* **codex:** configure agents and task records ([58dfd45](https://github.com/Shinonn23/connect_diagnostics_core/commit/58dfd458f02d89669d1de6032a5b9fe98c344614))
+* configure Codex agents and task records ([6ee9e33](https://github.com/Shinonn23/connect_diagnostics_core/commit/6ee9e33615b301c9e02e1f39fa2552c1eddaeba6))
+
+## [0.51.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.51.0...v0.51.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **deploy:** scope bench update to core app ([0ad43f2](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ad43f2a66e759e5bc27ea364e62f19c1a2e816c))
+* **deploy:** scope bench update to core app ([d5a7b89](https://github.com/Shinonn23/connect_diagnostics_core/commit/d5a7b898d138c57e35b9145f98787a2372cc220d))
+
+## [0.51.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.50.0...v0.51.0) (2026-09-08)
+
+
+### Features
+
+* add material request dispatch lifecycle ([15ee743](https://github.com/Shinonn23/connect_diagnostics_core/commit/15ee743299f25857f3ef85fe9f301baec2d84519))
+* add material request dispatch lifecycle ([195b9e8](https://github.com/Shinonn23/connect_diagnostics_core/commit/195b9e8e8df5c0058630498d94b8200ce1df7f8a))
+
+
+### Bug Fixes
+
+* **dispatch:** address review controls for returnable fulfillment ([9240e8b](https://github.com/Shinonn23/connect_diagnostics_core/commit/9240e8bbd00e68d7337323058e98d2bbc9ff7f01))
+
+## [0.50.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.49.0...v0.50.0) (2026-09-07)
+
+
+### Features
+
+* **accounting:** migrate to standard departments ([23fecd3](https://github.com/Shinonn23/connect_diagnostics_core/commit/23fecd3a3ab0e72d3693081ad09ea298734de897))
+* **print:** add action signatures and pagination services ([b5afe6d](https://github.com/Shinonn23/connect_diagnostics_core/commit/b5afe6d323afc539b0b947f0f0e65e675cabb2ab))
+* **print:** localize format settings and layouts ([5928f9a](https://github.com/Shinonn23/connect_diagnostics_core/commit/5928f9af638e594f1f2beac1dcf8a24fb6a205af))
+
+
+### Bug Fixes
+
+* **print:** embed self-contained format layouts ([bbf5b08](https://github.com/Shinonn23/connect_diagnostics_core/commit/bbf5b0882eeaf5f522915f8d068d2e172c873ab5))
+* self-contained print formats ([ecf9a60](https://github.com/Shinonn23/connect_diagnostics_core/commit/ecf9a60f95b00083ac73de86fdacace2fa83f19d))
+
+
+### Code Refactoring
+
+* **setup:** manage configuration in code ([c1f92e1](https://github.com/Shinonn23/connect_diagnostics_core/commit/c1f92e1ef96bb2d9b67647342a8a0d7d19e9968d))
+* **setup:** remove legacy configuration fixtures ([e321cdd](https://github.com/Shinonn23/connect_diagnostics_core/commit/e321cdd2bdbe754324b79395d08cb8d322eb3c18))
+
+
+### Miscellaneous Chores
+
+* **deps:** refresh yarn lockfile ([7d80c7d](https://github.com/Shinonn23/connect_diagnostics_core/commit/7d80c7dd3a8479836a260678d74a72af79d4465e))
+
+
+### Styles
+
+* **print:** normalize self-contained format css ([0ef65d0](https://github.com/Shinonn23/connect_diagnostics_core/commit/0ef65d07790713bd29c779e0271cc90ad662340c))
+
+
+### Tests
+
+* **print:** account for added format fixtures ([0673f25](https://github.com/Shinonn23/connect_diagnostics_core/commit/0673f25f299a38b6c282da49fa30dd1facf15481))
+* **print:** account for all format fixtures ([8580d1e](https://github.com/Shinonn23/connect_diagnostics_core/commit/8580d1ed32a202920c2f83a34e0e2a42d1845057))
+
+
+### Documentation
+
+* **print:** document self-contained format workflow ([f1d857e](https://github.com/Shinonn23/connect_diagnostics_core/commit/f1d857e0fce0574d02b9d52aeadb040b3bd1d7d3))
+
+## [0.49.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.48.0...v0.49.0) (2026-09-03)
+
+
+### Features
+
+* add quotation print signatures ([d5bfb79](https://github.com/Shinonn23/connect_diagnostics_core/commit/d5bfb7995eec7cbd6763590989c98bd3568db1f3))
+* add quotation print signatures ([dbdba29](https://github.com/Shinonn23/connect_diagnostics_core/commit/dbdba29fcd7dbed7334cff71652e8092e10cf5b3))
+
+
+### Bug Fixes
+
+* satisfy quotation signature CI checks ([163eafa](https://github.com/Shinonn23/connect_diagnostics_core/commit/163eafae9312e5a9db814a296e8b15941a0dc3e7))
+
+## [0.48.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.4...v0.48.0) (2026-09-03)
+
+
+### Features
+
+* disable ERPNext core TDS on Thai sites ([46d9ee9](https://github.com/Shinonn23/connect_diagnostics_core/commit/46d9ee997aac23851ef073a1f194dd7f25e07907))
+* disable ERPNext core TDS on Thai sites ([50f2681](https://github.com/Shinonn23/connect_diagnostics_core/commit/50f2681beb4f1aa1ee99279eb519b70335eb7e2a))
+
+
+### Bug Fixes
+
+* **tds:** force-clear legacy TDS during migration ([4df3ef5](https://github.com/Shinonn23/connect_diagnostics_core/commit/4df3ef5e81036659ea74d6ada71e98c76b908733))
+* **tds:** force-clear legacy TDS during migration ([56d92a0](https://github.com/Shinonn23/connect_diagnostics_core/commit/56d92a07a690aca7ce78accbee8e739dd226bc9d))
+
+
+### Documentation
+
+* require JSON schema modified timestamps ([0b785b7](https://github.com/Shinonn23/connect_diagnostics_core/commit/0b785b77259a3684e49a434b695896b660d0de6f))
+
+## [0.47.4](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.3...v0.47.4) (2026-08-25)
+
+
+### Bug Fixes
+
+* **print-format:** keep Credit Note format editable ([f7ddc97](https://github.com/Shinonn23/connect_diagnostics_core/commit/f7ddc9785458f637727f5b1cb2baaf3da4684cb2))
+* **print-format:** use credit note reason field ([210a81c](https://github.com/Shinonn23/connect_diagnostics_core/commit/210a81cf91a2863feb802bd44fa1ed86ea8f2e93))
+* use credit note reason field ([7c4c0fe](https://github.com/Shinonn23/connect_diagnostics_core/commit/7c4c0fe2646f3eede8a296f907ee57080b88fbcf))
+
+## [0.47.3](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.2...v0.47.3) (2026-08-23)
+
+
+### Documentation
+
+* migrate repository guidance to Codex ([9dc5746](https://github.com/Shinonn23/connect_diagnostics_core/commit/9dc5746d34b1ba2499b316fad9b2731d39603522))
+* migrate repository guidance to Codex ([0100bb8](https://github.com/Shinonn23/connect_diagnostics_core/commit/0100bb8e14ba7ba41191624adb2c441bc2ff8d81))
+
+## [0.47.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.1...v0.47.2) (2026-08-22)
+
+
+### Bug Fixes
+
+* include max_storage_days in shelf life reorder test fixtures ([72c8348](https://github.com/Shinonn23/connect_diagnostics_core/commit/72c8348e7ef6f59b51213a7dcf73404458768e31))
+
+
+### Code Refactoring
+
+* reorder Item shelf life fields after Serial No Series ([a4ce922](https://github.com/Shinonn23/connect_diagnostics_core/commit/a4ce9227ddbc8ab250525d0ac7ba474803637005))
+* retire Regulation Class doctype and orphaned Item fields ([2b867c5](https://github.com/Shinonn23/connect_diagnostics_core/commit/2b867c5b0331886a5b4ce583307c5dc615ce0be8))
+* retire Regulation Class doctype and remove orphaned Item fields ([01dc46b](https://github.com/Shinonn23/connect_diagnostics_core/commit/01dc46b6aa35d1ce7af269ffe1199c75868c9610))
+
+## [0.47.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.47.0...v0.47.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* correct Item Connections link field for Product Registration ([15652b3](https://github.com/Shinonn23/connect_diagnostics_core/commit/15652b39b40feadd0baf799ee4b2554e4b867700))
+* correct Item Connections link field for Product Registration ([7c0247c](https://github.com/Shinonn23/connect_diagnostics_core/commit/7c0247cc2da299b0f55e31cf088f0d9c811a08bb))
+
+## [0.47.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.46.0...v0.47.0) (2026-08-20)
+
+
+### Features
+
+* reorganize Item medical device regulatory and opening tabs ([8e17ac2](https://github.com/Shinonn23/connect_diagnostics_core/commit/8e17ac224022a8ff0e3defacc5ec3d23837a429f))
+* reorganize Item medical device regulatory and opening tabs ([a264eb0](https://github.com/Shinonn23/connect_diagnostics_core/commit/a264eb05680211ae22d1c721fbc5e6e681e9a2e3))
+
+## [0.46.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.45.0...v0.46.0) (2026-08-20)
+
+
+### Features
+
+* freeze stock transactions for items under active Stock Count ([9b75503](https://github.com/Shinonn23/connect_diagnostics_core/commit/9b75503267c804face7d20ebc4789776310f467b))
+
+
+### Code Refactoring
+
+* retire Storage Location doctype, use native Warehouse tree for Stock Count ([710df59](https://github.com/Shinonn23/connect_diagnostics_core/commit/710df591dd048d379ecb98c5c6bb121008b9f754))
+* retire Storage Location, use native Warehouse tree for Stock Count ([1ba8299](https://github.com/Shinonn23/connect_diagnostics_core/commit/1ba829990df695037d8366b3aaf113ba5c244302))
+
+## [0.45.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.2...v0.45.0) (2026-08-19)
+
+
+### Features
+
+* enforce Quotation signatory, add Delivery Terms Template, and redesign the Signatory/Terms layout ([0492703](https://github.com/Shinonn23/connect_diagnostics_core/commit/04927039d6af4988fc4f985eb77b5f244f7fe3f0))
+
+## [0.44.2](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.1...v0.44.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* restore POS received/change rows lost by the live-DEV print format sync ([b79ffc4](https://github.com/Shinonn23/connect_diagnostics_core/commit/b79ffc46d27707ad63d01926b1a08ea07353c731))
+* restore POS received/change rows lost by the live-DEV print format sync ([38345a2](https://github.com/Shinonn23/connect_diagnostics_core/commit/38345a2b45f4e6693220a8f4f145eaed49d8a2e7))
+
 ## [0.44.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.44.0...v0.44.1) (2026-08-19)
 
 

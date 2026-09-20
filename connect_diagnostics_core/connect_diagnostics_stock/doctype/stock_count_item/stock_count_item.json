@@ -9,7 +9,6 @@
 		"item_code",
 		"item_name",
 		"warehouse",
-		"storage_location",
 		"column_break_location",
 		"batch_no",
 		"serial_no",
@@ -44,16 +43,9 @@
 		{
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
+			"in_list_view": 1,
 			"label": "Warehouse",
 			"options": "Warehouse",
-			"read_only": 1
-		},
-		{
-			"fieldname": "storage_location",
-			"fieldtype": "Link",
-			"in_list_view": 1,
-			"label": "Storage Location",
-			"options": "Storage Location",
 			"read_only": 1
 		},
 		{

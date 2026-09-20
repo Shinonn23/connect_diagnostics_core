@@ -18,7 +18,7 @@ def _draft(**overrides: object) -> StockCount:
         "doctype": "Stock Count",
         "count_type": MONTHLY,
         "company": "_Test Company",
-        "warehouse": "_Test Warehouse - _TC",
+        "warehouses": [{"warehouse": "_Test Warehouse - _TC"}],
         "posting_date": "2026-08-12",
         "posting_time": "10:00:00",
     }
@@ -49,11 +49,11 @@ class TestStockCount(IntegrationTestCase):
         with self.assertRaises(frappe.ValidationError):
             doc.validate_duplicate_lines()
 
-    def test_allows_same_item_in_different_locations(self) -> None:
+    def test_allows_same_item_in_different_warehouses(self) -> None:
         doc = _draft(
             items=[
-                {"item_code": "_Test Item", "storage_location": "_Test Storage A"},
-                {"item_code": "_Test Item", "storage_location": "_Test Storage B"},
+                {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
+                {"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
             ]
         )
         doc.validate_duplicate_lines()
@@ -63,8 +63,12 @@ class TestStockCount(IntegrationTestCase):
         with self.assertRaises(frappe.ValidationError):
             doc.validate_scope()
 
-    def test_random_by_zone_requires_storage_location(self) -> None:
-        doc = _draft(selection_method="Random by Zone")
+    def test_random_by_warehouse_requires_no_extra_fields(self) -> None:
+        doc = _draft(selection_method="Random by Warehouse")
+        doc.validate_scope()
+
+    def test_validate_scope_requires_at_least_one_warehouse(self) -> None:
+        doc = _draft(warehouses=[])
         with self.assertRaises(frappe.ValidationError):
             doc.validate_scope()
 

@@ -58,7 +58,7 @@ class TestStockCountVariance(IntegrationTestCase):
                 "name": name,
                 "count_type": count_type,
                 "company": TEST_COMPANY,
-                "warehouse": TEST_WAREHOUSE,
+                "warehouses": [{"warehouse": TEST_WAREHOUSE}],
                 "posting_date": "2026-08-12",
                 "posting_time": "10:00:00",
                 "items": items,

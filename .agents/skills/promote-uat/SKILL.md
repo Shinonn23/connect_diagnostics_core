@@ -1,23 +1,14 @@
 ---
 name: promote-uat
-description: Gate-check then open the promotion PR developments → user-acceptance-testing. Normally requires every batched PR to have a manual-test task certified /test-pass by newyodsapad, with an explicit owner-only bypass that requires a reason and preserves pending test state. Use when the user wants to promote to UAT or cut a UAT release.
+description: Verify the released batch and open the promotion PR developments → user-acceptance-testing. Use when the user wants to promote to UAT or cut a UAT release.
 ---
 
 # Promote to UAT
 
-Open the promotion PR **`developments → user-acceptance-testing`** after
-inspecting every change and its manual-test state. Normally every item must be
-certified by `newyodsapad`. The only exception is an explicit owner-authorized
-manual-test bypass. The tester/certifier is `newyodsapad` and the owner/approver
-is `Shinonn23`; board field IDs are in the Board #6 reference below.
-
-## Invocation
-
-- Normal gate: `$promote-uat`
-- Owner bypass: `$promote-uat --bypass-test "<reason>"`
-
-Never infer a bypass from urgency or context. Require the exact flag and a
-non-empty reason in the user's instruction.
+Open the promotion PR **`developments → user-acceptance-testing`** after verifying
+the complete released batch. CI, review, branch protection, commit accounting, and
+Release Please artifacts remain required; UAT verification is handled separately
+from pull requests.
 
 ## Steps
 
@@ -29,90 +20,38 @@ non-empty reason in the user's instruction.
    ```
    Collect the complete set of **merged PRs** with
    `gh pr list --base developments --state merged --limit 1000 --json number,title,body,url,mergeCommit,mergedAt,headRefName,labels`
-   and retain PRs whose merge commit is in the Git range. Verify that every
-   non-promotion commit in the range maps to a PR; if any commit is unaccounted
-   for, STOP and report it rather than silently excluding it. From every included
-   PR body, collect the `Refs #` **source issues**.
-   Classify a PR as Release Please metadata only when its head starts with
-   `release-please--branches--developments` and it has the
-   `autorelease: tagged` label. Exclude these PRs from source-issue and manual-test
-   requirements, but keep them in the batch audit. Require the newest Release
-   Please PR to be after every non-release PR in the range. Verify that its
+   and retain PRs whose merge commit is in the Git range. Verify every
+   non-promotion commit maps to a PR; STOP and report unaccounted commits. Collect
+   `Refs #` source issues from every included non-release PR body.
+2. **Verify the release artifacts.** Classify a Release Please PR only when its
+   head starts with `release-please--branches--developments` and it has the
+   `autorelease: tagged` label. Keep it in the batch audit but exclude it from
+   source-issue reporting. Require the newest Release Please PR to be after every
+   non-release PR in the range. Verify its
    `connect_diagnostics_core/__init__.py` version equals the root value in
    `.release-please-manifest.json`, `CHANGELOG.md` contains that version, and the
-   published GitHub Release `v<version>` targets the Release PR merge commit.
-   STOP if the batch has unreleased commits, mismatched release metadata, or no
-   matching published release.
-2. **Find each non-release PR's test task** (`🧪 Test: PR #<n>`, label `manual-test`). Parse
-   its single `Test target: <environment> (<branch> @ <full SHA>)`; missing or
-   ambiguous target metadata fails the manual-test gate.
-3. **Gate — every item must satisfy ALL of:**
-   - test task is **closed**, and all its `- [x]` steps are ticked (no `- [ ]` left);
-   - board **Test Status = Passed** on the test task and its source issues;
-   - a `/test-pass — all steps verified on <environment> @ <full SHA>` comment
-     exists **authored by `newyodsapad`**, names exactly the environment and SHA
-     recorded in the task's current Test target, and is after the latest
-     `/test-fail` or `/retest-start` marker (`gh issue view <n> --json comments`
-     → compare comment bodies, timestamps, and authors). A bare or target-mismatched
-     `/test-pass` is not certification.
-4. **Handle the gate result:**
-   - If all items pass, continue normally.
-   - If any item fails and no bypass was explicitly requested, STOP. Report a
-     table of pending items (PR, test task, and what is missing). Do not open the
-     promotion PR.
-   - If a bypass was explicitly requested, run `gh api user --jq .login` and
-     require the exact authenticated login `Shinonn23`. STOP if the login differs
-     or the reason is empty. Apply the bypass to every failing item in the current
-     batch and keep the complete pending-items table for the PR body.
-   - The bypass covers only the manual-test gate. It never covers an unaccounted
-     commit, required CI, branch protection, review, deployment verification, or
-     the owner `/uat-approve` required for production promotion.
-5. **Create the promotion PR** after a normal pass or authorized bypass:
+   published GitHub Release `v<version>` targets the Release PR merge commit. STOP
+   if the batch has unreleased commits, mismatched metadata, or no matching release.
+3. **Create the promotion PR**:
    ```
    gh pr create --base user-acceptance-testing --head developments \
      --title "chore: promote to UAT (<YYYY-MM-DD>)" \
-     --body "<included PRs + certified items + bypass audit when applicable>"
+     --body "<included PRs, source issues, and verified Release Please version/tag>"
    ```
-   For a bypass, add a clearly labeled **Manual-test bypass** section containing
-   the authenticated owner login, reason, and pending-items table with each PR,
-   test task, source issue, current Test Status, unchecked steps, and missing or
-   stale certification. State that bypassed items were not certified.
-   After creating the PR, comment on every bypassed source issue from the same
-   authenticated owner account:
-   `/test-bypass — UAT promotion PR #<n>; owner Shinonn23; reason: <reason>`.
-   The source comment and matching PR-body entry are durable audit evidence only;
-   neither is a test result.
-   Include the verified Release Please version and tag in the promotion PR body.
-   Release Please runs only on `developments`, so this promotion copies the
-   released version without another bump.
-6. **Preserve bypassed test records.** Do not tick test steps, post `/test-pass`,
-   change Test Status or Tested By, or close test tasks or source issues. A bypass
-   is an authorization to promote, not a test result. Run later tasks and results
-   through `$dispatch-test` and `$test-result`; both preserve an existing UAT or
-   production deployment Status.
-7. **Advance the board only after deployment.** Wait until the promotion PR is
-   merged and its UAT deployment is explicitly verified, then move the promoted
-   source issues, including bypassed ones, → **UAT Deploy** (`98236657`) while
-   preserving their test fields. If a remediated source is already **PROD Deploy**
-   (`dba9dd7f`), preserve PROD Deploy rather than moving it backward. Until merge
-   and verified deployment are both true, leave board status unchanged. Note in
-   the PR that UAT sign-off (`/uat-approve` by the owner) is required before
-   `$promote-prod`.
+   The promotion copies the released version and does not calculate another bump.
+4. **Advance the board only after deployment.** Once the PR is merged and its UAT
+   deployment is explicitly verified, move related source issues to **UAT Deploy**
+   (`98236657`). Preserve an existing **PROD Deploy** status rather than moving it
+   backwards. Do not create or update PR-linked testing records.
 
 ## Output
 
-Return either the blocking table (nothing promoted) or the promotion PR URL,
-verified Release Please version/tag, and separate certified and bypassed lists.
-For a bypass, also report the authenticated owner, reason, and source issues
-carrying `/test-bypass` audit markers. Report board movement as pending until
-merge and UAT deployment are verified; only then report the issues moved to UAT
-Deploy and any existing PROD Deploy status preserved. Never auto-merge — branch
-protection + review apply.
+Return either the blocking commit/accounting or release-artifact details, or the
+promotion PR URL with its verified version/tag and source issues awaiting UAT
+deployment. Never auto-merge.
 
 ## Board #6 reference
 
 - Project: owner `Shinonn23`, number `6`, id `PVT_kwHOB1tcMM4BLM7I`.
-- **Status** field `PVTSSF_lAHOB1tcMM4BLM7Izg62NJg`: TODO `f75ad846` · DEV Ready `61e4505c` · Dev In progress `47fc9ee4` · Dev review `df73e18b` · Test In progress `18955566` · Test Review `6c769416` · UAT Deploy `98236657` · PROD Deploy `dba9dd7f` · Hold `232c6587`.
-- **Test Status** field `PVTSSF_lAHOB1tcMM4BLM7IzhWdi_0`: Not Tested `9d66b7d0` · Testing `2556afad` · Passed `97d946bc` · Failed `15087b1c`.
-- **Tested By** field `PVTF_lAHOB1tcMM4BLM7IzhWdjBE` (text).
-- Set a field: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>` (text fields use `--text`). Find an issue's item id with `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.
+- **Status** field `PVTSSF_lAHOB1tcMM4BLM7Izg62NJg`: UAT Deploy `98236657` · PROD Deploy `dba9dd7f`.
+- Set a field: `gh project item-edit --id <ITEM_ID> --field-id <FIELD_ID> --project-id PVT_kwHOB1tcMM4BLM7I --single-select-option-id <OPT_ID>`. Find an issue's item id with `gh project item-list 6 --owner Shinonn23 --format json --limit 1000`.

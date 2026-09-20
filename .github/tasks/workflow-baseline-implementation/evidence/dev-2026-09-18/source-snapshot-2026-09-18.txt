@@ -1,0 +1,215 @@
+# Source snapshot: 2026-09-18 DEV workflow slice
+
+Repository: /home/shinon/frappe/connect_diagnostics/apps/connect_diagnostics_core
+HEAD: 2e80debe7349826a4f950a2d993517a595228f6b
+Target: bench /home/shinon/frappe/connect_diagnostics, site local
+
+This manifest includes the pre-existing dirty tracked paths and untracked paths visible at the end of the slice. No path was reset or discarded.
+
+## Dirty tracked paths
+
+.codex/agents/architect.toml
+.codex/agents/browser_workflow_tester.toml
+.codex/agents/explorer.toml
+.codex/agents/reviewer.toml
+.codex/agents/ui_test_author.toml
+.codex/agents/worker.toml
+.codex/config.toml
+.github/tasks/README.md
+.github/tasks/item-request-v11/README.md
+AGENTS.md
+connect_diagnostics_core/AGENTS.md
+connect_diagnostics_core/hooks.py
+connect_diagnostics_core/patches.txt
+connect_diagnostics_core/setup/procure_to_pay.py
+connect_diagnostics_core/setup/sales_requirements.py
+connect_diagnostics_core/setup/tds.py
+connect_diagnostics_core/setup/tests/test_workflow_reset.py
+connect_diagnostics_core/setup/workspace.py
+
+## Untracked paths
+
+.github/tasks/workflow-baseline-implementation/IMPLEMENTATION-BLOCKERS-2026-09-18.md
+.github/tasks/workflow-baseline-implementation/OWNER-DECISION-REQUEST.md
+.github/tasks/workflow-baseline-implementation/README.md
+.github/tasks/workflow-baseline-implementation/decisions.md
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/equipment-scope-closure.md
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/stock-entry-direct-transfer-checkpoint.md
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/source-snapshot-2026-09-18.txt
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/workflow-actions-before.json
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/workflow-states-before.json
+.github/tasks/workflow-baseline-implementation/evidence/dev-2026-09-18/workflows-before.json
+.github/tasks/workflow-baseline-implementation/permission-blueprint.json
+.github/tasks/workflow-baseline-implementation/slices/shared-531-core.md
+.github/tasks/workflow-baseline-implementation/spec.md
+.github/tasks/workflow-baseline-implementation/verification.md
+.github/tasks/workflow-baseline-implementation/workflow-route-manifest.json
+connect_diagnostics_core/connect_diagnostics_regulatory/workspace/regulatory/regulatory.json
+connect_diagnostics_core/connect_diagnostics_stock/workspace/stock_counting/stock_counting.json
+connect_diagnostics_core/custom/asset_movement.json
+connect_diagnostics_core/custom/payment_entry.json
+connect_diagnostics_core/connect_diagnostics_stock/custom/stock_entry.json
+connect_diagnostics_core/fixtures/workflow.json
+connect_diagnostics_core/fixtures/workflow_action_master.json
+connect_diagnostics_core/fixtures/workflow_state.json
+connect_diagnostics_core/api/erpnext/stock_entry_workflow.py
+connect_diagnostics_core/api/erpnext/tests/test_stock_entry_workflow.py
+connect_diagnostics_core/api/erpnext/stock_reconciliation_freeze.py
+connect_diagnostics_core/api/erpnext/tests/test_stock_count_freeze.py
+connect_diagnostics_core/patches/v1_0/add_stock_entry_freeze_exception_fields.py
+connect_diagnostics_core/patches/v1_0/consolidate_stock_entry_workflow.py
+connect_diagnostics_core/patches/v1_0/rollback_consolidate_stock_entry_workflow.py
+connect_diagnostics_core/patches/v1_0/tests/test_consolidate_stock_entry_workflow.py
+connect_diagnostics_core/patches/v1_0/disable_equipment_assignment_workflow.py
+connect_diagnostics_core/patches/v1_0/remove_legacy_workflow_revise_actions.py
+connect_diagnostics_core/patches/v1_0/rollback_disable_equipment_assignment_workflow.py
+connect_diagnostics_core/patches/v1_0/rollback_remove_legacy_workflow_revise_actions.py
+connect_diagnostics_core/patches/v1_0/tests/test_disable_equipment_assignment_workflow.py
+connect_diagnostics_core/patches/v1_0/tests/test_remove_legacy_workflow_revise_actions.py
+connect_diagnostics_core/setup/tests/test_workflow_fixture_blueprints.py
+
+## Current source content checkpoints
+
+`connect_diagnostics_core/api/erpnext/stock_entry_workflow.py` owns direct-route detection,
+native completed-Workflow-Action verification, exception reason validation, critical-field lock
+after Emergency review, and native/API submit protection. `stock_reconciliation_freeze.py` calls
+that authorization only for direct Stock Entry exceptions; all other documents remain under the
+native reconciliation query.
+
+`connect_diagnostics_stock/custom/stock_entry.json` exports the two schema fields:
+`custom_freeze_exception` (Check) and `custom_freeze_exception_reason` (Small Text with
+`mandatory_depends_on`). The export is under the `connect_diagnostics_stock` module so Frappe
+actually synchronizes it during migrate.
+
+`fixtures/workflow.json` keeps one active `Connect Stock Transfer Approval` Workflow. Normal
+direct transitions use native purpose/transit fields; Emergency transitions additionally require
+the two exception fields and provide both `Stock Manager` and `C-Level Approver` approval roles.
+
+Runtime source proof: `SE2569090007` completed native Emergency approval by role, posted through
+ERPNext native submit despite `SR2569090003`, produced SLE `-1/-16.82` and `+1/+16.82`, and was
+then natively cancelled with cancellation SLE rows retained and `is_cancelled=1`. `SE2569090009`
+proved concurrent native posting: one executor succeeded, the other hit Frappe optimistic-lock
+`QueryDeadlockError (1020)`, and no duplicate non-cancelled SLE set was created. `SE2569090006`
+proved restricted-role, spoofed-state, and critical-field-change rejection. `SE2569090008` proved
+normal rejection with no ledger.
+
+## Revision after AUTH-01, AUTH-02 and MIG-01
+
+The current source adds `custom_freeze_exception_reconciliation_scope`, captured by the native
+Approve transition task before Post. At Post, current active native Reconciliation rows must be a
+subset of the approved descriptors (`reconciliation`, item, warehouse and `modified` revision),
+so a new or changed Freeze is rejected without creating SLE. The execution marker is cleared in
+the first Freeze before-submit guard and on early validation failure; it cannot authorize a later
+submit without a new native Post transition.
+
+The transition-task patch now verifies exact task content (enabled synchronous app method) when a
+record already exists. Its rollback is intentionally non-destructive because a name cannot prove
+that a site record was created by the patch; it never deletes a pre-existing or later-owned task.
+
+Current DEV runtime records: `SE2569090016` is the current-build positive and was natively
+cancelled after SLE `+1/-1` at `16.82`; `SE2569090017` is the changed-Freeze negative and stayed
+Approved/docstatus `0` with no SLE after `SR2569090007` was added after approval. Test Freeze
+records `SR2569090004`, `SR2569090005`, and `SR2569090007` are preserved in terminal Rejected
+state; no records were deleted.
+
+## Actual changed-source bundle
+
+The following are the source contents used by the DEV migration (the files are included here so
+independent review does not depend on a path-only inventory).
+
+### `connect_diagnostics_core/api/erpnext/stock_entry_workflow.py`
+
+```python
+DIRECT_TRANSFER_PURPOSE = "Material Transfer"
+APPROVED_STATES = frozenset({"Stock Transfer Submitted", "Emergency Stock Movement Submitted"})
+EXCEPTION_FLAG = "custom_freeze_exception"
+EXCEPTION_REASON = "custom_freeze_exception_reason"
+
+def is_direct_transfer(doc):
+    return bool(doc.get("purpose") == DIRECT_TRANSFER_PURPOSE
+        and not doc.get("add_to_transit")
+        and not doc.get("outgoing_stock_entry"))
+
+def _has_native_exception_approval(doc):
+    # Completed is supporting evidence only: Frappe also marks Reject Completed.
+    return bool(frappe.db.exists({
+        "doctype": "Workflow Action", "reference_doctype": "Stock Entry",
+        "reference_name": doc.name,
+        "workflow_state": "Emergency Stock Movement Pending Review",
+        "status": "Completed",
+    }))
+
+def _has_native_execution_provenance(doc):
+    return getattr(frappe.flags, "freeze_exception_execution", None) == {
+        "doctype": doc.doctype, "name": doc.name
+    }
+
+def is_authorized_freeze_exception(doc):
+    return bool(is_direct_transfer(doc) and doc.get(EXCEPTION_FLAG)
+        and doc.get("workflow_state") == "Emergency Stock Movement Submitted"
+        and str(doc.get(EXCEPTION_REASON) or "").strip()
+        and _has_native_exception_approval(doc)
+        and _has_native_execution_provenance(doc))
+
+def authorize_freeze_exception_execution(doc):
+    if not (is_direct_transfer(doc) and doc.get(EXCEPTION_FLAG)
+            and doc.get("workflow_state") == "Emergency Stock Movement Submitted"
+            and str(doc.get(EXCEPTION_REASON) or "").strip()
+            and _has_native_exception_approval(doc)):
+        frappe.throw(_("Emergency Stock Movement must have a completed native approval before posting."))
+    frappe.flags.freeze_exception_execution = {"doctype": doc.doctype, "name": doc.name}
+```
+
+### `connect_diagnostics_core/api/erpnext/stock_reconciliation_freeze.py`
+
+```python
+_ACTIVE_RECONCILIATION_CLAUSE = """
+    sr.docstatus = 0
+    and (sr.workflow_state is null or sr.workflow_state not in %(terminal_states)s)
+"""
+# Both item/warehouse queries join only tabStock Reconciliation and its items.
+# No Stock Count table or retired runtime entry point is referenced.
+```
+
+### `connect_diagnostics_core/patches/v1_0/add_freeze_exception_execution_task.py`
+
+```python
+TASKS = {
+    "Connect Emergency Stock Movement Approval": "Capture Freeze Exception Approval Scope",
+    "Connect Emergency Stock Movement Execution": "Authorize Freeze Exception Execution",
+}
+
+def _ensure_task(name, task_name):
+    expected = [(task_name, 1, 0)]
+    if frappe.db.exists("Workflow Transition Tasks", name):
+        actual = [(row.task, int(row.enabled), int(row.asynchronous))
+                  for row in frappe.get_doc("Workflow Transition Tasks", name).tasks]
+        if actual != expected:
+            frappe.throw("Workflow Transition Tasks configuration conflict")
+        return
+    frappe.get_doc({"doctype": "Workflow Transition Tasks", "name": name,
+                    "tasks": [{"task": task_name, "enabled": 1, "asynchronous": 0}]}).insert(
+                        ignore_permissions=True)
+
+def execute():
+    for name, task_name in TASKS.items():
+        _ensure_task(name, task_name)
+
+def rollback():
+    # Never delete a record when ownership cannot be proven by name.
+    return
+```
+
+### Native configuration and hook diff
+
+```diff
++ workflow_methods: Authorize Freeze Exception Execution
+  Workflow Transition Tasks: Connect Emergency Stock Movement Approval
++ Workflow Transition Tasks: Connect Emergency Stock Movement Execution
+  Approve Emergency Stock Movement -> transition_tasks:
++   Connect Emergency Stock Movement Approval
+  Post Emergency Stock Movement -> transition_tasks:
++   Connect Emergency Stock Movement Execution
+  before_submit Stock Entry:
++   native stock_entry_workflow / stock_reconciliation_freeze guards
+```
