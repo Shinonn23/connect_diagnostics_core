@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.52.1...v0.53.0) (2026-09-20)
+
+
+### Features
+
+* **employee:** add approval signature and overview identity fields ([e4abbc7](https://github.com/Shinonn23/connect_diagnostics_core/commit/e4abbc7e7de665ccbb4809196eb0af3af8c4f165))
+
 ## [0.52.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.52.0...v0.52.1) (2026-09-20)
 
 
