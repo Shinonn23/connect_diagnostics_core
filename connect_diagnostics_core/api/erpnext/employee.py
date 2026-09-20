@@ -7,9 +7,6 @@ import re
 from typing import Any, cast
 
 import frappe
-from erpnext_thailand.custom.naming import (
-    parse_naming_series_variable as parse_thailand_naming_series_variable,
-)
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
@@ -30,13 +27,11 @@ def _get_series_date(doc: Any):
 
 
 def parse_buddhist_era_naming_series_variable(doc: Any, variable: str) -> str | None:
-    if variable == "YYYY-BE":
-        gregorian_year = parse_thailand_naming_series_variable(doc, "YYYY-DATE")
-        return str(int(gregorian_year) + BUDDHIST_ERA_YEAR_OFFSET) if gregorian_year else None
-
-    # Retained for old Employee series and the historical broken-autoname backfill.
     series_date = _get_series_date(doc)
     buddhist_year = series_date.year + BUDDHIST_ERA_YEAR_OFFSET
+
+    if variable == "YYYY-BE":
+        return str(buddhist_year)
 
     if variable in ("YY-BE", "YYBE"):
         return f"{buddhist_year % 100:02d}"
@@ -78,15 +73,3 @@ def normalize_national_id(doc: Document, method: str | None = None) -> None:
 
     doc.set("national_id", cleaned)
     doc.set("national_id_display", format_national_id_display(cleaned))
-
-
-def validate_borrow_warehouse(doc: Document, _method: str | None = None) -> None:
-    """Ensure an employee's borrowed-stock warehouse is an active leaf in its company."""
-    warehouse = doc.get("borrow_warehouse")
-    if not warehouse:
-        return
-    details = frappe.db.get_value("Warehouse", warehouse, ["company", "is_group", "disabled"], as_dict=True)
-    if not details or details.company != doc.get("company"):
-        frappe.throw(_("Borrow Warehouse must belong to the Employee's Company."))
-    if details.disabled or details.is_group:
-        frappe.throw(_("Borrow Warehouse must be an active leaf Warehouse."))

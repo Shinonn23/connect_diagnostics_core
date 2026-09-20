@@ -75,7 +75,7 @@ class TestRegisterPrint(RecorderHarness):
         self.assertEqual(row["print_format"], "Sales Order")
 
     def test_resolved_copies_are_recorded(self) -> None:
-        self.set_request(trigger_print="1", format="ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ")
+        self.set_request(trigger_print="1", format="Tax Invoice Delivery Note and Invoice")
         context = {
             "language": "Thai",
             "copies": [
@@ -118,32 +118,6 @@ class TestRegisterPrint(RecorderHarness):
         )
 
         self.assertIsNone(self.inserted[0]["customer"])
-
-    def test_quotation_signatory_audit_values_are_recorded(self) -> None:
-        self.set_request(trigger_print="1", format="Quotation")
-
-        print_log.register_print(
-            FakeDocument(
-                {
-                    "doctype": "Quotation",
-                    "name": "SAL-QTN-0001",
-                    "quotation_to": "Customer",
-                    "party_name": "CUST-0001",
-                }
-            ),
-            "quotation",
-            {
-                "show_date": False,
-                "quotation_signatory_type": "Managing Director",
-                "signatory": {"employee": "EMP-MANAGER"},
-                "copies": [{"kind": "original", "label": "ต้นฉบับ"}],
-            },
-        )
-
-        row = self.inserted[0]
-        self.assertEqual(row["show_date"], 0)
-        self.assertEqual(row["signatory_type"], "Managing Director")
-        self.assertEqual(row["signatory_employee"], "EMP-MANAGER")
 
 
 class TestRecordPrintFailsOpen(RecorderHarness):
@@ -202,33 +176,6 @@ class TestDownloadPdfOverride(UnitTestCase):
             print_log.CHANNEL_PDF,
             print_format="Receipt",
             language=None,
-        )
-
-    def test_pdf_audit_values_are_forwarded_to_the_log(self) -> None:
-        with (
-            patch("frappe.utils.print_format.download_pdf", return_value="pdf-bytes"),
-            patch.object(
-                print_log,
-                "_request_audit_values",
-                return_value={
-                    "show_date": 1,
-                    "signatory_type": "Sales Representative",
-                    "signatory_employee": "EMP-0001",
-                },
-            ),
-            patch.object(print_log, "record_print") as mocked_record,
-        ):
-            print_log.download_pdf("Quotation", "SAL-QTN-0001", format="Quotation")
-
-        self.assertEqual(
-            mocked_record.call_args.kwargs,
-            {
-                "print_format": "Quotation",
-                "language": None,
-                "show_date": 1,
-                "signatory_type": "Sales Representative",
-                "signatory_employee": "EMP-0001",
-            },
         )
 
     def test_hooks_route_the_pdf_download_through_this_module(self) -> None:

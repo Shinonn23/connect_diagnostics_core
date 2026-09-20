@@ -5,7 +5,7 @@
 	"doctype": "DocType",
 	"editable_grid": 1,
 	"engine": "InnoDB",
-	"field_order": ["entry_type", "stock_entry", "stock_reconciliation", "remarks"],
+	"field_order": ["entry_type", "stock_entry", "remarks"],
 	"fields": [
 		{
 			"fieldname": "entry_type",
@@ -21,14 +21,6 @@
 			"in_list_view": 1,
 			"label": "Stock Entry",
 			"options": "Stock Entry",
-			"read_only": 1
-		},
-		{
-			"fieldname": "stock_reconciliation",
-			"in_list_view": 1,
-			"label": "Stock Reconciliation",
-			"options": "Stock Reconciliation",
-			"fieldtype": "Link",
 			"read_only": 1
 		},
 		{

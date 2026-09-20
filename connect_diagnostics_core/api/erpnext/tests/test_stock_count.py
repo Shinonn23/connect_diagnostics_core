@@ -19,6 +19,7 @@ def _candidates() -> list[dict]:
         {
             "item_code": f"ITEM-{i % 5}",
             "warehouse": "WH",
+            "storage_location": None,
             "batch_no": f"BATCH-{i}",
             "serial_no": None,
             "system_qty": float(i + 1),
@@ -60,8 +61,8 @@ class TestStockCountSelection(UnitTestCase):
         # ceil(10 lines * 0.25) == 3 lines
         self.assertEqual(len(stock_count._apply_selection(doc, _candidates())), 3)
 
-    def test_random_by_warehouse_returns_all_prefiltered_candidates(self) -> None:
-        doc = SimpleNamespace(count_type=stock_count.MONTHLY, selection_method="Random by Warehouse")
+    def test_random_by_zone_returns_all_prefiltered_candidates(self) -> None:
+        doc = SimpleNamespace(count_type=stock_count.MONTHLY, selection_method="Random by Zone")
         self.assertEqual(len(stock_count._apply_selection(doc, _candidates())), 10)
 
 
@@ -72,7 +73,7 @@ class TestFetchItems(IntegrationTestCase):
                 "doctype": "Stock Count",
                 "count_type": stock_count.MONTHLY,
                 "company": "_Test Company",
-                "warehouses": [{"warehouse": "_Test Warehouse - _TC"}],
+                "warehouse": "_Test Warehouse - _TC",
                 "posting_date": "2026-08-12",
                 "posting_time": "10:00:00",
                 "selection_method": "Manual",
@@ -90,6 +91,7 @@ class TestFetchItems(IntegrationTestCase):
                 "item_name": "_Test Item",
                 "stock_uom": "_Test UOM",
                 "warehouse": "_Test Warehouse - _TC",
+                "storage_location": None,
                 "batch_no": None,
                 "serial_no": None,
                 "system_qty": 12.0,
@@ -117,41 +119,3 @@ class TestFetchItems(IntegrationTestCase):
             stock_count.fetch_items(self.doc.name)
         self.doc.reload()
         self.assertEqual(self.doc.items[0].count_qty, 9)
-
-
-class TestFetchItemsRandomByWarehouse(IntegrationTestCase):
-    def setUp(self) -> None:
-        self.doc = frappe.get_doc(
-            {
-                "doctype": "Stock Count",
-                "count_type": stock_count.MONTHLY,
-                "company": "_Test Company",
-                "warehouses": [
-                    {"warehouse": "_Test Warehouse - _TC"},
-                    {"warehouse": "_Test Warehouse 1 - _TC"},
-                ],
-                "posting_date": "2026-08-12",
-                "posting_time": "10:00:00",
-                "selection_method": "Random by Warehouse",
-                "items": [],
-            }
-        ).insert(ignore_permissions=True)
-
-    def tearDown(self) -> None:
-        frappe.delete_doc("Stock Count", self.doc.name, force=True)
-
-    def test_narrows_candidates_to_one_randomly_chosen_warehouse(self) -> None:
-        captured: dict = {}
-
-        def fake_candidate_lines(company, warehouses, cutoff):
-            captured["warehouses"] = warehouses
-            return []
-
-        with (
-            patch.object(stock_count.random, "choice", return_value="_Test Warehouse 1 - _TC"),
-            patch.object(stock_count, "_candidate_lines", side_effect=fake_candidate_lines),
-        ):
-            result = stock_count.fetch_items(self.doc.name)
-
-        self.assertEqual(captured["warehouses"], ["_Test Warehouse 1 - _TC"])
-        self.assertIn("_Test Warehouse 1 - _TC", result["message"])

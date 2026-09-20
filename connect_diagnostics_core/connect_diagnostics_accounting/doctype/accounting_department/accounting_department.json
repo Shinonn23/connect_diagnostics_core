@@ -1,0 +1,171 @@
+{
+	"actions": [],
+	"allow_copy": 1,
+	"allow_import": 1,
+	"creation": "2026-05-20 15:22:14.222058",
+	"default_view": "List",
+	"description": "Departmental accounting dimension. Track separate Income and Expense per department.",
+	"doctype": "DocType",
+	"document_type": "Setup",
+	"engine": "InnoDB",
+	"field_order": [
+		"sb0",
+		"department_name",
+		"department_number",
+		"parent_accounting_department",
+		"company",
+		"cb0",
+		"is_group",
+		"disabled",
+		"lft",
+		"rgt",
+		"old_parent"
+	],
+	"fields": [
+		{
+			"fieldname": "sb0",
+			"fieldtype": "Section Break"
+		},
+		{
+			"fieldname": "department_name",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "Department Name",
+			"no_copy": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "department_number",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Department Number",
+			"read_only_depends_on": "eval:!doc.__islocal"
+		},
+		{
+			"fieldname": "parent_accounting_department",
+			"fieldtype": "Link",
+			"ignore_user_permissions": 1,
+			"in_list_view": 1,
+			"label": "Parent Accounting Department",
+			"options": "Accounting Department",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Company",
+			"options": "Company",
+			"remember_last_selected_value": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "cb0",
+			"fieldtype": "Column Break",
+			"width": "50%"
+		},
+		{
+			"default": "0",
+			"fieldname": "is_group",
+			"fieldtype": "Check",
+			"label": "Is Group"
+		},
+		{
+			"default": "0",
+			"fieldname": "disabled",
+			"fieldtype": "Check",
+			"label": "Disabled"
+		},
+		{
+			"fieldname": "lft",
+			"fieldtype": "Int",
+			"hidden": 1,
+			"label": "lft",
+			"no_copy": 1,
+			"print_hide": 1,
+			"read_only": 1,
+			"report_hide": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "rgt",
+			"fieldtype": "Int",
+			"hidden": 1,
+			"label": "rgt",
+			"no_copy": 1,
+			"print_hide": 1,
+			"read_only": 1,
+			"report_hide": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "old_parent",
+			"fieldtype": "Link",
+			"hidden": 1,
+			"ignore_user_permissions": 1,
+			"label": "Old Parent",
+			"no_copy": 1,
+			"options": "Accounting Department",
+			"print_hide": 1,
+			"report_hide": 1
+		}
+	],
+	"icon": "fa fa-sitemap",
+	"idx": 1,
+	"index_web_pages_for_search": 1,
+	"is_tree": 1,
+	"links": [],
+	"modified": "2026-05-20 15:49:42.052544",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Accounting",
+	"name": "Accounting Department",
+	"naming_rule": "By script",
+	"nsm_parent_field": "parent_accounting_department",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Accounts Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Accounts User",
+			"share": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"rows_threshold_for_grid_search": 20,
+	"search_fields": "parent_accounting_department, is_group",
+	"show_name_in_global_search": 1,
+	"sort_field": "modified",
+	"sort_order": "ASC",
+	"states": [],
+	"track_changes": 1,
+	"track_views": 1
+}

@@ -5,14 +5,6 @@
 
 from __future__ import annotations
 
-CUSTOMER_NAME_IN_ARABIC_DOCTYPES = (
-    "Customer",
-    "Delivery Note",
-    "POS Invoice",
-    "Sales Invoice",
-    "Sales Order",
-)
-
 
 def _sales_requirement_fields() -> list[dict[str, object]]:
     """Build the Customer sales-document requirement fields.
@@ -87,7 +79,6 @@ CUSTOM_FIELDS = {
 # (fieldname or None for DocType-level, property, value, property_type)
 PROPERTY_SETTERS = {
     "Customer": [
-        ("customer_name_in_arabic", "hidden", "1", "Check"),
         ("customer_type", "options", "Company\nIndividual\nPartnership\nPublic Company Limited", "Text"),
         (
             "gender",
@@ -113,8 +104,4 @@ PROPERTY_SETTERS = {
             "Data",
         ),
     ],
-    "Delivery Note": [("customer_name_in_arabic", "hidden", "1", "Check")],
-    "POS Invoice": [("customer_name_in_arabic", "hidden", "1", "Check")],
-    "Sales Invoice": [("customer_name_in_arabic", "hidden", "1", "Check")],
-    "Sales Order": [("customer_name_in_arabic", "hidden", "1", "Check")],
 }

@@ -8,7 +8,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Link",
             "insert_after": "accounting_dimensions_section",
             "is_system_generated": 1,
-            "options": "Department",
+            "options": "Accounting Department",
         },
         {
             "fieldname": "territory",

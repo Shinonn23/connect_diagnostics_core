@@ -27,9 +27,6 @@ class StockCount(Document):
         from connect_diagnostics_core.connect_diagnostics_stock.doctype.stock_count_item.stock_count_item import (
             StockCountItem,
         )
-        from connect_diagnostics_core.connect_diagnostics_stock.doctype.stock_count_warehouse.stock_count_warehouse import (
-            StockCountWarehouse,
-        )
 
         adjustments: DF.Table[StockCountAdjustment]
         amended_from: DF.Link | None
@@ -43,11 +40,10 @@ class StockCount(Document):
         remarks: DF.SmallText | None
         sample_count: DF.Int
         sample_percentage: DF.Percent
-        selection_method: DF.Literal[
-            "Manual", "Random by Count", "Random by Percentage", "Random by Warehouse"
-        ]
+        selection_method: DF.Literal["Manual", "Random by Count", "Random by Percentage", "Random by Zone"]
+        storage_location: DF.Link | None
         total_variance_qty: DF.Float
-        warehouses: DF.Table[StockCountWarehouse]
+        warehouse: DF.Link
     # end: auto-generated types
 
     def validate(self) -> None:
@@ -67,29 +63,30 @@ class StockCount(Document):
             self.holding_warehouse = frappe.db.get_single_value("Stock Settings", "default_holding_warehouse")
 
     def validate_scope(self) -> None:
-        if not self.warehouses:
-            frappe.throw(_("Select at least one warehouse."))
         if self.count_type != MONTHLY:
             return
         if self.selection_method == "Random by Count" and self.sample_count <= 0:
             frappe.throw(_("Sample Count must be greater than zero for Random by Count."))
         if self.selection_method == "Random by Percentage" and not 0 < self.sample_percentage <= 100:
             frappe.throw(_("Sample Percentage must be between 0 and 100 for Random by Percentage."))
+        if self.selection_method == "Random by Zone" and not self.storage_location:
+            frappe.throw(_("Storage Location is required for Random by Zone."))
 
     def validate_duplicate_lines(self) -> None:
-        seen: set[tuple[str, str, str, str]] = set()
+        seen: set[tuple[str, str, str, str, str]] = set()
         for row in self.items:
             key = (
                 row.item_code or "",
                 row.warehouse or "",
+                row.storage_location or "",
                 row.batch_no or "",
                 (row.serial_no or "").strip(),
             )
             if key in seen:
                 frappe.throw(
-                    _(
-                        "Row #{0}: Duplicate count line for the same item, warehouse, batch and serial."
-                    ).format(row.idx)
+                    _("Row #{0}: Duplicate count line for the same item, location, batch and serial.").format(
+                        row.idx
+                    )
                 )
             seen.add(key)
 

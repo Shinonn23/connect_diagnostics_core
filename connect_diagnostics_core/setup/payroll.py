@@ -22,7 +22,7 @@ from frappe.utils import flt, getdate, today
 
 # --- SSO (Social Security) ---------------------------------------------------
 # Company policy caps the SSO contribution base at 17,500 (5% -> 875/month),
-# above the current statutory 15,000/750 ceiling. See docs/domains/thai-payroll.md.
+# above the current statutory 15,000/750 ceiling. See CLAUDE.md payroll notes.
 SSO_CONTRIBUTION_CEILING = 17500
 SSO_RATE = 0.05
 

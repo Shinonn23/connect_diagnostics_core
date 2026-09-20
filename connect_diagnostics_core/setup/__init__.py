@@ -39,9 +39,9 @@ from connect_diagnostics_core.setup import (
     sales_taxes_and_charges,
     stock_entry,
     stock_settings,
+    storage_location,
     supplier,
     uom,
-    workflow_fields,
     workspace,
 )
 from connect_diagnostics_core.setup.print_format import remove_non_app_print_formats
@@ -79,7 +79,6 @@ _MODULES = (
     stock_settings,
     supplier,
     uom,
-    workflow_fields,
 )
 
 
@@ -101,12 +100,11 @@ def apply_all() -> None:
                     validate_fields_for_doctype=False,
                 )
     accounting_dimension.ensure_configuration()
-    item.ensure_configuration()
+    storage_location.ensure_configuration()
     procure_to_pay.ensure_configuration()
     payroll.ensure_configuration()
     customer_onboarding.ensure_configuration()
     sales_requirements.ensure_configuration()
-    quotation.ensure_configuration()
     regulatory.ensure_configuration()
     workspace.ensure_workspace_navigation()
 

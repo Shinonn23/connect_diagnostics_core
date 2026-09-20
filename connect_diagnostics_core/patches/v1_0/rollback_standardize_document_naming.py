@@ -6,10 +6,21 @@
 from __future__ import annotations
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 
 def execute() -> None:
+    import json
+    from pathlib import Path
+
     from connect_diagnostics_core.setup.document_naming import PROPERTY_SETTERS
+
+    fixture_path = Path(__file__).parents[2] / "fixtures" / "property_setter.json"
+    legacy_setters = {
+        (row["doc_type"], row.get("field_name"), row["property"]): row["value"]
+        for row in json.loads(fixture_path.read_text())
+        if row.get("doctype") == "Property Setter"
+    }
 
     for doctype, setters in PROPERTY_SETTERS.items():
         for fieldname, prop, value, _property_type in setters:
@@ -25,11 +36,24 @@ def execute() -> None:
             )
             for property_setter in property_setters:
                 if property_setter.value == value:
-                    frappe.delete_doc(
-                        "Property Setter",
-                        property_setter.name,
-                        ignore_permissions=True,
-                        force=True,
-                    )
+                    key = (doctype, fieldname, prop)
+                    legacy_value = legacy_setters.get(key)
+                    if legacy_value is None:
+                        frappe.delete_doc(
+                            "Property Setter",
+                            property_setter.name,
+                            ignore_permissions=True,
+                            force=True,
+                        )
+                    else:
+                        make_property_setter(
+                            doctype,
+                            fieldname,
+                            prop,
+                            legacy_value,
+                            _property_type,
+                            for_doctype=fieldname is None,
+                            validate_fields_for_doctype=False,
+                        )
         frappe.clear_cache(doctype=doctype)
     frappe.db.commit()

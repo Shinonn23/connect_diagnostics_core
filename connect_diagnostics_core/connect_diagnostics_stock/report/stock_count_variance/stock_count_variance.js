@@ -30,6 +30,12 @@ frappe.query_reports["Stock Count Variance"] = {
 			options: "Warehouse",
 		},
 		{
+			fieldname: "storage_location",
+			label: __("Storage Location"),
+			fieldtype: "Link",
+			options: "Storage Location",
+		},
+		{
 			fieldname: "from_posting_date",
 			label: __("From Posting Date"),
 			fieldtype: "Date",

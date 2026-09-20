@@ -64,29 +64,7 @@ SIDEBAR_ITEM_FIELDS = (
 )
 STALE_PARENT_PAGE = ("Financial Reports", "Accounting")
 RETIRED_SIDEBAR_LINKS = {
-    "Taxes": frozenset(
-        {
-            ("DocType", "Tax Withholding Category"),
-            ("DocType", "Tax Withholding Group"),
-            ("DocType", "Lower Deduction Certificate"),
-            ("Report", "TDS Computation Summary"),
-            ("Report", "Tax Withholding Details"),
-        }
-    ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
-    "Invoicing": frozenset({("DocType", "Accounting Department")}),
-    "HR Setup": frozenset({("DocType", "Accounting Department")}),
-    "Payroll": frozenset({("DocType", "Accounting Department")}),
-    "Stock": frozenset(
-        {
-            ("DocType", "Storage Location"),
-            ("DocType", "Regulation Class"),
-            ("DocType", "Demo Return Inspection"),
-            ("DocType", "Item Request"),
-            ("DocType", "Requestable Item"),
-            ("DocType", "Fulfillment Site"),
-        }
-    ),
     "ERPNext Settings": frozenset(
         {
             ("DocType", "Repost Accounting Ledger Settings"),
@@ -102,27 +80,7 @@ RETIRED_SIDEBAR_LINKS = {
     ),
 }
 RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
-    "Invoicing": frozenset(
-        {
-            ("DocType", "Tax Withholding Category"),
-            ("DocType", "Tax Withholding Group"),
-            ("DocType", "Lower Deduction Certificate"),
-            ("DocType", "Accounting Department"),
-        }
-    ),
     "Selling": frozenset({("DocType", "Print Configuration Template")}),
-    "HR Setup": frozenset({("DocType", "Accounting Department")}),
-    "Payroll": frozenset({("DocType", "Accounting Department")}),
-    "Stock": frozenset(
-        {
-            ("DocType", "Storage Location"),
-            ("DocType", "Regulation Class"),
-            ("DocType", "Demo Return Inspection"),
-            ("DocType", "Item Request"),
-            ("DocType", "Requestable Item"),
-            ("DocType", "Fulfillment Site"),
-        }
-    ),
     "ERPNext Settings": frozenset({("DocType", "Department User Permission")}),
     "Financial Reports": frozenset(
         {
@@ -215,11 +173,11 @@ REGULATORY_WORKSPACE_GROUPS = (
 REGULATORY_LINKS = tuple(link for group in REGULATORY_WORKSPACE_GROUPS for link in group.links)
 
 
-# Stock Count's counting + role-gated submit permissions are a distinct operating
-# loop from day-to-day Stock (see the workspace-navigation skill), so it
-# gets its own independent Workspace instead of crowding the existing Stock
-# Workspace. General stock reports/masters (expiry, goods receipt) stay in the
-# existing Stock Workspace since they are not specific to counting.
+# Stock Count's counting + two-tier approval workflow is a distinct operating loop
+# from day-to-day Stock (see the workspace-navigation rule in CLAUDE.md), so it gets
+# its own independent Workspace instead of crowding the existing Stock Workspace.
+# General stock reports/masters (Storage Location, expiry, goods receipt) stay in
+# the existing Stock Workspace since they are not specific to counting.
 STOCK_COUNT_WORKSPACE = "Stock Counting"
 # Deliberately not "Stock Count": Frappe's route-conflict check slugifies every Page,
 # Workspace, and DocType name and rejects duplicates, and the "Stock Count" DocType
@@ -252,13 +210,15 @@ NAVIGATION_GROUPS = (
         name="Financial Reports",
         links=(),
     ),
-    NavigationGroup(name="Invoicing", links=()),
+    NavigationGroup(
+        name="Invoicing",
+        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
+    ),
     NavigationGroup(
         name="Selling",
         links=(
             NavigationLink("Customer Credit Request", "Customer Credit Request", "DocType"),
             NavigationLink("DKSH Customer", "DKSH Customer", "DocType"),
-            NavigationLink("Delivery Terms Template", "Delivery Terms Template", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Print Log", "Print Log", "DocType"),
         ),
@@ -266,22 +226,11 @@ NAVIGATION_GROUPS = (
     NavigationGroup(
         name="Stock",
         links=(
-            NavigationLink("Dispatch", "Dispatch", "DocType"),
-            NavigationLink(
-                "Borrowed Asset Return Inspection",
-                "Borrowed Asset Return Inspection",
-                "DocType",
-            ),
-            NavigationLink("Borrowed Item Resolution", "Borrowed Item Resolution", "DocType"),
             NavigationLink("DKSH Item", "DKSH Item", "DocType"),
             NavigationLink("Product Group", "Product Group", "DocType"),
+            NavigationLink("Regulation Class", "Regulation Class", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
-            NavigationLink(
-                "ของที่ยังไม่คืน",
-                "Outstanding Borrowed Items",
-                "Report",
-                "Material Request",
-            ),
+            NavigationLink("Storage Location", "Storage Location", "DocType"),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
             NavigationLink("Goods Receipt Report", "Goods Receipt Report", "Report", "Purchase Receipt"),
@@ -295,35 +244,36 @@ NAVIGATION_GROUPS = (
         name="ERPNext Settings",
         links=(NavigationLink("Backup Settings", "Backup Settings", "DocType"),),
     ),
-    NavigationGroup(name="HR Setup", links=()),
-    NavigationGroup(name="Payroll", links=()),
+    NavigationGroup(
+        name="HR Setup",
+        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
+    ),
+    NavigationGroup(
+        name="Payroll",
+        links=(NavigationLink("Accounting Department", "Accounting Department", "DocType"),),
+    ),
 )
 
 SIDEBAR_PLACEMENTS = {
     "Financial Reports": (),
-    "Invoicing": (),
+    "Invoicing": (SidebarPlacement("Accounting Department", after_link_to="Account", icon="building-2"),),
     "Selling": (
         SidebarPlacement("Back Orders", after_link_to="Sales Order", icon="list-todo"),
         SidebarPlacement(
             "Customer Credit Request", after_link_to="Sales Invoice", icon="git-pull-request-arrow"
         ),
         SidebarPlacement("DKSH Customer", after_link_to="Customer", section="Setup"),
-        SidebarPlacement("Delivery Terms Template", after_link_to="DKSH Customer", section="Setup"),
         SidebarPlacement("Print Log", section="Reports"),
     ),
     "Stock": (
-        SidebarPlacement("Dispatch", after_link_to="Material Request", icon="truck"),
-        SidebarPlacement(
-            "Borrowed Asset Return Inspection", after_link_to="Dispatch", icon="clipboard-check"
-        ),
-        SidebarPlacement("Borrowed Item Resolution", after_link_to="Borrowed Asset Return Inspection"),
         SidebarPlacement("Back Orders", after_link_to="Pick List", icon="list-todo"),
         SidebarPlacement("Short Expiry Report", after_link_to="Back Orders", icon="calendar-clock"),
         SidebarPlacement("Goods Receipt Report", after_link_to="Short Expiry Report", icon="package-check"),
-        SidebarPlacement("Outstanding Borrowed Items", section="Reports"),
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
-        SidebarPlacement("Storage Condition", after_link_to="Product Group", section="Setup"),
+        SidebarPlacement("Regulation Class", after_link_to="Product Group", section="Setup"),
+        SidebarPlacement("Storage Condition", after_link_to="Regulation Class", section="Setup"),
+        SidebarPlacement("Storage Location", after_link_to="Storage Condition", section="Setup"),
     ),
     "Buying": (
         SidebarPlacement(
@@ -333,8 +283,10 @@ SIDEBAR_PLACEMENTS = {
         ),
     ),
     "ERPNext Settings": (SidebarPlacement("Backup Settings", section="Other Settings"),),
-    "HR Setup": (),
-    "Payroll": (),
+    "HR Setup": (SidebarPlacement("Accounting Department", after_link_to="Department", section="Setup"),),
+    "Payroll": (
+        SidebarPlacement("Accounting Department", after_link_to="Salary Structure", section="Setup"),
+    ),
 }
 
 
@@ -359,17 +311,6 @@ def ensure_workspace_navigation() -> None:
             sidebar_changed = True
         if sidebar_changed:
             _save_without_export(sidebar)
-    _retire_tds_sidebar_links()
-
-
-def _retire_tds_sidebar_links() -> None:
-    """Remove core TDS links from the ERPNext Taxes sidebar when it exists."""
-    sidebar_name = "Taxes"
-    if not frappe.db.exists("Workspace Sidebar", sidebar_name):
-        return
-    sidebar = frappe.get_doc("Workspace Sidebar", sidebar_name)
-    if _remove_retired_sidebar_links(sidebar, sidebar_name):
-        _save_without_export(sidebar)
 
 
 def ensure_regulatory_workspace() -> None:
@@ -959,7 +900,7 @@ def _ensure_regulatory_sidebar(sidebar: Document) -> bool:
             for index, row in enumerate(rows)
             if index not in managed_indexes and index not in section_rows
         ]
-        desired_rows: list[Document] = [row for row in custom_rows]
+        desired_rows: list[Document] = [cast(Document, row) for row in custom_rows]
         expected_section_ranges: list[range] = []
         for expected_section_index, expected_section in enumerate(expected):
             if expected_section.get("type") != "Section Break":
@@ -1161,7 +1102,7 @@ def _regulatory_sidebar_section_replacements(
                 [
                     cast(Document, frappe._dict(expected[expected_index])),
                     *[cast(Document, frappe._dict(child)) for child in expected_children],
-                    *[child for child in custom_children],
+                    *[cast(Document, child) for child in custom_children],
                 ],
             )
     return replacements

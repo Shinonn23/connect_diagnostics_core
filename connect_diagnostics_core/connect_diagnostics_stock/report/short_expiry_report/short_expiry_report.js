@@ -30,6 +30,12 @@ frappe.query_reports["Short Expiry Report"] = {
 			options: "Warehouse",
 		},
 		{
+			fieldname: "storage_location",
+			label: __("Storage Location"),
+			fieldtype: "Link",
+			options: "Storage Location",
+		},
+		{
 			fieldname: "item",
 			label: __("Item"),
 			fieldtype: "Link",

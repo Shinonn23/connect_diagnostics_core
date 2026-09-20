@@ -12,12 +12,13 @@ from typing import Any
 import frappe
 from frappe.utils import get_datetime, getdate, today
 
-YEAR_TOKEN = "YYYY-BE"
-DATE_TOKEN = "MM-DATE"
-SERIES_PATTERN = f"{YEAR_TOKEN}.{DATE_TOKEN}.####"
+DATE_TOKEN = "MM-DOC"
+SERIES_PATTERN = f"YY-BE.{DATE_TOKEN}.####"
 
-# Retained only for the historical broken-autoname data migration.
-LEGACY_DATE_TOKEN = "MM-DOC"
+# Frappe's braced-autoname regex (BRACED_PARAMS_PATTERN in frappe.model.naming)
+# never matches a "-" inside {...}, so the dot-separated tokens above cannot be
+# reused inside a `format:` autoname string. These hyphen-free aliases exist only
+# for that braced form; the dot-separated series tokens are untouched.
 AUTONAME_YEAR_TOKEN = "YYBE"
 AUTONAME_DATE_TOKEN = "MMDOC"
 
@@ -86,9 +87,6 @@ NAMING_SERIES_PREFIXES: dict[str, tuple[str, ...]] = {
     "Delivery Trip": ("DT",),
     "Landed Cost Voucher": ("LCV",),
     "Material Request": ("MR",),
-    "Dispatch": ("DSP",),
-    "Borrowed Asset Return Inspection": ("BARI",),
-    "Borrowed Item Resolution": ("BIR",),
     "Packing Slip": ("PS",),
     "Pick List": ("PL",),
     "Purchase Receipt": ("PR",),
@@ -212,7 +210,7 @@ def property_setters() -> dict[str, list[tuple[str | None, str, str, str]]]:
             (
                 None,
                 "autoname",
-                f"{prefix}.{SERIES_PATTERN}",
+                f"format:{prefix}{{{AUTONAME_YEAR_TOKEN}}}{{{AUTONAME_DATE_TOKEN}}}{{####}}",
                 "Data",
             )
         )
@@ -220,8 +218,8 @@ def property_setters() -> dict[str, list[tuple[str | None, str, str, str]]]:
 
 
 def parse_document_month(doc: Any, variable: str) -> str | None:
-    """Resolve legacy month tokens used by the historical autoname backfill."""
-    if variable not in (LEGACY_DATE_TOKEN, AUTONAME_DATE_TOKEN):
+    """Return the document month for the custom naming token."""
+    if variable not in (DATE_TOKEN, AUTONAME_DATE_TOKEN):
         return None
     return f"{_document_date(doc).month:02d}"
 

@@ -69,15 +69,6 @@ def sidebar_documents() -> dict[str, FakeDocument]:
             ],
         ),
         "Invoicing": FakeDocument(name="Invoicing", items=[sidebar_link("Account")]),
-        "Taxes": FakeDocument(
-            name="Taxes",
-            items=[
-                sidebar_link("Tax Withholding Category"),
-                sidebar_link("Tax Withholding Group"),
-                sidebar_link("TDS Computation Summary", link_type="Report"),
-                sidebar_link("Tax Category"),
-            ],
-        ),
         "Selling": FakeDocument(
             name="Selling",
             items=[
@@ -93,10 +84,7 @@ def sidebar_documents() -> dict[str, FakeDocument]:
         "Stock": FakeDocument(
             name="Stock",
             items=[
-                sidebar_link("Material Request"),
                 sidebar_link("Pick List"),
-                sidebar_section("Reports"),
-                sidebar_link("Stock Ledger", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -130,12 +118,12 @@ def sidebar_documents() -> dict[str, FakeDocument]:
     }
 
 
-def sidebar_link(link_to: str, *, child: int = 0, link_type: str = "DocType") -> frappe._dict:
+def sidebar_link(link_to: str, *, child: int = 0) -> frappe._dict:
     return frappe._dict(
         {
             "type": "Link",
             "label": link_to,
-            "link_type": link_type,
+            "link_type": "DocType",
             "link_to": link_to,
             "child": child,
         }
@@ -239,32 +227,11 @@ class TestWorkspaceNavigation(UnitTestCase):
                 ("Back Orders", "Sales Order", 1),
                 ("Short Expiry Report", "Item", 1),
                 ("Goods Receipt Report", "Purchase Receipt", 1),
-                ("Outstanding Borrowed Items", "Material Request", 1),
             },
         )
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
         self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
         self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
-        self.assertEqual(sum(row["link_to"] == "Outstanding Borrowed Items" for row in reports), 1)
-
-    def test_tds_links_are_removed_from_the_taxes_sidebar(self) -> None:
-        workspaces = workspace_documents()
-        sidebars = sidebar_documents()
-
-        with (
-            patch.object(
-                workspace.frappe,
-                "get_doc",
-                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
-            ),
-            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
-        ):
-            workspace.ensure_workspace_navigation()
-
-        self.assertEqual(
-            [row["link_to"] for row in sidebars["Taxes"]["items"]],
-            ["Tax Category"],
-        )
 
     def test_sync_is_idempotent_and_preserves_existing_navigation(self) -> None:
         workspaces = workspace_documents()
@@ -1072,12 +1039,10 @@ class TestWorkspaceNavigation(UnitTestCase):
                 sidebar_section(workspace.NAVIGATION_LABEL),
                 sidebar_link("DKSH Item", child=1),
                 sidebar_link("Product Group", child=1),
+                sidebar_link("Regulation Class", child=1),
                 sidebar_link("Storage Condition", child=1),
                 sidebar_link("Back Orders", child=1),
-                sidebar_link("Material Request"),
                 sidebar_link("Pick List"),
-                sidebar_section("Reports"),
-                sidebar_link("Stock Ledger", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -1096,22 +1061,12 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         self.assertEqual(sidebar["items"][pick_list_index + 1]["link_to"], "Back Orders")
         self.assertEqual(sidebar["items"][pick_list_index + 1]["child"], 0)
-        material_request_index = next(
-            index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Material Request"
-        )
-        self.assertEqual(
-            [
-                row["link_to"]
-                for row in sidebar["items"][material_request_index + 1 : material_request_index + 4]
-            ],
-            ["Dispatch", "Borrowed Asset Return Inspection", "Borrowed Item Resolution"],
-        )
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
-            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 4]],
-            ["DKSH Item", "Product Group", "Storage Condition"],
+            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 5]],
+            ["DKSH Item", "Product Group", "Regulation Class", "Storage Condition"],
         )
-        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 4]))
+        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 5]))
 
     def test_existing_workspace_card_links_are_reordered_by_priority(self) -> None:
         workspace_doc = FakeDocument(
@@ -1143,6 +1098,14 @@ class TestWorkspaceNavigation(UnitTestCase):
                         "label": "DKSH Item",
                         "link_type": "DocType",
                         "link_to": "DKSH Item",
+                    }
+                ),
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "label": "Regulation Class",
+                        "link_type": "DocType",
+                        "link_to": "Regulation Class",
                     }
                 ),
                 frappe._dict(
