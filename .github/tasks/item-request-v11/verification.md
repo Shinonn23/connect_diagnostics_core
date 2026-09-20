@@ -5,19 +5,19 @@ from the shared DEV site `local`; they are not clean-install or production evide
 
 ## Observed passing evidence
 
-| Area | Evidence |
-| --- | --- |
-| Approval operation persistence | `test_operations`: 6 unit + 17 integration passed |
-| Physical operation kernel | `test_physical_operations`: 8 passed |
-| Non-Demo Plan initialization | Plan controller 15 passed; Stock integration fixture 2 passed |
-| Demo assessment/approval kernels | Demo supply 7 passed; approval E2E 4 passed in earlier run |
-| Automatic Demo scheduler kernels | `test_automatic_demo`: 6 passed |
-| Outbound contract | `test_outbound`: 12 passed |
-| Shipment native snapshot adapter | `test_shipment_integration`: 4 passed |
-| Return preparation contract | `test_return_execution`: 8 passed |
-| Return integration scaffold | `test_return_execution_integration`: 2 passed; only leg construction/public surface |
-| Return obligation ledger | `test_return_ledger`: 23 passed |
-| Existing-custody exchange adapter | Focused exchange suite reported 13 passed after transfer-only fix |
+| Area                               | Evidence                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------ |
+| Approval operation persistence     | `test_operations`: 6 unit + 17 integration passed                                    |
+| Physical operation kernel          | `test_physical_operations`: 8 passed                                                 |
+| Non-Demo Plan initialization       | Plan controller 15 passed; Stock integration fixture 2 passed                        |
+| Demo assessment/approval kernels   | Demo supply 7 passed; approval E2E 4 passed in earlier run                           |
+| Automatic Demo scheduler kernels   | `test_automatic_demo`: 6 passed                                                      |
+| Outbound contract                  | `test_outbound`: 12 passed                                                           |
+| Shipment native snapshot adapter   | `test_shipment_integration`: 4 passed                                                |
+| Return preparation contract        | `test_return_execution`: 8 passed                                                    |
+| Return integration scaffold        | `test_return_execution_integration`: 2 passed; only leg construction/public surface  |
+| Return obligation ledger           | `test_return_ledger`: 23 passed                                                      |
+| Existing-custody exchange adapter  | Focused exchange suite reported 13 passed after transfer-only fix                    |
 | Provisioning foundation worker run | Stock 40, operation contract 4, voucher protection 56, controller 11 reported passed |
 
 The provisioning foundation result is **not accepted** because subsequent independent review
@@ -66,8 +66,20 @@ pre-commit run --all-files
 
 Also run focused native integration for every state transition, unique-key conflict, retry,
 response-loss replay, rollback, generated-voucher bypass, locked Asset reuse, and protected
-valuation/repost case. Desk verification must exercise every role and server behavior without
-client JavaScript.
+valuation/repost case.
+
+After the automated gates pass, run Computer Use acceptance against the approved DEV target. The
+matrix must exercise every affected role and server behavior without relying on client JavaScript,
+including creator/requester, reviewer/approver, forbidden/self-approval boundaries, generated
+voucher handoffs, blocked/rejected paths, visible downstream side effects, and retry/recovery where
+reachable. Record route, actor, prerequisites, exact click/type actions, state before/after,
+expected result, actual result, PASS/FAIL, and durable failure evidence.
+
+When Computer Use acceptance passes, rewrite the accepted Item Request behavior into the canonical
+final documentation under `docs/<module>/<workflow>/` and the relevant module `behavior.md`.
+Do not carry this task's backlog, P0/P1 register, temporary evidence, implementation checkpoints,
+or unimplemented design into final docs. Independently review the resulting documentation against
+the accepted code and runtime behavior before closing the task.
 
 ## Pause integrity
 
