@@ -14,9 +14,17 @@ policy in [`../AGENTS.md`](../AGENTS.md).
   `setup/*.py` must not generate new Custom Fields or Property Setters. The existing setup
   definitions are migration inventory only until their equivalent Customize Form exports are
   committed and verified.
-- The development Bench is `/home/erp/frappe`, and the development site is
-  `deverp.connectdiagnostics.net`. Run server code with
-  `bench --site … console` and `exec(open(f).read(), globals())`.
+- Shared/remote DEV uses Bench `/home/erp/frappe` and site `deverp.connectdiagnostics.net`.
+- Local development uses Bench `/home/shinon/frappe/connect_diagnostics` with two sites:
+  - `local` — normal interactive development; Desk host `dev.erp.connectdiagnostics.local`.
+  - `local.test` — dedicated automated/UI acceptance test site; Desk host
+    `dev.erp.connectdiagnostics.test`.
+- Run automated tests only against `local.test` by default, for example
+  `bench --site local.test run-tests --app connect_diagnostics_core`. Do not use `local` for test
+  runs unless the task explicitly requires it.
+- Use `local.test` for local Computer Use/browser acceptance as well. `local` is for ordinary
+  development and manual inspection. Run server inspection with `bench --site <site> console` and
+  `exec(open(f).read(), globals())` against the site appropriate to the task.
 - Salary Slips are submitted only through Payroll Entry. Never add a direct Salary Slip submit
   path.
 - The app may ship explicit, reviewed, filtered fixtures for native `Workflow`, `Workflow State`,

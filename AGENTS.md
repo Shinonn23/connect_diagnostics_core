@@ -101,9 +101,20 @@ PLAN
 - Automated tests are the deterministic correctness gate. Computer Use is an end-to-end acceptance
   layer for Desk-visible behavior, workflows, permissions, role handoffs, and visible side effects;
   it never substitutes for automated coverage.
-- Computer Use acceptance runs only after final automated gates pass. Use the ChatGPT desktop
-  Computer Use capability when available. If the current Codex host cannot use Computer Use, the
-  browser tester must mark the gate blocked rather than simulate or claim a pass.
+- Local development has two Frappe sites with distinct responsibilities:
+  - `local` is the normal interactive development site; its Desk host is
+    `dev.erp.connectdiagnostics.local`.
+  - `local.test` is the dedicated test site; its Desk host is
+    `dev.erp.connectdiagnostics.test`.
+  All automated test commands must target `local.test` unless the task explicitly authorizes a
+  different site. Do not run automated tests against `local` by default.
+- Computer Use acceptance runs only after final automated gates pass. For local development,
+  `browser_tester` must use `local.test` through `dev.erp.connectdiagnostics.test`; use
+  `dev.erp.connectdiagnostics.local` only for ordinary interactive development/manual inspection.
+  Repository access may be local or Remote SSH, but browser/Computer Use runs from the ChatGPT
+  desktop host and does not require a GUI browser on the SSH host. If the current Codex host cannot
+  use Computer Use or the test Desk host is unreachable from the desktop, the browser tester must
+  mark the gate blocked rather than simulate or claim a pass.
 - Final documentation runs only after runtime acceptance. `doc_writer` writes current shipped
   behavior under `docs/`; an independent reviewer checks it against accepted code and runtime
   evidence before the task closes.

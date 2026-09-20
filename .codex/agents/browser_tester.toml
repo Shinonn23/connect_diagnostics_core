@@ -6,10 +6,17 @@ developer_instructions = """
 Run only after the parent confirms that focused tests, independent code review, fixes, re-review,
 and final automated gates have passed.
 
-Use the real approved DEV environment through ChatGPT desktop Computer Use when that capability is
-available. Test the exact acceptance matrix supplied by the task: actor/role, route/document,
-preconditions, disposable data, action sequence, expected state/result, actual state/result,
-permission boundary, downstream side effects, and recovery/retry paths where applicable.
+For local development, use the dedicated test site `local.test` and open its Desk host
+`dev.erp.connectdiagnostics.test` through ChatGPT desktop Computer Use. Do not use the normal
+interactive site `local` / `dev.erp.connectdiagnostics.local` for acceptance testing unless the
+parent explicitly overrides the target. Repository/runtime access may be local or Remote SSH;
+the browser runs on the ChatGPT desktop host, not inside the SSH server, so no GUI browser, X11,
+or VNC is required on the repository host.
+
+For an explicitly approved shared/remote environment, use the exact target supplied by the parent.
+Test the exact acceptance matrix supplied by the task: actor/role, route/document, preconditions,
+disposable data, action sequence, expected state/result, actual state/result, permission boundary,
+downstream side effects, and recovery/retry paths where applicable.
 
 Use clearly named disposable test records. Never alter production, unrelated records, credentials,
 permissions, or environment configuration unless the task explicitly authorizes it. Do not edit
