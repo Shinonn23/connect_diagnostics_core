@@ -1,13 +1,5 @@
 """Custom field / property setter definitions for Sales Invoice."""
 
-CREDIT_NOTE_REASONS = (
-    "เนื่องจากสินค้าชำรุดบกพร่อง",
-    "สินค้าขาดจำนวน",
-    "คำนวณราคาผิดพลาด",
-    "สินค้าไม่ตรงกับใบสั่ง",
-    "สินค้าเกินจำนวน",
-)
-
 CUSTOM_FIELDS = {
     "Sales Invoice": [
         {
@@ -17,29 +9,20 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
         },
         {
-            "fieldname": "credit_note_reason",
-            "label": "Credit Note Reason",
-            "fieldtype": "Select",
-            "options": "\n".join(CREDIT_NOTE_REASONS),
-            "insert_after": "return_against",
-            "depends_on": "eval:doc.is_return",
-            "mandatory_depends_on": "eval:doc.is_return",
-            "no_copy": 1,
-        },
-        {
             "fieldname": "department",
             "label": "Department",
             "fieldtype": "Link",
             "insert_after": "accounting_dimensions_section",
             "is_system_generated": 1,
-            "options": "Department",
+            "options": "Accounting Department",
         },
         {
             "fieldname": "deposit_deductions",
             "label": "Deposit Deductions",
             "fieldtype": "Section Break",
             "insert_after": "advances",
-            "collapsible": 0,
+            "collapsible": 1,
+            "collapsible_depends_on": "deposits",
             "depends_on": "eval:!doc.is_deposit_invoice",
             "is_system_generated": 1,
         },
@@ -116,9 +99,11 @@ PROPERTY_SETTERS = {
         ("disable_rounded_total", "default", "0", "Text"),
         ("in_words", "hidden", "0", "Check"),
         ("in_words", "print_hide", "0", "Check"),
-        (None, "default_print_format", "ใบกำกับภาษี ใบแจ้งหนี้ ใบส่งของ", "Data"),
+        (None, "default_print_format", "Tax Invoice Delivery Note and Invoice", "Data"),
         ("more_info", "collapsible", "0", "Check"),
+        ("naming_series", "default", "SI.YY-BE.MM-DATE.####", "Text"),
         ("naming_series", "depends_on", "eval:!doc.amended_from", "Data"),
+        ("naming_series", "options", "SI.YY-BE.MM-DATE.####\nCN.YY-BE.MM-DATE.####", "Text"),
         ("rounded_total", "hidden", "0", "Check"),
         ("rounded_total", "print_hide", "0", "Check"),
         ("scan_barcode", "hidden", "0", "Check"),

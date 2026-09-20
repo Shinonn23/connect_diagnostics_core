@@ -154,7 +154,7 @@ class TestBackOrders(IntegrationTestCase):
         self.assertEqual(partial_row.item_code, TEST_ITEM)
         self.assertEqual(partial_row.item_name, TEST_ITEM)
         self.assertEqual(partial_row.warehouse, TEST_WAREHOUSE)
-        self.assertEqual(partial_row.department, TEST_DEPARTMENT)
+        self.assertEqual(partial_row.accounting_department, TEST_DEPARTMENT)
         self.assertEqual(partial_row.territory, TEST_TERRITORY)
         self.assertEqual(partial_row.qty, 10)
         self.assertEqual(partial_row.delivered_qty, 4)
@@ -192,7 +192,7 @@ class TestBackOrders(IntegrationTestCase):
             "customer": self.partial_order.customer,
             "item": TEST_ITEM,
             "warehouse": TEST_WAREHOUSE,
-            "department": TEST_DEPARTMENT,
+            "accounting_department": TEST_DEPARTMENT,
             "territory": TEST_TERRITORY,
         }
         for fieldname, value in correct_filters.items():
@@ -209,7 +209,7 @@ class TestBackOrders(IntegrationTestCase):
             "customer": "_Test Missing Back Orders Customer",
             "item": "_Test Missing Back Orders Item",
             "warehouse": "_Test Missing Back Orders Warehouse",
-            "department": "_Test Missing Back Orders Department",
+            "accounting_department": "_Test Missing Back Orders Department",
             "territory": "_Test Missing Back Orders Territory",
         }
         for fieldname, value in wrong_filters.items():

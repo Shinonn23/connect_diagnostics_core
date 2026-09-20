@@ -1,13 +1,9 @@
 name: Deploy
 
 on:
-    # DEV is release-driven: several merged pull requests accumulate in one Release
-    # Please pull request, and publishing its `vX.Y.Z` release deploys the whole batch
-    # once. Merging into `developments` therefore does not deploy on its own.
-    release:
-        types: [published]
     push:
         branches:
+            - developments
             - user-acceptance-testing
             - production
     workflow_dispatch:
@@ -26,12 +22,12 @@ permissions:
 
 jobs:
     deploy:
-        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.event_name == 'release' && 'DEV' || github.ref_name == 'user-acceptance-testing' && 'UAT' || github.ref_name == 'production' && 'PROD' || 'UNRESOLVED' }}
+        name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
         runs-on: ubuntu-latest
         timeout-minutes: 120
-        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.event_name == 'release' && 'DEV' || github.ref_name == 'user-acceptance-testing' && 'UAT' || github.ref_name == 'production' && 'PROD' || 'UNRESOLVED' }}
+        environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
         concurrency:
-            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || github.event_name == 'release' && 'DEV' || github.ref_name == 'user-acceptance-testing' && 'UAT' || github.ref_name == 'production' && 'PROD' || 'UNRESOLVED' }}
+            group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || (github.ref_name == 'developments' && 'DEV') || (github.ref_name == 'user-acceptance-testing' && 'UAT') || 'PROD' }}
             cancel-in-progress: false
 
         steps:
@@ -55,7 +51,7 @@ jobs:
             - name: Update Bench
               env:
                   BENCH_PATH: ${{ vars.BENCH_PATH }}
-                  DEPLOY_HOST: ${{ (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || github.event_name == 'release') && '34.143.156.218') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'UAT') || (github.event_name == 'push' && github.ref_name == 'user-acceptance-testing')) && '136.110.8.47') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'PROD') || (github.event_name == 'push' && github.ref_name == 'production')) && '34.87.7.164') || '' }}
+                  DEPLOY_HOST: ${{ (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'DEV') || (github.event_name == 'push' && github.ref_name == 'developments')) && '34.143.156.218') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'UAT') || (github.event_name == 'push' && github.ref_name == 'user-acceptance-testing')) && '136.110.8.47') || (((github.event_name == 'workflow_dispatch' && inputs.target_environment == 'PROD') || (github.event_name == 'push' && github.ref_name == 'production')) && '34.87.7.164') || '' }}
               run: |
                   set -Eeuo pipefail
                   if [[ -z "$DEPLOY_HOST" ]]; then
@@ -148,5 +144,5 @@ jobs:
                   fi
 
                   cd "$bench_path"
-                  "$bench_executable" update --apps connect_diagnostics_core --reset
+                  "$bench_executable" update --reset
                   REMOTE_SCRIPT

@@ -5,34 +5,9 @@ from unittest.mock import call, patch
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import disable_collapsible_sections as patch_module
-from connect_diagnostics_core.setup import (
-    employee,
-    journal_entry_account,
-    purchase_invoice,
-    regulatory_transactions,
-    sales_invoice,
-)
-
-APP_SECTION_MODULES = (
-    employee,
-    journal_entry_account,
-    purchase_invoice,
-    regulatory_transactions,
-    sales_invoice,
-)
 
 
 class TestDisableCollapsibleSectionsPatch(UnitTestCase):
-    def test_app_owned_section_breaks_are_not_collapsible(self) -> None:
-        for module in APP_SECTION_MODULES:
-            for doctype, fields in module.CUSTOM_FIELDS.items():
-                for field in fields:
-                    if field.get("fieldtype") != "Section Break":
-                        continue
-                    with self.subTest(doctype=doctype, fieldname=field["fieldname"]):
-                        self.assertFalse(field.get("collapsible"))
-                        self.assertFalse(field.get("collapsible_depends_on"))
-
     @patch.object(patch_module, "make_property_setter")
     @patch.object(patch_module, "frappe")
     def test_execute_disables_standard_custom_and_property_setter_sections(

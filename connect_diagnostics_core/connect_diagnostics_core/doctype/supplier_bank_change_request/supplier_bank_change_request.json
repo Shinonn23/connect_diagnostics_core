@@ -14,6 +14,7 @@
 		"reason",
 		"supporting_document",
 		"verification_notes",
+		"bank_change_request_state",
 		"verified_by",
 		"verified_on",
 		"approved_by",
@@ -62,6 +63,16 @@
 			"fieldname": "verification_notes",
 			"fieldtype": "Small Text",
 			"label": "Verification Notes"
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "bank_change_request_state",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Bank Change Request State",
+			"no_copy": 1,
+			"options": "Workflow State",
+			"read_only": 1
 		},
 		{
 			"allow_on_submit": 1,

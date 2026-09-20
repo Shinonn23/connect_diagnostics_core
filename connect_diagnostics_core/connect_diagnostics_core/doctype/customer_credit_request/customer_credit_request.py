@@ -19,6 +19,7 @@ class CustomerCreditRequest(Document):
         approved_on: DF.Datetime | None
         company: DF.Link
         credit_applied: DF.Check
+        credit_request_state: DF.Link | None
         customer: DF.Link
         naming_series: DF.Literal["CCR-.#####"]
         payment_terms: DF.Link

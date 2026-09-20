@@ -48,12 +48,6 @@ def workspace_documents() -> dict[str, FakeDocument]:
         links=[],
         content="[]",
     )
-    documents[workspace.STOCK_COUNT_WORKSPACE] = FakeDocument(
-        name=workspace.STOCK_COUNT_WORKSPACE,
-        parent_page="",
-        links=[],
-        content="[]",
-    )
     return documents
 
 
@@ -69,15 +63,6 @@ def sidebar_documents() -> dict[str, FakeDocument]:
             ],
         ),
         "Invoicing": FakeDocument(name="Invoicing", items=[sidebar_link("Account")]),
-        "Taxes": FakeDocument(
-            name="Taxes",
-            items=[
-                sidebar_link("Tax Withholding Category"),
-                sidebar_link("Tax Withholding Group"),
-                sidebar_link("TDS Computation Summary", link_type="Report"),
-                sidebar_link("Tax Category"),
-            ],
-        ),
         "Selling": FakeDocument(
             name="Selling",
             items=[
@@ -93,10 +78,7 @@ def sidebar_documents() -> dict[str, FakeDocument]:
         "Stock": FakeDocument(
             name="Stock",
             items=[
-                sidebar_link("Material Request"),
                 sidebar_link("Pick List"),
-                sidebar_section("Reports"),
-                sidebar_link("Stock Ledger", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -109,33 +91,16 @@ def sidebar_documents() -> dict[str, FakeDocument]:
                 sidebar_link("Subscription Settings", child=1),
             ],
         ),
-        "HR Setup": FakeDocument(
-            name="HR Setup",
-            items=[
-                sidebar_link("Employee"),
-                sidebar_section("Setup"),
-                sidebar_link("Department", child=1),
-            ],
-        ),
-        "Payroll": FakeDocument(
-            name="Payroll",
-            items=[
-                sidebar_link("Payroll Entry"),
-                sidebar_section("Setup"),
-                sidebar_link("Salary Structure", child=1),
-            ],
-        ),
         workspace.REGULATORY_WORKSPACE: FakeDocument(name=workspace.REGULATORY_WORKSPACE, items=[]),
-        workspace.STOCK_COUNT_WORKSPACE: FakeDocument(name=workspace.STOCK_COUNT_WORKSPACE, items=[]),
     }
 
 
-def sidebar_link(link_to: str, *, child: int = 0, link_type: str = "DocType") -> frappe._dict:
+def sidebar_link(link_to: str, *, child: int = 0) -> frappe._dict:
     return frappe._dict(
         {
             "type": "Link",
             "label": link_to,
-            "link_type": link_type,
+            "link_type": "DocType",
             "link_to": link_to,
             "child": child,
         }
@@ -153,13 +118,7 @@ def get_document(
 
 
 def existing_document(doctype: str, name: str) -> bool:
-    """Model the test fixture's current documents without a legacy navigation record.
-
-    The fixture holds no Desktop Icons, so ``ensure_desktop_icons`` is a no-op inside
-    the Workspace/Workspace Sidebar flows; it is covered by its own tests below.
-    """
-    if doctype == "Desktop Icon":
-        return False
+    """Model the test fixture's current documents without a legacy navigation record."""
     return not (
         doctype in {"Workspace", "Workspace Sidebar"} and name == workspace.LEGACY_REGULATORY_WORKSPACE
     )
@@ -237,34 +196,9 @@ class TestWorkspaceNavigation(UnitTestCase):
             {(row["link_to"], row["report_ref_doctype"], row["is_query_report"]) for row in reports},
             {
                 ("Back Orders", "Sales Order", 1),
-                ("Short Expiry Report", "Item", 1),
-                ("Goods Receipt Report", "Purchase Receipt", 1),
-                ("Outstanding Borrowed Items", "Material Request", 1),
             },
         )
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
-        self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
-        self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
-        self.assertEqual(sum(row["link_to"] == "Outstanding Borrowed Items" for row in reports), 1)
-
-    def test_tds_links_are_removed_from_the_taxes_sidebar(self) -> None:
-        workspaces = workspace_documents()
-        sidebars = sidebar_documents()
-
-        with (
-            patch.object(
-                workspace.frappe,
-                "get_doc",
-                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
-            ),
-            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
-        ):
-            workspace.ensure_workspace_navigation()
-
-        self.assertEqual(
-            [row["link_to"] for row in sidebars["Taxes"]["items"]],
-            ["Tax Category"],
-        )
 
     def test_sync_is_idempotent_and_preserves_existing_navigation(self) -> None:
         workspaces = workspace_documents()
@@ -356,144 +290,6 @@ class TestWorkspaceNavigation(UnitTestCase):
         self.assertEqual(settings_item["link_to"], "Medical Device Regulatory Settings")
         self.assertEqual(settings_item["child"], 0)
         self.assertEqual(settings_item["icon"], "settings")
-
-    def test_stock_count_workspace_and_sidebar_are_idempotent(self) -> None:
-        workspaces = workspace_documents()
-        sidebars = sidebar_documents()
-
-        with (
-            patch.object(
-                workspace.frappe,
-                "get_doc",
-                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
-            ),
-            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
-        ):
-            workspace.ensure_stock_count_workspace()
-            workspace.ensure_stock_count_workspace()
-
-        stock_count_workspace = workspaces[workspace.STOCK_COUNT_WORKSPACE]
-        stock_count_sidebar = sidebars[workspace.STOCK_COUNT_WORKSPACE]
-        expected_groups = [group.name for group in workspace.STOCK_COUNT_WORKSPACE_GROUPS]
-
-        self.assertEqual(stock_count_workspace.save_count, 1)
-        self.assertEqual(stock_count_sidebar.save_count, 1)
-        self.assertEqual(stock_count_workspace["icon"], workspace.STOCK_COUNT_ICON)
-        self.assertEqual(
-            [row["label"] for row in stock_count_workspace["links"] if row.get("type") == "Card Break"],
-            expected_groups,
-        )
-        self.assertEqual(
-            [row["link_to"] for row in stock_count_workspace["links"] if row.get("type") == "Link"],
-            ["Stock Count", "Stock Count Variance"],
-        )
-        self.assertEqual(
-            [block["data"]["card_name"] for block in json.loads(stock_count_workspace["content"])],
-            expected_groups,
-        )
-        self.assertEqual(stock_count_sidebar["header_icon"], workspace.STOCK_COUNT_ICON)
-        sidebar_items = stock_count_sidebar["items"]
-        self.assertEqual(sidebar_items[0]["label"], "Home")
-        self.assertEqual(sidebar_items[0]["link_type"], "Workspace")
-        self.assertEqual(
-            [row["link_to"] for row in sidebar_items if row.get("type") == "Link"],
-            [workspace.STOCK_COUNT_WORKSPACE, "Stock Count", "Stock Count Variance"],
-        )
-        self.assertEqual(
-            [row["label"] for row in sidebar_items if row.get("type") == "Section Break"],
-            ["Reports"],
-        )
-        variance_item = sidebar_items[-1]
-        self.assertEqual(variance_item["link_to"], "Stock Count Variance")
-        self.assertEqual(variance_item["child"], 1)
-        self.assertEqual(variance_item["is_query_report"], 1)
-        self.assertEqual(variance_item["report_ref_doctype"], "Stock Count")
-
-    def test_inventory_desktop_icon_folder_groups_the_stock_workspaces(self) -> None:
-        desktop_icon_dir = Path(__file__).parents[2] / "desktop_icon"
-        inventory = json.loads((desktop_icon_dir / "inventory.json").read_text())
-        stock_counting = json.loads((desktop_icon_dir / "stock_counting.json").read_text())
-
-        self.assertEqual(inventory["doctype"], "Desktop Icon")
-        self.assertEqual(inventory["name"], workspace.INVENTORY_DESKTOP_ICON)
-        self.assertEqual(inventory["label"], workspace.INVENTORY_DESKTOP_ICON)
-        self.assertEqual(inventory["icon_type"], "Folder")
-        self.assertEqual(inventory["link_to"], "")
-        self.assertEqual(inventory["parent_icon"], "")
-        self.assertEqual(inventory["app"], "connect_diagnostics_core")
-        self.assertEqual(inventory["standard"], 1)
-        self.assertEqual(inventory["hidden"], 0)
-        self.assertTrue(inventory["modified"])
-
-        self.assertEqual(stock_counting["doctype"], "Desktop Icon")
-        self.assertEqual(stock_counting["name"], workspace.STOCK_COUNT_WORKSPACE)
-        self.assertEqual(stock_counting["label"], workspace.STOCK_COUNT_WORKSPACE)
-        self.assertEqual(stock_counting["icon_type"], "Link")
-        self.assertEqual(stock_counting["link_type"], "Workspace Sidebar")
-        self.assertEqual(stock_counting["link_to"], workspace.STOCK_COUNT_WORKSPACE)
-        self.assertEqual(stock_counting["parent_icon"], workspace.INVENTORY_DESKTOP_ICON)
-        self.assertEqual(stock_counting["icon"], workspace.STOCK_COUNT_ICON)
-        self.assertEqual(stock_counting["app"], "connect_diagnostics_core")
-        self.assertEqual(stock_counting["standard"], 1)
-        self.assertEqual(stock_counting["hidden"], 0)
-        self.assertTrue(stock_counting["modified"])
-        # ERPNext ships the Stock icon at idx 1, so Stock Counting must sort after it.
-        self.assertGreater(stock_counting["idx"], 1)
-
-        for variant in ("subtle", "solid"):
-            self.assertTrue(
-                (
-                    Path(__file__).parents[2]
-                    / "public"
-                    / "icons"
-                    / "desktop_icons"
-                    / variant
-                    / "stock_counting.svg"
-                ).is_file()
-            )
-
-    def test_stock_desktop_icon_is_reparented_under_inventory(self) -> None:
-        stock_icon = FakeDocument(
-            name=workspace.STOCK_DESKTOP_ICON, parent_icon=workspace.ERPNEXT_DESKTOP_ICON
-        )
-
-        with (
-            patch.object(workspace.frappe.db, "exists", return_value=True),
-            patch.object(workspace.frappe.db, "get_value", side_effect=lambda *_: stock_icon["parent_icon"]),
-            patch.object(workspace.frappe, "get_doc", return_value=stock_icon),
-        ):
-            workspace.ensure_desktop_icons()
-            workspace.ensure_desktop_icons()
-
-        self.assertEqual(stock_icon["parent_icon"], workspace.INVENTORY_DESKTOP_ICON)
-        self.assertEqual(stock_icon.save_count, 1)
-
-    def test_stock_desktop_icon_falls_back_to_erpnext_when_inventory_is_missing(self) -> None:
-        stock_icon = FakeDocument(
-            name=workspace.STOCK_DESKTOP_ICON, parent_icon=workspace.INVENTORY_DESKTOP_ICON
-        )
-        present = {workspace.STOCK_DESKTOP_ICON, workspace.ERPNEXT_DESKTOP_ICON}
-
-        with (
-            patch.object(workspace.frappe.db, "exists", side_effect=lambda _doctype, name: name in present),
-            patch.object(workspace.frappe.db, "get_value", side_effect=lambda *_: stock_icon["parent_icon"]),
-            patch.object(workspace.frappe, "get_doc", return_value=stock_icon),
-        ):
-            workspace.ensure_desktop_icons()
-
-        self.assertEqual(stock_icon["parent_icon"], workspace.ERPNEXT_DESKTOP_ICON)
-        self.assertEqual(stock_icon.save_count, 1)
-
-    def test_desktop_icons_are_untouched_without_an_erpnext_stock_icon(self) -> None:
-        with (
-            patch.object(workspace.frappe.db, "exists", return_value=False),
-            patch.object(workspace.frappe.db, "get_value") as get_value,
-            patch.object(workspace.frappe, "get_doc") as get_doc,
-        ):
-            workspace.ensure_desktop_icons()
-
-        get_value.assert_not_called()
-        get_doc.assert_not_called()
 
     def test_regulatory_navigation_preserves_unmanaged_rows(self) -> None:
         workspaces = workspace_documents()
@@ -1072,12 +868,10 @@ class TestWorkspaceNavigation(UnitTestCase):
                 sidebar_section(workspace.NAVIGATION_LABEL),
                 sidebar_link("DKSH Item", child=1),
                 sidebar_link("Product Group", child=1),
+                sidebar_link("Regulation Class", child=1),
                 sidebar_link("Storage Condition", child=1),
                 sidebar_link("Back Orders", child=1),
-                sidebar_link("Material Request"),
                 sidebar_link("Pick List"),
-                sidebar_section("Reports"),
-                sidebar_link("Stock Ledger", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -1096,22 +890,12 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         self.assertEqual(sidebar["items"][pick_list_index + 1]["link_to"], "Back Orders")
         self.assertEqual(sidebar["items"][pick_list_index + 1]["child"], 0)
-        material_request_index = next(
-            index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Material Request"
-        )
-        self.assertEqual(
-            [
-                row["link_to"]
-                for row in sidebar["items"][material_request_index + 1 : material_request_index + 4]
-            ],
-            ["Dispatch", "Borrowed Asset Return Inspection", "Borrowed Item Resolution"],
-        )
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
-            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 4]],
-            ["DKSH Item", "Product Group", "Storage Condition"],
+            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 5]],
+            ["DKSH Item", "Product Group", "Regulation Class", "Storage Condition"],
         )
-        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 4]))
+        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 5]))
 
     def test_existing_workspace_card_links_are_reordered_by_priority(self) -> None:
         workspace_doc = FakeDocument(
@@ -1143,6 +927,14 @@ class TestWorkspaceNavigation(UnitTestCase):
                         "label": "DKSH Item",
                         "link_type": "DocType",
                         "link_to": "DKSH Item",
+                    }
+                ),
+                frappe._dict(
+                    {
+                        "type": "Link",
+                        "label": "Regulation Class",
+                        "link_type": "DocType",
+                        "link_to": "Regulation Class",
                     }
                 ),
                 frappe._dict(

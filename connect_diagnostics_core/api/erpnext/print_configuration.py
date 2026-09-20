@@ -1,35 +1,32 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Build the Jinja print context for one document and one print request.
+"""Resolve the print configuration for one document and one print request.
 
-Values come from two sources, the sidebar winning:
+Values are resolved in four stages, later stages winning:
 
 1. registry defaults from :mod:`connect_diagnostics_core.setup.print_documents`
-2. request-only sidebar overrides carried in ``doc.flags.print_settings``
+2. the ``Print Configuration Template`` rows the Customer links to
+3. the Customer's own scalar fields and per-document override rows
+4. request-only sidebar overrides carried in ``doc.flags.print_settings``
 
-Print options are chosen per print in the print sidebar; there is no stored
-per-Customer print configuration.
+Stage 2 is read live on every print, so editing a Template takes effect for every
+linked Customer immediately. A Customer overrides a document by adding a row for
+it; without a row it follows the Template.
 """
 
 from __future__ import annotations
 
-import base64
-from binascii import Error as Base64Error
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from functools import lru_cache
-from io import BytesIO
 from typing import Any, cast
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
-from PIL import Image
 
-from connect_diagnostics_core.connect_diagnostics_print.print_format.settings import SidebarExtension
-from connect_diagnostics_core.setup import print_action_fields, print_documents
+from connect_diagnostics_core.setup import print_documents
 
 SIDEBAR_PREFIX = "cd_"
 COPY_FIELD_PREFIX = "copy_"
@@ -37,25 +34,50 @@ COPY_FIELD_PREFIX = "copy_"
 
 def get_default_configuration(document: print_documents.PrintDocument) -> dict[str, Any]:
     """Return the registry defaults for one document, before any site data."""
-    values: dict[str, Any] = {
-        "enabled": 1,
-        **document.defaults,
-    }
-    if document.include_standard_sidebar_fields:
-        values.update(
-            {
-                "show_date": 1,
-                "language": print_documents.default_language(document),
-                "show_batch_serial": 1 if document.offers_batch_serial else 0,
-            }
-        )
-        for definition in document.copies:
-            values[_copy_field(definition.key)] = definition.default_count
-            if definition.selection_mode == "checkbox" and not definition.always_include:
-                values[_copy_enabled_field(definition.key)] = 0
-                if definition.custom_label:
-                    values[_copy_label_field(definition.key)] = ""
+    values: dict[str, Any] = dict(print_documents.SCALAR_DEFAULTS)
+    values.update(
+        {
+            "enabled": 1,
+            "show_date": 1,
+            "language": print_documents.default_language(document),
+            "show_batch_serial": 1 if document.offers_batch_serial else 0,
+        }
+    )
+    for definition in document.copies:
+        values[_copy_field(definition.key)] = definition.default_count
     return values
+
+
+@frappe.whitelist()
+def get_sidebar_configuration(
+    doctype: str,
+    docname: str,
+    print_format: str | None = None,
+) -> dict[str, Any]:
+    """Return the sidebar controls and resolved values for one print view."""
+    frappe.has_permission(doctype, "read", docname, throw=True)
+    doc = frappe.get_doc(doctype, docname)
+    document = print_documents.get_document(
+        print_documents.resolve_document_key(doctype, _text(print_format))
+    )
+    if not document or not _customer_from_document(doc):
+        return {"data": {"fields": [], "values": {}, "sources": {}}, "message": ""}
+
+    resolved = resolve_configuration(doc, document.key)
+    if not cint(resolved.values.get("enabled")):
+        return {
+            "data": {"fields": [], "values": {}, "sources": {}},
+            "message": _("{0} is disabled for this Customer.").format(document.label),
+        }
+
+    return {
+        "data": {
+            "fields": _sidebar_fields(document),
+            "values": resolved.values,
+            "sources": resolved.sources,
+        },
+        "message": _("Customer print defaults loaded."),
+    }
 
 
 @dataclass(frozen=True)
@@ -76,132 +98,29 @@ def _require_document(configuration: str) -> print_documents.PrintDocument:
 
 
 def resolve_configuration(doc: Document | Mapping[str, Any], configuration: str) -> Resolution:
-    """Resolve one document's configuration from registry defaults + sidebar."""
+    """Resolve one document's configuration through all four stages."""
     document = _require_document(configuration)
 
     values = get_default_configuration(document)
     sources = dict.fromkeys(values, print_documents.SOURCE_DEFAULT)
 
+    customer = _customer_from_document(doc)
+    template = _customer_template(customer)
+    if template:
+        _apply_row(values, sources, _template_rows(template, document), print_documents.SOURCE_TEMPLATE)
+
+    if customer:
+        _apply_scalars(values, sources, _customer_scalars(customer))
+        _apply_row(values, sources, _customer_rows(customer, document), print_documents.SOURCE_CUSTOMER)
+
     _apply_document_fields(values, sources, doc, document)
     _apply_print_settings(values, sources, doc, document)
-    _validate_copy_settings(document, values)
     return Resolution(values, sources)
 
 
 def get_document_configuration(doc: Document | Mapping[str, Any], configuration: str) -> dict[str, Any]:
     """Return only the resolved values, without their provenance."""
     return resolve_configuration(doc, configuration).values
-
-
-@frappe.whitelist()
-def get_print_options(doctype: str, docname: str, print_format: str | None = None) -> dict[str, Any]:
-    """Return the print sidebar controls and their default values for one print.
-
-    Registry controls and document-scoped defaults. There is no per-Customer
-    configuration: every print is chosen fresh in the sidebar. Quotation's
-    authorized manager choices are read from its Company allow-list. Returns an
-    empty set for an unconfigured doctype/format.
-    """
-    frappe.has_permission(doctype, "read", docname, throw=True)
-    document = print_documents.get_document(
-        print_documents.resolve_document_key(doctype, _text(print_format))
-    )
-    if not document:
-        return {"data": {"fields": [], "values": {}}, "message": ""}
-    values = get_default_configuration(document)
-    extension = document.sidebar_extension(docname) if document.sidebar_extension else None
-    if extension:
-        values.update(extension.values)
-    return {
-        "data": {
-            "fields": _sidebar_fields(document, extension),
-            "values": values,
-            "manager_signatories": list(extension.manager_signatories) if extension else [],
-        },
-        "message": _("Print options loaded."),
-    }
-
-
-def _sidebar_fields(
-    document: print_documents.PrintDocument,
-    extension: SidebarExtension | None = None,
-) -> list[dict[str, Any]]:
-    """Build the sidebar controls for one document from the registry."""
-    fields: list[dict[str, Any]] = []
-    if document.include_standard_sidebar_fields:
-        fields.extend(
-            [
-                {
-                    "fieldname": "customer_print_name",
-                    "label": _("Customer Print Name"),
-                    "fieldtype": "Data",
-                },
-                {
-                    "fieldname": "show_date",
-                    "label": _("Show Date"),
-                    "fieldtype": "Check",
-                },
-            ]
-        )
-    if extension:
-        fields.extend(dict(field) for field in extension.fields)
-    if document.include_standard_sidebar_fields and document.language_selectable:
-        fields.append(
-            {
-                "fieldname": "language",
-                "label": _("Language"),
-                "fieldtype": "Select",
-                "options": "\n".join(print_documents.LANGUAGE_OPTIONS),
-            }
-        )
-    if document.include_standard_sidebar_fields and document.offers_batch_serial:
-        fields.append(
-            {
-                "fieldname": "show_batch_serial",
-                "label": _("Show Batch / Serial Number"),
-                "fieldtype": "Check",
-            }
-        )
-    if document.include_standard_sidebar_fields:
-        for definition in document.copies:
-            if definition.always_include:
-                continue
-            if definition.selection_mode == "checkbox":
-                fields.append(
-                    {
-                        "fieldname": _copy_enabled_field(definition.key),
-                        "label": definition.label_th,
-                        "fieldtype": "Check",
-                        "copy_option": definition.key,
-                    }
-                )
-                if definition.custom_label:
-                    fields.append(
-                        {
-                            "fieldname": _copy_label_field(definition.key),
-                            "label": _("Text"),
-                            "fieldtype": "Data",
-                            "copy_label_for": definition.key,
-                        }
-                    )
-                fields.append(
-                    {
-                        "fieldname": _copy_field(definition.key),
-                        "label": _("Number of copies"),
-                        "fieldtype": "Int",
-                        "copy_count_for": definition.key,
-                        "min": 1,
-                    }
-                )
-                continue
-            fields.append(
-                {
-                    "fieldname": _copy_field(definition.key),
-                    "label": definition.label_th,
-                    "fieldtype": "Int",
-                }
-            )
-    return fields
 
 
 def get_document_print_context(doc: Document | Mapping[str, Any], configuration: str) -> dict[str, Any]:
@@ -232,133 +151,13 @@ def get_document_print_context(doc: Document | Mapping[str, Any], configuration:
         if document.offers_batch_serial
         else False,
         "quotation_signatory_type": _text(values.get("quotation_signatory_type")),
-        "manager_signatory_employee": _text(values.get("manager_signatory_employee")),
         "sales_representative_employee": _text(values.get("sales_representative_employee")),
-        "edit_validity_text": cint(values.get("edit_validity_text")),
-        "validity_text": _text(values.get("validity_text")),
+        "override_quotation_validity_text": cint(values.get("override_quotation_validity_text")),
+        "quotation_custom_validity_text": _text(values.get("quotation_custom_validity_text")),
         "quotation_delivery_terms": _text(values.get("quotation_delivery_terms")),
-        "print_actions": get_print_action_context(doc),
     }
-    if document.key == "quotation":
-        context["signatory_employee"] = (
-            context["manager_signatory_employee"]
-            if context["quotation_signatory_type"] == "Managing Director"
-            else context["sales_representative_employee"]
-        )
-    # Quotation resolves its Employee/E-Signature after this shared context is
-    # built, so its own API registers only after readiness validation. This
-    # prevents an attempted print with a missing signatory from creating an
-    # audit row.
-    if configuration != "quotation":
-        register_print(doc, configuration, context)
+    register_print(doc, configuration, context)
     return context
-
-
-def get_print_action_context(doc: Document | Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    """Resolve stored Employee links for the action slots in a print format.
-
-    Only fields written on the document are considered. In particular, this
-    does not fall back to ``owner`` or ``modified_by`` because those users are
-    not proof that a particular workflow action occurred.
-    """
-    doctype = _text(doc.get("doctype"))
-    actions = print_action_fields.get_actions(doctype)
-    context = {
-        action.key: {
-            "employee": _text(doc.get(action.employee_field)),
-            "name": "",
-            "signature": prepare_signature_for_print(_text(doc.get(action.signature_field))),
-            "acted_at": doc.get(action.datetime_field),
-        }
-        for action in actions
-    }
-    employee_names = sorted(value["employee"] for value in context.values() if value["employee"])
-    if not employee_names:
-        return context
-
-    employees = {
-        _text(row.get("name")): row
-        for row in frappe.get_all(
-            "Employee",
-            filters={"name": ["in", employee_names]},
-            fields=["name", "employee_name"],
-        )
-    }
-    for value in context.values():
-        employee = employees.get(_text(value.get("employee")))
-        if employee:
-            value["name"] = _text(employee.get("employee_name")) or _text(employee.get("name"))
-
-    # The checked-by box represents the person who submitted the document in
-    # the standard transaction flow. Keep an explicitly stored checked action
-    # as a fallback for legacy documents that predate the submit snapshot.
-    submit = context.get("submit")
-    if submit and submit["employee"] and "checked" in context:
-        context["checked"] = dict(submit)
-    return context
-
-
-@lru_cache(maxsize=128)
-def prepare_signature_for_print(signature: str) -> str:
-    """Crop the signature canvas for display without changing the stored snapshot."""
-    if signature.endswith("/assets/frappe/images/signature-placeholder.png"):
-        return ""
-    if not signature.startswith("data:image/") or ";base64," not in signature:
-        return signature
-
-    _header, encoded = signature.split(",", 1)
-    try:
-        raw = base64.b64decode(encoded, validate=True)
-        if not raw or len(raw) > 2 * 1024 * 1024:
-            return signature
-        image = Image.open(BytesIO(raw)).convert("RGBA")
-        image.load()
-    except (Base64Error, OSError, ValueError):
-        return signature
-
-    alpha = image.getchannel("A")
-    thresholded_alpha = alpha.point(lambda value: 255 if value > 8 else 0)
-    content_box = thresholded_alpha.getbbox()
-    if not content_box:
-        return signature
-
-    # The signature widget's baseline is a long horizontal run. Remove only
-    # rows wider than half of the actual content so ordinary pen strokes stay.
-    baseline_rows: set[int] = set()
-    content_width = content_box[2] - content_box[0]
-    for y in range(content_box[1], content_box[3]):
-        longest_run = 0
-        current_run = 0
-        for x in range(content_box[0], content_box[2]):
-            if cast(int, thresholded_alpha.getpixel((x, y))) > 0:
-                current_run += 1
-                longest_run = max(longest_run, current_run)
-            else:
-                current_run = 0
-        if longest_run >= max(100, content_width // 2):
-            baseline_rows.add(y)
-
-    if baseline_rows:
-        for y in baseline_rows:
-            for x in range(image.width):
-                red, green, blue, _alpha = cast(tuple[int, int, int, int], image.getpixel((x, y)))
-                image.putpixel((x, y), (red, green, blue, 0))
-        thresholded_alpha = image.getchannel("A").point(lambda value: 255 if value > 8 else 0)
-        content_box = thresholded_alpha.getbbox()
-        if not content_box:
-            return signature
-
-    # Keep only a small safety margin around the ink. The source signature
-    # widget has already been cropped above; a large margin would make the
-    # signature look small again when it is fitted into the print slot.
-    left = max(content_box[0] - 2, 0)
-    top = max(content_box[1] - 2, 0)
-    right = min(content_box[2] + 2, image.width)
-    bottom = min(content_box[3] + 2, image.height)
-    cropped = image.crop((left, top, right, bottom))
-    output = BytesIO()
-    cropped.save(output, format="PNG", optimize=True)
-    return "data:image/png;base64," + base64.b64encode(output.getvalue()).decode("ascii")
 
 
 def _copy_contexts(
@@ -369,16 +168,7 @@ def _copy_contexts(
     """Expand each named copy into one page-set entry per requested count."""
     copies: list[dict[str, Any]] = []
     for definition in document.copies:
-        if definition.always_include:
-            count = definition.default_count
-        elif definition.selection_mode == "checkbox":
-            count = (
-                max(cint(values.get(_copy_field(definition.key))), 0)
-                if cint(values.get(_copy_enabled_field(definition.key)))
-                else 0
-            )
-        else:
-            count = max(cint(values.get(_copy_field(definition.key))), 0)
+        count = max(cint(values.get(_copy_field(definition.key))), 0)
         label = _text(values.get(_copy_label_field(definition.key))) or definition.label(language)
         for index in range(1, count + 1):
             suffix = f" {index}/{count}" if count > 1 else ""
@@ -402,6 +192,97 @@ def _copy_contexts(
             "count": 1,
         }
     ]
+
+
+def _sidebar_fields(document: print_documents.PrintDocument) -> list[dict[str, Any]]:
+    """Build the sidebar controls for one document from the registry."""
+    fields: list[dict[str, Any]] = [
+        {
+            "fieldname": "customer_print_name",
+            "label": _("Customer Print Name"),
+            "fieldtype": "Data",
+        },
+        {
+            "fieldname": "show_date",
+            "label": _("Show Date"),
+            "fieldtype": "Check",
+        },
+    ]
+    if document.language_selectable:
+        fields.append(
+            {
+                "fieldname": "language",
+                "label": _("Language"),
+                "fieldtype": "Select",
+                "options": "\n".join(print_documents.LANGUAGE_OPTIONS),
+            }
+        )
+    if document.offers_batch_serial:
+        fields.append(
+            {
+                "fieldname": "show_batch_serial",
+                "label": _("Show Batch / Serial Number"),
+                "fieldtype": "Check",
+            }
+        )
+    fields.extend(
+        {
+            "fieldname": _copy_field(definition.key),
+            "label": definition.label_th,
+            "fieldtype": "Int",
+        }
+        for definition in document.copies
+    )
+    if document.key != "quotation":
+        return fields
+
+    return [
+        *fields,
+        {
+            "fieldname": "override_quotation_validity_text",
+            "label": _("Override validity text"),
+            "fieldtype": "Check",
+        },
+        {
+            "fieldname": "quotation_custom_validity_text",
+            "label": _("Custom Validity Text"),
+            "fieldtype": "Small Text",
+        },
+        {
+            "fieldname": "quotation_delivery_terms",
+            "label": _("Delivery Terms"),
+            "fieldtype": "Small Text",
+        },
+    ]
+
+
+def _apply_scalars(
+    values: dict[str, Any],
+    sources: dict[str, str],
+    scalars: Mapping[str, Any],
+) -> None:
+    """Apply Customer scalar fields; a blank text value keeps the default."""
+    for fieldname, value in scalars.items():
+        if value is None or value == "":
+            continue
+        values[fieldname] = value
+        sources[fieldname] = print_documents.SOURCE_CUSTOMER
+
+
+def _apply_row(
+    values: dict[str, Any],
+    sources: dict[str, str],
+    row: Mapping[str, Any] | None,
+    source: str,
+) -> None:
+    """Apply one whole document row and its copies."""
+    if not row:
+        return
+    for fieldname, value in row.items():
+        if value is None:
+            continue
+        values[fieldname] = value
+        sources[fieldname] = source
 
 
 def _apply_document_fields(
@@ -438,23 +319,154 @@ def _apply_print_settings(
 
 
 def _overridable_fields(document: print_documents.PrintDocument) -> tuple[str, ...]:
-    standard_fields: list[str] = []
-    if document.include_standard_sidebar_fields:
-        standard_fields.extend(("customer_print_name", "show_date"))
-        if document.language_selectable:
-            standard_fields.append("language")
-        if document.offers_batch_serial:
-            standard_fields.append("show_batch_serial")
-        for definition in document.copies:
-            if definition.always_include:
-                continue
-            if definition.selection_mode == "checkbox":
-                standard_fields.extend((_copy_enabled_field(definition.key), _copy_field(definition.key)))
-                if definition.custom_label:
-                    standard_fields.append(_copy_label_field(definition.key))
-            else:
-                standard_fields.append(_copy_field(definition.key))
-    return (*standard_fields, *document.extra_fields)
+    return (
+        "customer_print_name",
+        "show_date",
+        *(("language",) if document.language_selectable else ()),
+        *(("show_batch_serial",) if document.offers_batch_serial else ()),
+        *tuple(_copy_field(definition.key) for definition in document.copies),
+        *document.extra_fields,
+    )
+
+
+def get_document_enabled_map(customers: Sequence[str], configuration: str) -> dict[str, bool]:
+    """Return, for many Customers at once, whether one document is enabled.
+
+    Mirrors stages 1-3 of :func:`resolve_configuration` — registry default, then
+    Template row, then Customer row — for the ``enabled`` flag alone, in three
+    queries rather than three per Customer. A report needs the answer for a whole
+    page at once; request-only overrides do not apply outside a print request.
+    """
+    document = _require_document(configuration)
+    names = sorted({name for name in customers if name})
+    if not names:
+        return {}
+
+    enabled = dict.fromkeys(names, bool(cint(get_default_configuration(document)["enabled"])))
+    linked = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Customer",
+            filters={"name": ["in", names]},
+            fields=["name", "print_configuration_template"],
+        ),
+    )
+    templates = {_text(row.get("print_configuration_template")) for row in linked}
+    templates.discard("")
+
+    by_template = _enabled_rows("Print Configuration Template", sorted(templates), document.key)
+    for row in linked:
+        template = _text(row.get("print_configuration_template"))
+        if template in by_template:
+            enabled[cast(str, row["name"])] = by_template[template]
+
+    enabled.update(_enabled_rows("Customer", names, document.key))
+    return enabled
+
+
+def _enabled_rows(parenttype: str, parents: Sequence[str], document_key: str) -> dict[str, bool]:
+    if not parents:
+        return {}
+    rows = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Print Document Configuration",
+            filters={
+                "parenttype": parenttype,
+                "parent": ["in", list(parents)],
+                "parentfield": "print_documents",
+                "document_key": document_key,
+            },
+            fields=["parent", "enabled"],
+        ),
+    )
+    return {cast(str, row["parent"]): bool(cint(row.get("enabled"))) for row in rows}
+
+
+def _template_rows(template: str, document: print_documents.PrintDocument) -> dict[str, Any] | None:
+    return _rows_for_document("Print Configuration Template", template, document)
+
+
+def _customer_rows(customer: str, document: print_documents.PrintDocument) -> dict[str, Any] | None:
+    return _rows_for_document("Customer", customer, document)
+
+
+def _rows_for_document(
+    parenttype: str,
+    parent: str,
+    document: print_documents.PrintDocument,
+) -> dict[str, Any] | None:
+    """Return one parent's settings for a document, or None when it has no row."""
+    settings = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Print Document Configuration",
+            filters={
+                "parenttype": parenttype,
+                "parent": parent,
+                "parentfield": "print_documents",
+                "document_key": document.key,
+            },
+            fields=["enabled", "show_date", "language", "show_batch_serial"],
+            limit=1,
+        ),
+    )
+    if not settings:
+        return None
+
+    row: dict[str, Any] = dict(settings[0])
+    if not document.language_selectable:
+        row.pop("language", None)
+    if not document.offers_batch_serial:
+        row.pop("show_batch_serial", None)
+
+    copies = cast(
+        list[dict[str, Any]],
+        frappe.get_all(
+            "Print Copy Configuration",
+            filters={
+                "parenttype": parenttype,
+                "parent": parent,
+                "parentfield": "print_copies",
+                "document_key": document.key,
+            },
+            fields=["copy_key", "label", "count"],
+        ),
+    )
+    for copy in copies:
+        copy_key = _text(copy.get("copy_key"))
+        if not document.copy(copy_key):
+            continue
+        row[_copy_field(copy_key)] = copy.get("count")
+        row[_copy_label_field(copy_key)] = copy.get("label")
+    return row
+
+
+def _customer_template(customer: str) -> str:
+    if not customer:
+        return ""
+    return _text(frappe.db.get_value("Customer", customer, "print_configuration_template"))
+
+
+def _customer_scalars(customer: str) -> dict[str, Any]:
+    available = _available_customer_fields()
+    if not available:
+        return {}
+    return cast(
+        dict[str, Any],
+        frappe.db.get_value("Customer", customer, available, as_dict=True) or {},
+    )
+
+
+def _available_customer_fields() -> list[str]:
+    """Return the scalar fields the current site schema actually has.
+
+    A deployment can serve print views after the app code updates but before
+    migration creates the Customer fields; restricting the query keeps those
+    requests on registry defaults instead of erroring.
+    """
+    customer_meta = frappe.get_meta("Customer")
+    return [fieldname for fieldname in print_documents.SCALAR_FIELDS if customer_meta.has_field(fieldname)]
 
 
 def _copy_field(copy_key: str) -> str:
@@ -465,24 +477,13 @@ def _copy_label_field(copy_key: str) -> str:
     return f"{COPY_FIELD_PREFIX}{copy_key}_label"
 
 
-def _copy_enabled_field(copy_key: str) -> str:
-    return f"{COPY_FIELD_PREFIX}{copy_key}_enabled"
-
-
-def _validate_copy_settings(
-    document: print_documents.PrintDocument,
-    values: Mapping[str, Any],
-) -> None:
-    """Reject selected copy options without a positive quantity or label."""
-    for definition in document.copies:
-        if definition.selection_mode != "checkbox" or not cint(
-            values.get(_copy_enabled_field(definition.key))
-        ):
-            continue
-        if cint(values.get(_copy_field(definition.key))) < 1:
-            frappe.throw(_("The number of copies for {0} must be at least 1.").format(definition.label_th))
-        if definition.custom_label and not _text(values.get(_copy_label_field(definition.key))):
-            frappe.throw(_("Enter text for the custom copy before printing."))
+def _customer_from_document(doc: Document | Mapping[str, Any]) -> str:
+    doctype = _text(doc.get("doctype"))
+    if doctype == "Quotation":
+        return _text(doc.get("party_name")) if _text(doc.get("quotation_to")) == "Customer" else ""
+    if doctype == "Payment Entry":
+        return _text(doc.get("party")) if _text(doc.get("party_type")) == "Customer" else ""
+    return _text(doc.get("customer"))
 
 
 def _document_customer_name(doc: Document | Mapping[str, Any]) -> str:

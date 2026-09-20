@@ -10,6 +10,8 @@ from pathlib import Path
 
 from frappe.tests import UnitTestCase
 
+from connect_diagnostics_core.setup import regulatory
+
 REGULATORY_DOCTYPE_DIR = Path(__file__).parents[2] / "connect_diagnostics_regulatory" / "doctype"
 EXPECTED_LAYOUT_FIELDS = {
     "medical_device_establishment_registration": {
@@ -76,6 +78,9 @@ EXPECTED_LAYOUT_FIELDS = {
 
 
 class TestRegulatorySetup(UnitTestCase):
+    def test_superseded_workflow_state_uses_a_supported_style(self) -> None:
+        self.assertEqual(regulatory.WORKFLOW_STATES["Registration Superseded"], "Inverse")
+
     def test_regulatory_forms_have_complete_grouped_layouts(self) -> None:
         for doctype_dir, expected_fields in EXPECTED_LAYOUT_FIELDS.items():
             with self.subTest(doctype=doctype_dir):

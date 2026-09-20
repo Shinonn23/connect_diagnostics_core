@@ -25,7 +25,6 @@ an audit trail rather than accidental:
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from typing import Any, Literal
 
@@ -63,43 +62,22 @@ def download_pdf(
     """
     from frappe.utils.print_format import download_pdf as frappe_download_pdf
 
-    flags = getattr(frappe.local, "flags", None)
-    previous_pdf_flag = flags.get("cd_pdf_request") if flags else None
-    if flags is not None:
-        flags.cd_pdf_request = True
-    try:
-        result = frappe_download_pdf(
-            doctype,
-            name,
-            format=format,
-            doc=doc,
-            no_letterhead=no_letterhead,
-            language=language,
-            letterhead=letterhead,
-            pdf_generator=pdf_generator,
-        )
-    finally:
-        if flags is not None:
-            flags.cd_pdf_request = previous_pdf_flag
+    from connect_diagnostics_core.api.erpnext.source_purchase_order import append_source_copy
 
-    # Audit enrichment is deliberately fail-open too. PDF generation has
-    # already succeeded at this point; an older schema or transient database
-    # failure must not turn a successful download into a 500 merely because
-    # optional audit fields cannot be read.
-    try:
-        audit = _request_audit_values(doctype, name)
-    except Exception:
-        frappe.log_error(
-            title="Print Log audit values not available",
-            message=f"reference_doctype={doctype} reference_name={name}\n\n{frappe.get_traceback()}",
-        )
-        audit = {}
-    record_kwargs: dict[str, Any] = {
-        "print_format": format,
-        "language": language,
-        **audit,
-    }
-    record_print(doctype, name, CHANNEL_PDF, **record_kwargs)
+    result = frappe_download_pdf(
+        doctype,
+        name,
+        format=format,
+        doc=doc,
+        no_letterhead=no_letterhead,
+        language=language,
+        letterhead=letterhead,
+        pdf_generator=pdf_generator,
+    )
+    # The only override point for the PDF channel, so the source Purchase Order
+    # copy a Customer requires is joined on here rather than in its own wrapper.
+    append_source_copy(doctype, name, print_format=format)
+    record_print(doctype, name, CHANNEL_PDF, print_format=format, language=language)
     return result
 
 
@@ -118,17 +96,6 @@ def register_print(
         return ""
 
     copies = list(context.get("copies") or []) if context else []
-    signatory = context.get("signatory") if context else None
-    audit: dict[str, Any] = {}
-    if context and "show_date" in context:
-        audit["show_date"] = context.get("show_date")
-    if context and context.get("quotation_signatory_type"):
-        audit["signatory_type"] = context.get("quotation_signatory_type")
-        audit["signatory_employee"] = (
-            _text(signatory.get("employee"))
-            if isinstance(signatory, Mapping)
-            else _text(context.get("signatory_employee"))
-        )
     record_print(
         _text(doc.get("doctype")),
         _text(doc.get("name")),
@@ -139,7 +106,6 @@ def register_print(
         copy_labels=", ".join(_text(copy.get("label")) for copy in copies),
         customer=_customer_from_document(doc),
         configuration=configuration,
-        **audit,
     )
     return ""
 
@@ -154,9 +120,6 @@ def record_print(
     copy_labels: str = "",
     customer: str = "",
     configuration: str = "",
-    show_date: int | bool | None = None,
-    signatory_type: str | None = None,
-    signatory_employee: str | None = None,
 ) -> None:
     """Insert one Print Log row, never letting a failure block printing."""
     if not reference_doctype or not reference_name:
@@ -164,23 +127,18 @@ def record_print(
 
     try:
         log = frappe.new_doc("Print Log")
-        values: dict[str, Any] = {
-            "reference_doctype": reference_doctype,
-            "reference_name": reference_name,
-            "customer": customer or _customer_for_reference(reference_doctype, reference_name),
-            "print_format": _text(print_format) or None,
-            "channel": channel,
-            "language": _text(language),
-            "copies": max(cint(copies), 1),
-            "copy_labels": copy_labels,
-        }
-        if show_date is not None:
-            values["show_date"] = cint(show_date)
-        if signatory_type is not None:
-            values["signatory_type"] = _text(signatory_type)
-        if signatory_employee is not None:
-            values["signatory_employee"] = _text(signatory_employee) or None
-        log.update(values)
+        log.update(
+            {
+                "reference_doctype": reference_doctype,
+                "reference_name": reference_name,
+                "customer": customer or _customer_for_reference(reference_doctype, reference_name),
+                "print_format": _text(print_format) or None,
+                "channel": channel,
+                "language": _text(language),
+                "copies": max(cint(copies), 1),
+                "copy_labels": copy_labels,
+            }
+        )
         log.insert(ignore_permissions=True)
         frappe.db.commit()
     except Exception:
@@ -197,9 +155,6 @@ def record_print(
 
 def _is_triggered_print() -> bool:
     """Return True only for the Print button, not for a preview render."""
-    flags = getattr(frappe.local, "flags", None)
-    if flags and flags.get("cd_pdf_request"):
-        return False
     form_dict = getattr(frappe.local, "form_dict", None)
     if not form_dict:
         return False
@@ -237,49 +192,6 @@ def _customer_from_document(doc: Document | Mapping[str, Any]) -> str:
         if source_doctype == doctype:
             return _text(doc.get(fieldname)) if _text(doc.get(discriminator)) == expected else ""
     return _text(doc.get("customer"))
-
-
-def _request_audit_values(doctype: str, name: str) -> dict[str, Any]:
-    """Extract request-only audit values for the PDF channel."""
-    form_dict = getattr(frappe.local, "form_dict", None)
-    settings = _request_print_settings(form_dict)
-    values: dict[str, Any] = {}
-    if "cd_show_date" in settings:
-        values["show_date"] = settings["cd_show_date"]
-    if doctype != "Quotation":
-        return values
-
-    quotation_values = (
-        frappe.db.get_value(
-            "Quotation", name, ["quotation_signatory_type", "sales_representative_employee"], as_dict=True
-        )
-        or {}
-    )
-    signatory_type = _text(settings.get("cd_quotation_signatory_type")) or _text(
-        quotation_values.get("quotation_signatory_type")
-    )
-    if signatory_type:
-        values["signatory_type"] = signatory_type
-    employee = _text(settings.get("cd_manager_signatory_employee"))
-    if signatory_type != "Managing Director":
-        employee = _text(quotation_values.get("sales_representative_employee"))
-    values["signatory_employee"] = employee
-    return values
-
-
-def _request_print_settings(form_dict: Mapping[str, Any] | None) -> Mapping[str, Any]:
-    if not form_dict:
-        return {}
-    raw_settings = form_dict.get("settings")
-    if isinstance(raw_settings, Mapping):
-        return raw_settings
-    if not raw_settings:
-        return {}
-    try:
-        parsed = json.loads(str(raw_settings))
-    except (TypeError, ValueError):
-        return {}
-    return parsed if isinstance(parsed, Mapping) else {}
 
 
 def _text(value: Any) -> str:

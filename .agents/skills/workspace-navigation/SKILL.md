@@ -28,9 +28,6 @@ $workspace-navigation <Module, DocType, or feature>
 4. Search hooks, patches, API callers, client scripts, templates, and jobs for
    the feature so navigation does not duplicate an existing entry point.
 
-Read [`references/desktop-icons.md`](references/desktop-icons.md) when the change adds,
-regroups, or edits a Desk Desktop Icon.
-
 ## Placement Rules
 
 - For an existing ERPNext domain, retain the Connect Diagnostics Workspace card
@@ -50,18 +47,10 @@ regroups, or edits a Desk Desktop Icon.
   business labels.
 - Add a standard top-level Desktop Icon linked to the Workspace Sidebar so the
   independent module is visible in the Desk module grid.
-- Ship app-owned Desktop Icons as `connect_diagnostics_core/desktop_icon/<scrub(label)>.json`
-  with matching `public/icons/desktop_icons/{subtle,solid}/<scrub(label)>.svg` artwork.
-  Never create them in setup code: migrate's orphan cleanup deletes any standard icon
-  this app has no file for. Use an `icon_type: "Folder"` icon, with children carrying
-  `parent_icon`, when two or more workspaces belong to one Desk group; a folder with
-  no visible children is not rendered at all.
 - Child-table and technical DocTypes with no standalone Desk route do not receive
   navigation. State the reason in the change proposal and PR.
-- Do not modify ERPNext Workspace, Workspace Sidebar, or Desktop Icon source files.
-  Keep site customization idempotent in the app's setup code, and save a document owned
-  by another app through `_save_without_export` so the change is not written back into
-  that app's source.
+- Do not modify ERPNext Workspace or Workspace Sidebar source files. Keep site
+  customization idempotent in the app's setup code.
 
 ## Implementation and Verification
 

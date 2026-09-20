@@ -130,8 +130,6 @@ def validate_item_classification(item: Document) -> None:
     if not is_medical_device:
         item.update(
             {
-                "medical_device_category": "",
-                "regulatory_owner": "",
                 "current_medical_device_registration": "",
                 "current_newcode": "",
                 "current_registration_expiry": "",
@@ -156,7 +154,7 @@ def get_regulatory_owner(item: Document) -> str | None:
 def inject_item_dashboard_connections(data: dict[str, Any]) -> dict[str, Any]:
     """Add Product Registration to the Item form Connections without changing source data."""
     non_standard = data.setdefault("non_standard_fieldnames", {})
-    non_standard[PRODUCT_REGISTRATION] = "item_code"
+    non_standard[PRODUCT_REGISTRATION] = "current_medical_device_registration"
     transactions = data.setdefault("transactions", [])
     for group in transactions:
         if group.get("label") == _("Regulatory"):

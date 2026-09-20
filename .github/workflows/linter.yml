@@ -52,23 +52,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Always runs and always reports: `Vulnerable Dependency Check` is a required
-      # status check, so gating the job itself would leave the pull request pending.
-      - name: Detect change scope
-        id: scope
-        uses: ./.github/actions/change-scope
-
       - uses: actions/setup-python@v5
-        if: steps.scope.outputs.run_full == 'true'
         with:
           python-version: "3.14"
 
+      - uses: actions/checkout@v4
+
       - name: Cache pip
-        if: steps.scope.outputs.run_full == 'true'
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
@@ -78,7 +68,6 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install and run pip-audit
-        if: steps.scope.outputs.run_full == 'true'
         run: |
           pip install pip-audit
           cd ${GITHUB_WORKSPACE}

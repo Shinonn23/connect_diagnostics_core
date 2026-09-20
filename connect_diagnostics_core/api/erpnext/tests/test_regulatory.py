@@ -4,11 +4,9 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import cast
 from unittest.mock import patch
 
 import frappe
-from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import regulatory
@@ -21,30 +19,6 @@ class TestRegulatoryResolver(UnitTestCase):
     def test_normalize_registration_number_keeps_legacy_letters_and_digits(self) -> None:
         self.assertEqual(regulatory.normalize_registration_number(" 68-2-2-1-0006254 "), "682210006254")
         self.assertEqual(regulatory.normalize_registration_number("ab / 01-c"), "AB01C")
-
-    def test_clears_regulatory_fields_when_not_medical_device(self) -> None:
-        item = frappe._dict(
-            {
-                "name": "",
-                "is_medical_device": 0,
-                "regulatory_registration_requirement": "Not Applicable",
-                "medical_device_category": "IVD",
-                "regulatory_owner": "user@example.com",
-                "current_medical_device_registration": "68-2-2-1-0006254",
-                "current_newcode": "NEW-1",
-                "current_registration_expiry": "2029-12-31",
-                "current_registration_status": "Active",
-            }
-        )
-
-        regulatory.validate_item_classification(cast(Document, item))
-
-        self.assertEqual(item.medical_device_category, "")
-        self.assertEqual(item.regulatory_owner, "")
-        self.assertEqual(item.current_medical_device_registration, "")
-        self.assertEqual(item.current_newcode, "")
-        self.assertEqual(item.current_registration_expiry, "")
-        self.assertEqual(item.current_registration_status, "")
 
     def test_resolves_single_effective_mapping(self) -> None:
         mapping = {
@@ -86,7 +60,7 @@ class TestRegulatoryResolver(UnitTestCase):
 
         self.assertEqual(
             dashboard["non_standard_fieldnames"],
-            {"Medical Device Product Registration": "item_code"},
+            {"Medical Device Product Registration": "current_medical_device_registration"},
         )
         self.assertEqual(
             dashboard["transactions"],
