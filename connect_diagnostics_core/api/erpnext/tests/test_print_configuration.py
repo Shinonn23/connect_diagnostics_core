@@ -221,7 +221,7 @@ class TestPrintActionContext(UnitTestCase):
             {
                 "name": "EMP-0001",
                 "employee_name": "Approved Employee",
-                "quotation_signature": "data:image/png;base64,signature",
+                "approval_signature": "data:image/png;base64,signature",
             }
         ],
     )
@@ -252,7 +252,7 @@ class TestPrintActionContext(UnitTestCase):
             {
                 "name": "EMP-0001",
                 "employee_name": "Approved Employee",
-                "quotation_signature": "data:image/png;base64,current-signature",
+                "approval_signature": "data:image/png;base64,current-signature",
             }
         ],
     )

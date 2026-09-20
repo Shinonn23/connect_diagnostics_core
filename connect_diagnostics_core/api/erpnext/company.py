@@ -166,7 +166,7 @@ def get_quotation_authorized_signatories(company: str) -> list[dict[str, Any]]:
     employees = frappe.get_all(
         "Employee",
         filters={"name": ["in", employee_names]},
-        fields=["name", "employee_name", "company", "status", "user_id", "quotation_signature"],
+        fields=["name", "employee_name", "company", "status", "user_id", "approval_signature"],
         ignore_permissions=True,
     )
     by_name = {_text(row.get("name")): row for row in employees if _text(row.get("name"))}
@@ -203,7 +203,7 @@ def get_quotation_authorized_signatories(company: str) -> list[dict[str, Any]]:
             or _text(row.get("user_id")) not in role_users
         ):
             continue
-        signature = _text(row.get("quotation_signature"))
+        signature = _text(row.get("approval_signature"))
         result.append(
             {
                 "employee": employee_name,

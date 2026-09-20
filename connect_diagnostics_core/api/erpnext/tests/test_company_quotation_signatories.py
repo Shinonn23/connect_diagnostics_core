@@ -69,7 +69,7 @@ class TestCompanyAuthorizedSignatories(UnitTestCase):
                 "company": "COMP-0001",
                 "status": "Active",
                 "user_id": "manager@example.com",
-                "quotation_signature": "data:image/png;base64,signature",
+                "approval_signature": "data:image/png;base64,signature",
             },
             {
                 "name": "EMP-0002",
@@ -77,7 +77,7 @@ class TestCompanyAuthorizedSignatories(UnitTestCase):
                 "company": "COMP-0001",
                 "status": "Active",
                 "user_id": "second@example.com",
-                "quotation_signature": "",
+                "approval_signature": "",
             },
         ]
 

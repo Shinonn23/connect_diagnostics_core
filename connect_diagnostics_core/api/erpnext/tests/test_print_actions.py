@@ -28,7 +28,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         return_value={
             "name": "EMP-0001",
             "employee_name": "Submitter",
-            "quotation_signature": "data:image/png;base64,signature",
+            "approval_signature": "data:image/png;base64,signature",
         },
     )
     def test_captures_employee_time_and_signature_snapshot(
@@ -48,7 +48,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         get_value.assert_called_once_with(
             "Employee",
             {"user_id": print_actions.frappe.session.user},
-            ["name", "employee_name", "quotation_signature"],
+            ["name", "employee_name", "approval_signature"],
             as_dict=True,
         )
 
@@ -57,7 +57,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
     @patch.object(
         print_actions.frappe.db,
         "get_value",
-        return_value={"name": "EMP-0001", "employee_name": "No Signature", "quotation_signature": ""},
+        return_value={"name": "EMP-0001", "employee_name": "No Signature", "approval_signature": ""},
     )
     def test_missing_signature_warns_but_still_captures_employee_and_time(
         self,
@@ -97,7 +97,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         return_value={
             "name": "EMP-0001",
             "employee_name": "Quotation Signatory",
-            "quotation_signature": "data:image/png;base64,signature",
+            "approval_signature": "data:image/png;base64,signature",
         },
     )
     def test_signatory_and_signed_tasks_use_the_same_snapshot_writer(
@@ -126,7 +126,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         return_value={
             "name": "EMP-0001",
             "employee_name": "Warehouse Employee",
-            "quotation_signature": "data:image/png;base64,signature",
+            "approval_signature": "data:image/png;base64,signature",
         },
     )
     def test_stock_entry_uses_submit_snapshot_writer(
@@ -148,7 +148,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         return_value={
             "name": "EMP-0001",
             "employee_name": "C-Level Approver",
-            "quotation_signature": "data:image/png;base64,signature",
+            "approval_signature": "data:image/png;base64,signature",
         },
     )
     def test_material_request_and_capitalization_use_authorized_snapshot_writer(

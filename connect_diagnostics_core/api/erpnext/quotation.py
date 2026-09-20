@@ -193,7 +193,7 @@ def _signatory_details(
         details["reason"] = _("The selected signatory Employee could not be found.")
     elif not details.get("signature"):
         details["ready"] = False
-        details["reason"] = _("The selected signatory has no Quotation E-Signature configured.")
+        details["reason"] = _("The selected signatory has no Approval Signature configured.")
     else:
         details["reason"] = ""
 
@@ -262,11 +262,11 @@ def _employee_details(employee: str) -> dict[str, Any]:
         frappe.db.get_value(
             "Employee",
             employee,
-            ["employee_name", "cell_number", "quotation_signature"],
+            ["employee_name", "cell_number", "approval_signature"],
             as_dict=True,
         ),
     )
-    signature = prepare_signature_for_print(_text(details.get("quotation_signature"))) if details else ""
+    signature = prepare_signature_for_print(_text(details.get("approval_signature"))) if details else ""
     return {
         "employee": employee,
         "name": _text(details.get("employee_name")) if details else "",

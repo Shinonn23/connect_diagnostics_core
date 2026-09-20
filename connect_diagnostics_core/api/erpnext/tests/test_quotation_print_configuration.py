@@ -15,7 +15,7 @@ from connect_diagnostics_core.api.erpnext import quotation
 SALES_REPRESENTATIVE = {
     "employee_name": "ภานุพงษ์ ตั้งพรประเสริฐ",
     "cell_number": "090-660-5666",
-    "quotation_signature": "data:image/png;base64,sales-signature",
+    "approval_signature": "data:image/png;base64,sales-signature",
 }
 
 
@@ -70,7 +70,7 @@ class TestQuotationPrintConfiguration(UnitTestCase):
         mocked_get_value.assert_called_with(
             "Employee",
             "EMP-0001",
-            ["employee_name", "cell_number", "quotation_signature"],
+            ["employee_name", "cell_number", "approval_signature"],
             as_dict=True,
         )
 
@@ -173,7 +173,7 @@ class TestQuotationPrintConfiguration(UnitTestCase):
         return_value={
             "employee_name": "Managing Director",
             "cell_number": "",
-            "quotation_signature": "data:image/png;base64,manager-signature",
+            "approval_signature": "data:image/png;base64,manager-signature",
         },
     )
     @patch.object(quotation, "get_document_print_context")

@@ -19,7 +19,13 @@ NATIONAL_ID_FIELDS = {
     "national_id_section": "Section Break",
     "national_id": "Data",
     "national_id_display": "Data",
+    "national_id_column_break": "Column Break",
     "social_security_id": "Data",
+}
+
+APPROVAL_SIGNATURE_FIELDS = {
+    "approval_signature_section": "Section Break",
+    "approval_signature": "Signature",
 }
 
 
@@ -54,10 +60,11 @@ class TestEmployeeCustomFields(UnitTestCase):
         self.assertEqual(self._field("provident_fund_rate")["insert_after"], "social_security_eligible")
 
     def test_national_id_insert_after_chain_is_contiguous(self) -> None:
-        self.assertEqual(self._field("national_id_section")["insert_after"], "place_of_issue")
+        self.assertEqual(self._field("national_id_section")["insert_after"], "basic_details_tab")
         self.assertEqual(self._field("national_id")["insert_after"], "national_id_section")
         self.assertEqual(self._field("national_id_display")["insert_after"], "national_id")
-        self.assertEqual(self._field("social_security_id")["insert_after"], "national_id_display")
+        self.assertEqual(self._field("national_id_column_break")["insert_after"], "national_id_display")
+        self.assertEqual(self._field("social_security_id")["insert_after"], "national_id_column_break")
 
     def test_national_id_display_is_read_only(self) -> None:
         self.assertEqual(self._field("national_id_display").get("read_only"), 1)
@@ -68,12 +75,17 @@ class TestEmployeeCustomFields(UnitTestCase):
         self.assertNotIn("default", field)
         self.assertTrue(field.get("description"))
 
-    def test_quotation_signature_is_a_signature_without_a_default(self) -> None:
-        field = self._field("quotation_signature")
+    def test_approval_signature_has_its_own_personal_details_section(self) -> None:
+        for fieldname, fieldtype in APPROVAL_SIGNATURE_FIELDS.items():
+            with self.subTest(fieldname=fieldname):
+                self.assertEqual(self._field(fieldname)["fieldtype"], fieldtype)
 
-        self.assertEqual(field["fieldtype"], "Signature")
-        self.assertNotIn("default", field)
-        self.assertTrue(field.get("description"))
+        section = self._field("approval_signature_section")
+        signature = self._field("approval_signature")
+        self.assertEqual(section["insert_after"], "personal_details")
+        self.assertEqual(signature["insert_after"], "approval_signature_section")
+        self.assertNotIn("default", signature)
+        self.assertTrue(signature.get("description"))
 
     def test_no_property_setter_makes_thai_payroll_fields_required(self) -> None:
         required = {
@@ -84,6 +96,7 @@ class TestEmployeeCustomFields(UnitTestCase):
 
         self.assertTrue(THAI_PAYROLL_FIELDS.keys().isdisjoint(required))
         self.assertTrue(NATIONAL_ID_FIELDS.keys().isdisjoint(required))
+        self.assertTrue(APPROVAL_SIGNATURE_FIELDS.keys().isdisjoint(required))
 
     def test_signature_field_is_configured_without_duplicating_the_standard_field(self) -> None:
         fieldnames = [field["fieldname"] for field in self._employee_fields()]

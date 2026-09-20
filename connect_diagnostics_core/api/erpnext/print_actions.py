@@ -39,7 +39,7 @@ def capture_print_action(doc: Document, action_key: str) -> None:
         frappe.db.get_value(
             "Employee",
             {"user_id": frappe.session.user},
-            ["name", "employee_name", "quotation_signature"],
+            ["name", "employee_name", "approval_signature"],
             as_dict=True,
         ),
     )
@@ -53,7 +53,7 @@ def capture_print_action(doc: Document, action_key: str) -> None:
         )
         return
 
-    signature = _text(employee.get("quotation_signature"))
+    signature = _text(employee.get("approval_signature"))
     doc.set(action.employee_field, _text(employee.get("name")))
     doc.set(action.datetime_field, now_datetime())
     doc.set(action.signature_field, signature)
