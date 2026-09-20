@@ -18,7 +18,6 @@ class SupplierBankChangeRequest(Document):
         approved_by: DF.Link | None
         approved_on: DF.Datetime | None
         bank_account: DF.Link
-        bank_change_request_state: DF.Link | None
         naming_series: DF.Literal["SBCR-.#####"]
         reason: DF.SmallText
         supplier: DF.Link

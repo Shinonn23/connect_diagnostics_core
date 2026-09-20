@@ -1,0 +1,246 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"autoname": "naming_series:",
+	"creation": "2026-08-12 09:20:00.000000",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"naming_series",
+		"count_type",
+		"company",
+		"column_break_main",
+		"posting_date",
+		"posting_time",
+		"scope_section",
+		"warehouses",
+		"selection_method",
+		"sample_count",
+		"sample_percentage",
+		"column_break_scope",
+		"holding_warehouse",
+		"remarks",
+		"items_section",
+		"items",
+		"result_section",
+		"total_variance_qty",
+		"column_break_result",
+		"adjustments",
+		"amended_from"
+	],
+	"fields": [
+		{
+			"default": "STK-CNT-.YYYY.-",
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"hidden": 1,
+			"label": "Series",
+			"options": "STK-CNT-.YYYY.-",
+			"read_only": 1
+		},
+		{
+			"fieldname": "count_type",
+			"fieldtype": "Select",
+			"in_list_view": 1,
+			"in_standard_filter": 1,
+			"label": "Count Type",
+			"options": "Cycle Count (Monthly)\nYearly Count",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "column_break_main",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "Today",
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"label": "Posting Date",
+			"reqd": 1
+		},
+		{
+			"default": "Now",
+			"fieldname": "posting_time",
+			"fieldtype": "Time",
+			"label": "Posting Time",
+			"reqd": 1
+		},
+		{
+			"fieldname": "scope_section",
+			"fieldtype": "Section Break",
+			"label": "Count Scope"
+		},
+		{
+			"fieldname": "warehouses",
+			"fieldtype": "Table MultiSelect",
+			"in_list_view": 1,
+			"label": "Warehouses",
+			"options": "Stock Count Warehouse",
+			"reqd": 1
+		},
+		{
+			"default": "Manual",
+			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)'",
+			"description": "How to pick items for a monthly cycle count. Yearly counts always cover every selected warehouse.",
+			"fieldname": "selection_method",
+			"fieldtype": "Select",
+			"label": "Selection Method",
+			"options": "Manual\nRandom by Count\nRandom by Percentage\nRandom by Warehouse"
+		},
+		{
+			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)' && doc.selection_method=='Random by Count'",
+			"fieldname": "sample_count",
+			"fieldtype": "Int",
+			"label": "Sample Count",
+			"non_negative": 1
+		},
+		{
+			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)' && doc.selection_method=='Random by Percentage'",
+			"fieldname": "sample_percentage",
+			"fieldtype": "Percent",
+			"label": "Sample Percentage"
+		},
+		{
+			"fieldname": "column_break_scope",
+			"fieldtype": "Column Break"
+		},
+		{
+			"depends_on": "eval:doc.count_type=='Cycle Count (Monthly)'",
+			"description": "Quarantine warehouse short or mismatched items are transferred into. Defaults from Stock Settings.",
+			"fieldname": "holding_warehouse",
+			"fieldtype": "Link",
+			"label": "Holding Warehouse",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname": "remarks",
+			"fieldtype": "Small Text",
+			"label": "Remarks"
+		},
+		{
+			"fieldname": "items_section",
+			"fieldtype": "Section Break",
+			"label": "Count Lines"
+		},
+		{
+			"description": "Populated by the Fetch Items button. Required only when submitting.",
+			"fieldname": "items",
+			"fieldtype": "Table",
+			"label": "Items",
+			"options": "Stock Count Item"
+		},
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Result"
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "total_variance_qty",
+			"fieldtype": "Float",
+			"label": "Total Variance Qty",
+			"read_only": 1
+		},
+		{
+			"fieldname": "column_break_result",
+			"fieldtype": "Column Break"
+		},
+		{
+			"allow_on_submit": 1,
+			"fieldname": "adjustments",
+			"fieldtype": "Table",
+			"label": "Generated Stock Entries",
+			"no_copy": 1,
+			"options": "Stock Count Adjustment",
+			"read_only": 1
+		},
+		{
+			"fieldname": "amended_from",
+			"fieldtype": "Link",
+			"label": "Amended From",
+			"no_copy": 1,
+			"options": "Stock Count",
+			"print_hide": 1,
+			"read_only": 1,
+			"search_index": 1
+		}
+	],
+	"grid_page_length": 50,
+	"index_web_pages_for_search": 1,
+	"is_submittable": 1,
+	"links": [],
+	"modified": "2026-08-12 09:20:00.000000",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Stock",
+	"name": "Stock Count",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock User",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"amend": 1,
+			"cancel": 1,
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Accounts Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		},
+		{
+			"amend": 1,
+			"cancel": 1,
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "creation",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

@@ -13,18 +13,16 @@ created only when absent so a later manual edit is preserved.
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, cast
+from typing import cast
 
 import frappe
 import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
-from connect_diagnostics_core.setup.customer_onboarding import ensure_workflow
-
 # --- SSO (Social Security) ---------------------------------------------------
 # Company policy caps the SSO contribution base at 17,500 (5% -> 875/month),
-# above the current statutory 15,000/750 ceiling. See CLAUDE.md payroll notes.
+# above the current statutory 15,000/750 ceiling. See docs/domains/thai-payroll.md.
 SSO_CONTRIBUTION_CEILING = 17500
 SSO_RATE = 0.05
 
@@ -49,68 +47,6 @@ INCOME_TAX_SLABS = (
 
 INCOME_TAX_SLAB_NAME = "Thailand Personal Income Tax"
 SALARY_STRUCTURE_NAME = "Connect Diagnostics Monthly"
-
-SALARY_SLIP_DOCTYPE = "Salary Slip"
-SALARY_SLIP_REVIEW_WORKFLOW = "Salary Slip Review"
-SALARY_SLIP_REVIEW_STATE_FIELD = "salary_slip_review_state"
-SALARY_SLIP_DRAFT_STATE = "Salary Slip Draft"
-SALARY_SLIP_REVIEWED_STATE = "Salary Slip Reviewed"
-SALARY_SLIP_SUBMITTED_STATE = "Salary Slip Submitted"
-SALARY_SLIP_CANCELLED_STATE = "Salary Slip Cancelled"
-
-HR_USER_ROLE = "HR User"
-HR_MANAGER_ROLE = "HR Manager"
-
-CUSTOM_FIELDS = {
-    SALARY_SLIP_DOCTYPE: [
-        {
-            "fieldname": SALARY_SLIP_REVIEW_STATE_FIELD,
-            "label": "Salary Slip Review State",
-            "fieldtype": "Link",
-            "options": "Workflow State",
-            "read_only": 1,
-            "no_copy": 1,
-            "allow_on_submit": 1,
-            "insert_after": "status",
-        }
-    ]
-}
-
-SALARY_SLIP_WORKFLOW_STATES: tuple[dict[str, Any], ...] = (
-    {"state": SALARY_SLIP_DRAFT_STATE, "doc_status": "0", "allow_edit": HR_USER_ROLE, "send_email": 0},
-    {"state": SALARY_SLIP_DRAFT_STATE, "doc_status": "0", "allow_edit": HR_MANAGER_ROLE, "send_email": 0},
-    {"state": SALARY_SLIP_REVIEWED_STATE, "doc_status": "0", "allow_edit": HR_MANAGER_ROLE, "send_email": 0},
-    {"state": SALARY_SLIP_SUBMITTED_STATE, "doc_status": "1", "allow_edit": HR_MANAGER_ROLE, "send_email": 0},
-    {"state": SALARY_SLIP_CANCELLED_STATE, "doc_status": "2", "allow_edit": HR_MANAGER_ROLE, "send_email": 0},
-)
-
-SALARY_SLIP_WORKFLOW_TRANSITIONS: tuple[dict[str, Any], ...] = (
-    {
-        "state": SALARY_SLIP_DRAFT_STATE,
-        "action": "Mark salary slip reviewed",
-        "next_state": SALARY_SLIP_REVIEWED_STATE,
-        "allowed": HR_MANAGER_ROLE,
-        "condition": "",
-        "allow_self_approval": 0,
-        "send_email_to_creator": 0,
-    },
-    {
-        "state": SALARY_SLIP_REVIEWED_STATE,
-        "action": "Return salary slip for correction",
-        "next_state": SALARY_SLIP_DRAFT_STATE,
-        "allowed": HR_MANAGER_ROLE,
-        "condition": "",
-        "allow_self_approval": 0,
-        "send_email_to_creator": 0,
-    },
-)
-
-SALARY_SLIP_WORKFLOW_STATE_STYLES = {
-    SALARY_SLIP_DRAFT_STATE: "",
-    SALARY_SLIP_REVIEWED_STATE: "Success",
-    SALARY_SLIP_SUBMITTED_STATE: "Success",
-    SALARY_SLIP_CANCELLED_STATE: "Danger",
-}
 
 # --- Salary Components -------------------------------------------------------
 # formula: an amount_based_on_formula expression evaluated in the HRMS salary
@@ -146,7 +82,6 @@ STRUCTURE_DEDUCTIONS = ("Social Security", "Provident Fund", "Withholding Tax")
 
 
 def ensure_configuration() -> None:
-    ensure_salary_slip_review_workflow()
     ensure_salary_components()
     company = _default_company()
     if not company:
@@ -158,37 +93,6 @@ def ensure_configuration() -> None:
     ensure_income_tax_slab(company)
     ensure_payroll_period(company)
     ensure_salary_structure(company)
-
-
-def ensure_salary_slip_review_workflow() -> None:
-    """Create the managed review workflow without replacing another active workflow."""
-    for state_name, style in SALARY_SLIP_WORKFLOW_STATE_STYLES.items():
-        if frappe.db.exists("Workflow State", state_name):
-            state = cast(Document, frappe.get_doc("Workflow State", state_name))
-            if state.get("style") != style:
-                state.set("style", style)
-                state.save(ignore_permissions=True)
-            continue
-        frappe.get_doc(
-            {"doctype": "Workflow State", "workflow_state_name": state_name, "style": style}
-        ).insert(ignore_permissions=True)
-
-    for action_name in {transition["action"] for transition in SALARY_SLIP_WORKFLOW_TRANSITIONS}:
-        if not frappe.db.exists("Workflow Action Master", action_name):
-            frappe.get_doc({"doctype": "Workflow Action Master", "workflow_action_name": action_name}).insert(
-                ignore_permissions=True
-            )
-
-    ensure_workflow(
-        workflow_name=SALARY_SLIP_REVIEW_WORKFLOW,
-        document_type=SALARY_SLIP_DOCTYPE,
-        workflow_state_field=SALARY_SLIP_REVIEW_STATE_FIELD,
-        states=SALARY_SLIP_WORKFLOW_STATES,
-        transitions=SALARY_SLIP_WORKFLOW_TRANSITIONS,
-        send_email_alert=0,
-        is_active=1,
-    )
-    frappe.clear_cache(doctype=SALARY_SLIP_DOCTYPE)
 
 
 def _default_company() -> str | None:

@@ -1,4 +1,17 @@
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
 """Custom field / property setter definitions for Employee."""
+
+from __future__ import annotations
+
+import json
+
+import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+SIGNATURE_FIELD = "signature_cvru"
+SIGNATURE_ANCHOR = "shift_request_approver"
 
 CUSTOM_FIELDS = {
     "Employee": [
@@ -34,6 +47,14 @@ CUSTOM_FIELDS = {
             "insert_after": "holiday_list",
             "is_system_generated": 1,
             "options": "Shift Type",
+        },
+        {
+            "fieldname": "borrow_warehouse",
+            "label": "Borrow Warehouse",
+            "fieldtype": "Link",
+            "insert_after": "default_shift",
+            "description": "Leaf warehouse used while this Employee is responsible for borrowed stock.",
+            "options": "Warehouse",
         },
         {
             "fieldname": "employment_type",
@@ -81,7 +102,7 @@ CUSTOM_FIELDS = {
             "label": "Health Insurance",
             "fieldtype": "Section Break",
             "insert_after": "health_details",
-            "collapsible": 1,
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
@@ -129,7 +150,7 @@ CUSTOM_FIELDS = {
             "label": "Thai Payroll",
             "fieldtype": "Section Break",
             "insert_after": "payroll_cost_center",
-            "collapsible": 1,
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
@@ -144,15 +165,15 @@ CUSTOM_FIELDS = {
             "label": "Provident Fund Rate (%)",
             "fieldtype": "Percent",
             "insert_after": "social_security_eligible",
-            "description": "อัตราหักกองทุนสำรองเลี้ยงชีพของพนักงาน (%) — กรอกรายบุคคล ไม่มีค่าเริ่มต้น",
+            "description": "Employee provident fund deduction rate (%). Set per employee; no default is applied.",
             "is_system_generated": 1,
         },
         {
             "fieldname": "national_id_section",
             "label": "National ID & Social Security",
             "fieldtype": "Section Break",
-            "insert_after": "place_of_issue",
-            "collapsible": 1,
+            "insert_after": "basic_details_tab",
+            "collapsible": 0,
             "is_system_generated": 1,
         },
         {
@@ -160,7 +181,7 @@ CUSTOM_FIELDS = {
             "label": "National ID",
             "fieldtype": "Data",
             "insert_after": "national_id_section",
-            "description": "เลขบัตรประชาชน 13 หลัก (ใช้เป็นเลขประจำตัวผู้เสียภาษีสำหรับ ภ.ง.ด.1ก)",
+            "description": "13-digit Thai National ID used as the taxpayer identification number for P.N.D. 1 Kor.",
             "is_system_generated": 1,
         },
         {
@@ -169,14 +190,37 @@ CUSTOM_FIELDS = {
             "fieldtype": "Data",
             "insert_after": "national_id",
             "read_only": 1,
-            "description": "รูปแบบเลขบัตรประชาชนสำหรับแสดงผล (คำนวณอัตโนมัติ)",
+            "description": "Formatted National ID for display. Calculated automatically.",
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "national_id_column_break",
+            "fieldtype": "Column Break",
+            "insert_after": "national_id_display",
             "is_system_generated": 1,
         },
         {
             "fieldname": "social_security_id",
             "label": "Social Security ID",
             "fieldtype": "Data",
-            "insert_after": "national_id_display",
+            "insert_after": "national_id_column_break",
+            "description": "Thai Social Security identification number for this employee.",
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "approval_signature_section",
+            "label": "Approval Signature",
+            "fieldtype": "Section Break",
+            "insert_after": "personal_details",
+            "collapsible": 0,
+            "is_system_generated": 1,
+        },
+        {
+            "fieldname": "approval_signature",
+            "label": "Approval Signature",
+            "fieldtype": "Signature",
+            "insert_after": "approval_signature_section",
+            "description": "Signature used for document approvals, authorization, and printed approval snapshots.",
             "is_system_generated": 1,
         },
     ],
@@ -192,5 +236,53 @@ PROPERTY_SETTERS = {
         ("naming_series", "default", "YY-BE.MM.###", "Text"),
         ("naming_series", "options", "YY-BE.MM.###\nC.YY-BE.MM.###", "Text"),
         ("naming_series", "reqd", "1", "Check"),
+        (SIGNATURE_FIELD, "label", "Employee Signature", "Data"),
     ],
 }
+
+
+def ensure_configuration() -> None:
+    """Place the Employee signature after the app-managed approver fields."""
+    doctype = "Employee"
+    meta = frappe.get_meta(doctype)
+    live_order = [field.fieldname for field in meta.fields if field.fieldname]
+
+    if SIGNATURE_FIELD not in live_order or SIGNATURE_ANCHOR not in live_order:
+        return
+
+    desired_order = _relocated_after_anchor(live_order, (SIGNATURE_FIELD,), SIGNATURE_ANCHOR)
+    if desired_order == live_order:
+        return
+
+    _set_field_order(doctype, desired_order)
+
+
+def _relocated_after_anchor(current_order: list[str], fields: tuple[str, ...], anchor: str) -> list[str]:
+    """Move fields directly after an existing anchor while preserving other fields."""
+    moved = set(fields)
+    remaining = [fieldname for fieldname in current_order if fieldname not in moved]
+
+    anchor_index = remaining.index(anchor)
+    remaining[anchor_index + 1 : anchor_index + 1] = list(fields)
+    return remaining
+
+
+def _set_field_order(doctype: str, order: list[str]) -> None:
+    """Persist a DocType-level field-order Property Setter idempotently."""
+    value = json.dumps(order)
+    name = frappe.db.get_value("Property Setter", {"doc_type": doctype, "property": "field_order"}, "name")
+    if name:
+        property_setter = frappe.get_doc("Property Setter", name)
+        property_setter.value = value
+        property_setter.save(ignore_permissions=True)
+        return
+
+    make_property_setter(
+        doctype,
+        None,
+        "field_order",
+        value,
+        "Small Text",
+        for_doctype=True,
+        validate_fields_for_doctype=False,
+    )

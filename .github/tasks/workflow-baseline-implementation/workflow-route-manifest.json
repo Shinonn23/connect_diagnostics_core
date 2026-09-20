@@ -1,0 +1,117 @@
+{
+	"schema_version": 1,
+	"revision": "2026-09-18.workflow-blueprint.3",
+	"manifest_status": "dev-enabled",
+	"target_scope": "DEV:local.test",
+	"records_are_inert": false,
+	"activation_status": "enabled-on-dev",
+	"activation_prerequisites": [
+		"approved-route-revision",
+		"approved-target-and-scope",
+		"workflow-state-field-setup",
+		"executable-permission-contract",
+		"collision-and-pending-action-disposition",
+		"migration-rerun-recovery-validation",
+		"independent-configuration-review"
+	],
+	"collision_policy": "stop-and-obtain-owner-disposition",
+	"rerun_policy": "deterministic-read-only-validation; no-site-sync",
+	"recovery_policy": "remove-unreleased-artifact from repository change only; no-site-mutation",
+	"routes": [
+		{
+			"id": "WF-01",
+			"status": "enabled",
+			"document_type": "Stock Entry",
+			"workflow": "Connect Stock Transfer Approval"
+		},
+		{
+			"id": "WF-02",
+			"status": "enabled",
+			"document_type": "Stock Entry",
+			"workflow": "Connect Stock Transfer Approval"
+		},
+		{
+			"id": "WF-03",
+			"status": "enabled",
+			"document_type": "Stock Entry",
+			"workflow": "Connect Stock Transfer Approval",
+			"route_scope": "Freeze/Exception controls in the shared Stock Entry Workflow"
+		},
+		{
+			"id": "WF-04",
+			"status": "enabled",
+			"document_type": "Stock Reconciliation",
+			"workflow": "Connect Stock Reconciliation Blueprint"
+		},
+		{
+			"id": "WF-05",
+			"status": "enabled",
+			"document_type": "Stock Reconciliation",
+			"workflow": "Connect Stock Reconciliation Blueprint"
+		},
+		{
+			"id": "WF-06",
+			"status": "enabled",
+			"document_type": "Asset Movement",
+			"workflow": "Connect Asset Movement Approval"
+		},
+		{
+			"id": "WF-07",
+			"status": "enabled",
+			"document_type": "Asset",
+			"workflow": "Connect Asset Disposal Blueprint"
+		},
+		{
+			"id": "WF-08",
+			"status": "disabled",
+			"document_type": null,
+			"workflow": null,
+			"reason": "Equipment is out of scope; Asset routes remain separate and do not replace this route by renaming it."
+		},
+		{
+			"id": "WF-09",
+			"status": "enabled",
+			"document_type": "Sales Order",
+			"workflow": "Connect Sales Order Blueprint"
+		},
+		{
+			"id": "WF-10",
+			"status": "enabled",
+			"document_type": "Sales Invoice",
+			"workflow": "Connect Sales Invoice Credit Blueprint"
+		},
+		{
+			"id": "WF-11",
+			"status": "enabled",
+			"document_type": "Purchase Order",
+			"workflow": "Connect Purchase Order Blueprint",
+			"workflow_names": ["Connect Material Request Blueprint", "Connect Purchase Order Blueprint"],
+			"workflow_documents": [
+				{ "document_type": "Material Request", "workflow": "Connect Material Request Blueprint" },
+				{ "document_type": "Purchase Order", "workflow": "Connect Purchase Order Blueprint" }
+			]
+		},
+		{
+			"id": "WF-12",
+			"status": "enabled",
+			"document_type": "Purchase Invoice",
+			"workflow": "Connect Purchase Invoice Blueprint"
+		},
+		{
+			"id": "WF-13",
+			"status": "enabled",
+			"document_type": "Payment Entry",
+			"workflow": "Connect Payment Entry Approval"
+		},
+		{
+			"id": "WF-14",
+			"status": "enabled",
+			"document_type": "Payroll Entry",
+			"workflow": "Connect Payroll Entry Blueprint"
+		},
+		{ "id": "WF-15", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-16", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-17", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-18", "status": "no-record", "document_type": null, "workflow": null }
+	]
+}

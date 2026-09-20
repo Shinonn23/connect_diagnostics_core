@@ -1,0 +1,23 @@
+[
+	{ "name": "Approve" },
+	{ "name": "Approve Asset Movement" },
+	{ "name": "Approve Payment Entry" },
+	{ "name": "Approve Stock Transfer" },
+	{ "name": "Cancel Asset Movement" },
+	{ "name": "Cancel Payment Entry" },
+	{ "name": "Cancel Stock Transfer" },
+	{ "name": "Escalate Payment Request Approval" },
+	{ "name": "Post Asset Movement" },
+	{ "name": "Post Payment Entry" },
+	{ "name": "Post Stock Transfer" },
+	{ "name": "Reject" },
+	{ "name": "Reject Asset Movement" },
+	{ "name": "Reject Payment Entry" },
+	{ "name": "Reject Stock Transfer" },
+	{ "name": "Return for correction" },
+	{ "name": "Review" },
+	{ "name": "Submit Asset Movement for Approval" },
+	{ "name": "Submit for Review" },
+	{ "name": "Submit Payment Entry for Approval" },
+	{ "name": "Submit Stock Transfer for Approval" }
+]
