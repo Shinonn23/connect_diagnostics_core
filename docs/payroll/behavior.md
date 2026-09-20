@@ -6,7 +6,7 @@ HRMS owns Salary Slip, Payroll Entry, Salary Structure, Salary Structure Assignm
 
 - Salary Slips are submitted only through Payroll Entry.
 - HRMS remains the owner of salary accrual and its standard accounting path.
-- Thailand-specific Employee fields on the HRMS Employee DocType are managed through exported Customize Form JSON.
+- Thailand-specific Employee fields on the HRMS Employee DocType are code-managed by the app's Employee setup module.
 - Payroll configuration is applied idempotently and must not overwrite later intentional manual edits to create-only configuration records.
 
 ## Workflows

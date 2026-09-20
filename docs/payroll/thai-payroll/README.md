@@ -4,7 +4,7 @@ Thai payroll configuration is maintained by `connect_diagnostics_core/setup/payr
 
 ## Employee data
 
-The payroll configuration uses exported Employee fields for:
+The payroll configuration uses app-managed Employee Custom Fields defined through the Employee setup path for:
 
 - Social Security eligibility.
 - Provident Fund rate.

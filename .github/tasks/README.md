@@ -27,5 +27,4 @@ After runtime acceptance, stable shipped behavior must be finalized under `docs/
 
 | Task | Status | Record |
 | --- | --- | --- |
-| Item Request / Asset Fulfillment v11 | Paused; stale checkpoint will be redone from current `developments` | [item-request-v11](item-request-v11/) |
 | Workflow baseline implementation | Planning checkpoint accepted; implementation record imported from workflow branch | [workflow-baseline-implementation](workflow-baseline-implementation/) |
