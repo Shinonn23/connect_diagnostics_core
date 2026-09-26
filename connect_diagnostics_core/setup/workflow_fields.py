@@ -69,3 +69,55 @@ CUSTOM_FIELDS = {
         },
     ],
 }
+
+_APPROVAL_FIELDS = (
+    {
+        "fieldname": "approval_maker_user",
+        "label": "Approval Maker User",
+        "fieldtype": "Link",
+        "options": "User",
+    },
+    {
+        "fieldname": "approval_reviewer_user",
+        "label": "Approval Reviewer User",
+        "fieldtype": "Link",
+        "options": "User",
+    },
+    {
+        "fieldname": "approval_authorized_user",
+        "label": "Approval Authorized User",
+        "fieldtype": "Link",
+        "options": "User",
+    },
+    {
+        "fieldname": "approval_critical_digest",
+        "label": "Approval Critical Digest",
+        "fieldtype": "Data",
+    },
+)
+
+for _doctype in (
+    "Stock Entry",
+    "Stock Reconciliation",
+    "Asset Movement",
+    "Journal Entry",
+    "Sales Order",
+    "Sales Invoice",
+    "Purchase Order",
+    "Purchase Invoice",
+    "Payment Entry",
+    "Payroll Entry",
+):
+    existing = {str(field["fieldname"]) for field in CUSTOM_FIELDS.get(_doctype, [])}
+    CUSTOM_FIELDS.setdefault(_doctype, []).extend(
+        {
+            **field,
+            "hidden": 1,
+            "read_only": 1,
+            "allow_on_submit": 1,
+            "no_copy": 1,
+            "is_system_generated": 1,
+        }
+        for field in _APPROVAL_FIELDS
+        if str(field["fieldname"]) not in existing
+    )

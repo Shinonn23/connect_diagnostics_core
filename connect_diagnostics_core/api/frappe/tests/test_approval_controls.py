@@ -9,6 +9,7 @@ from math import inf, nan
 from unittest.mock import patch
 
 import frappe
+from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.frappe import approval_controls
@@ -53,6 +54,11 @@ class TestCriticalDigest(UnitTestCase):
 
 
 class TestApprovalControls(UnitTestCase):
+    def tearDown(self) -> None:
+        if hasattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY):
+            delattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY)
+        super().tearDown()
+
     def _identity_mocks(self):
         def exists(doctype, name):
             return doctype == "User" and name in {"maker@example.com", "actor@example.com"}
@@ -276,3 +282,116 @@ class TestApprovalControls(UnitTestCase):
                 self.assertRaises(frappe.ValidationError),
             ):
                 approval_controls.capture_signed_approval_actor(doc, "maker@example.com")
+
+    def test_interactive_actor_mints_one_use_exact_document_grant(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            snapshot = approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+            self.assertEqual(snapshot.user, "actor@example.com")
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
+            with self.assertRaises(frappe.ValidationError):
+                approval_controls.consume_approval_field_grant(
+                    doc,
+                    "asset_movement",
+                    "Review Asset Movement",
+                )
+
+    def test_grant_rejects_cross_document_route_action_and_forged_lookalike(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        lookalike = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+            invalid = (
+                (lookalike, "asset_movement", "Review Asset Movement"),
+                (doc, "payment_entry", "Review Asset Movement"),
+                (doc, "asset_movement", "Approve Asset Movement"),
+            )
+            for candidate, route, action in invalid:
+                with self.subTest(route=route, action=action), self.assertRaises(frappe.ValidationError):
+                    approval_controls.consume_approval_field_grant(candidate, route, action)
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
+
+    def test_interactive_actor_rejects_noninteractive_and_unauthorized_users(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        for user, roles, request in (
+            ("Guest", ["Stock Manager"], object()),
+            ("Administrator", ["Stock Manager"], object()),
+            ("actor@example.com", ["Stock User"], object()),
+            ("actor@example.com", ["Stock Manager"], None),
+        ):
+            with (
+                self.subTest(user=user, roles=roles, request=request),
+                self._identity_mocks()[0],
+                self._identity_mocks()[1],
+                patch.object(frappe, "has_permission", return_value=True),
+                patch.object(frappe, "get_roles", return_value=roles),
+                patch.dict(frappe.session, {"user": user}),
+                patch.object(frappe.local, "request", request, create=True),
+                self.assertRaises(frappe.ValidationError),
+            ):
+                approval_controls.authorize_approval_field_write(
+                    doc,
+                    "asset_movement",
+                    "Review Asset Movement",
+                    ("Stock Manager",),
+                    "maker@example.com",
+                )
+
+    def test_permission_revocation_does_not_mint_a_grant(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=False),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+            self.assertRaises(frappe.PermissionError),
+        ):
+            approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+        with self.assertRaises(frappe.ValidationError):
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
