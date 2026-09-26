@@ -395,3 +395,54 @@ class TestApprovalControls(UnitTestCase):
                 "asset_movement",
                 "Review Asset Movement",
             )
+
+    def test_maker_action_allows_self_without_employee_signature(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+
+        def get_value(doctype, filters, fieldname, **kwargs):
+            return 1 if doctype == "User" and filters == "maker@example.com" else None
+
+        with (
+            patch.object(frappe.db, "exists", return_value=True),
+            patch.object(frappe.db, "get_value", side_effect=get_value),
+            patch("frappe.get_all", return_value=[]),
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock User"]),
+            patch.dict(frappe.session, {"user": "maker@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            user = approval_controls.authorize_workflow_field_write(
+                doc,
+                "asset_movement",
+                "Send Asset Movement for Review",
+                ("Stock User",),
+            )
+            self.assertEqual(user, "maker@example.com")
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Send Asset Movement for Review",
+            )
+
+    def test_nonapproval_action_still_rechecks_role_permission_and_request(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        cases = (
+            (["Stock Manager"], True, object(), frappe.ValidationError),
+            (["Stock User"], False, object(), frappe.PermissionError),
+            (["Stock User"], True, None, frappe.ValidationError),
+        )
+        for roles, permitted, request, error in cases:
+            with (
+                self.subTest(roles=roles, permitted=permitted, request=request),
+                patch.object(frappe, "get_roles", return_value=roles),
+                patch.object(frappe, "has_permission", return_value=permitted),
+                patch.dict(frappe.session, {"user": "maker@example.com"}),
+                patch.object(frappe.local, "request", request, create=True),
+                self.assertRaises(error),
+            ):
+                approval_controls.authorize_workflow_field_write(
+                    doc,
+                    "asset_movement",
+                    "Send Asset Movement for Review",
+                    ("Stock User",),
+                )
