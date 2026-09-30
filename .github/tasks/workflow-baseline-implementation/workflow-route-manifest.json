@@ -112,6 +112,13 @@
 		{ "id": "WF-15", "status": "no-record", "document_type": null, "workflow": null },
 		{ "id": "WF-16", "status": "no-record", "document_type": null, "workflow": null },
 		{ "id": "WF-17", "status": "no-record", "document_type": null, "workflow": null },
-		{ "id": "WF-18", "status": "no-record", "document_type": null, "workflow": null }
+		{ "id": "WF-18", "status": "no-record", "document_type": null, "workflow": null },
+		{
+			"id": "WF-19",
+			"status": "enabled",
+			"document_type": "Journal Entry",
+			"workflow": "Connect Journal Entry Approval",
+			"route_scope": "All standard Journal Entries; native GL remains the posting boundary"
+		}
 	]
 }

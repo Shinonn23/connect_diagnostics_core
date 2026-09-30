@@ -418,5 +418,61 @@
 		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Cancel Asset Disposal",
 		"workflow_action_name": "Cancel Asset Disposal"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Send Journal Entry for Review",
+		"workflow_action_name": "Send Journal Entry for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Review Journal Entry",
+		"workflow_action_name": "Review Journal Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Return Journal Entry",
+		"workflow_action_name": "Return Journal Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Approve Journal Entry",
+		"workflow_action_name": "Approve Journal Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Reject Journal Entry",
+		"workflow_action_name": "Reject Journal Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Resubmit Journal Entry for Review",
+		"workflow_action_name": "Resubmit Journal Entry for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Submit Journal Entry",
+		"workflow_action_name": "Submit Journal Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Cancel Journal Entry",
+		"workflow_action_name": "Cancel Journal Entry"
 	}
 ]

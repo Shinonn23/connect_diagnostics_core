@@ -25,7 +25,7 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
         self.assertEqual(manifest["activation_status"], "enabled-on-dev")
         self.assertIn("workflow-state-field-setup", manifest["activation_prerequisites"])
         self.assertIn("executable-permission-contract", manifest["activation_prerequisites"])
-        self.assertEqual(set(routes), {f"WF-{number:02d}" for number in range(1, 19)})
+        self.assertEqual(set(routes), {f"WF-{number:02d}" for number in range(1, 20)})
         self.assertEqual(routes["WF-08"]["status"], "disabled")
         self.assertIsNone(routes["WF-08"]["document_type"])
         self.assertIsNone(routes["WF-08"]["workflow"])
@@ -69,7 +69,7 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if not row["action"].startswith("Submit ")
+                    if not row["action"].startswith(("Submit ", "Send ", "Resubmit "))
                 )
             )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
@@ -80,9 +80,9 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
         self.assertEqual(states, referenced_states)
         self.assertEqual(actions, referenced_actions)
 
-    def test_permission_blueprint_is_non_executable_and_unassigned(self) -> None:
+    def test_permission_blueprint_is_executable_and_unassigned(self) -> None:
         blueprint = json.loads(PERMISSIONS.read_text())
-        self.assertFalse(blueprint["executable"])
+        self.assertTrue(blueprint["executable"])
         self.assertEqual(blueprint["assignments"], [])
         self.assertTrue(blueprint["rights"])
 

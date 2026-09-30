@@ -23,6 +23,7 @@ from connect_diagnostics_core.setup import (
     item_default,
     item_group,
     journal_entry_account,
+    journal_entry_workflow,
     packed_item,
     payroll,
     procure_to_pay,
@@ -108,6 +109,7 @@ def apply_all() -> None:
     sales_requirements.ensure_configuration()
     quotation.ensure_configuration()
     regulatory.ensure_configuration()
+    journal_entry_workflow.ensure_configuration()
     workspace.ensure_workspace_navigation()
 
 

@@ -55,6 +55,7 @@ doctype_js = {
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
     "Material Request": "public/js/custom/material_request/doctype.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
+    "Petty Cash Holder": "public/js/petty_cash_holder.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
     "Sales Order": "public/js/custom/sales_order/doctype.js",
@@ -116,6 +117,30 @@ jinja = {
 # They snapshot the current Employee and signature without creating or owning
 # any Workflow definition in this app.
 workflow_methods = [
+    {
+        "name": "Capture Journal Entry Maker",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.capture_maker_snapshot",
+    },
+    {
+        "name": "Capture Journal Entry Checker",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.capture_checker_snapshot",
+    },
+    {
+        "name": "Capture Journal Entry Approver",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.capture_approver_snapshot",
+    },
+    {
+        "name": "Clear Journal Entry Approval",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.clear_approval_snapshots",
+    },
+    {
+        "name": "Authorize Journal Entry Submit",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.authorize_submit_transition",
+    },
+    {
+        "name": "Authorize Journal Entry Cancel",
+        "method": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.authorize_cancel_transition",
+    },
     {
         "name": "Capture Freeze Exception Approval Scope",
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
@@ -370,6 +395,11 @@ doc_events = {
     },
     "Journal Entry": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+        "validate": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_workflow",
+        "before_submit": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_submit",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_cancel",
+        "on_submit": "connect_diagnostics_core.api.erpnext.journal_entry_generators.complete_approved_generated_source",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.journal_entry_generators.complete_generated_source_cancel",
     },
     "Stock Reconciliation": {
         "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
@@ -442,6 +472,23 @@ override_whitelisted_methods = {
     "frappe.utils.print_format.download_pdf": ("connect_diagnostics_core.api.frappe.print_log.download_pdf"),
     "erpnext_thailand.utils.get_address_by_tax_id": (
         "connect_diagnostics_core.api.frappe.address.get_address_by_tax_id"
+    ),
+    "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts": (
+        "connect_diagnostics_core.api.erpnext.journal_entry_generators.create_journal_entry_bts"
+    ),
+    "erpnext_thailand.petty_cash.doctype.petty_cash_holder.petty_cash_holder.create_journal_entry": (
+        "connect_diagnostics_core.api.erpnext.journal_entry_generators.create_petty_cash_journal_entry"
+    ),
+}
+
+extend_doctype_class = {
+    "Asset Value Adjustment": (
+        "connect_diagnostics_core.api.erpnext.asset_value_adjustment_workflow.AssetValueAdjustmentWorkflowMixin"
+    ),
+    "Journal Entry": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.JournalEntryWorkflowMixin",
+    "Payroll Entry": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryWorkflowMixin",
+    "Process Deferred Accounting": (
+        "connect_diagnostics_core.api.erpnext.process_deferred_accounting_workflow.ProcessDeferredAccountingWorkflowMixin"
     ),
 }
 
@@ -547,6 +594,7 @@ fixtures = [
                     "Connect Purchase Invoice Blueprint",
                     "Connect Payroll Entry Blueprint",
                     "Connect Asset Disposal Blueprint",
+                    "Connect Journal Entry Approval",
                 ],
             ]
         ],
@@ -630,6 +678,14 @@ fixtures = [
                     "Asset Disposal Rejected",
                     "Asset Disposal Submitted",
                     "Asset Disposal Cancelled",
+                    "Journal Entry Draft",
+                    "Journal Entry Pending Review",
+                    "Journal Entry Reviewed",
+                    "Journal Entry Approved",
+                    "Journal Entry Returned",
+                    "Journal Entry Rejected",
+                    "Journal Entry Submitted",
+                    "Journal Entry Cancelled",
                 ],
             ]
         ],
@@ -701,6 +757,14 @@ fixtures = [
                     "Reject Asset Disposal",
                     "Post Asset Disposal",
                     "Cancel Asset Disposal",
+                    "Send Journal Entry for Review",
+                    "Review Journal Entry",
+                    "Return Journal Entry",
+                    "Approve Journal Entry",
+                    "Reject Journal Entry",
+                    "Resubmit Journal Entry for Review",
+                    "Submit Journal Entry",
+                    "Cancel Journal Entry",
                 ],
             ]
         ],
