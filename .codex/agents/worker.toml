@@ -1,5 +1,7 @@
 name = "worker"
 description = "Implementation specialist for one bounded, plan-ready change with exclusive file ownership and focused automated tests."
+model = "gpt-6-sol"
+model_reasoning_effort = "medium"
 sandbox_mode = "danger-full-access"
 
 developer_instructions = """
