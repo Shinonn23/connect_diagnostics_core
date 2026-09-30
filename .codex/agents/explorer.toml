@@ -1,5 +1,7 @@
 name = "explorer"
 description = "Read-only specialist for tracing Frappe/ERPNext behavior, dependencies, installed source, configuration, and tests."
+model = "gpt-6-luna"
+model_reasoning_effort = "low"
 sandbox_mode = "danger-full-access"
 
 developer_instructions = """
