@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.53.1](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.53.0...v0.53.1) (2026-09-30)
+
+
+### Miscellaneous Chores
+
+* update Codex agent models to GPT-6 ([e4e4ecb](https://github.com/Shinonn23/connect_diagnostics_core/commit/e4e4ecb85648d398ac9909d0a42b0a5112da3f4a))
+* update Codex agent models to GPT-6 ([d7396e4](https://github.com/Shinonn23/connect_diagnostics_core/commit/d7396e474403f4c31582d162984363d2f260e073))
+
 ## [0.53.0](https://github.com/Shinonn23/connect_diagnostics_core/compare/v0.52.1...v0.53.0) (2026-09-20)
 
 
