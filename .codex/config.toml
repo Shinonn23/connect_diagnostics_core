@@ -8,7 +8,7 @@ hooks = true
 enabled = true
 # Keep at most four live threads including the primary agent.
 max_concurrent_threads_per_session = 3
-default_subagent_model = "gpt-5.6-luna"
+default_subagent_model = "gpt-6-luna"
 default_subagent_reasoning_effort = "low"
 interrupt_message = true
 
