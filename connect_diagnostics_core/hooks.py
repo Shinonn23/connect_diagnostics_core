@@ -117,6 +117,26 @@ jinja = {
 # any Workflow definition in this app.
 workflow_methods = [
     {
+        "name": "Capture Purchase Invoice Source Verification",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.capture_source_verification_snapshot",
+    },
+    {
+        "name": "Capture Purchase Invoice Accounting Approval",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.capture_accounting_approval_snapshot",
+    },
+    {
+        "name": "Clear Purchase Invoice Approval Snapshots",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.clear_approval_snapshots",
+    },
+    {
+        "name": "Authorize Purchase Invoice Submit",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.authorize_submit_execution",
+    },
+    {
+        "name": "Authorize Purchase Invoice Cancel",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.authorize_cancel_execution",
+    },
+    {
         "name": "Capture Freeze Exception Approval Scope",
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
     },
@@ -195,6 +215,7 @@ after_migrate = [
     "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
+    "connect_diagnostics_core.patches.v1_0.add_purchase_invoice_approval_controls.validate_installed_configuration",
 ]
 
 # Uninstallation
@@ -360,7 +381,12 @@ doc_events = {
     },
     "Purchase Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
-        "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        "validate": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_workflow",
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_before_submit",
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_before_cancel",
     },
     "Purchase Invoice Item": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -607,7 +633,9 @@ fixtures = [
                     "Purchase Order Submitted",
                     "Purchase Order Cancelled",
                     "Purchase Invoice Draft",
-                    "Purchase Invoice Pending Review",
+                    "Purchase Invoice Pending Source Verification",
+                    "Purchase Invoice Pending Accounting Approval",
+                    "Purchase Invoice Returned",
                     "Purchase Invoice Approved",
                     "Purchase Invoice Rejected",
                     "Purchase Invoice Submitted",
@@ -682,6 +710,9 @@ fixtures = [
                     "Post Purchase Order",
                     "Cancel Purchase Order",
                     "Submit Purchase Invoice for Review",
+                    "Verify Purchase Invoice Source",
+                    "Return Purchase Invoice",
+                    "Resubmit Purchase Invoice",
                     "Approve Purchase Invoice",
                     "Reject Purchase Invoice",
                     "Post Purchase Invoice",

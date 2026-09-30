@@ -4,6 +4,33 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Source Verification",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Source Verification"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Accounting Approval",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Accounting Approval"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Returned",
+		"style": "Warning",
+		"workflow_state_name": "Purchase Invoice Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Asset Movement Draft",
 		"style": "Info",
 		"workflow_state_name": "Asset Movement Draft"
@@ -439,15 +466,6 @@
 		"name": "Purchase Invoice Draft",
 		"style": "Info",
 		"workflow_state_name": "Purchase Invoice Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Pending Review"
 	},
 	{
 		"docstatus": 0,

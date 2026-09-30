@@ -3,6 +3,27 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Verify Purchase Invoice Source",
+		"workflow_action_name": "Verify Purchase Invoice Source"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Return Purchase Invoice",
+		"workflow_action_name": "Return Purchase Invoice"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Resubmit Purchase Invoice",
+		"workflow_action_name": "Resubmit Purchase Invoice"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Submit Asset Movement for Approval",
 		"workflow_action_name": "Submit Asset Movement for Approval"
 	},

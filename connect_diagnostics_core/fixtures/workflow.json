@@ -998,41 +998,87 @@
 		"document_type": "Purchase Invoice",
 		"enable_action_confirmation": 0,
 		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-23 20:12:10.000000",
 		"name": "Connect Purchase Invoice Blueprint",
 		"override_status": 0,
 		"send_email_alert": 0,
 		"states": [
 			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Draft" },
-			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Pending Review" },
-			{ "allow_edit": "Accounts Manager", "doc_status": "0", "state": "Purchase Invoice Approved" },
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "0",
+				"state": "Purchase Invoice Pending Source Verification"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"state": "Purchase Invoice Pending Accounting Approval"
+			},
+			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Returned" },
 			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Rejected" },
+			{ "allow_edit": "Accounts Manager", "doc_status": "0", "state": "Purchase Invoice Approved" },
 			{ "allow_edit": "Accounts Manager", "doc_status": "1", "state": "Purchase Invoice Submitted" },
 			{ "allow_edit": "Accounts Manager", "doc_status": "2", "state": "Purchase Invoice Cancelled" }
 		],
 		"transitions": [
 			{
 				"action": "Submit Purchase Invoice for Review",
-				"allow_self_approval": 0,
+				"allow_self_approval": 1,
 				"allowed": "Accounts User",
 				"condition": null,
 				"state": "Purchase Invoice Draft",
-				"next_state": "Purchase Invoice Pending Review"
+				"next_state": "Purchase Invoice Pending Source Verification"
+			},
+			{
+				"action": "Verify Purchase Invoice Source",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Pending Accounting Approval",
+				"transition_tasks": "Connect Purchase Invoice Source Verification"
 			},
 			{
 				"action": "Approve Purchase Invoice",
 				"allow_self_approval": 0,
 				"allowed": "Accounts Manager",
 				"condition": null,
-				"state": "Purchase Invoice Pending Review",
-				"next_state": "Purchase Invoice Approved"
+				"state": "Purchase Invoice Pending Accounting Approval",
+				"next_state": "Purchase Invoice Approved",
+				"transition_tasks": "Connect Purchase Invoice Accounting Approval"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
+			},
+			{
+				"action": "Reject Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Rejected"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Accounting Approval",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
 			},
 			{
 				"action": "Reject Purchase Invoice",
 				"allow_self_approval": 0,
 				"allowed": "Accounts Manager",
 				"condition": null,
-				"state": "Purchase Invoice Pending Review",
+				"state": "Purchase Invoice Pending Accounting Approval",
 				"next_state": "Purchase Invoice Rejected"
 			},
 			{
@@ -1041,7 +1087,25 @@
 				"allowed": "Accounts Manager",
 				"condition": null,
 				"state": "Purchase Invoice Approved",
-				"next_state": "Purchase Invoice Submitted"
+				"next_state": "Purchase Invoice Submitted",
+				"transition_tasks": "Connect Purchase Invoice Submit"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Approved",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
+			},
+			{
+				"action": "Resubmit Purchase Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"state": "Purchase Invoice Returned",
+				"next_state": "Purchase Invoice Pending Source Verification"
 			},
 			{
 				"action": "Cancel Purchase Invoice",
@@ -1049,7 +1113,8 @@
 				"allowed": "Accounts Manager",
 				"condition": null,
 				"state": "Purchase Invoice Submitted",
-				"next_state": "Purchase Invoice Cancelled"
+				"next_state": "Purchase Invoice Cancelled",
+				"transition_tasks": "Connect Purchase Invoice Cancel"
 			}
 		],
 		"workflow_data": null,
