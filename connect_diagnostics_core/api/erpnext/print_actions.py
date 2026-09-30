@@ -13,6 +13,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now_datetime
 
+from connect_diagnostics_core.api.frappe.approval_controls import (
+    require_distinct_actors,
+    require_permission,
+)
 from connect_diagnostics_core.setup import print_action_fields
 
 
@@ -34,6 +38,15 @@ def capture_print_action(doc: Document, action_key: str) -> None:
     if action is None:
         return
 
+    if action.protected:
+        previous_actor = doc.get("approval_reviewer_user") if action.key == "authorized" else None
+        require_permission(doc)
+        require_distinct_actors(
+            _text(doc.get("owner")),
+            frappe.session.user,
+            (_text(previous_actor),),
+        )
+
     employee = cast(
         Mapping[str, Any] | None,
         frappe.db.get_value(
@@ -43,6 +56,12 @@ def capture_print_action(doc: Document, action_key: str) -> None:
             as_dict=True,
         ),
     )
+    if not employee and action.required_signature:
+        frappe.throw(
+            _("A linked Employee with an approval signature is required for the {0} action.").format(
+                action_key.replace("_", " ")
+            )
+        )
     if not employee:
         frappe.msgprint(
             _("No Employee is linked to the user performing the {0} action.").format(
@@ -54,9 +73,24 @@ def capture_print_action(doc: Document, action_key: str) -> None:
         return
 
     signature = _text(employee.get("approval_signature"))
+    if action.required_signature and not signature:
+        frappe.throw(
+            _("An approval signature is required for the {0} action.").format(action_key.replace("_", " "))
+        )
     doc.set(action.employee_field, _text(employee.get("name")))
     doc.set(action.datetime_field, now_datetime())
     doc.set(action.signature_field, signature)
+
+    if doc.doctype == "Purchase Order" and action.key == "checked":
+        from connect_diagnostics_core.api.erpnext.purchase_order_workflow import capture_review_snapshot
+
+        capture_review_snapshot(doc)
+    elif doc.doctype == "Purchase Order" and action.key == "authorized":
+        from connect_diagnostics_core.api.erpnext.purchase_order_workflow import (
+            capture_authorization_snapshot,
+        )
+
+        capture_authorization_snapshot(doc)
 
     if not signature:
         frappe.msgprint(

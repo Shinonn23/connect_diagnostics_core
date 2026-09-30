@@ -140,6 +140,73 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
         self.assertEqual(doc["submit_at"], datetime(2026, 9, 5, 10, 30, 0))
         self.assertEqual(doc["submit_signature"], "data:image/png;base64,signature")
 
+    @patch.object(print_actions, "now_datetime", return_value=datetime(2026, 9, 26, 10, 30, 0))
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
+    @patch.object(
+        print_actions.frappe.db,
+        "get_value",
+        return_value={
+            "name": "EMP-REVIEWER",
+            "employee_name": "Purchase Reviewer",
+            "approval_signature": "data:image/png;base64,reviewer",
+        },
+    )
+    @patch("connect_diagnostics_core.api.erpnext.purchase_order_workflow.capture_review_snapshot")
+    def test_purchase_order_review_is_protected_signed_and_bound_to_current_payload(
+        self,
+        capture_review_snapshot: MagicMock,
+        _get_value: MagicMock,
+        require_permission: MagicMock,
+        require_distinct_actors: MagicMock,
+        _now_datetime: MagicMock,
+    ) -> None:
+        doc = FakeDocument({"doctype": "Purchase Order", "owner": "maker@example.com"})
+
+        print_actions.capture_checked_action(cast(Document, doc))
+
+        self.assertEqual(doc["checked_by"], "EMP-REVIEWER")
+        self.assertEqual(doc["checked_signature"], "data:image/png;base64,reviewer")
+        require_permission.assert_called_once_with(doc)
+        require_distinct_actors.assert_called_once()
+        capture_review_snapshot.assert_called_once_with(doc)
+
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
+    @patch.object(print_actions.frappe.db, "get_value", return_value=None)
+    def test_purchase_order_review_without_employee_fails_closed(
+        self,
+        _get_value: MagicMock,
+        _require_permission: MagicMock,
+        _require_distinct_actors: MagicMock,
+    ) -> None:
+        doc = FakeDocument({"doctype": "Purchase Order", "owner": "maker@example.com"})
+
+        with self.assertRaises(frappe.ValidationError):
+            print_actions.capture_checked_action(cast(Document, doc))
+
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
+    @patch.object(
+        print_actions.frappe.db,
+        "get_value",
+        return_value={
+            "name": "EMP-APPROVER",
+            "employee_name": "Purchase Approver",
+            "approval_signature": "",
+        },
+    )
+    def test_purchase_order_approval_without_signature_fails_closed(
+        self,
+        _get_value: MagicMock,
+        _require_permission: MagicMock,
+        _require_distinct_actors: MagicMock,
+    ) -> None:
+        doc = FakeDocument({"doctype": "Purchase Order", "owner": "maker@example.com"})
+
+        with self.assertRaises(frappe.ValidationError):
+            print_actions.capture_authorized_action(cast(Document, doc))
+
     @patch.object(print_actions, "now_datetime", return_value=datetime(2026, 9, 5, 10, 30, 0))
     @patch.object(print_actions.frappe, "msgprint")
     @patch.object(

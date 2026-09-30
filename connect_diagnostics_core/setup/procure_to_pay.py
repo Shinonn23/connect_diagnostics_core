@@ -441,9 +441,10 @@ def activate_standard_permissions() -> None:
     # Preserve the native permissions before adding app-specific roles. Frappe
     # switches a DocType to its Custom DocPerm table once the first custom row
     # exists; copying first keeps the native operational roles intact.
-    for doctype in (ASSET_MOVEMENT, STOCK_ENTRY, PAYMENT_ENTRY):
+    for doctype in (ASSET_MOVEMENT, STOCK_ENTRY, PAYMENT_ENTRY, PURCHASE_ORDER):
         setup_custom_perms(doctype)
     _ensure_permission(PAYMENT_ENTRY, C_LEVEL_APPROVER_ROLE, read=1, write=1)
+    _ensure_permission(PURCHASE_ORDER, C_LEVEL_APPROVER_ROLE, read=1, write=1)
     for doctype in (ASSET_MOVEMENT, STOCK_ENTRY):
         _ensure_permission(doctype, "Stock User", read=1, write=1, create=1, submit=1, report=1, print=1)
         _ensure_permission(

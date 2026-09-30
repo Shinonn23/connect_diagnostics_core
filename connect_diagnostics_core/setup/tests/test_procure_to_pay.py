@@ -3,12 +3,40 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.setup import procure_to_pay
 
 
 class TestProcureToPayPropertySetters(UnitTestCase):
+    @patch.object(procure_to_pay, "_ensure_permission")
+    @patch.object(procure_to_pay, "_ensure_material_request_permission")
+    @patch.object(procure_to_pay, "setup_custom_perms", return_value=False)
+    def test_c_level_approver_gets_only_purchase_order_review_rights(
+        self,
+        setup_custom_perms: MagicMock,
+        _ensure_material_request_permission: MagicMock,
+        ensure_permission: MagicMock,
+    ) -> None:
+        procure_to_pay.activate_standard_permissions()
+
+        setup_custom_perms.assert_any_call("Purchase Order")
+        ensure_permission.assert_any_call(
+            "Purchase Order",
+            procure_to_pay.C_LEVEL_APPROVER_ROLE,
+            read=1,
+            write=1,
+        )
+        po_call = next(
+            call
+            for call in ensure_permission.call_args_list
+            if call.args[:2] == ("Purchase Order", procure_to_pay.C_LEVEL_APPROVER_ROLE)
+        )
+        self.assertNotIn("submit", po_call.kwargs)
+        self.assertNotIn("cancel", po_call.kwargs)
+
     def test_demo_and_loan_are_separate_usage_options(self) -> None:
         usage = next(
             field

@@ -125,6 +125,18 @@ workflow_methods = [
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.authorize_freeze_exception_execution",
     },
     {
+        "name": "Clear Purchase Order Approval Snapshots",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.clear_approval_snapshots",
+    },
+    {
+        "name": "Authorize Purchase Order Submit",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.authorize_submit_execution",
+    },
+    {
+        "name": "Authorize Purchase Order Cancel",
+        "method": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.authorize_cancel_execution",
+    },
+    {
         "name": "Capture Print Action: Submit",
         "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_submit_action",
     },
@@ -195,6 +207,7 @@ after_migrate = [
     "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
+    "connect_diagnostics_core.patches.v1_0.configure_purchase_order_approval_boundary.validate_installed_configuration",
 ]
 
 # Uninstallation
@@ -325,11 +338,14 @@ doc_events = {
     },
     "Purchase Order": {
         "validate": [
+            "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_workflow",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
         ],
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_before_cancel",
     },
     "Purchase Receipt": {
         "before_submit": [
@@ -542,7 +558,6 @@ fixtures = [
                     "Connect Stock Reconciliation Blueprint",
                     "Connect Sales Order Blueprint",
                     "Connect Sales Invoice Credit Blueprint",
-                    "Connect Material Request Blueprint",
                     "Connect Purchase Order Blueprint",
                     "Connect Purchase Invoice Blueprint",
                     "Connect Payroll Entry Blueprint",
@@ -594,14 +609,9 @@ fixtures = [
                     "Sales Invoice Credit Rejected",
                     "Sales Invoice Credit Submitted",
                     "Sales Invoice Credit Cancelled",
-                    "Material Request Draft",
-                    "Material Request Pending Review",
-                    "Material Request Approved",
-                    "Material Request Rejected",
-                    "Material Request Submitted",
-                    "Material Request Cancelled",
                     "Purchase Order Draft",
                     "Purchase Order Pending Review",
+                    "Purchase Order Pending Approval",
                     "Purchase Order Approved",
                     "Purchase Order Rejected",
                     "Purchase Order Submitted",
@@ -671,12 +681,10 @@ fixtures = [
                     "Reject Sales Invoice Credit",
                     "Post Sales Invoice Credit",
                     "Cancel Sales Invoice Credit",
-                    "Submit Material Request for Review",
-                    "Approve Material Request",
-                    "Reject Material Request",
-                    "Post Material Request",
-                    "Cancel Material Request",
                     "Submit Purchase Order for Review",
+                    "Review Purchase Order",
+                    "Return Purchase Order",
+                    "Resubmit Purchase Order",
                     "Approve Purchase Order",
                     "Reject Purchase Order",
                     "Post Purchase Order",

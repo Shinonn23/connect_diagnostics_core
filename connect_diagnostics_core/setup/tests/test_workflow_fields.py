@@ -7,6 +7,28 @@ from connect_diagnostics_core.setup import workflow_fields
 
 
 class TestWorkflowFields(UnitTestCase):
+    def test_purchase_order_has_revision_bound_approval_fields(self) -> None:
+        fields = {field["fieldname"]: field for field in workflow_fields.CUSTOM_FIELDS["Purchase Order"]}
+
+        self.assertEqual(
+            set(fields),
+            {
+                "workflow_state",
+                "approval_critical_digest",
+                "approval_digest_version",
+                "approval_reviewer_user",
+                "approval_authorized_user",
+            },
+        )
+        for fieldname in (
+            "approval_critical_digest",
+            "approval_digest_version",
+            "approval_reviewer_user",
+            "approval_authorized_user",
+        ):
+            self.assertEqual(fields[fieldname]["read_only"], 1)
+            self.assertEqual(fields[fieldname]["no_copy"], 1)
+
     def test_workflow_fields_are_setup_managed_without_custom_prefix(self) -> None:
         fields = workflow_fields.CUSTOM_FIELDS
 

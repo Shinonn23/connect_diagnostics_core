@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-18.workflow-blueprint.3",
+	"revision": "2026-09-26.purchase-order.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"records_are_inert": false,
@@ -85,11 +85,11 @@
 			"status": "enabled",
 			"document_type": "Purchase Order",
 			"workflow": "Connect Purchase Order Blueprint",
-			"workflow_names": ["Connect Material Request Blueprint", "Connect Purchase Order Blueprint"],
-			"workflow_documents": [
-				{ "document_type": "Material Request", "workflow": "Connect Material Request Blueprint" },
-				{ "document_type": "Purchase Order", "workflow": "Connect Purchase Order Blueprint" }
-			]
+			"route_scope": "Every Purchase Order; native RFQ/Supplier Quotation references and direct PO are enabled",
+			"decision_revision": "D-PROCURE-PO-2026-09-26",
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"],
+			"disabled_workflow": "Connect Material Request Blueprint",
+			"pending_action_policy": "stop-before-write when an affected open PO/MR Workflow Action lacks record-level disposition"
 		},
 		{
 			"id": "WF-12",

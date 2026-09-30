@@ -11,6 +11,17 @@ from connect_diagnostics_core.setup import print_action_fields
 
 
 class TestPrintActionFields(UnitTestCase):
+    def test_purchase_order_review_and_approval_require_distinct_signed_actions(self) -> None:
+        actions = {action.key: action for action in print_action_fields.PRINT_ACTIONS["Purchase Order"]}
+
+        self.assertEqual(set(actions), {"submit", "ordered", "checked", "authorized"})
+        for action_key in ("submit", "ordered"):
+            self.assertFalse(actions[action_key].required_signature)
+            self.assertFalse(actions[action_key].protected)
+        for action_key in ("checked", "authorized"):
+            self.assertTrue(actions[action_key].required_signature)
+            self.assertTrue(actions[action_key].protected)
+
     def test_material_request_and_capitalization_keep_only_authorized_snapshot(self) -> None:
         for doctype in ("Material Request", "Asset Capitalization"):
             self.assertEqual(
@@ -29,6 +40,7 @@ class TestPrintActionFields(UnitTestCase):
                 with self.subTest(doctype=doctype, action=action.key):
                     self.assertEqual(employee["fieldtype"], "Link")
                     self.assertEqual(employee["options"], "Employee")
+                    self.assertEqual(employee["ignore_user_permissions"], 1)
                     self.assertEqual(timestamp["fieldtype"], "Datetime")
                     self.assertEqual(signature["fieldtype"], "Signature")
                     for field in (employee, timestamp, signature):
