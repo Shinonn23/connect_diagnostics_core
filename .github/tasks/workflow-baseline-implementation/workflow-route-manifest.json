@@ -1,117 +1,120 @@
 {
-	"schema_version": 1,
-	"revision": "2026-09-18.workflow-blueprint.3",
+	"schema_version": 2,
+	"revision": "2026-09-26.normalized-workflow-baseline.1",
+	"predecessor_sha256": "61a876fa98dba63dba709b439199b275061d73f58ec4578de6cc79e31f90257e",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
+	"configuration_owner": "TSK-602 normalized workflow baseline",
 	"records_are_inert": false,
-	"activation_status": "enabled-on-dev",
+	"activation_status": "enabled-on-local-test-after-guarded-migration",
 	"activation_prerequisites": [
-		"approved-route-revision",
+		"approved-normalized-route-revision",
 		"approved-target-and-scope",
 		"workflow-state-field-setup",
 		"executable-permission-contract",
+		"exact-route-fingerprint-match",
 		"collision-and-pending-action-disposition",
 		"migration-rerun-recovery-validation",
 		"independent-configuration-review"
 	],
-	"collision_policy": "stop-and-obtain-owner-disposition",
-	"rerun_policy": "deterministic-read-only-validation; no-site-sync",
-	"recovery_policy": "remove-unreleased-artifact from repository change only; no-site-mutation",
+	"collision_policy": "stop-affected-route-on-name-doctype-or-transition-scope-collision",
+	"rerun_policy": "deterministic-idempotent-guarded-apply",
+	"recovery_policy": "restore-captured-predecessor-only-on-matching-post-migration-fingerprint",
+	"history_policy": "never-delete-or-fabricate-workflow-action-version-comment-or-document-history",
+	"shared_controls": [
+		"TSK-600 Approval Action Snapshot",
+		"TSK-601 Self-Approval and Segregation of Duties"
+	],
 	"routes": [
 		{
-			"id": "WF-01",
-			"status": "enabled",
-			"document_type": "Stock Entry",
-			"workflow": "Connect Stock Transfer Approval"
-		},
-		{
-			"id": "WF-02",
-			"status": "enabled",
-			"document_type": "Stock Entry",
-			"workflow": "Connect Stock Transfer Approval"
-		},
-		{
-			"id": "WF-03",
+			"id": "TSK-590",
 			"status": "enabled",
 			"document_type": "Stock Entry",
 			"workflow": "Connect Stock Transfer Approval",
-			"route_scope": "Freeze/Exception controls in the shared Stock Entry Workflow"
+			"route_scope": "purpose is Material Transfer and add_to_transit is false and outgoing_stock_entry is empty",
+			"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+			"migration_rule": "replace only an allowlisted predecessor fingerprint; preserve legacy Emergency history"
 		},
 		{
-			"id": "WF-04",
+			"id": "TSK-591",
 			"status": "enabled",
 			"document_type": "Stock Reconciliation",
-			"workflow": "Connect Stock Reconciliation Blueprint"
+			"workflow": "Connect Stock Reconciliation Blueprint",
+			"route_scope": "standard native Stock Reconciliation; no Stock Count or recount engine",
+			"condition": null,
+			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
 		},
 		{
-			"id": "WF-05",
-			"status": "enabled",
-			"document_type": "Stock Reconciliation",
-			"workflow": "Connect Stock Reconciliation Blueprint"
-		},
-		{
-			"id": "WF-06",
+			"id": "TSK-592",
 			"status": "enabled",
 			"document_type": "Asset Movement",
-			"workflow": "Connect Asset Movement Approval"
+			"workflow": "Connect Asset Movement Approval",
+			"route_scope": "standard native Asset Movement purposes; no equipment assignment workflow",
+			"condition": null,
+			"migration_rule": "update only the exact app-owned predecessor fingerprint"
 		},
 		{
-			"id": "WF-07",
+			"id": "TSK-593",
 			"status": "enabled",
-			"document_type": "Asset",
-			"workflow": "Connect Asset Disposal Blueprint"
+			"document_type": "Journal Entry",
+			"workflow": "Connect Journal Entry Approval",
+			"route_scope": "manual Journal Entry approval; generated entries remain native drafts and receive no bypass",
+			"condition": null,
+			"migration_rule": "adopt the exact reviewed local.test predecessor or create on an unowned DocType only"
 		},
 		{
-			"id": "WF-08",
-			"status": "disabled",
-			"document_type": null,
-			"workflow": null,
-			"reason": "Equipment is out of scope; Asset routes remain separate and do not replace this route by renaming it."
-		},
-		{
-			"id": "WF-09",
+			"id": "TSK-594",
 			"status": "enabled",
 			"document_type": "Sales Order",
-			"workflow": "Connect Sales Order Blueprint"
+			"workflow": "Connect Sales Order Blueprint",
+			"route_scope": "all standard native Sales Orders; no invented amount or credit threshold",
+			"condition": null,
+			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
 		},
 		{
-			"id": "WF-10",
+			"id": "TSK-595",
 			"status": "enabled",
 			"document_type": "Sales Invoice",
-			"workflow": "Connect Sales Invoice Credit Blueprint"
+			"workflow": "Connect Sales Invoice Credit Blueprint",
+			"route_scope": "native return and credit-note Sales Invoices only",
+			"condition": "doc.is_return == 1",
+			"migration_rule": "rename/update the exact app-owned credit blueprint predecessor only"
 		},
 		{
-			"id": "WF-11",
+			"id": "TSK-596",
 			"status": "enabled",
 			"document_type": "Purchase Order",
 			"workflow": "Connect Purchase Order Blueprint",
-			"workflow_names": ["Connect Material Request Blueprint", "Connect Purchase Order Blueprint"],
-			"workflow_documents": [
-				{ "document_type": "Material Request", "workflow": "Connect Material Request Blueprint" },
-				{ "document_type": "Purchase Order", "workflow": "Connect Purchase Order Blueprint" }
-			]
+			"route_scope": "all standard native Purchase Orders; Material Request is not a protected route",
+			"condition": null,
+			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
 		},
 		{
-			"id": "WF-12",
+			"id": "TSK-597",
 			"status": "enabled",
 			"document_type": "Purchase Invoice",
-			"workflow": "Connect Purchase Invoice Blueprint"
+			"workflow": "Connect Purchase Invoice Blueprint",
+			"route_scope": "all standard native Purchase Invoices; ERPNext owns matching and posting",
+			"condition": null,
+			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
 		},
 		{
-			"id": "WF-13",
+			"id": "TSK-598",
 			"status": "enabled",
 			"document_type": "Payment Entry",
-			"workflow": "Connect Payment Entry Approval"
+			"workflow": "Connect Payment Entry Approval",
+			"route_scope": "all standard native Payment Entry types; no POC flag or voucher restriction",
+			"condition": null,
+			"migration_rule": "update only the exact app-owned predecessor fingerprint"
 		},
 		{
-			"id": "WF-14",
+			"id": "TSK-599",
 			"status": "enabled",
 			"document_type": "Payroll Entry",
-			"workflow": "Connect Payroll Entry Blueprint"
-		},
-		{ "id": "WF-15", "status": "no-record", "document_type": null, "workflow": null },
-		{ "id": "WF-16", "status": "no-record", "document_type": null, "workflow": null },
-		{ "id": "WF-17", "status": "no-record", "document_type": null, "workflow": null },
-		{ "id": "WF-18", "status": "no-record", "document_type": null, "workflow": null }
+			"workflow": "Connect Payroll Entry Blueprint",
+			"route_scope": "all native Payroll Entries; no Salary Slip Workflow",
+			"condition": null,
+			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
+		}
 	]
 }

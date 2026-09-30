@@ -2,16 +2,440 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow",
+		"document_type": "Stock Entry",
+		"enable_action_confirmation": 1,
+		"is_active": 1,
+		"modified": "2026-09-23 15:16:23.226397",
+		"name": "Connect Stock Transfer Approval",
+		"override_status": 0,
+		"send_email_alert": 1,
+		"states": [
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Transfer Draft"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Transfer Pending Review"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Transfer Reviewed"
+			},
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Transfer Returned"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Transfer Approved"
+			},
+			{
+				"allow_edit": "System Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Transfer Rejected"
+			},
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Stock Entry Submitted"
+			},
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Stock Entry Cancelled"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Stock Transfer Submitted"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Stock Transfer Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Send Stock Transfer for Review",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Pending Review",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Draft",
+				"transition_tasks": "Connect Stock Transfer Maker Snapshot"
+			},
+			{
+				"action": "Review Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Reviewed",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Pending Review",
+				"transition_tasks": "Connect Stock Transfer Review Snapshot"
+			},
+			{
+				"action": "Return Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Returned",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Pending Review",
+				"transition_tasks": "Connect Stock Transfer Approval Reset"
+			},
+			{
+				"action": "Approve Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Approved",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Reviewed",
+				"transition_tasks": "Connect Stock Transfer Approval Snapshot"
+			},
+			{
+				"action": "Return Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Returned",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Reviewed",
+				"transition_tasks": "Connect Stock Transfer Approval Reset"
+			},
+			{
+				"action": "Reject Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Rejected",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Reviewed",
+				"transition_tasks": null
+			},
+			{
+				"action": "Return Stock Transfer",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Returned",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Approved",
+				"transition_tasks": "Connect Stock Transfer Approval Reset"
+			},
+			{
+				"action": "Resubmit Stock Transfer for Review",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Pending Review",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Returned",
+				"transition_tasks": "Connect Stock Transfer Maker Snapshot"
+			},
+			{
+				"action": "Submit Stock Transfer",
+				"allow_self_approval": 1,
+				"allowed": "Stock Manager",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Submitted",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Approved",
+				"transition_tasks": "Connect Stock Transfer Submit Execution"
+			},
+			{
+				"action": "Cancel Stock Transfer",
+				"allow_self_approval": 1,
+				"allowed": "Stock Manager",
+				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
+				"next_state": "Stock Transfer Cancelled",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Submitted",
+				"transition_tasks": "Connect Stock Transfer Cancel Execution"
+			},
+			{
+				"action": "Submit Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Submitted",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Draft",
+				"transition_tasks": null
+			},
+			{
+				"action": "Submit Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Stock Manager",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Submitted",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Draft",
+				"transition_tasks": null
+			},
+			{
+				"action": "Submit Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Manufacturing User",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Submitted",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Draft",
+				"transition_tasks": null
+			},
+			{
+				"action": "Submit Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Manufacturing Manager",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Submitted",
+				"send_email_to_creator": 0,
+				"state": "Stock Transfer Draft",
+				"transition_tasks": null
+			},
+			{
+				"action": "Cancel Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Cancelled",
+				"send_email_to_creator": 0,
+				"state": "Stock Entry Submitted",
+				"transition_tasks": null
+			},
+			{
+				"action": "Cancel Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Stock Manager",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Cancelled",
+				"send_email_to_creator": 0,
+				"state": "Stock Entry Submitted",
+				"transition_tasks": null
+			},
+			{
+				"action": "Cancel Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Manufacturing User",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Cancelled",
+				"send_email_to_creator": 0,
+				"state": "Stock Entry Submitted",
+				"transition_tasks": null
+			},
+			{
+				"action": "Cancel Stock Entry",
+				"allow_self_approval": 1,
+				"allowed": "Manufacturing Manager",
+				"condition": "not (doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry)",
+				"next_state": "Stock Entry Cancelled",
+				"send_email_to_creator": 0,
+				"state": "Stock Entry Submitted",
+				"transition_tasks": null
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Stock Transfer Approval",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Stock Reconciliation",
+		"enable_action_confirmation": 0,
+		"is_active": 1,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Connect Stock Reconciliation Blueprint",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Reconciliation Draft"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Reconciliation Pending Review"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Reconciliation Reviewed"
+			},
+			{
+				"allow_edit": "Stock User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Reconciliation Returned"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Stock Reconciliation Approved"
+			},
+			{
+				"allow_edit": "System Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Stock Reconciliation Rejected"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Stock Reconciliation Submitted"
+			},
+			{
+				"allow_edit": "Stock Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Stock Reconciliation Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"state": "Stock Reconciliation Draft",
+				"action": "Send Stock Reconciliation for Review",
+				"next_state": "Stock Reconciliation Pending Review",
+				"allowed": "Stock User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Capture Maker"
+			},
+			{
+				"state": "Stock Reconciliation Pending Review",
+				"action": "Review Stock Reconciliation",
+				"next_state": "Stock Reconciliation Reviewed",
+				"allowed": "Stock Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Capture Review"
+			},
+			{
+				"state": "Stock Reconciliation Pending Review",
+				"action": "Return Stock Reconciliation",
+				"next_state": "Stock Reconciliation Returned",
+				"allowed": "Stock Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Clear Approval"
+			},
+			{
+				"state": "Stock Reconciliation Reviewed",
+				"action": "Approve Stock Reconciliation",
+				"next_state": "Stock Reconciliation Approved",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Capture Approval"
+			},
+			{
+				"state": "Stock Reconciliation Reviewed",
+				"action": "Return Stock Reconciliation",
+				"next_state": "Stock Reconciliation Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Clear Approval"
+			},
+			{
+				"state": "Stock Reconciliation Reviewed",
+				"action": "Reject Stock Reconciliation",
+				"next_state": "Stock Reconciliation Rejected",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Clear Approval"
+			},
+			{
+				"state": "Stock Reconciliation Approved",
+				"action": "Return Stock Reconciliation",
+				"next_state": "Stock Reconciliation Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Clear Approval"
+			},
+			{
+				"state": "Stock Reconciliation Returned",
+				"action": "Resubmit Stock Reconciliation for Review",
+				"next_state": "Stock Reconciliation Pending Review",
+				"allowed": "Stock User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Capture Maker"
+			},
+			{
+				"state": "Stock Reconciliation Approved",
+				"action": "Submit Stock Reconciliation",
+				"next_state": "Stock Reconciliation Submitted",
+				"allowed": "Stock Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Submit Execution"
+			},
+			{
+				"state": "Stock Reconciliation Submitted",
+				"action": "Cancel Stock Reconciliation",
+				"next_state": "Stock Reconciliation Cancelled",
+				"allowed": "Stock Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Stock Reconciliation Cancel Execution"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Stock Reconciliation Blueprint",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
 		"document_type": "Asset Movement",
 		"enable_action_confirmation": 1,
 		"is_active": 1,
-		"modified": "2026-09-16 19:06:50.975480",
+		"modified": "2026-09-26 00:00:00.000000",
 		"name": "Connect Asset Movement Approval",
 		"override_status": 0,
 		"send_email_alert": 1,
 		"states": [
 			{
-				"allow_edit": "Stock Manager",
+				"allow_edit": "Stock User",
 				"avoid_status_override": 0,
 				"doc_status": "0",
 				"evaluate_as_expression": 0,
@@ -26,6 +450,20 @@
 			},
 			{
 				"allow_edit": "Stock Manager",
+				"avoid_status_override": 0,
+				"doc_status": "0",
+				"evaluate_as_expression": 0,
+				"is_optional_state": 0,
+				"message": null,
+				"next_action_email_template": null,
+				"send_email": 1,
+				"state": "Asset Movement Pending Review",
+				"update_field": null,
+				"update_value": null,
+				"workflow_builder_id": null
+			},
+			{
+				"allow_edit": "C-Level Approver",
 				"avoid_status_override": 0,
 				"doc_status": "0",
 				"evaluate_as_expression": 0,
@@ -53,7 +491,7 @@
 				"workflow_builder_id": null
 			},
 			{
-				"allow_edit": "System Manager",
+				"allow_edit": "Stock User",
 				"avoid_status_override": 0,
 				"doc_status": "0",
 				"evaluate_as_expression": 0,
@@ -97,14 +535,36 @@
 		],
 		"transitions": [
 			{
-				"action": "Submit Asset Movement for Approval",
+				"action": "Send Asset Movement for Review",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
+				"condition": null,
+				"next_state": "Asset Movement Pending Review",
+				"send_email_to_creator": 0,
+				"state": "Asset Movement Draft",
+				"transition_tasks": "Connect Asset Movement Maker Snapshot",
+				"workflow_builder_id": null
+			},
+			{
+				"action": "Review Asset Movement",
 				"allow_self_approval": 0,
 				"allowed": "Stock Manager",
 				"condition": null,
 				"next_state": "Asset Movement Pending Approval",
 				"send_email_to_creator": 0,
-				"state": "Asset Movement Draft",
-				"transition_tasks": null,
+				"state": "Asset Movement Pending Review",
+				"transition_tasks": "Connect Asset Movement Review Snapshot",
+				"workflow_builder_id": null
+			},
+			{
+				"action": "Return Asset Movement",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": null,
+				"next_state": "Asset Movement Draft",
+				"send_email_to_creator": 0,
+				"state": "Asset Movement Pending Review",
+				"transition_tasks": "Connect Asset Movement Approval Reset",
 				"workflow_builder_id": null
 			},
 			{
@@ -115,18 +575,18 @@
 				"next_state": "Asset Movement Approved",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Pending Approval",
-				"transition_tasks": null,
+				"transition_tasks": "Connect Asset Movement Approval Snapshot",
 				"workflow_builder_id": null
 			},
 			{
-				"action": "Approve Asset Movement",
+				"action": "Return Asset Movement",
 				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
+				"allowed": "C-Level Approver",
 				"condition": null,
-				"next_state": "Asset Movement Approved",
+				"next_state": "Asset Movement Draft",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Pending Approval",
-				"transition_tasks": null,
+				"transition_tasks": "Connect Asset Movement Approval Reset",
 				"workflow_builder_id": null
 			},
 			{
@@ -141,41 +601,799 @@
 				"workflow_builder_id": null
 			},
 			{
-				"action": "Reject Asset Movement",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
+				"action": "Resubmit Asset Movement",
+				"allow_self_approval": 1,
+				"allowed": "Stock User",
 				"condition": null,
-				"next_state": "Asset Movement Rejected",
+				"next_state": "Asset Movement Pending Review",
 				"send_email_to_creator": 0,
-				"state": "Asset Movement Pending Approval",
-				"transition_tasks": null,
+				"state": "Asset Movement Rejected",
+				"transition_tasks": "Connect Asset Movement Maker Snapshot",
 				"workflow_builder_id": null
 			},
 			{
-				"action": "Post Asset Movement",
+				"action": "Submit Asset Movement",
 				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
+				"allowed": "Stock Manager",
 				"condition": null,
 				"next_state": "Asset Movement Submitted",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Approved",
-				"transition_tasks": null,
+				"transition_tasks": "Connect Asset Movement Submit Authorization",
 				"workflow_builder_id": null
 			},
 			{
 				"action": "Cancel Asset Movement",
 				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
+				"allowed": "Stock Manager",
 				"condition": null,
 				"next_state": "Asset Movement Cancelled",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Submitted",
-				"transition_tasks": null,
+				"transition_tasks": "Connect Asset Movement Cancel Authorization",
 				"workflow_builder_id": null
 			}
 		],
 		"workflow_data": null,
 		"workflow_name": "Connect Asset Movement Approval",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Journal Entry",
+		"enable_action_confirmation": 1,
+		"is_active": 1,
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Connect Journal Entry Approval",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Draft"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Pending Review"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Reviewed"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Approved"
+			},
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Returned"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Rejected"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Journal Entry Submitted"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Journal Entry Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Send Journal Entry for Review",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"next_state": "Journal Entry Pending Review",
+				"state": "Journal Entry Draft",
+				"transition_tasks": "Connect Journal Entry Capture Maker"
+			},
+			{
+				"action": "Review Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Reviewed",
+				"state": "Journal Entry Pending Review",
+				"transition_tasks": "Connect Journal Entry Capture Checker"
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Pending Review",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Approve Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Approved",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": "Connect Journal Entry Capture Approver"
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Reject Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Rejected",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": null
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Approved",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Resubmit Journal Entry for Review",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"next_state": "Journal Entry Pending Review",
+				"state": "Journal Entry Returned",
+				"transition_tasks": "Connect Journal Entry Capture Maker"
+			},
+			{
+				"action": "Submit Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Submitted",
+				"state": "Journal Entry Approved",
+				"transition_tasks": "Connect Journal Entry Submit Execution"
+			},
+			{
+				"action": "Cancel Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Cancelled",
+				"state": "Journal Entry Submitted",
+				"transition_tasks": "Connect Journal Entry Cancel Execution"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Journal Entry Approval",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Sales Order",
+		"enable_action_confirmation": 0,
+		"is_active": 1,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Connect Sales Order Blueprint",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Sales User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Sales Order Draft"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Sales Order Pending Review"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Sales Order Reviewed"
+			},
+			{
+				"allow_edit": "Sales User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Sales Order Returned"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Sales Order Approved"
+			},
+			{
+				"allow_edit": "System Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Sales Order Rejected"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Sales Order Submitted"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Sales Order Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"state": "Sales Order Draft",
+				"action": "Send Sales Order for Review",
+				"next_state": "Sales Order Pending Review",
+				"allowed": "Sales User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Capture Maker"
+			},
+			{
+				"state": "Sales Order Pending Review",
+				"action": "Review Sales Order",
+				"next_state": "Sales Order Reviewed",
+				"allowed": "Sales Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Capture Review"
+			},
+			{
+				"state": "Sales Order Pending Review",
+				"action": "Return Sales Order",
+				"next_state": "Sales Order Returned",
+				"allowed": "Sales Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Clear Approval"
+			},
+			{
+				"state": "Sales Order Reviewed",
+				"action": "Approve Sales Order",
+				"next_state": "Sales Order Approved",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Capture Approval"
+			},
+			{
+				"state": "Sales Order Reviewed",
+				"action": "Return Sales Order",
+				"next_state": "Sales Order Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Clear Approval"
+			},
+			{
+				"state": "Sales Order Reviewed",
+				"action": "Reject Sales Order",
+				"next_state": "Sales Order Rejected",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Clear Approval"
+			},
+			{
+				"state": "Sales Order Approved",
+				"action": "Return Sales Order",
+				"next_state": "Sales Order Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Clear Approval"
+			},
+			{
+				"state": "Sales Order Returned",
+				"action": "Resubmit Sales Order for Review",
+				"next_state": "Sales Order Pending Review",
+				"allowed": "Sales User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Capture Maker"
+			},
+			{
+				"state": "Sales Order Approved",
+				"action": "Submit Sales Order",
+				"next_state": "Sales Order Submitted",
+				"allowed": "Sales Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Submit Execution"
+			},
+			{
+				"state": "Sales Order Submitted",
+				"action": "Cancel Sales Order",
+				"next_state": "Sales Order Cancelled",
+				"allowed": "Sales Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Sales Order Cancel Execution"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Sales Order Blueprint",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Sales Invoice",
+		"enable_action_confirmation": 1,
+		"is_active": 1,
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Connect Sales Invoice Credit Blueprint",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "All",
+				"doc_status": "0",
+				"state": "Sales Invoice Draft"
+			},
+			{
+				"allow_edit": "Sales User",
+				"doc_status": "0",
+				"state": "Sales Invoice Credit Pending Review"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "0",
+				"state": "Sales Invoice Credit Reviewed"
+			},
+			{
+				"allow_edit": "Sales User",
+				"doc_status": "0",
+				"state": "Sales Invoice Credit Returned"
+			},
+			{
+				"allow_edit": "Sales Manager",
+				"doc_status": "0",
+				"state": "Sales Invoice Credit Approved"
+			},
+			{
+				"allow_edit": "All",
+				"doc_status": "1",
+				"state": "Sales Invoice Submitted"
+			},
+			{
+				"allow_edit": "All",
+				"doc_status": "2",
+				"state": "Sales Invoice Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Submit Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Draft",
+				"next_state": "Sales Invoice Submitted"
+			},
+			{
+				"action": "Submit Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts Manager",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Draft",
+				"next_state": "Sales Invoice Submitted"
+			},
+			{
+				"action": "Cancel Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts Manager",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Submitted",
+				"next_state": "Sales Invoice Cancelled"
+			},
+			{
+				"action": "Send Sales Invoice Credit for Review",
+				"allow_self_approval": 1,
+				"allowed": "Sales User",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Draft",
+				"transition_tasks": "Connect Sales Invoice Credit Send",
+				"next_state": "Sales Invoice Credit Pending Review"
+			},
+			{
+				"action": "Resubmit Sales Invoice Credit for Review",
+				"allow_self_approval": 1,
+				"allowed": "Sales User",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Returned",
+				"transition_tasks": "Connect Sales Invoice Credit Resubmit",
+				"next_state": "Sales Invoice Credit Pending Review"
+			},
+			{
+				"action": "Review Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Pending Review",
+				"transition_tasks": "Connect Sales Invoice Credit Review",
+				"next_state": "Sales Invoice Credit Reviewed"
+			},
+			{
+				"action": "Return Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Pending Review",
+				"transition_tasks": "Connect Sales Invoice Credit Return",
+				"next_state": "Sales Invoice Credit Returned"
+			},
+			{
+				"action": "Approve Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Reviewed",
+				"transition_tasks": "Connect Sales Invoice Credit Approve",
+				"next_state": "Sales Invoice Credit Approved"
+			},
+			{
+				"action": "Reject Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Reviewed",
+				"transition_tasks": "Connect Sales Invoice Credit Reject",
+				"next_state": "Sales Invoice Credit Returned"
+			},
+			{
+				"action": "Post Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Credit Approved",
+				"transition_tasks": "Connect Sales Invoice Credit Post",
+				"next_state": "Sales Invoice Submitted"
+			},
+			{
+				"action": "Cancel Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return == 1",
+				"state": "Sales Invoice Submitted",
+				"next_state": "Sales Invoice Cancelled"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Sales Invoice Credit Blueprint",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Purchase Order",
+		"enable_action_confirmation": 0,
+		"is_active": 1,
+		"modified": "2026-09-26 15:40:39.985606",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Purchase User",
+				"doc_status": "0",
+				"state": "Purchase Order Draft"
+			},
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "0",
+				"state": "Purchase Order Pending Review"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"state": "Purchase Order Pending Approval"
+			},
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "0",
+				"state": "Purchase Order Approved"
+			},
+			{
+				"allow_edit": "Purchase User",
+				"doc_status": "0",
+				"state": "Purchase Order Rejected"
+			},
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "1",
+				"state": "Purchase Order Submitted"
+			},
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "2",
+				"state": "Purchase Order Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Submit Purchase Order for Review",
+				"allow_self_approval": 1,
+				"allowed": "Purchase User",
+				"condition": null,
+				"state": "Purchase Order Draft",
+				"next_state": "Purchase Order Pending Review",
+				"transition_tasks": "Connect Purchase Order Maker"
+			},
+			{
+				"action": "Review Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Order Pending Review",
+				"next_state": "Purchase Order Pending Approval",
+				"transition_tasks": "Connect Purchase Order Review"
+			},
+			{
+				"action": "Return Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Order Pending Review",
+				"next_state": "Purchase Order Draft",
+				"transition_tasks": "Connect Purchase Order Approval Reset"
+			},
+			{
+				"action": "Approve Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"state": "Purchase Order Pending Approval",
+				"next_state": "Purchase Order Approved",
+				"transition_tasks": "Connect Purchase Order Approval"
+			},
+			{
+				"action": "Reject Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"state": "Purchase Order Pending Approval",
+				"next_state": "Purchase Order Rejected"
+			},
+			{
+				"action": "Return Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"state": "Purchase Order Pending Approval",
+				"next_state": "Purchase Order Draft",
+				"transition_tasks": "Connect Purchase Order Approval Reset"
+			},
+			{
+				"action": "Resubmit Purchase Order",
+				"allow_self_approval": 1,
+				"allowed": "Purchase User",
+				"condition": null,
+				"state": "Purchase Order Rejected",
+				"next_state": "Purchase Order Pending Review",
+				"transition_tasks": "Connect Purchase Order Maker"
+			},
+			{
+				"action": "Post Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Order Approved",
+				"next_state": "Purchase Order Submitted",
+				"transition_tasks": "Connect Purchase Order Submit"
+			},
+			{
+				"action": "Cancel Purchase Order",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Order Submitted",
+				"next_state": "Purchase Order Cancelled",
+				"transition_tasks": "Connect Purchase Order Cancel"
+			}
+		],
+		"workflow_data": null,
+		"name": "Connect Purchase Order Blueprint",
+		"workflow_name": "Connect Purchase Order Blueprint",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Purchase Invoice",
+		"enable_action_confirmation": 0,
+		"is_active": 1,
+		"modified": "2026-09-23 20:12:10.000000",
+		"name": "Connect Purchase Invoice Blueprint",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"state": "Purchase Invoice Draft"
+			},
+			{
+				"allow_edit": "Purchase Manager",
+				"doc_status": "0",
+				"state": "Purchase Invoice Pending Source Verification"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"state": "Purchase Invoice Pending Accounting Approval"
+			},
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"state": "Purchase Invoice Returned"
+			},
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"state": "Purchase Invoice Rejected"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"state": "Purchase Invoice Approved"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "1",
+				"state": "Purchase Invoice Submitted"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "2",
+				"state": "Purchase Invoice Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Submit Purchase Invoice for Review",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"state": "Purchase Invoice Draft",
+				"next_state": "Purchase Invoice Pending Source Verification",
+				"transition_tasks": "Connect Purchase Invoice Maker"
+			},
+			{
+				"action": "Verify Purchase Invoice Source",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Pending Accounting Approval",
+				"transition_tasks": "Connect Purchase Invoice Source Verification"
+			},
+			{
+				"action": "Approve Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Accounting Approval",
+				"next_state": "Purchase Invoice Approved",
+				"transition_tasks": "Connect Purchase Invoice Accounting Approval"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
+			},
+			{
+				"action": "Reject Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Purchase Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Source Verification",
+				"next_state": "Purchase Invoice Rejected"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Accounting Approval",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
+			},
+			{
+				"action": "Reject Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Pending Accounting Approval",
+				"next_state": "Purchase Invoice Rejected"
+			},
+			{
+				"action": "Post Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Approved",
+				"next_state": "Purchase Invoice Submitted",
+				"transition_tasks": "Connect Purchase Invoice Submit"
+			},
+			{
+				"action": "Return Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Approved",
+				"next_state": "Purchase Invoice Returned",
+				"transition_tasks": "Connect Purchase Invoice Approval Reset"
+			},
+			{
+				"action": "Resubmit Purchase Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"state": "Purchase Invoice Returned",
+				"next_state": "Purchase Invoice Pending Source Verification",
+				"transition_tasks": "Connect Purchase Invoice Maker"
+			},
+			{
+				"action": "Cancel Purchase Invoice",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"state": "Purchase Invoice Submitted",
+				"next_state": "Purchase Invoice Cancelled",
+				"transition_tasks": "Connect Purchase Invoice Cancel"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Purchase Invoice Blueprint",
 		"workflow_state_field": "workflow_state"
 	},
 	{
@@ -191,869 +1409,157 @@
 		"states": [
 			{
 				"allow_edit": "Accounts User",
-				"avoid_status_override": 0,
 				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
 				"send_email": 0,
-				"state": "Payment Entry Draft",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"state": "Payment Entry Draft"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Payment Entry Pending Review"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Payment Entry Reviewed"
 			},
 			{
 				"allow_edit": "Accounts User",
-				"avoid_status_override": 0,
 				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 1,
-				"state": "Payment Entry Pending Approval",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"send_email": 0,
+				"state": "Payment Entry Returned"
 			},
 			{
 				"allow_edit": "Accounts Manager",
-				"avoid_status_override": 0,
 				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
 				"send_email": 1,
-				"state": "Payment Entry Approved",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"state": "Payment Entry Approved"
 			},
 			{
 				"allow_edit": "System Manager",
-				"avoid_status_override": 0,
 				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
 				"send_email": 0,
-				"state": "Payment Entry Rejected",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"state": "Payment Entry Rejected"
 			},
 			{
 				"allow_edit": "Accounts Manager",
-				"avoid_status_override": 0,
 				"doc_status": "1",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
 				"send_email": 0,
-				"state": "Payment Entry Submitted",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"state": "Payment Entry Submitted"
 			},
 			{
 				"allow_edit": "Accounts Manager",
-				"avoid_status_override": 0,
 				"doc_status": "2",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
 				"send_email": 0,
-				"state": "Payment Entry Cancelled",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
+				"state": "Payment Entry Cancelled"
 			}
 		],
 		"transitions": [
 			{
-				"action": "Submit Payment Entry for Approval",
-				"allow_self_approval": 0,
-				"allowed": "Accounts User",
-				"condition": null,
-				"next_state": "Payment Entry Pending Approval",
-				"send_email_to_creator": 0,
 				"state": "Payment Entry Draft",
-				"transition_tasks": null,
-				"workflow_builder_id": null
+				"action": "Send Payment Entry for Review",
+				"next_state": "Payment Entry Pending Review",
+				"allowed": "Accounts User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Capture Maker"
 			},
 			{
+				"state": "Payment Entry Pending Review",
+				"action": "Review Payment Entry",
+				"next_state": "Payment Entry Reviewed",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Capture Checker"
+			},
+			{
+				"state": "Payment Entry Pending Review",
+				"action": "Return Payment Entry",
+				"next_state": "Payment Entry Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Clear Approval"
+			},
+			{
+				"state": "Payment Entry Reviewed",
 				"action": "Approve Payment Entry",
-				"allow_self_approval": 0,
-				"allowed": "C-Level Approver",
-				"condition": null,
 				"next_state": "Payment Entry Approved",
-				"send_email_to_creator": 0,
-				"state": "Payment Entry Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Reject Payment Entry",
-				"allow_self_approval": 0,
 				"allowed": "C-Level Approver",
+				"allow_self_approval": 0,
 				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Capture Approver"
+			},
+			{
+				"state": "Payment Entry Reviewed",
+				"action": "Return Payment Entry",
+				"next_state": "Payment Entry Returned",
+				"allowed": "C-Level Approver",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Clear Approval"
+			},
+			{
+				"state": "Payment Entry Reviewed",
+				"action": "Reject Payment Entry",
 				"next_state": "Payment Entry Rejected",
+				"allowed": "C-Level Approver",
+				"allow_self_approval": 0,
+				"condition": null,
 				"send_email_to_creator": 0,
-				"state": "Payment Entry Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
+				"transition_tasks": "Connect Payment Entry Clear Approval"
 			},
 			{
-				"action": "Post Payment Entry",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
-				"condition": null,
-				"next_state": "Payment Entry Submitted",
-				"send_email_to_creator": 0,
 				"state": "Payment Entry Approved",
-				"transition_tasks": null,
-				"workflow_builder_id": null
+				"action": "Return Payment Entry",
+				"next_state": "Payment Entry Returned",
+				"allowed": "C-Level Approver",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Clear Approval"
 			},
 			{
-				"action": "Cancel Payment Entry",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
+				"state": "Payment Entry Returned",
+				"action": "Resubmit Payment Entry for Review",
+				"next_state": "Payment Entry Pending Review",
+				"allowed": "Accounts User",
+				"allow_self_approval": 1,
 				"condition": null,
-				"next_state": "Payment Entry Cancelled",
 				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Capture Maker"
+			},
+			{
+				"state": "Payment Entry Approved",
+				"action": "Submit Payment Entry",
+				"next_state": "Payment Entry Submitted",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Submit Execution"
+			},
+			{
 				"state": "Payment Entry Submitted",
-				"transition_tasks": null,
-				"workflow_builder_id": null
+				"action": "Cancel Payment Entry",
+				"next_state": "Payment Entry Cancelled",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payment Entry Cancel Execution"
 			}
 		],
 		"workflow_data": null,
 		"workflow_name": "Connect Payment Entry Approval",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Stock Entry",
-		"enable_action_confirmation": 1,
-		"is_active": 1,
-		"modified": "2026-09-16 19:06:50.975480",
-		"name": "Connect Stock Transfer Approval",
-		"override_status": 0,
-		"send_email_alert": 1,
-		"states": [
-			{
-				"allow_edit": "Stock User",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Stock Transfer Draft",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock User",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 1,
-				"state": "Stock Transfer Pending Approval",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 1,
-				"state": "Stock Transfer Approved",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "System Manager",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Stock Transfer Rejected",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "1",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Stock Transfer Submitted",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "2",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Stock Transfer Cancelled",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock User",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 1,
-				"state": "Emergency Stock Movement Pending Review",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 1,
-				"state": "Emergency Stock Movement Approved",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Emergency Stock Movement Rejected",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "1",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"send_email": 0,
-				"state": "Emergency Stock Movement Submitted",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock Manager",
-				"avoid_status_override": 0,
-				"doc_status": "2",
-				"is_optional_state": 0,
-				"message": null,
-				"send_email": 0,
-				"state": "Emergency Stock Movement Cancelled",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			},
-			{
-				"allow_edit": "Stock User",
-				"avoid_status_override": 0,
-				"doc_status": "0",
-				"evaluate_as_expression": 0,
-				"is_optional_state": 0,
-				"message": null,
-				"next_action_email_template": null,
-				"send_email": 0,
-				"state": "Emergency Stock Movement Draft",
-				"update_field": null,
-				"update_value": null,
-				"workflow_builder_id": null
-			}
-		],
-		"transitions": [
-			{
-				"action": "Submit Stock Transfer for Approval",
-				"allow_self_approval": 1,
-				"allowed": "Stock User",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Pending Approval",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Draft",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Approve Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "C-Level Approver",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Approved",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Approve Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Approved",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Reject Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "C-Level Approver",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Rejected",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Reject Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Rejected",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Pending Approval",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Post Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Submitted",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Approved",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Cancel Stock Transfer",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-				"next_state": "Stock Transfer Cancelled",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Submitted",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Submit Emergency Stock Movement for Review",
-				"allow_self_approval": 1,
-				"allowed": "Stock User",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Pending Review",
-				"send_email_to_creator": 0,
-				"state": "Stock Transfer Draft",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Approve Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Approved",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Pending Review",
-				"transition_tasks": "Connect Emergency Stock Movement Approval",
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Approve Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "C-Level Approver",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Approved",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Pending Review",
-				"transition_tasks": "Connect Emergency Stock Movement Approval",
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Reject Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Rejected",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Pending Review",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Reject Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "C-Level Approver",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Rejected",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Pending Review",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Post Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Submitted",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Approved",
-				"transition_tasks": "Connect Emergency Stock Movement Execution",
-				"workflow_builder_id": null
-			},
-			{
-				"action": "Cancel Emergency Stock Movement",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry and doc.freeze_exception and doc.freeze_exception_reason",
-				"next_state": "Emergency Stock Movement Cancelled",
-				"send_email_to_creator": 0,
-				"state": "Emergency Stock Movement Submitted",
-				"transition_tasks": null,
-				"workflow_builder_id": null
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Stock Transfer Approval",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Stock Reconciliation",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Stock Reconciliation Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Stock Reconciliation Draft" },
-			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Stock Reconciliation Pending Review" },
-			{ "allow_edit": "Stock Manager", "doc_status": "0", "state": "Stock Reconciliation Approved" },
-			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Stock Reconciliation Rejected" },
-			{ "allow_edit": "Stock Manager", "doc_status": "1", "state": "Stock Reconciliation Submitted" },
-			{ "allow_edit": "Stock Manager", "doc_status": "2", "state": "Stock Reconciliation Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Stock Reconciliation for Review",
-				"allow_self_approval": 0,
-				"allowed": "Stock User",
-				"condition": null,
-				"state": "Stock Reconciliation Draft",
-				"next_state": "Stock Reconciliation Pending Review"
-			},
-			{
-				"action": "Approve Stock Reconciliation",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Stock Reconciliation Pending Review",
-				"next_state": "Stock Reconciliation Approved"
-			},
-			{
-				"action": "Reject Stock Reconciliation",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Stock Reconciliation Pending Review",
-				"next_state": "Stock Reconciliation Rejected"
-			},
-			{
-				"action": "Post Stock Reconciliation",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Stock Reconciliation Approved",
-				"next_state": "Stock Reconciliation Submitted"
-			},
-			{
-				"action": "Cancel Stock Reconciliation",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Stock Reconciliation Submitted",
-				"next_state": "Stock Reconciliation Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Stock Reconciliation Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Sales Order",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Sales Order Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Order Draft" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Order Pending Review" },
-			{ "allow_edit": "Sales Manager", "doc_status": "0", "state": "Sales Order Approved" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Order Rejected" },
-			{ "allow_edit": "Sales Manager", "doc_status": "1", "state": "Sales Order Submitted" },
-			{ "allow_edit": "Sales Manager", "doc_status": "2", "state": "Sales Order Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Sales Order for Review",
-				"allow_self_approval": 0,
-				"allowed": "Sales User",
-				"condition": null,
-				"state": "Sales Order Draft",
-				"next_state": "Sales Order Pending Review"
-			},
-			{
-				"action": "Approve Sales Order",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Order Pending Review",
-				"next_state": "Sales Order Approved"
-			},
-			{
-				"action": "Reject Sales Order",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Order Pending Review",
-				"next_state": "Sales Order Rejected"
-			},
-			{
-				"action": "Post Sales Order",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Order Approved",
-				"next_state": "Sales Order Submitted"
-			},
-			{
-				"action": "Cancel Sales Order",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Order Submitted",
-				"next_state": "Sales Order Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Sales Order Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Sales Invoice",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Sales Invoice Credit Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Draft" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Pending Review" },
-			{ "allow_edit": "Sales Manager", "doc_status": "0", "state": "Sales Invoice Credit Approved" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Rejected" },
-			{ "allow_edit": "Sales Manager", "doc_status": "1", "state": "Sales Invoice Credit Submitted" },
-			{ "allow_edit": "Sales Manager", "doc_status": "2", "state": "Sales Invoice Credit Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Sales Invoice Credit for Review",
-				"allow_self_approval": 0,
-				"allowed": "Sales User",
-				"condition": null,
-				"state": "Sales Invoice Credit Draft",
-				"next_state": "Sales Invoice Credit Pending Review"
-			},
-			{
-				"action": "Approve Sales Invoice Credit",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Pending Review",
-				"next_state": "Sales Invoice Credit Approved"
-			},
-			{
-				"action": "Reject Sales Invoice Credit",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Pending Review",
-				"next_state": "Sales Invoice Credit Rejected"
-			},
-			{
-				"action": "Post Sales Invoice Credit",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Approved",
-				"next_state": "Sales Invoice Credit Submitted"
-			},
-			{
-				"action": "Cancel Sales Invoice Credit",
-				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Submitted",
-				"next_state": "Sales Invoice Credit Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Sales Invoice Credit Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Material Request",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Material Request Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Material Request Draft" },
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Material Request Pending Review" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "0", "state": "Material Request Approved" },
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Material Request Rejected" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "1", "state": "Material Request Submitted" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "2", "state": "Material Request Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Material Request for Review",
-				"allow_self_approval": 0,
-				"allowed": "Purchase User",
-				"condition": null,
-				"state": "Material Request Draft",
-				"next_state": "Material Request Pending Review"
-			},
-			{
-				"action": "Approve Material Request",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Material Request Pending Review",
-				"next_state": "Material Request Approved"
-			},
-			{
-				"action": "Reject Material Request",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Material Request Pending Review",
-				"next_state": "Material Request Rejected"
-			},
-			{
-				"action": "Post Material Request",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Material Request Approved",
-				"next_state": "Material Request Submitted"
-			},
-			{
-				"action": "Cancel Material Request",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Material Request Submitted",
-				"next_state": "Material Request Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Material Request Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Purchase Order",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Purchase Order Draft" },
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Purchase Order Pending Review" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "0", "state": "Purchase Order Approved" },
-			{ "allow_edit": "Purchase User", "doc_status": "0", "state": "Purchase Order Rejected" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "1", "state": "Purchase Order Submitted" },
-			{ "allow_edit": "Purchase Manager", "doc_status": "2", "state": "Purchase Order Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Purchase Order for Review",
-				"allow_self_approval": 0,
-				"allowed": "Purchase User",
-				"condition": null,
-				"state": "Purchase Order Draft",
-				"next_state": "Purchase Order Pending Review"
-			},
-			{
-				"action": "Approve Purchase Order",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Purchase Order Pending Review",
-				"next_state": "Purchase Order Approved"
-			},
-			{
-				"action": "Reject Purchase Order",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Purchase Order Pending Review",
-				"next_state": "Purchase Order Rejected"
-			},
-			{
-				"action": "Post Purchase Order",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Purchase Order Approved",
-				"next_state": "Purchase Order Submitted"
-			},
-			{
-				"action": "Cancel Purchase Order",
-				"allow_self_approval": 0,
-				"allowed": "Purchase Manager",
-				"condition": null,
-				"state": "Purchase Order Submitted",
-				"next_state": "Purchase Order Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"name": "Connect Purchase Order Blueprint",
-		"workflow_name": "Connect Purchase Order Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Purchase Invoice",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Purchase Invoice Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Draft" },
-			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Pending Review" },
-			{ "allow_edit": "Accounts Manager", "doc_status": "0", "state": "Purchase Invoice Approved" },
-			{ "allow_edit": "Accounts User", "doc_status": "0", "state": "Purchase Invoice Rejected" },
-			{ "allow_edit": "Accounts Manager", "doc_status": "1", "state": "Purchase Invoice Submitted" },
-			{ "allow_edit": "Accounts Manager", "doc_status": "2", "state": "Purchase Invoice Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Purchase Invoice for Review",
-				"allow_self_approval": 0,
-				"allowed": "Accounts User",
-				"condition": null,
-				"state": "Purchase Invoice Draft",
-				"next_state": "Purchase Invoice Pending Review"
-			},
-			{
-				"action": "Approve Purchase Invoice",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
-				"condition": null,
-				"state": "Purchase Invoice Pending Review",
-				"next_state": "Purchase Invoice Approved"
-			},
-			{
-				"action": "Reject Purchase Invoice",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
-				"condition": null,
-				"state": "Purchase Invoice Pending Review",
-				"next_state": "Purchase Invoice Rejected"
-			},
-			{
-				"action": "Post Purchase Invoice",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
-				"condition": null,
-				"state": "Purchase Invoice Approved",
-				"next_state": "Purchase Invoice Submitted"
-			},
-			{
-				"action": "Cancel Purchase Invoice",
-				"allow_self_approval": 0,
-				"allowed": "Accounts Manager",
-				"condition": null,
-				"state": "Purchase Invoice Submitted",
-				"next_state": "Purchase Invoice Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Purchase Invoice Blueprint",
 		"workflow_state_field": "workflow_state"
 	},
 	{
@@ -1067,121 +1573,159 @@
 		"override_status": 0,
 		"send_email_alert": 0,
 		"states": [
-			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Draft" },
-			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Pending Review" },
-			{ "allow_edit": "HR Manager", "doc_status": "0", "state": "Payroll Entry Approved" },
-			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Rejected" },
-			{ "allow_edit": "HR Manager", "doc_status": "1", "state": "Payroll Entry Submitted" },
-			{ "allow_edit": "HR Manager", "doc_status": "2", "state": "Payroll Entry Cancelled" }
+			{
+				"allow_edit": "HR User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Payroll Entry Draft"
+			},
+			{
+				"allow_edit": "HR Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Payroll Entry Pending Review"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Payroll Entry Reviewed"
+			},
+			{
+				"allow_edit": "HR User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Payroll Entry Returned"
+			},
+			{
+				"allow_edit": "HR Manager",
+				"doc_status": "0",
+				"send_email": 1,
+				"state": "Payroll Entry Approved"
+			},
+			{
+				"allow_edit": "System Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Payroll Entry Rejected"
+			},
+			{
+				"allow_edit": "HR Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Payroll Entry Submitted"
+			},
+			{
+				"allow_edit": "HR Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Payroll Entry Cancelled"
+			}
 		],
 		"transitions": [
 			{
-				"action": "Submit Payroll Entry for Review",
-				"allow_self_approval": 0,
-				"allowed": "HR User",
-				"condition": null,
 				"state": "Payroll Entry Draft",
-				"next_state": "Payroll Entry Pending Review"
+				"action": "Send Payroll Entry for Review",
+				"next_state": "Payroll Entry Pending Review",
+				"allowed": "HR User",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Capture Maker"
 			},
 			{
+				"state": "Payroll Entry Pending Review",
+				"action": "Review Payroll Entry",
+				"next_state": "Payroll Entry Reviewed",
+				"allowed": "HR Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Capture Review"
+			},
+			{
+				"state": "Payroll Entry Pending Review",
+				"action": "Return Payroll Entry",
+				"next_state": "Payroll Entry Returned",
+				"allowed": "HR Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Clear Approval"
+			},
+			{
+				"state": "Payroll Entry Reviewed",
 				"action": "Approve Payroll Entry",
+				"next_state": "Payroll Entry Approved",
+				"allowed": "Accounts Manager",
 				"allow_self_approval": 0,
-				"allowed": "HR Manager",
 				"condition": null,
-				"state": "Payroll Entry Pending Review",
-				"next_state": "Payroll Entry Approved"
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Capture Approval"
 			},
 			{
+				"state": "Payroll Entry Reviewed",
+				"action": "Return Payroll Entry",
+				"next_state": "Payroll Entry Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Clear Approval"
+			},
+			{
+				"state": "Payroll Entry Reviewed",
 				"action": "Reject Payroll Entry",
+				"next_state": "Payroll Entry Rejected",
+				"allowed": "Accounts Manager",
 				"allow_self_approval": 0,
-				"allowed": "HR Manager",
 				"condition": null,
-				"state": "Payroll Entry Pending Review",
-				"next_state": "Payroll Entry Rejected"
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Clear Approval"
 			},
 			{
-				"action": "Post Payroll Entry",
-				"allow_self_approval": 0,
-				"allowed": "HR Manager",
-				"condition": null,
 				"state": "Payroll Entry Approved",
-				"next_state": "Payroll Entry Submitted"
+				"action": "Return Payroll Entry",
+				"next_state": "Payroll Entry Returned",
+				"allowed": "Accounts Manager",
+				"allow_self_approval": 0,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Clear Approval"
 			},
 			{
-				"action": "Cancel Payroll Entry",
-				"allow_self_approval": 0,
-				"allowed": "HR Manager",
+				"state": "Payroll Entry Returned",
+				"action": "Resubmit Payroll Entry for Review",
+				"next_state": "Payroll Entry Pending Review",
+				"allowed": "HR User",
+				"allow_self_approval": 1,
 				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Capture Maker"
+			},
+			{
+				"state": "Payroll Entry Approved",
+				"action": "Submit Payroll Entry",
+				"next_state": "Payroll Entry Submitted",
+				"allowed": "HR Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": "Connect Payroll Entry Submit Execution"
+			},
+			{
 				"state": "Payroll Entry Submitted",
-				"next_state": "Payroll Entry Cancelled"
+				"action": "Cancel Payroll Entry",
+				"next_state": "Payroll Entry Cancelled",
+				"allowed": "HR Manager",
+				"allow_self_approval": 1,
+				"condition": null,
+				"send_email_to_creator": 0,
+				"transition_tasks": null
 			}
 		],
 		"workflow_data": null,
 		"workflow_name": "Connect Payroll Entry Blueprint",
-		"workflow_state_field": "workflow_state"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow",
-		"document_type": "Asset",
-		"enable_action_confirmation": 0,
-		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Connect Asset Disposal Blueprint",
-		"override_status": 0,
-		"send_email_alert": 0,
-		"states": [
-			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Asset Disposal Draft" },
-			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Asset Disposal Pending Review" },
-			{ "allow_edit": "Stock Manager", "doc_status": "0", "state": "Asset Disposal Approved" },
-			{ "allow_edit": "Stock Manager", "doc_status": "0", "state": "Asset Disposal Rejected" },
-			{ "allow_edit": "Stock Manager", "doc_status": "1", "state": "Asset Disposal Submitted" },
-			{ "allow_edit": "Stock Manager", "doc_status": "2", "state": "Asset Disposal Cancelled" }
-		],
-		"transitions": [
-			{
-				"action": "Submit Asset Disposal for Review",
-				"allow_self_approval": 0,
-				"allowed": "Stock User",
-				"condition": null,
-				"state": "Asset Disposal Draft",
-				"next_state": "Asset Disposal Pending Review"
-			},
-			{
-				"action": "Approve Asset Disposal",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Asset Disposal Pending Review",
-				"next_state": "Asset Disposal Approved"
-			},
-			{
-				"action": "Reject Asset Disposal",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Asset Disposal Pending Review",
-				"next_state": "Asset Disposal Rejected"
-			},
-			{
-				"action": "Post Asset Disposal",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Asset Disposal Approved",
-				"next_state": "Asset Disposal Submitted"
-			},
-			{
-				"action": "Cancel Asset Disposal",
-				"allow_self_approval": 0,
-				"allowed": "Stock Manager",
-				"condition": null,
-				"state": "Asset Disposal Submitted",
-				"next_state": "Asset Disposal Cancelled"
-			}
-		],
-		"workflow_data": null,
-		"workflow_name": "Connect Asset Disposal Blueprint",
 		"workflow_state_field": "workflow_state"
 	}
 ]

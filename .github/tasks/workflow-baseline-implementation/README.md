@@ -1,11 +1,16 @@
 # Workflow baseline implementation
 
-Status: planning checkpoint accepted; no runtime implementation slice is ready.
+Status: normalized-baseline TSK-602 plan ready; implementation active.
+
+The 2026-09-26 normalized-baseline request supersedes the old WF-01–18 business-workflow count.
+The canonical target is ten standard ERPNext/HRMS DocType routes; TSK-600/601 are shared controls,
+not additional business workflows. The old mapping remains below as historical task context until
+TSK-602 completes the reviewed manifest and task-register migration.
 
 This record supersedes conflicting assumptions in the eight attached plans. It does not treat
-planning text, task status, fixture presence, or old tests as runtime evidence. The complete goal
-remains all required WF-01–18 implementation and evidence gates; this checkpoint does not narrow
-that goal.
+planning text, task status, fixture presence, or old tests as runtime evidence. The active goal is
+the normalized ten-route baseline and its evidence gates. WF-01–18 obligations appear only as
+historical context and do not authorize or require retired business workflows.
 
 ## Fixed constraints
 
@@ -33,7 +38,30 @@ that goal.
   slice is blocked until D-CORE, required D-IDENTITY decisions, target approval, exact files, and
   a second independent readiness review are complete.
 
-## Dependency graph
+## Active normalized dependency graph (authoritative)
+
+```text
+D-TARGET + D-NORMALIZED-ROUTES + D-CORE + D-IDENTITY
+  -> TSK-600/601 shared controls
+  -> TSK-590 Stock Entry
+  -> TSK-591 Stock Reconciliation
+  -> TSK-592 Asset Movement
+  -> TSK-593 / TSK-603 Journal Entry
+  -> TSK-594 Sales Order
+  -> TSK-595 Sales Invoice Return/Credit Note
+  -> TSK-596 Purchase Order
+  -> TSK-597 Purchase Invoice
+  -> TSK-598 Payment Entry
+  -> TSK-599 Payroll Entry
+  -> TSK-602 normalized fixture/migration integration
+  -> automated gates -> Computer Use -> docs -> accepted
+```
+
+Advanced count/recount, asset disposal/equipment, delegation, backup, amount/credit thresholds,
+bank settlement, and baseline-freeze workflows are outside this graph. A blocked route blocks only
+its own acceptance; TSK-602 continues all independent routes and evidence.
+
+## Historical dependency graph (superseded by TSK-602)
 
 ```text
 FIXED-CONSTRAINTS
@@ -54,7 +82,24 @@ FREEZE-08-REGISTER may proceed from the traceability contract.
 FREEZE-08-SIGNOFF waits for every required WF-01–17 and G0–G4.
 ```
 
-## Task register
+## Active normalized task register
+
+| ID | Route / responsibility | Status | Close evidence |
+| --- | --- | --- | --- |
+| TSK-600/601 | Shared snapshot and SoD helpers | integration review required | shared tests; no Workflow rows |
+| TSK-590 | Stock Entry — Material Transfer | source worktree available | focused tests + migration/browser evidence |
+| TSK-591 | Stock Reconciliation | source evidence incomplete | focused tests + migration/browser evidence |
+| TSK-592 | Asset Movement | source worktree available | focused tests + migration/browser evidence |
+| TSK-593 / TSK-603 | Manual Journal Entry | source worktree available | focused tests + generator non-bypass + migration/browser evidence |
+| TSK-594 | Sales Order | demo source only; production adapter review required | focused tests + migration/browser evidence |
+| TSK-595 | Sales Invoice Return/Credit Note | source worktree available | focused tests + migration/browser evidence |
+| TSK-596 | Purchase Order | source worktree available | focused tests + migration/browser evidence |
+| TSK-597 | Purchase Invoice | trial source only; production adapter review required | focused tests + migration/browser evidence |
+| TSK-598 | Payment Entry | POC source only; production adapter review required | focused tests + migration/browser evidence |
+| TSK-599 | Payroll Entry | source worktree available | focused tests + migration/browser evidence |
+| TSK-602 | Normalized fixture/migration integration | active | exactly ten routes; history-safe repeatable migration; final gates |
+
+## Historical WF-01–18 task register (superseded business-workflow taxonomy)
 
 | ID                          | Status                             | Start dependencies                                        | Close dependencies / evidence                                               |
 | --------------------------- | ---------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -80,6 +125,8 @@ FREEZE-08-SIGNOFF waits for every required WF-01–17 and G0–G4.
 | PAYROLL-07-CORE             | Blocked                            | D-PAYROLL, 531 Core, Payroll Entry contract               | Review/accrual/recovery/privacy evidence                                    |
 | PAYROLL-07-BANK-HANDOFF     | Blocked                            | Payroll Core, 529 Core                                    | Bank JE/evidence/settlement tests; no duplicate PE                          |
 | CONFIG-PAYMENT              | Blocked                            | D-PAYMENT, approved site owner/target                     | Desired state, pending PE/actions, permissions, migration/re-run/rollback   |
+| TSK-603-JOURNAL-ENTRY       | Route implementation; integration review required | D-CORE, D-IDENTITY, approved manual-JE actor contract | Manual Journal Entry tests, collision-aware migration, browser evidence |
+| TSK-602-NORMALIZED-BASELINE | Plan review                        | Target snapshot, TSK-600/601, route source decisions      | Exactly ten routes, guarded migration/recovery, G0–G4 evidence              |
 | FREEZE-08-REGISTER          | Active (documentation only)        | Scope/traceability contract                               | Complete owner/decision/evidence row for WF-01–18                           |
 | FREEZE-08-SIGNOFF           | Blocked                            | All required coverage                                     | G0–G4, manifest, migration rehearsal, independent sign-off                  |
 
