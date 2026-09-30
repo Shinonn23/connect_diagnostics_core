@@ -27,4 +27,5 @@ After runtime acceptance, stable shipped behavior must be finalized under `docs/
 
 | Task | Status | Record |
 | --- | --- | --- |
+| TSK-512 Borrow prototype | Planning; isolated Stock-only MVP | [tsk-512-borrow-prototype](tsk-512-borrow-prototype/) |
 | Workflow baseline implementation | Planning checkpoint accepted; implementation record imported from workflow branch | [workflow-baseline-implementation](workflow-baseline-implementation/) |

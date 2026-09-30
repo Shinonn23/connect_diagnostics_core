@@ -11,6 +11,11 @@ from connect_diagnostics_core.setup import item
 
 
 class TestRelocatedAfterAnchor(UnitTestCase):
+    def test_borrow_fields_are_declared(self) -> None:
+        fields = {field["fieldname"]: field for field in item.CUSTOM_FIELDS["Item"]}
+        self.assertEqual(fields["allow_borrow"]["fieldtype"], "Check")
+        self.assertEqual(fields["borrow_return_policy"]["options"], "Exact Return")
+
     def test_moves_the_fields_directly_after_the_anchor(self) -> None:
         current_order = [
             "has_serial_no",

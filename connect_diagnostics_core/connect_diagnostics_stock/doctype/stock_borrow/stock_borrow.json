@@ -1,0 +1,138 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Borrow",
+	"creation": "2026-09-27 15:27:57.272710",
+	"modified": "2026-09-27 15:42:32.812124",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"module": "Connect Diagnostics Stock",
+	"autoname": "naming_series:",
+	"is_submittable": 0,
+	"engine": "InnoDB",
+	"field_order": [
+		"naming_series",
+		"material_request",
+		"company",
+		"responsible_employee",
+		"destination_type",
+		"destination_customer",
+		"destination_address",
+		"expected_return_date",
+		"borrow_warehouse",
+		"return_hold_warehouse",
+		"items",
+		"issued_qty",
+		"returned_qty",
+		"pending_issue_qty",
+		"outstanding_qty",
+		"status"
+	],
+	"fields": [
+		{
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Series",
+			"options": "SBR.YYYY-BE.MM-DATE.####",
+			"default": "SBR.YYYY-BE.MM-DATE.####",
+			"hidden": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "material_request",
+			"fieldtype": "Link",
+			"label": "Material Request",
+			"options": "Material Request",
+			"reqd": 1,
+			"unique": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "responsible_employee",
+			"fieldtype": "Link",
+			"label": "Responsible Employee",
+			"options": "Employee",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "destination_type",
+			"fieldtype": "Select",
+			"label": "Destination Type",
+			"options": "Employee\nCustomer\nCompany Site",
+			"read_only": 1
+		},
+		{
+			"fieldname": "destination_customer",
+			"fieldtype": "Link",
+			"label": "Destination Customer",
+			"options": "Customer",
+			"read_only": 1
+		},
+		{
+			"fieldname": "destination_address",
+			"fieldtype": "Link",
+			"label": "Destination Address",
+			"options": "Address",
+			"read_only": 1
+		},
+		{
+			"fieldname": "expected_return_date",
+			"fieldtype": "Date",
+			"label": "Expected Return Date",
+			"read_only": 1
+		},
+		{
+			"fieldname": "borrow_warehouse",
+			"fieldtype": "Link",
+			"label": "Borrow Warehouse",
+			"options": "Warehouse",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "return_hold_warehouse",
+			"fieldtype": "Link",
+			"label": "Return Hold Warehouse",
+			"options": "Warehouse",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "items",
+			"fieldtype": "Table",
+			"label": "Items",
+			"options": "Stock Borrow Item",
+			"reqd": 1
+		},
+		{ "fieldname": "issued_qty", "fieldtype": "Float", "label": "Issued Qty", "read_only": 1 },
+		{ "fieldname": "returned_qty", "fieldtype": "Float", "label": "Returned Qty", "read_only": 1 },
+		{
+			"fieldname": "pending_issue_qty",
+			"fieldtype": "Float",
+			"label": "Pending Issue Qty",
+			"read_only": 1
+		},
+		{ "fieldname": "outstanding_qty", "fieldtype": "Float", "label": "Outstanding Qty", "read_only": 1 },
+		{
+			"fieldname": "status",
+			"fieldtype": "Select",
+			"label": "Status",
+			"options": "Pending Issue\nPartially Issued\nIssued\nPartially Returned\nReturned",
+			"read_only": 1
+		}
+	],
+	"permissions": [
+		{ "role": "Stock User", "read": 1, "write": 1, "create": 1 },
+		{ "role": "Stock Manager", "read": 1, "write": 1, "create": 1 },
+		{ "role": "Employee", "read": 1 },
+		{ "role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1 }
+	]
+}
