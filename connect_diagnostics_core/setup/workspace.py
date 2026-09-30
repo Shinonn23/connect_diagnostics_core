@@ -266,6 +266,8 @@ NAVIGATION_GROUPS = (
     NavigationGroup(
         name="Stock",
         links=(
+            NavigationLink("Equipment Model", "Equipment Model", "DocType"),
+            NavigationLink("Material Request Fulfillment", "Material Request Fulfillment", "DocType"),
             NavigationLink("Dispatch", "Dispatch", "DocType"),
             NavigationLink(
                 "Borrowed Asset Return Inspection",
@@ -283,6 +285,12 @@ NAVIGATION_GROUPS = (
                 "Material Request",
             ),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
+            NavigationLink(
+                "Equipment Model Mapping Review",
+                "Equipment Model Mapping Review",
+                "Report",
+                "Equipment Model",
+            ),
             NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
             NavigationLink("Goods Receipt Report", "Goods Receipt Report", "Report", "Purchase Receipt"),
         ),
@@ -321,9 +329,16 @@ SIDEBAR_PLACEMENTS = {
         SidebarPlacement("Short Expiry Report", after_link_to="Back Orders", icon="calendar-clock"),
         SidebarPlacement("Goods Receipt Report", after_link_to="Short Expiry Report", icon="package-check"),
         SidebarPlacement("Outstanding Borrowed Items", section="Reports"),
+        SidebarPlacement(
+            "Equipment Model Mapping Review",
+            after_link_to="Outstanding Borrowed Items",
+            section="Reports",
+        ),
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
         SidebarPlacement("Storage Condition", after_link_to="Product Group", section="Setup"),
+        SidebarPlacement("Equipment Model", after_link_to="Storage Condition", section="Setup"),
+        SidebarPlacement("Material Request Fulfillment", after_link_to="Equipment Model", section="Setup"),
     ),
     "Buying": (
         SidebarPlacement(

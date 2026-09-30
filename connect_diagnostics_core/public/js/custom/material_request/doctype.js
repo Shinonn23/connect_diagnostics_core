@@ -34,13 +34,71 @@ frappe.ui.form.on("Material Request", {
 		}
 		refresh_route_options(frm);
 	},
+	onload_post_render(frm) {
+		install_demo_item_query(frm);
+		refresh_demo_eligible_items(frm);
+	},
+	company(frm) {
+		refresh_demo_eligible_items(frm);
+	},
 	request_usage(frm) {
 		refresh_route_options(frm);
+		refresh_demo_eligible_items(frm);
 	},
 	validate(frm) {
 		validate_schedule_date(frm);
 	},
 });
+
+function install_demo_item_query(frm) {
+	const field = frm.fields_dict.items?.grid?.get_field("item_code");
+	if (!field) return;
+
+	if (!frm.__native_material_request_item_query) {
+		frm.__native_material_request_item_query = field.get_query;
+	}
+	if (!frm.__native_material_request_item_query || field.get_query === frm.__demo_item_query) return;
+
+	frm.__demo_item_query = (doc, cdt, cdn) =>
+		build_demo_item_query(
+			frm.__native_material_request_item_query(doc, cdt, cdn),
+			doc.request_usage,
+			frm.__demo_eligible_items || [],
+		);
+	field.get_query = frm.__demo_item_query;
+}
+
+function build_demo_item_query(native_query, request_usage, eligible_items) {
+	if (request_usage !== "Customer Demo") return native_query;
+
+	return {
+		...(native_query || {}),
+		filters: {
+			...(native_query?.filters || {}),
+			name: ["in", eligible_items],
+		},
+	};
+}
+
+async function refresh_demo_eligible_items(frm) {
+	install_demo_item_query(frm);
+	frm.__demo_eligible_items = [];
+	if (frm.doc.request_usage !== "Customer Demo" || !frm.doc.company) {
+		frm.fields_dict.items?.grid?.refresh();
+		return;
+	}
+
+	const requested_company = frm.doc.company;
+	const response = await frappe.call({
+		method: "connect_diagnostics_core.api.erpnext.material_request.get_demo_eligible_items",
+		type: "GET",
+		args: { company: requested_company },
+	});
+	if (frm.doc.request_usage === "Customer Demo" && frm.doc.company === requested_company) {
+		frm.__demo_eligible_items = response.message?.data || [];
+		frm.fields_dict.items?.grid?.refresh();
+	}
+}
 
 frappe.ui.form.on("Material Request Item", {
 	items_form_render(frm, cdt, cdn) {

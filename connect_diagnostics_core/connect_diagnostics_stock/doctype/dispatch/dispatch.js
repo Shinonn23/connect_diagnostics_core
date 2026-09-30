@@ -35,6 +35,26 @@ frappe.ui.form.on("Dispatch", {
 			frm.add_custom_button(__("Prepare Return Transit"), () => prepare_return_transit(frm));
 		}
 		if (frm.doc.docstatus !== 1) return;
+		if (frm.doc.dispatch_type === "Outbound" && frm.doc.delivery_status === "Delivered") {
+			frm.add_custom_button(__("Prepare Demo Return Movement"), () =>
+				frappe
+					.call({
+						method: "connect_diagnostics_core.api.erpnext.material_request_fulfillment.prepare_demo_return_movement",
+						args: { dispatch: frm.doc.name },
+						freeze: true,
+					})
+					.then(() => frm.reload_doc()),
+			);
+			frm.add_custom_button(__("Prepare Demo Return Dispatch"), () =>
+				frappe
+					.call({
+						method: "connect_diagnostics_core.api.erpnext.material_request_fulfillment.prepare_demo_return_dispatch",
+						args: { dispatch: frm.doc.name },
+						freeze: true,
+					})
+					.then(() => frm.reload_doc()),
+			);
+		}
 		if (frm.doc.delivery_status === "Failed") {
 			frm.add_custom_button(__("Return to Origin"), () => show_return_origin_dialog(frm));
 			return;

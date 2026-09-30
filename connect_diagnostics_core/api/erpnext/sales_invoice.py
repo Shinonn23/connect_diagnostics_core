@@ -11,6 +11,7 @@ from typing import Any, cast
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint
@@ -257,3 +258,320 @@ def _row_as_dict(row: Any) -> dict[str, Any]:
     if callable(as_dict):
         return cast(dict[str, Any], as_dict())
     return dict(vars(row))
+
+
+def _demo_sale_context(allocation: str) -> tuple[Any, Any, Any, Any]:
+    row = frappe.db.get_value(
+        "Material Request Fulfillment Allocation",
+        allocation,
+        [
+            "name",
+            "parent",
+            "lifecycle_state",
+            "resolved_asset",
+            "fixed_asset_item",
+            "current_sales_invoice",
+            "sale_attempt",
+            "asset_reservation",
+            "dispatch_transfer",
+        ],
+        as_dict=True,
+        for_update=True,
+    )
+    if not row or row.lifecycle_state != "Delivered" or not row.resolved_asset:
+        frappe.throw(_("Only a delivered Demo allocation with a resolved Asset can be sold."))
+    plan = frappe.db.get_value(
+        "Material Request Fulfillment",
+        row.parent,
+        ["name", "material_request", "company", "status"],
+        as_dict=True,
+        for_update=True,
+    )
+    if not plan or plan.status != "Planned":
+        frappe.throw(_("The linked Fulfillment is no longer active."))
+    mr = frappe.db.get_value(
+        "Material Request",
+        plan.material_request,
+        ["company", "docstatus", "request_usage"],
+        as_dict=True,
+        for_update=True,
+    )
+    if not mr or mr.docstatus != 1 or mr.request_usage != "Customer Demo" or mr.company != plan.company:
+        frappe.throw(_("The linked request is not an active Demo request."))
+    asset = frappe.db.get_value(
+        "Asset",
+        row.resolved_asset,
+        ["name", "company", "docstatus", "status", "asset_quantity", "item_code"],
+        as_dict=True,
+        for_update=True,
+    )
+    if (
+        not asset
+        or asset.company != plan.company
+        or asset.docstatus != 1
+        or asset.status in {"Sold", "Scrapped"}
+        or asset.asset_quantity != 1
+        or asset.item_code != row.fixed_asset_item
+    ):
+        frappe.throw(_("The resolved Asset is no longer eligible for sale."))
+    transfer = frappe.db.get_value(
+        "Dispatch Transfer",
+        row.dispatch_transfer,
+        ["name", "parent", "asset", "fulfillment_allocation"],
+        as_dict=True,
+        for_update=True,
+    )
+    dispatch = frappe.db.get_value(
+        "Dispatch",
+        transfer.parent if transfer else "",
+        ["name", "company", "docstatus", "dispatch_type", "delivery_status"],
+        as_dict=True,
+        for_update=True,
+    )
+    if (
+        not transfer
+        or not dispatch
+        or transfer.fulfillment_allocation != allocation
+        or transfer.asset != row.resolved_asset
+        or dispatch.company != plan.company
+        or dispatch.docstatus != 1
+        or dispatch.dispatch_type != "Outbound"
+        or dispatch.delivery_status != "Delivered"
+    ):
+        frappe.throw(_("A delivered Outbound Dispatch is required before sale."))
+    reservation = frappe.db.get_value(
+        "Demo Asset Reservation",
+        row.asset_reservation,
+        ["name", "asset", "fulfillment_allocation", "status"],
+        as_dict=True,
+        for_update=True,
+    )
+    if (
+        not reservation
+        or reservation.asset != row.resolved_asset
+        or reservation.fulfillment_allocation != allocation
+        or reservation.status != "Consumed"
+    ):
+        frappe.throw(_("The allocation reservation must be consumed before sale."))
+    return_movements = frappe.get_all(
+        "Asset Movement",
+        filters={
+            "reference_doctype": "Dispatch",
+            "reference_name": dispatch.name,
+            "purpose": "Receipt",
+            "docstatus": ("<", 2),
+        },
+        pluck="name",
+        order_by="name asc",
+    )
+    blocked_movements = []
+    for name in return_movements:
+        frappe.db.get_value("Asset Movement", name, "name", for_update=True)
+        movement_item = frappe.db.get_value(
+            "Asset Movement Item",
+            {"parent": name, "asset": row.resolved_asset},
+            "name",
+            for_update=True,
+        )
+        if movement_item:
+            blocked_movements.append(name)
+    if blocked_movements:
+        frappe.throw(_("A started return movement blocks this sale."))
+    return_dispatches = frappe.get_all(
+        "Dispatch",
+        filters={"original_dispatch": dispatch.name, "dispatch_type": "Return", "docstatus": ("<", 2)},
+        pluck="name",
+        order_by="name asc",
+    )
+    blocked_dispatches = []
+    for name in return_dispatches:
+        frappe.db.get_value("Dispatch", name, "name", for_update=True)
+        return_transfer = frappe.db.get_value(
+            "Dispatch Transfer",
+            {"parent": name, "fulfillment_allocation": allocation},
+            "name",
+            for_update=True,
+        )
+        if return_transfer:
+            blocked_dispatches.append(name)
+    if blocked_dispatches:
+        frappe.throw(_("A started return Dispatch blocks this sale."))
+    successors = frappe.get_all(
+        "Demo Asset Reservation",
+        filters={"asset": row.resolved_asset, "status": "Active"},
+        fields=["name", "fulfillment_allocation"],
+        order_by="name asc",
+    )
+    successors = [
+        frappe.db.get_value(
+            "Demo Asset Reservation",
+            candidate.name,
+            ["name", "fulfillment_allocation"],
+            as_dict=True,
+            for_update=True,
+        )
+        for candidate in successors
+    ]
+    if any(candidate and candidate.fulfillment_allocation != allocation for candidate in successors):
+        frappe.throw(_("A successor reservation blocks this sale."))
+    return row, plan, asset, dispatch
+
+
+@frappe.whitelist(methods=["POST"])
+def create_demo_sales_invoice(allocation: str, customer: str) -> dict[str, Any]:
+    if not set(frappe.get_roles()) & {"Accounts User", "Accounts Manager", "System Manager"}:
+        frappe.throw(_("Accounts access is required to sell a Demo Asset."), frappe.PermissionError)
+    if not frappe.has_permission("Sales Invoice", "create"):
+        frappe.throw(_("Sales Invoice create permission is required."), frappe.PermissionError)
+    if not frappe.has_permission("Customer", "read", customer):
+        frappe.throw(_("Customer read permission is required."), frappe.PermissionError)
+    locked = frappe.db.get_value(
+        "Material Request Fulfillment Allocation",
+        allocation,
+        ["name", "current_sales_invoice", "sale_attempt"],
+        as_dict=True,
+        for_update=True,
+    )
+    if not locked:
+        frappe.throw(_("The Demo allocation does not exist."))
+    if locked.current_sales_invoice:
+        current = frappe.db.get_value(
+            "Sales Invoice",
+            locked.current_sales_invoice,
+            [
+                "name",
+                "docstatus",
+                "customer",
+                "demo_fulfillment_allocation",
+                "demo_sale_attempt",
+                "demo_sale_operation_id",
+            ],
+            as_dict=True,
+            for_update=True,
+        )
+        if (
+            current
+            and current.docstatus < 2
+            and current.customer == customer
+            and current.demo_fulfillment_allocation == allocation
+            and current.demo_sale_attempt == locked.sale_attempt
+            and current.demo_sale_operation_id == f"demo-sale:{allocation}:{locked.sale_attempt}"
+        ):
+            return {"data": current.name, "message": _("Demo Sales Invoice already exists.")}
+        frappe.throw(_("The current Demo sale attempt is inconsistent and must be reviewed."))
+    row, plan, asset, dispatch = _demo_sale_context(allocation)
+    attempt = int(row.sale_attempt or 0) + 1
+    operation_id = f"demo-sale:{allocation}:{attempt}"
+    existing = frappe.db.get_value("Sales Invoice", {"demo_sale_operation_id": operation_id}, "name")
+    if existing:
+        return {"data": existing, "message": _("Demo Sales Invoice already exists.")}
+    invoice = cast(Document, make_sales_invoice(asset.name, asset.item_code, plan.company, 1))
+    invoice.set("customer", customer)
+    invoice.run_method("set_missing_values")
+    invoice.set("update_stock", 0)
+    invoice.set("demo_fulfillment_allocation", allocation)
+    invoice.set("demo_outbound_dispatch", dispatch.name)
+    invoice.set("demo_sale_attempt", attempt)
+    invoice.set("demo_sale_operation_id", operation_id)
+    if len(invoice.get("items") or []) != 1:
+        frappe.throw(_("Demo Asset sale must contain exactly one invoice item."))
+    item = invoice.get("items")[0]
+    if item.get("item_code") != asset.item_code or item.get("qty") != 1 or item.get("asset") != asset.name:
+        frappe.throw(_("Demo Asset sale provenance does not match the fixed Asset."))
+    if not frappe.db.get_value("Item", asset.item_code, "is_fixed_asset"):
+        frappe.throw(_("The sale item must be a fixed-asset Item."))
+    if not frappe.db.exists("Customer", customer):
+        frappe.throw(_("The selected Customer does not exist."))
+    invoice.insert()
+    frappe.db.set_value(
+        "Material Request Fulfillment Allocation",
+        allocation,
+        {"current_sales_invoice": invoice.name, "sale_attempt": attempt},
+        update_modified=False,
+    )
+    return {"data": invoice.name, "message": _("Demo Sales Invoice draft created.")}
+
+
+def validate_demo_sales_invoice(doc: Document, method: str | None = None) -> None:
+    if not doc.get("demo_fulfillment_allocation"):
+        return
+    row, plan, asset, dispatch = _demo_sale_context(cast(str, doc.get("demo_fulfillment_allocation")))
+    if (
+        doc.get("demo_sale_attempt") != row.sale_attempt
+        or doc.get("demo_sale_operation_id") != f"demo-sale:{row.name}:{doc.get('demo_sale_attempt')}"
+        or doc.get("demo_outbound_dispatch") != dispatch.name
+        or not doc.get("customer")
+        or doc.get("update_stock")
+        or row.current_sales_invoice != doc.name
+    ):
+        frappe.throw(_("Demo Sales Invoice provenance is invalid."))
+    items = cast(list[Any], doc.get("items") or [])
+    if (
+        len(items) != 1
+        or items[0].get("item_code") != asset.item_code
+        or items[0].get("asset") != asset.name
+        or items[0].get("qty") != 1
+        or not items[0].get("is_fixed_asset")
+        or not frappe.db.get_value("Item", asset.item_code, "is_fixed_asset")
+    ):
+        frappe.throw(_("Demo Sales Invoice must contain the exact fixed Asset item and quantity one."))
+    if doc.get("company") != plan.company or not frappe.db.exists("Customer", doc.get("customer")):
+        frappe.throw(_("Demo Sales Invoice company or Customer is invalid."))
+
+
+def on_submit_demo_sales_invoice(doc: Document, method: str) -> None:
+    if not doc.get("demo_fulfillment_allocation"):
+        return
+    allocation = frappe.db.get_value(
+        "Material Request Fulfillment Allocation",
+        doc.get("demo_fulfillment_allocation"),
+        ["name", "current_sales_invoice", "sale_attempt", "lifecycle_state", "resolved_asset"],
+        as_dict=True,
+        for_update=True,
+    )
+    if (
+        not allocation
+        or allocation.current_sales_invoice != doc.name
+        or allocation.sale_attempt != doc.get("demo_sale_attempt")
+        or allocation.lifecycle_state != "Delivered"
+        or doc.get("demo_sale_operation_id") != f"demo-sale:{allocation.name}:{allocation.sale_attempt}"
+        or frappe.db.get_value("Asset", allocation.resolved_asset, "status", for_update=True) != "Sold"
+    ):
+        frappe.throw(_("The Demo sale result no longer matches its current allocation attempt."))
+    frappe.db.set_value(
+        "Material Request Fulfillment Allocation",
+        allocation.name,
+        {
+            "current_sales_invoice": doc.name,
+            "sale_attempt": doc.get("demo_sale_attempt"),
+            "lifecycle_state": "Sold",
+        },
+        update_modified=False,
+    )
+
+
+def on_cancel_demo_sales_invoice(doc: Document, method: str) -> None:
+    if not doc.get("demo_fulfillment_allocation"):
+        return
+    allocation = frappe.db.get_value(
+        "Material Request Fulfillment Allocation",
+        doc.get("demo_fulfillment_allocation"),
+        ["name", "current_sales_invoice", "sale_attempt", "lifecycle_state", "resolved_asset"],
+        as_dict=True,
+        for_update=True,
+    )
+    if (
+        not allocation
+        or allocation.current_sales_invoice != doc.name
+        or allocation.sale_attempt != doc.get("demo_sale_attempt")
+        or allocation.lifecycle_state != "Sold"
+        or doc.get("demo_sale_operation_id") != f"demo-sale:{allocation.name}:{allocation.sale_attempt}"
+        or frappe.db.get_value("Asset", allocation.resolved_asset, "status", for_update=True) == "Sold"
+    ):
+        frappe.throw(_("Only the current Demo sale attempt can restore its allocation."))
+    frappe.db.set_value(
+        "Material Request Fulfillment Allocation",
+        allocation.name,
+        {"current_sales_invoice": None, "lifecycle_state": "Delivered"},
+        update_modified=False,
+    )

@@ -289,11 +289,14 @@ doc_events = {
     "Sales Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice.validate_demo_sales_invoice",
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
+        "on_submit": "connect_diagnostics_core.api.erpnext.sales_invoice.on_submit_demo_sales_invoice",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.sales_invoice.on_cancel_demo_sales_invoice",
     },
     "Payment Entry": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -313,6 +316,7 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.material_request.validate",
         ],
         "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel",
+        "on_submit": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.on_submit",
     },
     "Asset Movement": {
         "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_asset_movement",
@@ -401,6 +405,14 @@ doc_events = {
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
     },
+}
+
+permission_query_conditions = {
+    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.get_permission_query_conditions",
+}
+
+has_permission = {
+    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.has_permission",
 }
 
 # Standard link-search queries (override the default link search per doctype).

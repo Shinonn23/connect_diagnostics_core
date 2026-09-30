@@ -209,7 +209,56 @@ def _confirm_delivery(
     doc.set("delivery_override_attachment", override_attachment)
     doc.flags.dispatch_action = "delivery"
     doc.save()
+    _complete_demo_allocation_delivery(doc)
     return {"data": doc.as_dict(), "message": _("Dispatch delivery confirmed.")}
+
+
+def _complete_demo_allocation_delivery(doc: Document) -> None:
+    for row in sorted(
+        (row for row in doc.get("transfers", []) if row.get("fulfillment_allocation")),
+        key=lambda value: cast(str, value.get("fulfillment_allocation")),
+    ):
+        allocation = frappe.db.get_value(
+            "Material Request Fulfillment Allocation",
+            row.get("fulfillment_allocation"),
+            ["resolved_asset", "asset_reservation", "lifecycle_state"],
+            as_dict=True,
+            for_update=True,
+        )
+        expected_state = "Dispatched" if doc.get("dispatch_type") == "Outbound" else "Delivered"
+        if (
+            not allocation
+            or allocation.resolved_asset != row.get("asset")
+            or allocation.lifecycle_state != expected_state
+        ):
+            frappe.throw(_("A Demo allocation changed before delivery confirmation."))
+        frappe.db.set_value(
+            "Material Request Fulfillment Allocation",
+            row.get("fulfillment_allocation"),
+            "lifecycle_state",
+            "Delivered" if doc.get("dispatch_type") == "Outbound" else "Returned",
+            update_modified=False,
+        )
+        if doc.get("dispatch_type") != "Outbound" or not allocation.asset_reservation:
+            continue
+        reservation = frappe.db.get_value(
+            "Demo Asset Reservation",
+            allocation.asset_reservation,
+            ["asset", "status"],
+            as_dict=True,
+            for_update=True,
+        )
+        if not reservation or reservation.asset != allocation.resolved_asset:
+            frappe.throw(_("The Demo Asset reservation no longer matches its allocation."))
+        if reservation.status == "Active":
+            frappe.db.set_value(
+                "Demo Asset Reservation",
+                allocation.asset_reservation,
+                {"status": "Consumed", "active_asset_key": None},
+                update_modified=False,
+            )
+        elif reservation.status != "Consumed":
+            frappe.throw(_("The Demo Asset reservation is not active for delivery."))
 
 
 def _create_delivery_movements(doc: Document) -> None:
@@ -308,6 +357,29 @@ def _validate_asset_delivery_movements(doc: Document) -> None:
         or movement.purpose != expected_purpose
     ):
         frappe.throw(_("The Dispatch Asset Movement must be submitted and match this journey."))
+    demo_rows = [row for row in asset_rows if row.get("fulfillment_allocation")]
+    if demo_rows:
+        expected_reference_doctype = (
+            "Dispatch" if doc.get("dispatch_type") == "Return" else "Material Request Fulfillment"
+        )
+        expected_reference_name = (
+            doc.get("original_dispatch")
+            if doc.get("dispatch_type") == "Return"
+            else frappe.db.get_value(
+                "Material Request Fulfillment Allocation",
+                demo_rows[0].get("fulfillment_allocation"),
+                "parent",
+            )
+        )
+        reference = frappe.db.get_value(
+            "Asset Movement", movement_name, ["reference_doctype", "reference_name"], as_dict=True
+        )
+        if (
+            not reference
+            or reference.reference_doctype != expected_reference_doctype
+            or reference.reference_name != expected_reference_name
+        ):
+            frappe.throw(_("The Demo Asset Movement reference does not match this journey."))
     for transfer in asset_rows:
         if not frappe.db.exists(
             "Asset Movement Item", {"parent": movement_name, "asset": transfer.get("asset")}

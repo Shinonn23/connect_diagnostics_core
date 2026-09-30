@@ -1,0 +1,358 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"autoname": "naming_series:",
+	"creation": "2026-09-27 15:13:53.963570",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"naming_series",
+		"company",
+		"material_request_fulfillment",
+		"fulfillment_allocation",
+		"operation_id",
+		"posting_date",
+		"posting_time",
+		"is_return",
+		"target_section",
+		"target_asset_item",
+		"asset_category",
+		"target_location",
+		"column_break_target",
+		"fixed_asset_account",
+		"cost_center",
+		"depreciation_section",
+		"accounting_treatment",
+		"treatment_override_reason",
+		"finance_book",
+		"depreciation_start_date",
+		"column_break_depreciation",
+		"frequency_of_depreciation",
+		"total_number_of_depreciations",
+		"expected_value_after_useful_life",
+		"source_section",
+		"items",
+		"preview_section",
+		"preview_stock_value",
+		"preview_valuation_rate",
+		"preview_recommendation",
+		"preview_hash",
+		"preview_column_break",
+		"preview_approved_by",
+		"preview_approved_on",
+		"result_section",
+		"asset",
+		"amended_from"
+	],
+	"fields": [
+		{
+			"default": "SAC.YYYY-BE.MM-DATE.####",
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"hidden": 1,
+			"label": "Series",
+			"options": "SAC.YYYY-BE.MM-DATE.####",
+			"read_only": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"in_standard_filter": 1,
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "material_request_fulfillment",
+			"fieldtype": "Link",
+			"label": "Material Request Fulfillment",
+			"options": "Material Request Fulfillment",
+			"read_only": 1
+		},
+		{
+			"fieldname": "fulfillment_allocation",
+			"fieldtype": "Link",
+			"label": "Fulfillment Allocation",
+			"options": "Material Request Fulfillment Allocation",
+			"read_only": 1
+		},
+		{
+			"fieldname": "operation_id",
+			"fieldtype": "Data",
+			"label": "Operation ID",
+			"read_only": 1,
+			"unique": 1
+		},
+		{
+			"default": "Today",
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"label": "Posting Date",
+			"reqd": 1
+		},
+		{
+			"default": "Now",
+			"fieldname": "posting_time",
+			"fieldtype": "Time",
+			"label": "Posting Time",
+			"reqd": 1
+		},
+		{
+			"default": "0",
+			"fieldname": "is_return",
+			"fieldtype": "Check",
+			"hidden": 1,
+			"label": "Is Return",
+			"read_only": 1
+		},
+		{
+			"fieldname": "target_section",
+			"fieldtype": "Section Break",
+			"label": "Target Asset"
+		},
+		{
+			"fieldname": "target_asset_item",
+			"fieldtype": "Link",
+			"label": "Target Asset Item",
+			"options": "Item",
+			"reqd": 1
+		},
+		{
+			"fieldname": "asset_category",
+			"fieldtype": "Link",
+			"label": "Asset Category",
+			"options": "Asset Category",
+			"reqd": 1
+		},
+		{
+			"fieldname": "target_location",
+			"fieldtype": "Link",
+			"label": "Target Location",
+			"options": "Location",
+			"reqd": 1
+		},
+		{
+			"fieldname": "column_break_target",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "fixed_asset_account",
+			"fieldtype": "Link",
+			"label": "Fixed Asset Account",
+			"options": "Account",
+			"read_only": 1
+		},
+		{
+			"fieldname": "cost_center",
+			"fieldtype": "Link",
+			"label": "Cost Center",
+			"options": "Cost Center"
+		},
+		{
+			"fieldname": "depreciation_section",
+			"fieldtype": "Section Break",
+			"label": "Depreciation"
+		},
+		{
+			"default": "Full Depreciation — Single Entry",
+			"fieldname": "accounting_treatment",
+			"fieldtype": "Select",
+			"label": "Accounting Treatment",
+			"options": "Full Depreciation — Single Entry\nNormal Depreciation",
+			"reqd": 1
+		},
+		{
+			"fieldname": "treatment_override_reason",
+			"fieldtype": "Small Text",
+			"label": "Treatment Override Reason"
+		},
+		{
+			"fieldname": "finance_book",
+			"fieldtype": "Link",
+			"label": "Finance Book",
+			"options": "Finance Book"
+		},
+		{
+			"default": "Today",
+			"fieldname": "depreciation_start_date",
+			"fieldtype": "Date",
+			"label": "Depreciation Start Date",
+			"reqd": 1
+		},
+		{
+			"fieldname": "column_break_depreciation",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "1",
+			"fieldname": "frequency_of_depreciation",
+			"fieldtype": "Int",
+			"label": "Frequency of Depreciation (Months)",
+			"reqd": 1
+		},
+		{
+			"default": "1",
+			"fieldname": "total_number_of_depreciations",
+			"fieldtype": "Int",
+			"label": "Total Number of Depreciations",
+			"reqd": 1
+		},
+		{
+			"default": "0",
+			"fieldname": "expected_value_after_useful_life",
+			"fieldtype": "Currency",
+			"label": "Expected Value After Useful Life"
+		},
+		{
+			"fieldname": "source_section",
+			"fieldtype": "Section Break",
+			"label": "Source Stock"
+		},
+		{
+			"fieldname": "items",
+			"fieldtype": "Table",
+			"label": "Items",
+			"options": "Stock Asset Conversion Item",
+			"reqd": 1
+		},
+		{
+			"fieldname": "preview_section",
+			"fieldtype": "Section Break",
+			"label": "Approved Conversion Preview"
+		},
+		{
+			"fieldname": "preview_stock_value",
+			"fieldtype": "Currency",
+			"label": "Preview Stock Value",
+			"read_only": 1
+		},
+		{
+			"fieldname": "preview_valuation_rate",
+			"fieldtype": "Currency",
+			"label": "Preview Valuation Rate",
+			"read_only": 1
+		},
+		{
+			"fieldname": "preview_recommendation",
+			"fieldtype": "Select",
+			"label": "Preview Recommendation",
+			"options": "Full Depreciation — Single Entry\nNormal Depreciation",
+			"read_only": 1
+		},
+		{
+			"fieldname": "preview_hash",
+			"fieldtype": "Data",
+			"hidden": 1,
+			"label": "Preview Hash",
+			"read_only": 1
+		},
+		{
+			"fieldname": "preview_column_break",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "preview_approved_by",
+			"fieldtype": "Link",
+			"label": "Preview Approved By",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "preview_approved_on",
+			"fieldtype": "Datetime",
+			"label": "Preview Approved On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Result"
+		},
+		{
+			"fieldname": "asset",
+			"fieldtype": "Link",
+			"label": "Asset",
+			"no_copy": 1,
+			"options": "Asset",
+			"read_only": 1
+		},
+		{
+			"fieldname": "amended_from",
+			"fieldtype": "Link",
+			"label": "Amended From",
+			"no_copy": 1,
+			"options": "Stock Asset Conversion",
+			"print_hide": 1,
+			"read_only": 1,
+			"search_index": 1
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"is_submittable": 1,
+	"links": [],
+	"modified": "2026-09-27 18:08:53.159812",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Stock",
+	"name": "Stock Asset Conversion",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock User",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"amend": 1,
+			"cancel": 1,
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		},
+		{
+			"cancel": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Accounts Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		},
+		{
+			"amend": 1,
+			"cancel": 1,
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"submit": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "creation",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

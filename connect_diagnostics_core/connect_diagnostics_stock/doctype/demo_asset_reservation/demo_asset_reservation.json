@@ -1,0 +1,92 @@
+{
+	"doctype": "DocType",
+	"name": "Demo Asset Reservation",
+	"module": "Connect Diagnostics Stock",
+	"autoname": "hash",
+	"engine": "InnoDB",
+	"creation": "2026-09-27 17:38:51.921604",
+	"modified": "2026-09-27 17:38:51.921604",
+	"modified_by": "Administrator",
+	"field_order": [
+		"fulfillment",
+		"fulfillment_allocation",
+		"asset",
+		"active_asset_key",
+		"reservation_type",
+		"status",
+		"expected_available_on",
+		"released_on",
+		"release_reason"
+	],
+	"fields": [
+		{
+			"fieldname": "fulfillment",
+			"fieldtype": "Link",
+			"options": "Material Request Fulfillment",
+			"label": "Fulfillment",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "fulfillment_allocation",
+			"fieldtype": "Link",
+			"options": "Material Request Fulfillment Allocation",
+			"label": "Fulfillment Allocation",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "asset",
+			"fieldtype": "Link",
+			"options": "Asset",
+			"label": "Asset",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "active_asset_key",
+			"fieldtype": "Data",
+			"label": "Active Asset Key",
+			"unique": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "reservation_type",
+			"fieldtype": "Select",
+			"options": "Existing Asset\nReturning Asset",
+			"label": "Reservation Type",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "status",
+			"fieldtype": "Select",
+			"options": "Active\nReleased\nConsumed",
+			"label": "Status",
+			"default": "Active",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "expected_available_on",
+			"fieldtype": "Date",
+			"label": "Expected Available On",
+			"read_only": 1
+		},
+		{ "fieldname": "released_on", "fieldtype": "Datetime", "label": "Released On", "read_only": 1 },
+		{
+			"fieldname": "release_reason",
+			"fieldtype": "Small Text",
+			"label": "Release Reason",
+			"read_only": 1
+		}
+	],
+	"permissions": [
+		{ "role": "Stock User", "read": 1 },
+		{ "role": "Stock Manager", "read": 1 },
+		{ "role": "System Manager", "read": 1 }
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"track_changes": 1
+}

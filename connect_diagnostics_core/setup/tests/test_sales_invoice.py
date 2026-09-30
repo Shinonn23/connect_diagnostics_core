@@ -31,3 +31,15 @@ class TestSalesInvoiceCustomFields(UnitTestCase):
     def test_fieldnames_are_unique(self) -> None:
         fieldnames = [field["fieldname"] for field in sales_invoice.CUSTOM_FIELDS["Sales Invoice"]]
         self.assertEqual(len(fieldnames), len(set(fieldnames)))
+
+    def test_demo_sale_provenance_fields_are_immutable_and_auditable(self) -> None:
+        for fieldname in (
+            "demo_fulfillment_allocation",
+            "demo_outbound_dispatch",
+            "demo_sale_attempt",
+            "demo_sale_operation_id",
+        ):
+            field = self._field(fieldname)
+            self.assertEqual(field["read_only"], 1)
+            self.assertEqual(field["no_copy"], 1)
+        self.assertEqual(self._field("demo_sale_operation_id")["unique"], 1)

@@ -14,6 +14,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, now, rounded
 
+from connect_diagnostics_core.connect_diagnostics_stock.doctype.equipment_model.equipment_model import (
+    get_eligible_demo_stock_items,
+)
+
 DEMO_THRESHOLD = 10_000.0
 RETURNABLE_USAGES = frozenset({"Employee Borrow", "Customer Demo", "Customer Loan"})
 ASSET_ROUTES = frozenset({"Existing Asset", "Stock Capitalization"})
@@ -50,6 +54,7 @@ def validate(doc: Document, method: str | None = None) -> None:
     del method
     _validate_controlled_field_access(doc)
     _validate_downstream_lock(doc)
+    _validate_demo_item_eligibility(doc)
     _validate_routes(doc)
     if doc.get("request_usage") == "Internal Permanent Use":
         _validate_internal_destination(doc)
@@ -61,11 +66,17 @@ def validate_asset_movement(doc: Document, method: str | None = None) -> None:
     material_request = doc.get("material_request")
     if not material_request:
         return
-    mr = frappe.db.get_value("Material Request", material_request, ["company", "docstatus"], as_dict=True)
+    mr = frappe.db.get_value(
+        "Material Request", material_request, ["company", "docstatus", "request_usage"], as_dict=True
+    )
     if not mr or mr.docstatus != 1:
         frappe.throw(_("Linked Material Request must be submitted."))
     if mr.company != doc.get("company"):
         frappe.throw(_("Asset Movement and Material Request must belong to the same company."))
+
+    if mr.request_usage == "Customer Demo":
+        _validate_demo_asset_movement(doc, material_request)
+        return
 
     allocated_assets = set(
         frappe.get_all(
@@ -85,6 +96,82 @@ def validate_asset_movement(doc: Document, method: str | None = None) -> None:
                     row.idx, row.get("asset")
                 )
             )
+        _validate_asset_qa_gate(doc, row)
+
+
+def _validate_demo_asset_movement(doc: Document, material_request: str) -> None:
+    fulfillment = frappe.db.get_value(
+        "Material Request Fulfillment",
+        {"material_request": material_request, "status": "Planned"},
+        "name",
+        order_by="plan_revision desc",
+    )
+    if not fulfillment:
+        frappe.throw(_("Customer Demo Asset Movement requires an active Fulfillment."))
+    allocations = frappe.get_all(
+        "Material Request Fulfillment Allocation",
+        filters={"parent": fulfillment},
+        fields=["name", "resolved_asset", "lifecycle_state", "current_sales_invoice"],
+        order_by="idx asc",
+    )
+    movement_assets = [row.get("asset") for row in doc.get("assets", [])]
+    if doc.get("purpose") == "Issue":
+        resolved_assets = [row.resolved_asset for row in allocations if row.resolved_asset]
+        if (
+            not resolved_assets
+            or len(resolved_assets) != len(allocations)
+            or len(resolved_assets) != len(set(resolved_assets))
+            or len(movement_assets) != len(set(movement_assets))
+            or set(movement_assets) != set(resolved_assets)
+        ):
+            frappe.throw(
+                _("Customer Demo Issue movement must contain every active allocation Asset exactly once.")
+            )
+        if (
+            doc.get("reference_doctype") != "Material Request Fulfillment"
+            or doc.get("reference_name") != fulfillment
+        ):
+            frappe.throw(_("Demo Issue movement must reference the active Fulfillment."))
+        for row in doc.get("assets", []):
+            current_location = frappe.db.get_value("Asset", row.get("asset"), "location")
+            if not current_location or row.get("source_location") != current_location:
+                frappe.throw(_("Demo Issue movement must retain each Asset's current source Location."))
+    elif doc.get("purpose") == "Receipt":
+        dispatch = frappe.db.get_value(
+            "Dispatch",
+            doc.get("reference_name"),
+            ["material_request", "dispatch_type", "docstatus", "delivery_status"],
+            as_dict=True,
+        )
+        if (
+            doc.get("reference_doctype") != "Dispatch"
+            or not dispatch
+            or dispatch.material_request != material_request
+            or dispatch.dispatch_type != "Outbound"
+            or dispatch.docstatus != 1
+            or dispatch.delivery_status != "Delivered"
+        ):
+            frappe.throw(_("Demo Receipt movement must reference its delivered Outbound Dispatch."))
+        returnable_assets = [
+            row.resolved_asset
+            for row in allocations
+            if row.resolved_asset and row.lifecycle_state == "Delivered" and not row.current_sales_invoice
+        ]
+        if (
+            not returnable_assets
+            or len(returnable_assets) != len(set(returnable_assets))
+            or len(movement_assets) != len(set(movement_assets))
+            or set(movement_assets) != set(returnable_assets)
+        ):
+            frappe.throw(
+                _("Demo Receipt movement must contain every remaining delivered Asset exactly once.")
+            )
+        qa_location = frappe.db.get_value("Company", doc.get("company"), "return_qa_hold_location")
+        if not qa_location or any(row.get("target_location") != qa_location for row in doc.get("assets", [])):
+            frappe.throw(_("Demo Receipt movement must receive every Asset into Return QA Hold."))
+    else:
+        frappe.throw(_("Customer Demo movement must be an Issue or Receipt."))
+    for row in doc.get("assets", []):
         _validate_asset_qa_gate(doc, row)
 
 
@@ -302,6 +389,7 @@ def validate_submit_for_approval(doc: Document) -> None:
     if usage == "Customer Demo" and doc.get("destination_type") != "Customer":
         frappe.throw(_("Customer Demo requires Destination Type Customer."))
 
+    _validate_demo_item_eligibility(doc)
     _validate_responsible_employee(doc)
     if usage in RETURNABLE_USAGES:
         from connect_diagnostics_core.api.erpnext.company import validate_returnable_configuration
@@ -311,6 +399,58 @@ def validate_submit_for_approval(doc: Document) -> None:
         )
     if usage == "Internal Permanent Use":
         _validate_internal_destination(doc)
+
+
+def _validate_demo_item_eligibility(doc: Document) -> None:
+    """Reject Demo rows that bypass the configured Equipment Model mapping."""
+
+    if doc.get("request_usage") != "Customer Demo":
+        return
+
+    company = cast(str, doc.get("company") or "")
+    eligible_items = set(get_eligible_demo_stock_items(company)) if company else set()
+    for row in doc.get("items", []):
+        item_code = cast(str, row.get("item_code") or "")
+        if item_code not in eligible_items:
+            frappe.throw(
+                _("Row #{0}: Item {1} is not enabled for Customer Demo in company {2}.").format(
+                    row.idx,
+                    frappe.bold(item_code or _("Not set")),
+                    frappe.bold(company or _("Not set")),
+                )
+            )
+
+
+@frappe.whitelist(methods=["GET"])
+def get_demo_eligible_items(company: str | None = None) -> dict[str, Any]:
+    """Return only Demo-eligible Item identifiers for an authorized Company."""
+
+    can_create = frappe.has_permission(  # nosemgrep: unchecked-frappe-permission-call
+        "Material Request", "create"
+    )
+    can_read = frappe.has_permission(  # nosemgrep: unchecked-frappe-permission-call
+        "Material Request", "read"
+    )
+    can_access_material_request = can_create or can_read
+    if not can_access_material_request:
+        frappe.throw(_("You are not permitted to access Material Requests."), frappe.PermissionError)
+
+    if not company:
+        return {"data": [], "message": _("Select a Company to load Demo Items.")}
+
+    company_doc = frappe.get_doc("Company", company)
+    if company_doc.get("is_group"):
+        frappe.throw(_("Demo Items require a non-group Company."))
+    can_read_company = frappe.has_permission(  # nosemgrep: unchecked-frappe-permission-call
+        "Company", "read", doc=company_doc
+    )
+    if not can_read_company:
+        frappe.throw(_("You are not permitted to access this Company."), frappe.PermissionError)
+
+    return {
+        "data": get_eligible_demo_stock_items(company),
+        "message": _("Demo Items loaded successfully."),
+    }
 
 
 def before_cancel(doc: Document, _method: str | None = None) -> None:

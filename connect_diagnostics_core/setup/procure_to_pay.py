@@ -187,6 +187,13 @@ CUSTOM_FIELDS = {
     ],
     COMPANY: [
         {
+            "fieldname": "demo_low_value_asset_threshold",
+            "label": "Demo Low Value Asset Threshold",
+            "fieldtype": "Currency",
+            "description": "Threshold used by linked Demo conversion review.",
+            "insert_after": "default_currency",
+        },
+        {
             "fieldname": "borrow_in_transit_warehouse",
             "label": "Borrow In Transit Warehouse",
             "fieldtype": "Link",
@@ -220,6 +227,20 @@ CUSTOM_FIELDS = {
             "fieldtype": "Link",
             "options": "Location",
             "insert_after": "return_qa_hold_location",
+        },
+        {
+            "fieldname": "demo_asset_pool_location",
+            "label": "Demo Asset Pool Location",
+            "fieldtype": "Link",
+            "options": "Location",
+            "insert_after": "return_repair_location",
+        },
+        {
+            "fieldname": "demo_return_reuse_window_days",
+            "label": "Demo Return Reuse Window Days",
+            "fieldtype": "Int",
+            "default": "7",
+            "insert_after": "demo_asset_pool_location",
         },
     ],
     ASSET_CAPITALIZATION: [
