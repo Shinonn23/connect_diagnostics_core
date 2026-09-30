@@ -9,6 +9,8 @@ from typing import Any
 
 from frappe.tests import UnitTestCase
 
+from connect_diagnostics_core import hooks
+
 ROOT = Path(__file__).parents[3]
 FIXTURES = ROOT / "connect_diagnostics_core" / "fixtures"
 MANIFEST = ROOT / ".github" / "tasks" / "workflow-baseline-implementation" / "workflow-route-manifest.json"
@@ -16,6 +18,145 @@ PERMISSIONS = ROOT / ".github" / "tasks" / "workflow-baseline-implementation" / 
 
 
 class TestWorkflowFixtureBlueprints(UnitTestCase):
+    def test_asset_movement_runtime_hooks_are_exact(self) -> None:
+        self.assertEqual(
+            hooks.extend_doctype_class["Asset"],
+            ["connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementNativeMixin"],
+        )
+        self.assertEqual(
+            hooks.extend_doctype_class["Asset Movement"],
+            ["connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementWorkflowMixin"],
+        )
+        self.assertEqual(
+            hooks.doc_events["Asset Movement"],
+            {
+                "before_validate": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.lock_assets_before_submit",
+                "validate": [
+                    "connect_diagnostics_core.api.erpnext.material_request.validate_asset_movement",
+                    "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_workflow",
+                ],
+                "before_submit": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_before_submit",
+                "before_cancel": [
+                    "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_before_cancel",
+                    "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+                ],
+            },
+        )
+        methods = {row["name"]: row["method"] for row in hooks.workflow_methods}
+        self.assertEqual(
+            {
+                name: methods[name]
+                for name in (
+                    "Capture Asset Movement Maker",
+                    "Capture Asset Movement Review",
+                    "Capture Asset Movement Approval",
+                    "Reset Asset Movement Approval",
+                    "Authorize Asset Movement Submit Transition",
+                    "Authorize Asset Movement Cancel Transition",
+                )
+            },
+            {
+                "Capture Asset Movement Maker": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_maker",
+                "Capture Asset Movement Review": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_review",
+                "Capture Asset Movement Approval": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_approval",
+                "Reset Asset Movement Approval": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.reset_approval",
+                "Authorize Asset Movement Submit Transition": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.authorize_submit_transition",
+                "Authorize Asset Movement Cancel Transition": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.authorize_cancel_transition",
+            },
+        )
+
+    def test_asset_movement_wf06_route_is_exact(self) -> None:
+        workflows = json.loads((FIXTURES / "workflow.json").read_text())
+        route = next(row for row in workflows if row["document_type"] == "Asset Movement")
+        self.assertEqual(route["workflow_name"], "Connect Asset Movement Approval")
+        self.assertEqual(
+            [(row["state"], row["allow_edit"], row["doc_status"]) for row in route["states"]],
+            [
+                ("Asset Movement Draft", "Stock User", "0"),
+                ("Asset Movement Pending Review", "Stock Manager", "0"),
+                ("Asset Movement Pending Approval", "C-Level Approver", "0"),
+                ("Asset Movement Approved", "Stock Manager", "0"),
+                ("Asset Movement Rejected", "Stock User", "0"),
+                ("Asset Movement Submitted", "Stock Manager", "1"),
+                ("Asset Movement Cancelled", "Stock Manager", "2"),
+            ],
+        )
+        self.assertEqual(
+            [
+                (row["action"], row["state"], row["next_state"], row["allowed"], row["transition_tasks"])
+                for row in route["transitions"]
+            ],
+            [
+                (
+                    "Send Asset Movement for Review",
+                    "Asset Movement Draft",
+                    "Asset Movement Pending Review",
+                    "Stock User",
+                    "Connect Asset Movement Maker Snapshot",
+                ),
+                (
+                    "Review Asset Movement",
+                    "Asset Movement Pending Review",
+                    "Asset Movement Pending Approval",
+                    "Stock Manager",
+                    "Connect Asset Movement Review Snapshot",
+                ),
+                (
+                    "Return Asset Movement",
+                    "Asset Movement Pending Review",
+                    "Asset Movement Draft",
+                    "Stock Manager",
+                    "Connect Asset Movement Approval Reset",
+                ),
+                (
+                    "Approve Asset Movement",
+                    "Asset Movement Pending Approval",
+                    "Asset Movement Approved",
+                    "C-Level Approver",
+                    "Connect Asset Movement Approval Snapshot",
+                ),
+                (
+                    "Return Asset Movement",
+                    "Asset Movement Pending Approval",
+                    "Asset Movement Draft",
+                    "C-Level Approver",
+                    "Connect Asset Movement Approval Reset",
+                ),
+                (
+                    "Reject Asset Movement",
+                    "Asset Movement Pending Approval",
+                    "Asset Movement Rejected",
+                    "C-Level Approver",
+                    None,
+                ),
+                (
+                    "Resubmit Asset Movement",
+                    "Asset Movement Rejected",
+                    "Asset Movement Pending Review",
+                    "Stock User",
+                    "Connect Asset Movement Maker Snapshot",
+                ),
+                (
+                    "Submit Asset Movement",
+                    "Asset Movement Approved",
+                    "Asset Movement Submitted",
+                    "Stock Manager",
+                    "Connect Asset Movement Submit Authorization",
+                ),
+                (
+                    "Cancel Asset Movement",
+                    "Asset Movement Submitted",
+                    "Asset Movement Cancelled",
+                    "Stock Manager",
+                    "Connect Asset Movement Cancel Authorization",
+                ),
+            ],
+        )
+        self.assertEqual(
+            [row["action"] for row in route["transitions"] if row["allow_self_approval"]],
+            ["Send Asset Movement for Review", "Resubmit Asset Movement"],
+        )
+
     def test_workflows_are_active_and_manifest_complete(self) -> None:
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
         manifest = json.loads(MANIFEST.read_text())
@@ -61,17 +202,17 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
             row["workflow_action_name"]
             for row in json.loads((FIXTURES / "workflow_action_master.json").read_text())
         }
+        self_approval_allowlist = {
+            ("Connect Asset Movement Approval", "Send Asset Movement for Review"),
+            ("Connect Asset Movement Approval", "Resubmit Asset Movement"),
+        }
         for workflow in workflows:
             self.assertTrue({row["state"] for row in workflow["states"]} <= states)
             self.assertTrue({row["next_state"] for row in workflow["transitions"]} <= states)
             self.assertTrue({row["action"] for row in workflow["transitions"]} <= actions)
-            self.assertTrue(
-                all(
-                    row["allow_self_approval"] == 0
-                    for row in workflow["transitions"]
-                    if not row["action"].startswith("Submit ")
-                )
-            )
+            for row in workflow["transitions"]:
+                if row["allow_self_approval"] and not row["action"].startswith("Submit "):
+                    self.assertIn((workflow["name"], row["action"]), self_approval_allowlist)
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
         referenced_states.update(
             row["next_state"] for workflow in workflows for row in workflow["transitions"]

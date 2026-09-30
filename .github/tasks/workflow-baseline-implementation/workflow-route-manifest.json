@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-18.workflow-blueprint.3",
+	"revision": "2026-09-26.asset-movement.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"records_are_inert": false,
@@ -53,7 +53,12 @@
 			"id": "WF-06",
 			"status": "enabled",
 			"document_type": "Asset Movement",
-			"workflow": "Connect Asset Movement Approval"
+			"workflow": "Connect Asset Movement Approval",
+			"decision": "D-ASSET-2026-09-26",
+			"route_scope": "Generic native Asset Movement; Borrow/Demo, Equipment Assignment/Installation, exact-location engines, and Asset Disposal excluded",
+			"approval_route": ["Stock User", "Stock Manager", "C-Level Approver"],
+			"shared_controls": ["TSK-600", "TSK-601"],
+			"native_exception": "Exact ERPNext Asset-generated Receipt and Cancel only"
 		},
 		{
 			"id": "WF-07",

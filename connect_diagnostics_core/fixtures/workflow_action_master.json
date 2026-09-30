@@ -3,41 +3,6 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Asset Movement for Approval",
-		"workflow_action_name": "Submit Asset Movement for Approval"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Approve Asset Movement",
-		"workflow_action_name": "Approve Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Asset Movement",
-		"workflow_action_name": "Reject Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Post Asset Movement",
-		"workflow_action_name": "Post Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Asset Movement",
-		"workflow_action_name": "Cancel Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Submit Payment Entry for Approval",
 		"workflow_action_name": "Submit Payment Entry for Approval"
 	},
@@ -418,5 +383,61 @@
 		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Cancel Asset Disposal",
 		"workflow_action_name": "Cancel Asset Disposal"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Send Asset Movement for Review",
+		"workflow_action_name": "Send Asset Movement for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Review Asset Movement",
+		"workflow_action_name": "Review Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Return Asset Movement",
+		"workflow_action_name": "Return Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Approve Asset Movement",
+		"workflow_action_name": "Approve Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Reject Asset Movement",
+		"workflow_action_name": "Reject Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Resubmit Asset Movement",
+		"workflow_action_name": "Resubmit Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Submit Asset Movement",
+		"workflow_action_name": "Submit Asset Movement"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Cancel Asset Movement",
+		"workflow_action_name": "Cancel Asset Movement"
 	}
 ]

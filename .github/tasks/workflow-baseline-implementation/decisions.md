@@ -23,6 +23,28 @@ impacts. Test constants are not policy.
 | CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Conflict open; evidence: `evidence/config-dirty-ownership.md` (pending owner) |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
 
+## Approved Asset Movement route decision — 2026-09-26
+
+```text
+Decision ID: D-ASSET-2026-09-26
+Owner / backup owner: Siwat Sroisuwan / not assigned
+Approved policy / desired state: Generic native Asset Movement uses Stock User Maker, Stock Manager Reviewer, and C-Level Approver Final Approver. Maker, Reviewer, and Final Approver must be distinct server-resolved users. Review and Approve require signed TSK-600 snapshots and TSK-601 separation-of-duties enforcement. Return and Reject do not change Asset location/custodian. Native Asset-generated Receipt and Cancel operations are exempt only through the reviewed server-only object capability and exact native shape validation; no client-visible field or reference tuple grants a bypass. Every user-created Asset Movement, including intentionally linked Material Request movements, requires approval.
+Revision: 2026-09-26.asset-movement.1
+Effective date/timezone: 2026-09-26 / Asia/Bangkok
+Enabled routes: WF-06 generic ERPNext Asset Movement purposes Issue, Receipt, Transfer, and Transfer and Issue; linked Material Request validation remains an additional constraint
+Deferred/disabled routes and reason: WF-08 Equipment Assignment/Installation, Borrow/Demo business workflows, exact-location engines, and Asset Disposal remain outside this baseline
+Affected existing documents/configuration: Connect Asset Movement Approval, its Asset Movement states/actions/tasks, setup-managed approval fields, and pending draft Asset Movement documents; historical Workflow Action, Version, Timeline, submitted Asset Movement, and Asset Activity records are preserved
+Allowed target and mutation scope: automated tests and guarded migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test after automated gates
+Required permissions/roles/scopes: Stock User Maker, Stock Manager Reviewer/authorized native Submit and Cancel, C-Level Approver Final Approver; current document permission is rechecked server-side at each protected boundary
+Required tests and evidence: generic no-MR and linked-MR paths, Return/Reject, self-approval/wrong-role/direct-submit/state-spoof/stale mutation, native Asset Receipt/Cancel, retry/concurrency, multi-Asset native state/history, migration repeat/recovery, full app tests, pre-commit, independent review, and Computer Use acceptance
+Migration/re-run behavior: collision-aware, deterministic, and idempotent; do not fabricate or delete Workflow Action, Version, Timeline, Asset Movement, or Asset Activity history
+Collision behavior: stop WF-06 on an unrelated active Asset Movement Workflow, incompatible same-name record, conflicting transition task, incompatible setup field, or unresolved pending action and obtain owner disposition
+Rollback/recovery behavior: restore the captured prior WF-06 configuration only on the expected post-migration fingerprint; recover submitted movements through native cancel/reversal, never direct Asset writes
+Business sign-off: requester confirmed the proposed roles and native Asset Receipt/Cancel exemption in the Codex task on 2026-09-26
+Technical sign-off: TSK-523A native-boundary plan, code, migration, and focused integration evidence independently reviewed with no P0/P1 findings; Computer Use acceptance is blocked by unavailable browser capability
+Security sign-off: shared TSK-600/601 integration and full route re-review pending
+```
+
 ## Decision request format
 
 ```text
