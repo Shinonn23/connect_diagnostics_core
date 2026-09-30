@@ -76,7 +76,10 @@ def validate_transaction(doc: Document, method: str | None = None) -> None:
         if not pairs and not warehouses:
             return
 
-        messages = _check_item_level(pairs) + _check_warehouse_level(warehouses)
+        exclude_name = doc.name if doc.doctype == "Stock Reconciliation" else None
+        messages = _check_item_level(pairs, exclude_name=exclude_name) + _check_warehouse_level(
+            warehouses, exclude_name=exclude_name
+        )
         if messages:
             frappe.throw("<br>".join(messages), title=_("Stock Reconciliation in progress"))
     finally:
@@ -118,6 +121,7 @@ _ITEM_SCOPE_QUERY = (
     + """
         and sri.item_code in %(item_codes)s
         and sri.warehouse in %(warehouses)s
+        and (%(exclude_name)s is null or sr.name != %(exclude_name)s)
     """
 )
 _WAREHOUSE_SCOPE_QUERY = (
@@ -129,11 +133,12 @@ _WAREHOUSE_SCOPE_QUERY = (
     + _ACTIVE_RECONCILIATION_CLAUSE
     + """
         and sri.warehouse in %(warehouses)s
+        and (%(exclude_name)s is null or sr.name != %(exclude_name)s)
     """
 )
 
 
-def _check_item_level(pairs: set[tuple[str, str]]) -> list[str]:
+def _check_item_level(pairs: set[tuple[str, str]], *, exclude_name: str | None = None) -> list[str]:
     if not pairs:
         return []
     item_codes = tuple({item_code for item_code, _warehouse in pairs})
@@ -144,6 +149,7 @@ def _check_item_level(pairs: set[tuple[str, str]]) -> list[str]:
             "terminal_states": tuple(_TERMINAL_WORKFLOW_STATES),
             "item_codes": item_codes,
             "warehouses": warehouses,
+            "exclude_name": exclude_name,
         },
         as_dict=True,
     )
@@ -156,7 +162,7 @@ def _check_item_level(pairs: set[tuple[str, str]]) -> list[str]:
     ]
 
 
-def _check_warehouse_level(warehouses: set[str]) -> list[str]:
+def _check_warehouse_level(warehouses: set[str], *, exclude_name: str | None = None) -> list[str]:
     if not warehouses:
         return []
     rows = frappe.db.sql(
@@ -164,6 +170,7 @@ def _check_warehouse_level(warehouses: set[str]) -> list[str]:
         {
             "terminal_states": tuple(_TERMINAL_WORKFLOW_STATES),
             "warehouses": tuple(warehouses),
+            "exclude_name": exclude_name,
         },
         as_dict=True,
     )

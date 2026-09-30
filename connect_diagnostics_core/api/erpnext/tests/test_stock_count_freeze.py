@@ -51,6 +51,40 @@ class TestStockReconciliationFreeze(UnitTestCase):
             messages = stock_reconciliation_freeze._check_warehouse_level({"WH-1"})
         self.assertIn("SR-1", messages[0])
 
+    def test_stock_reconciliation_validation_excludes_current_reconciliation(self) -> None:
+        doc = Document(
+            {
+                "doctype": "Stock Reconciliation",
+                "name": "SR-CURRENT",
+                "items": [{"item_code": "ITEM-A", "warehouse": "WH-1"}],
+            }
+        )
+        with (
+            patch.object(stock_reconciliation_freeze, "_check_item_level", return_value=[]) as item_check,
+            patch.object(stock_reconciliation_freeze, "_check_warehouse_level", return_value=[]) as warehouse_check,
+        ):
+            stock_reconciliation_freeze.validate_transaction(doc)
+        item_check.assert_called_once_with({("ITEM-A", "WH-1")}, exclude_name="SR-CURRENT")
+        warehouse_check.assert_called_once_with({"WH-1"}, exclude_name="SR-CURRENT")
+
+    def test_different_active_reconciliation_still_blocks(self) -> None:
+        rows = [frappe._dict(item_code="ITEM-A", warehouse="WH-1", reconciliation="SR-OTHER")]
+        with patch.object(stock_reconciliation_freeze.frappe.db, "sql", return_value=rows) as sql:
+            messages = stock_reconciliation_freeze._check_item_level(
+                {("ITEM-A", "WH-1")}, exclude_name="SR-CURRENT"
+            )
+        self.assertIn("SR-OTHER", messages[0])
+        self.assertEqual(sql.call_args_list[0].args[1]["exclude_name"], "SR-CURRENT")
+
+    def test_different_active_reconciliation_still_blocks_at_warehouse_level(self) -> None:
+        rows = [frappe._dict(warehouse="WH-1", reconciliation="SR-OTHER")]
+        with patch.object(stock_reconciliation_freeze.frappe.db, "sql", return_value=rows) as sql:
+            messages = stock_reconciliation_freeze._check_warehouse_level(
+                {"WH-1"}, exclude_name="SR-CURRENT"
+            )
+        self.assertIn("SR-OTHER", messages[0])
+        self.assertEqual(sql.call_args_list[0].args[1]["exclude_name"], "SR-CURRENT")
+
     def test_non_stock_update_invoice_is_skipped(self) -> None:
         stock_reconciliation_freeze.validate_transaction(
             frappe.get_doc({"doctype": "Sales Invoice", "update_stock": 0})
