@@ -25,8 +25,16 @@ class TestWorkflowFields(UnitTestCase):
                 "freeze_exception",
                 "freeze_exception_reason",
                 "freeze_exception_reconciliation_scope",
+                "approval_critical_digest",
+                "approval_reviewer_user",
+                "approval_authorized_user",
             },
         )
+
+        stock_fields = {row["fieldname"]: row for row in fields["Stock Entry"]}
+        self.assertEqual(stock_fields["approval_reviewer_user"]["options"], "User")
+        self.assertEqual(stock_fields["approval_authorized_user"]["options"], "User")
+        self.assertTrue(stock_fields["approval_critical_digest"]["read_only"])
 
         for rows in fields.values():
             for row in rows:

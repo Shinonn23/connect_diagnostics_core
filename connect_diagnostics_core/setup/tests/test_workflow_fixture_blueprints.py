@@ -69,7 +69,7 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if not row["action"].startswith("Submit ")
+                    if not row["action"].startswith(("Submit ", "Send ", "Resubmit ", "Cancel "))
                 )
             )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
@@ -92,8 +92,44 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
             for transition in workflow["transitions"]:
                 condition = transition.get("condition")
                 if workflow["document_type"] == "Stock Entry":
-                    self.assertIn("doc.purpose == 'Material Transfer'", condition or "")
-                    self.assertIn("not doc.add_to_transit", condition or "")
-                    self.assertIn("not doc.outgoing_stock_entry", condition or "")
+                    with self.subTest(action=transition["action"]):
+                        self.assertIn("doc.purpose == 'Material Transfer'", condition or "")
+                        self.assertIn("not doc.add_to_transit", condition or "")
+                        self.assertIn("not doc.outgoing_stock_entry", condition or "")
+                        if transition["action"] in {"Submit Stock Entry", "Cancel Stock Entry"}:
+                            self.assertTrue((condition or "").startswith("not ("))
+                        else:
+                            self.assertFalse((condition or "").startswith("not ("))
                 else:
                     self.assertFalse(condition)
+
+    def test_stock_transfer_uses_approved_role_and_snapshot_matrix(self) -> None:
+        workflow = next(
+            workflow
+            for workflow in json.loads((FIXTURES / "workflow.json").read_text())
+            if workflow["name"] == "Connect Stock Transfer Approval"
+        )
+        transitions = {(row["state"], row["action"], row["allowed"]): row for row in workflow["transitions"]}
+
+        submitted_states = [row["state"] for row in workflow["states"] if row["doc_status"] == "1"]
+        self.assertEqual(submitted_states[0], "Stock Entry Submitted")
+
+        self.assertEqual(
+            transitions[("Stock Transfer Pending Review", "Review Stock Transfer", "Stock Manager")][
+                "transition_tasks"
+            ],
+            "Connect Stock Transfer Review Snapshot",
+        )
+        self.assertEqual(
+            transitions[("Stock Transfer Reviewed", "Approve Stock Transfer", "C-Level Approver")][
+                "transition_tasks"
+            ],
+            "Connect Stock Transfer Approval Snapshot",
+        )
+        self.assertEqual(
+            transitions[("Stock Transfer Returned", "Resubmit Stock Transfer for Review", "Stock User")][
+                "next_state"
+            ],
+            "Stock Transfer Pending Review",
+        )
+        self.assertFalse(any("Emergency Stock Movement" in row["state"] for row in workflow["states"]))

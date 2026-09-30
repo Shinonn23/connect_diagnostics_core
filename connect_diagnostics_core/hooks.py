@@ -125,6 +125,10 @@ workflow_methods = [
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.authorize_freeze_exception_execution",
     },
     {
+        "name": "Clear Stock Transfer Approval Snapshots",
+        "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.clear_approval_snapshots",
+    },
+    {
         "name": "Capture Print Action: Submit",
         "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_submit_action",
     },
@@ -349,7 +353,10 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_cancel",
+            "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+        ],
     },
     "Delivery Note": {
         "before_submit": [

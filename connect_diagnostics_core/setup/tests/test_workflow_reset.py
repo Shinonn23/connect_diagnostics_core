@@ -108,6 +108,7 @@ class TestWorkflowReset(UnitTestCase):
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
                         if transition["action"].startswith(("Approve ", "Reject ", "Post ", "Cancel "))
+                        and workflow["document_type"] != "Stock Entry"
                     )
                 )
 
@@ -131,7 +132,7 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if not transition["action"].startswith("Submit ")
+                        if not transition["action"].startswith(("Submit ", "Send ", "Resubmit ", "Cancel "))
                     )
                 )
 

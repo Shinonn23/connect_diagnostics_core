@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-18.workflow-blueprint.3",
+	"revision": "2026-09-23.warehouse-transfer.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"records_are_inert": false,
@@ -15,27 +15,31 @@
 		"independent-configuration-review"
 	],
 	"collision_policy": "stop-and-obtain-owner-disposition",
-	"rerun_policy": "deterministic-read-only-validation; no-site-sync",
-	"recovery_policy": "remove-unreleased-artifact from repository change only; no-site-mutation",
+	"rerun_policy": "deterministic fixture sync and guarded migration rehearsal on local.test",
+	"recovery_policy": "restore the prior reviewed fixture on a matching configuration fingerprint; preserve Workflow Action, Version, and Timeline history",
 	"routes": [
 		{
 			"id": "WF-01",
-			"status": "enabled",
-			"document_type": "Stock Entry",
-			"workflow": "Connect Stock Transfer Approval"
+			"status": "disabled",
+			"document_type": null,
+			"workflow": null,
+			"reason": "The normalized baseline excludes the custom Internal Location Transfer/exact-location route."
 		},
 		{
 			"id": "WF-02",
 			"status": "enabled",
 			"document_type": "Stock Entry",
-			"workflow": "Connect Stock Transfer Approval"
+			"workflow": "Connect Stock Transfer Approval",
+			"route_scope": "Direct Material Transfer only; native transit legs are deferred",
+			"decision_revision": "D-TRANSFER-2026-09-23",
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"]
 		},
 		{
 			"id": "WF-03",
-			"status": "enabled",
-			"document_type": "Stock Entry",
-			"workflow": "Connect Stock Transfer Approval",
-			"route_scope": "Freeze/Exception controls in the shared Stock Entry Workflow"
+			"status": "disabled",
+			"document_type": null,
+			"workflow": null,
+			"reason": "Emergency Movement During Freeze is removed from active baseline ownership; historical records remain auditable."
 		},
 		{
 			"id": "WF-04",

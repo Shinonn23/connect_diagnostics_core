@@ -20,8 +20,53 @@ impacts. Test constants are not policy.
 | D-PAYMENT | What voucher matrix, beneficiary/account/currency/amount authority, bank evidence and settlement rules apply? | Finance + Management | WF-10/12/13/14, 529 Core | Open |
 | D-PAYROLL | What cutoff, grouping, off-cycle, correction/recovery, privacy and bank-handoff authority apply? | Payroll + Finance | WF-14 | Open |
 | CONFIG-PAYMENT | Retain approved site-owned PE Workflow or retire/replace it; who owns desired state and pending records? | Site Configuration Owner + Finance Owner, to be named | WF-13 / task `CONFIG-PAYMENT` | Conflict open; evidence: `evidence/config-payment.md` (not created until owners approve access) |
-| CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Conflict open; evidence: `evidence/config-dirty-ownership.md` (pending owner) |
+| CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Partially resolved for TSK-590/600 by D-SIGNED-APPROVAL-2026-09-26: preserve all existing dirty work; serialize shared-file integration under the primary agent; all unrelated ownership remains open |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
+
+## Approved route decision — 2026-09-23
+
+```text
+Decision ID: D-TRANSFER-2026-09-23
+Owner / backup owner: Siwat Sroisuwan / not assigned
+Approved policy / desired state: Direct Material Transfer only. Stock User is Maker, Stock Manager is Reviewer, and C-Level Approver is Final Approver. Maker may Send/Resubmit. Maker may not Review or Approve, and Reviewer may not Final Approve. Review and Approve require signed action snapshots; Return and Reject do not. Emergency Freeze is removed from the active baseline by the baseline migration owner while historical records remain intact. TSK-600/601 shared controls are implemented before TSK-590 wiring and are not duplicated in the Stock Entry adapter.
+Revision: 2026-09-23.warehouse-transfer.1
+Effective date/timezone: 2026-09-23 / Asia/Bangkok
+Enabled routes: Stock Entry purpose = Material Transfer, excluding add_to_transit and outgoing_stock_entry transit legs
+Deferred/disabled routes and reason: Native transit legs deferred until receipt/approval ordering is approved; Emergency Freeze, Borrow/Demo, exact-location/WMS, and custom posting are outside this route
+Affected existing documents/configuration: Connect Stock Transfer Approval and its normal direct-transfer states/actions; legacy Emergency states/actions require non-destructive TSK-602 disposition
+Allowed target and mutation scope: automated tests and migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test
+Dirty-work ownership: Existing dirty Stock Entry route/configuration changes remain TSK-590-owned and must be preserved. TSK-600 may extend the shared declaration/helper and only non-Stock-Entry Workflow rows after TSK-590 writing stops; the primary agent owns the serialized integration. No unrelated dirty file is authorized for modification or discard.
+Required permissions/roles/scopes: Stock User Maker, Stock Manager Reviewer, C-Level Approver Final Approver; authenticated server identity and current role/permission recheck
+Required tests and evidence: TSK-590 automated matrix, full app tests, pre-commit, independent review, and Computer Use acceptance
+Migration/re-run behavior: deterministic and idempotent; do not fabricate or delete Workflow Action, Version, or Timeline history
+Collision behavior: stop only the Stock Entry route on an unrelated site-owned collision and obtain owner disposition
+Rollback/recovery behavior: restore the prior active configuration from captured evidence; native cancel/reversal owns posted-stock recovery
+Business sign-off: approved in Codex task on 2026-09-23
+Technical sign-off: pending implementation review
+Security/Finance sign-off (if applicable): pending shared-control and runtime review
+```
+
+## Approved signed-action decision — 2026-09-26
+
+```text
+Decision ID: D-SIGNED-APPROVAL-2026-09-26
+Owner / backup owner: Siwat Sroisuwan / not assigned
+Approved policy / desired state: Every baseline Approve action for Stock Entry, Stock Reconciliation, Asset Movement, Journal Entry, Sales Order, Sales Invoice Credit, Material Request, Purchase Order, Purchase Invoice, Payment Entry, and Payroll Entry requires a server-resolved active Employee approval signature. Review requires a signature only for Stock Entry. Return, Reject, Submit/Post, and other print events are not made protected by this decision.
+Revision: 2026-09-26.signed-approval.1
+Effective date/timezone: 2026-09-26 / Asia/Bangkok
+Enabled routes: Existing approved or manifest-declared baseline Workflows; Journal Entry declaration/fields only until a separate Journal Entry Workflow is approved
+Deferred/disabled routes and reason: Journal Entry transition wiring is deferred because the current manifest has no Journal Entry Workflow; no Workflow may be invented by this cross-cutting slice
+Affected existing documents/configuration: Existing compatible *_by, *_at, and *_signature fields; Employee.approval_signature remains the sole signature source
+Allowed target and mutation scope: automated tests and migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test
+Required permissions/roles/scopes: Existing Workflow roles and permissions remain authoritative; this decision adds only the signed-action requirement
+Required tests and evidence: declaration coverage, server-identity and fail-closed tests, idempotent migration, two Workflow integrations, full app tests, pre-commit, independent review, and Computer Use acceptance
+Migration/re-run behavior: additive, collision-checked, deterministic, and idempotent; no duplicate fields or transition tasks
+Collision behavior: stop the affected route on an unrelated site-owned field/task conflict and obtain owner disposition
+Rollback/recovery behavior: restore only exact configuration owned by this slice; preserve document snapshots and native Workflow Action, Version, and Timeline history
+Business sign-off: approved in Codex task on 2026-09-26
+Technical sign-off: pending implementation review
+Security/Finance sign-off (if applicable): pending implementation and runtime review
+```
 
 ## Decision request format
 

@@ -11,12 +11,42 @@ from connect_diagnostics_core.setup import print_action_fields
 
 
 class TestPrintActionFields(UnitTestCase):
+    def test_stock_review_and_approval_are_the_only_required_signed_actions(self) -> None:
+        actions = {action.key: action for action in print_action_fields.PRINT_ACTIONS["Stock Entry"]}
+
+        self.assertFalse(actions["submit"].required_signature)
+        self.assertFalse(actions["submit"].protected)
+        for action_key in ("checked", "authorized"):
+            self.assertTrue(actions[action_key].required_signature)
+            self.assertTrue(actions[action_key].protected)
+
     def test_material_request_and_capitalization_keep_only_authorized_snapshot(self) -> None:
         for doctype in ("Material Request", "Asset Capitalization"):
             self.assertEqual(
                 [action.key for action in print_action_fields.PRINT_ACTIONS[doctype]],
                 ["authorized"],
             )
+
+    def test_baseline_approval_actions_are_protected_and_signed(self) -> None:
+        protected = {
+            "Stock Reconciliation",
+            "Asset Movement",
+            "Journal Entry",
+            "Sales Order",
+            "Sales Invoice",
+            "Material Request",
+            "Purchase Order",
+            "Purchase Invoice",
+            "Payment Entry",
+            "Payroll Entry",
+        }
+        for doctype in protected:
+            action = next(
+                action for action in print_action_fields.get_actions(doctype) if action.key == "authorized"
+            )
+            with self.subTest(doctype=doctype):
+                self.assertTrue(action.required_signature)
+                self.assertTrue(action.protected)
 
     def test_action_definitions_have_hidden_employee_and_datetime_fields(self) -> None:
         for doctype, actions in print_action_fields.PRINT_ACTIONS.items():
@@ -29,6 +59,7 @@ class TestPrintActionFields(UnitTestCase):
                 with self.subTest(doctype=doctype, action=action.key):
                     self.assertEqual(employee["fieldtype"], "Link")
                     self.assertEqual(employee["options"], "Employee")
+                    self.assertEqual(employee["ignore_user_permissions"], 1)
                     self.assertEqual(timestamp["fieldtype"], "Datetime")
                     self.assertEqual(signature["fieldtype"], "Signature")
                     for field in (employee, timestamp, signature):

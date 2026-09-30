@@ -6,16 +6,22 @@
 from __future__ import annotations
 
 import json
+from typing import Any, cast
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from connect_diagnostics_core.api.frappe.approval_controls import (
+    critical_digest,
+    require_distinct_actors,
+    require_permission,
+)
+
 DIRECT_TRANSFER_PURPOSE = "Material Transfer"
 APPROVED_STATES = frozenset(
     {
         "Stock Transfer Submitted",
-        "Emergency Stock Movement Submitted",
     }
 )
 EMERGENCY_STATES = frozenset(
@@ -30,17 +36,58 @@ EMERGENCY_STATES = frozenset(
 EXCEPTION_FLAG = "freeze_exception"
 EXCEPTION_REASON = "freeze_exception_reason"
 EXCEPTION_SCOPE = "freeze_exception_reconciliation_scope"
-_CRITICAL_FIELDS = ("purpose", "add_to_transit", "outgoing_stock_entry", "items")
+_REVIEW_LOCKED_STATES = frozenset(
+    {
+        "Stock Transfer Pending Review",
+        "Stock Transfer Reviewed",
+        "Stock Transfer Approved",
+        "Emergency Stock Movement Pending Review",
+        "Emergency Stock Movement Approved",
+    }
+)
+_CRITICAL_FIELDS = (
+    "purpose",
+    "stock_entry_type",
+    "company",
+    "posting_date",
+    "posting_time",
+    "set_posting_time",
+    "from_warehouse",
+    "to_warehouse",
+    "add_to_transit",
+    "outgoing_stock_entry",
+    "inspection_required",
+    "apply_putaway_rule",
+    "items",
+)
 _CRITICAL_ITEM_FIELDS = (
     "item_code",
     "s_warehouse",
     "t_warehouse",
     "qty",
+    "transfer_qty",
     "uom",
     "stock_uom",
     "conversion_factor",
+    "serial_and_batch_bundle",
+    "serial_no",
+    "batch_no",
     "basic_rate",
+    "basic_amount",
+    "valuation_rate",
     "allow_zero_valuation_rate",
+    "use_serial_batch_fields",
+    "expense_account",
+    "cost_center",
+    "project",
+    "material_request",
+    "material_request_item",
+    "against_stock_entry",
+    "putaway_rule",
+    "reference_purchase_receipt",
+    "job_card_item",
+    "bom_no",
+    "sample_quantity",
 )
 
 
@@ -138,25 +185,81 @@ def capture_freeze_exception_approval_scope(doc: Document) -> None:
     doc.set(EXCEPTION_SCOPE, json.dumps(get_active_freeze_scope(doc), sort_keys=True))
 
 
+def _approval_payload(doc: Document) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        fieldname: doc.get(fieldname) for fieldname in _CRITICAL_FIELDS if fieldname != "items"
+    }
+    if not doc.get("set_posting_time"):
+        payload["posting_date"] = None
+        payload["posting_time"] = None
+    payload["items"] = [
+        {fieldname: row.get(fieldname) for fieldname in _CRITICAL_ITEM_FIELDS}
+        for row in doc.get("items") or []
+    ]
+    return payload
+
+
+def get_approval_digest(doc: Document) -> str:
+    """Bind approval to the direct transfer values that control native posting."""
+    return critical_digest(_approval_payload(doc))
+
+
+def capture_review_snapshot(doc: Document) -> None:
+    """Bind a successful protected Review action to the current transfer payload."""
+    if not is_direct_transfer(doc):
+        frappe.throw(_("Review is limited to direct Material Transfer stock entries."))
+    doc.set("approval_critical_digest", get_approval_digest(doc))
+    doc.set("approval_reviewer_user", frappe.session.user)
+    doc.set("approval_authorized_user", None)
+
+
+def capture_authorization_snapshot(doc: Document) -> None:
+    """Validate the review binding and record the distinct Final Approver."""
+    if not is_direct_transfer(doc):
+        frappe.throw(_("Approval is limited to direct Material Transfer stock entries."))
+    if str(doc.get("approval_critical_digest") or "") != get_approval_digest(doc):
+        frappe.throw(_("The Stock Entry changed after review and must be reviewed again."))
+    require_distinct_actors(
+        str(doc.get("owner") or ""),
+        frappe.session.user,
+        (str(doc.get("approval_reviewer_user") or ""),),
+    )
+    doc.set("approval_authorized_user", frappe.session.user)
+
+
+def clear_approval_snapshots(doc: Document) -> None:
+    """Clear current denormalized approval evidence when a transfer is returned."""
+    for fieldname in (
+        "approval_critical_digest",
+        "approval_reviewer_user",
+        "approval_authorized_user",
+        "checked_by",
+        "checked_at",
+        "checked_signature",
+        "authorized_by",
+        "authorized_at",
+        "authorized_signature",
+    ):
+        doc.set(fieldname, None)
+
+
 def _reject_critical_changes_after_review(doc: Document) -> None:
     previous = doc.get_doc_before_save()
-    if not previous or previous.get("workflow_state") not in {
-        "Emergency Stock Movement Pending Review",
-        "Emergency Stock Movement Approved",
-    }:
+    if not previous or previous.get("workflow_state") not in _REVIEW_LOCKED_STATES:
         return
-    for fieldname in _CRITICAL_FIELDS:
-        previous_value = previous.get(fieldname)
-        current_value = doc.get(fieldname)
-        if fieldname == "items":
-            previous_value = [
-                tuple(row.get(key) for key in _CRITICAL_ITEM_FIELDS) for row in previous_value or []
-            ]
-            current_value = [
-                tuple(row.get(key) for key in _CRITICAL_ITEM_FIELDS) for row in current_value or []
-            ]
-        if previous_value != current_value:
-            frappe.throw(_("Critical Stock Entry fields cannot change after Emergency review starts."))
+    previous_payload = _approval_payload(previous)
+    current_payload = _approval_payload(doc)
+    changed = [
+        key
+        for key in previous_payload
+        if critical_digest({key: previous_payload[key]}) != critical_digest({key: current_payload[key]})
+    ]
+    if changed:
+        frappe.throw(
+            _(
+                "Critical Stock Entry fields cannot change after review. Return it for correction first: {0}."
+            ).format(", ".join(changed))
+        )
 
 
 def validate_workflow(doc: Document, method: str | None = None) -> None:
@@ -184,6 +287,57 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
         validate_workflow(doc)
         if is_direct_transfer(doc) and doc.get("workflow_state") not in APPROVED_STATES:
             frappe.throw(_("Direct stock transfers must be approved through the Stock Entry Workflow."))
+        if is_direct_transfer(doc) and doc.get("workflow_state") in APPROVED_STATES:
+            require_permission(doc, "submit")
+            persisted = cast(
+                dict[str, Any] | None,
+                frappe.db.get_value(
+                    "Stock Entry",
+                    doc.name,
+                    [
+                        "workflow_state",
+                        "approval_critical_digest",
+                        "approval_reviewer_user",
+                        "approval_authorized_user",
+                        "checked_signature",
+                        "authorized_signature",
+                    ],
+                    as_dict=True,
+                    for_update=True,
+                ),
+            )
+            if persisted is None:
+                frappe.throw(_("Stock Transfer must be submitted through its approved Workflow action."))
+                return
+            if persisted.get("workflow_state") != "Stock Transfer Approved":
+                frappe.throw(_("Stock Transfer must be submitted through its approved Workflow action."))
+            if persisted.get("approval_critical_digest") != get_approval_digest(doc):
+                frappe.throw(_("The Stock Entry approval is stale and must be renewed."))
+            if not persisted.get("checked_signature") or not persisted.get("authorized_signature"):
+                frappe.throw(_("Signed Review and Approval snapshots are required before submission."))
+            require_distinct_actors(
+                str(doc.get("owner") or ""),
+                str(persisted.get("approval_authorized_user") or ""),
+                (str(persisted.get("approval_reviewer_user") or ""),),
+            )
     except Exception:
         clear_freeze_exception_execution()
         raise
+
+
+def validate_before_cancel(doc: Document, method: str | None = None) -> None:
+    """Keep direct transfers on the native Workflow cancel transition."""
+    del method
+    if not is_direct_transfer(doc):
+        return
+    persisted_state = frappe.db.get_value(
+        "Stock Entry",
+        doc.name,
+        "workflow_state",
+        for_update=True,
+    )
+    if not (
+        persisted_state == "Stock Transfer Submitted"
+        and doc.get("workflow_state") == "Stock Transfer Cancelled"
+    ):
+        frappe.throw(_("Direct stock transfers must be cancelled through their Workflow action."))

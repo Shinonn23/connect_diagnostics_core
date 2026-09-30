@@ -26,6 +26,8 @@ class PrintAction:
     employee_field: str
     datetime_field: str
     signature_field: str
+    required_signature: bool = False
+    protected: bool = False
 
 
 PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
@@ -33,7 +35,7 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("received", "received_by", "received_at", "received_signature"),
         PrintAction("delivered", "delivered_by", "delivered_at", "delivered_signature"),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
         PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
         PrintAction(
             "return_received",
@@ -52,19 +54,25 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("received", "received_by", "received_at", "received_signature"),
         PrintAction("delivered", "delivered_by", "delivered_at", "delivered_signature"),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
         PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
     ),
     "Sales Order": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("prepared", "prepared_by", "prepared_at", "prepared_signature"),
         PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
     ),
     "Purchase Order": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("ordered", "ordered_by", "ordered_at", "ordered_signature"),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Purchase Invoice": (
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Payroll Entry": (
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
     ),
     "Purchase Receipt": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
@@ -74,15 +82,24 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
     ),
     "Quotation": (PrintAction("signatory", "signatory_by", "signatory_at", "signatory_signature"),),
     "Material Request": (
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Stock Reconciliation": (
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Asset Movement": (
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Journal Entry": (
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
     ),
     "Asset Capitalization": (
         PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
     ),
     "Stock Entry": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
-        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature", True, True),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
     ),
     "Withholding Tax Cert": (PrintAction("signed", "signed_by", "signed_at", "signed_signature"),),
 }
@@ -132,6 +149,7 @@ def _fields_for_action(
             "Link",
             f"Print Action: {label} By",
             options="Employee",
+            ignore_user_permissions=1,
         ),
         _field(
             action.datetime_field,
