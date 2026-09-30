@@ -1,5 +1,7 @@
 name = "reviewer"
 description = "Read-only independent reviewer for plans, code, tests, security, Frappe lifecycle behavior, and final documentation."
+model = "gpt-6-sol"
+model_reasoning_effort = "high"
 sandbox_mode = "danger-full-access"
 
 developer_instructions = """
