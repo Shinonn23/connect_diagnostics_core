@@ -63,6 +63,11 @@ Journal Entries and any custom posting/state engine.
 Required negative evidence: self approval, multi-role self approval, reviewer/final reuse, wrong
 role, direct apply_workflow RPC, direct submit/state spoof, permission revocation, stale critical
 data and repeated action. Maker Send/Resubmit must remain possible.
+
+Sales Invoice Credit Note route states use the native `Sales Invoice Draft` and `Sales Invoice
+Submitted` states because Frappe permits one active Workflow per DocType. The route remains scoped
+to return/credit-note invoices; ordinary Sales Invoices retain their direct native submit path,
+while the intermediate credit-note review states remain route-specific.
 Configuration impact: Protected Review/Approve transitions use allow_self_approval=0. Maker
 Send/Resubmit transitions may use allow_self_approval=1. Existing routes are changed only by their
 own approved domain branch with collision-aware migration and recovery.
