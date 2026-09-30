@@ -176,6 +176,34 @@ workflow_methods = [
         "name": "Validate Material Request: Close",
         "method": "connect_diagnostics_core.api.erpnext.material_request.validate_close",
     },
+    {
+        "name": "Capture Sales Invoice Credit Maker",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.capture_maker",
+    },
+    {
+        "name": "Capture Sales Invoice Credit Review",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.capture_review",
+    },
+    {
+        "name": "Clear Sales Invoice Credit Return",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.clear_on_return",
+    },
+    {
+        "name": "Capture Sales Invoice Credit Approval",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.capture_approval",
+    },
+    {
+        "name": "Clear Sales Invoice Credit Reject",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.clear_on_reject",
+    },
+    {
+        "name": "Authorize Sales Invoice Credit Post",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.authorize_submit_transition",
+    },
+    {
+        "name": "Authorize Sales Invoice Credit Cancel",
+        "method": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.authorize_cancel_transition",
+    },
 ]
 
 # Installation
@@ -288,12 +316,15 @@ doc_events = {
     },
     "Sales Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
+        "validate": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_approval_fields",
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_before_cancel",
     },
     "Payment Entry": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -588,12 +619,13 @@ fixtures = [
                     "Sales Order Rejected",
                     "Sales Order Submitted",
                     "Sales Order Cancelled",
-                    "Sales Invoice Credit Draft",
+                    "Sales Invoice Draft",
                     "Sales Invoice Credit Pending Review",
+                    "Sales Invoice Credit Reviewed",
+                    "Sales Invoice Credit Returned",
                     "Sales Invoice Credit Approved",
-                    "Sales Invoice Credit Rejected",
-                    "Sales Invoice Credit Submitted",
-                    "Sales Invoice Credit Cancelled",
+                    "Sales Invoice Submitted",
+                    "Sales Invoice Cancelled",
                     "Material Request Draft",
                     "Material Request Pending Review",
                     "Material Request Approved",
@@ -666,11 +698,16 @@ fixtures = [
                     "Reject Sales Order",
                     "Post Sales Order",
                     "Cancel Sales Order",
-                    "Submit Sales Invoice Credit for Review",
+                    "Send Sales Invoice Credit for Review",
+                    "Resubmit Sales Invoice Credit for Review",
+                    "Review Sales Invoice Credit",
+                    "Return Sales Invoice Credit",
                     "Approve Sales Invoice Credit",
                     "Reject Sales Invoice Credit",
                     "Post Sales Invoice Credit",
                     "Cancel Sales Invoice Credit",
+                    "Submit Sales Invoice",
+                    "Cancel Sales Invoice",
                     "Submit Material Request for Review",
                     "Approve Material Request",
                     "Reject Material Request",

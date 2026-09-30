@@ -54,13 +54,12 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
 
     def test_companion_fixtures_are_referentially_integral(self) -> None:
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
-        states = {
-            row["workflow_state_name"] for row in json.loads((FIXTURES / "workflow_state.json").read_text())
-        }
-        actions = {
-            row["workflow_action_name"]
-            for row in json.loads((FIXTURES / "workflow_action_master.json").read_text())
-        }
+        state_rows = json.loads((FIXTURES / "workflow_state.json").read_text())
+        action_rows = json.loads((FIXTURES / "workflow_action_master.json").read_text())
+        states = {row["workflow_state_name"] for row in state_rows}
+        actions = {row["workflow_action_name"] for row in action_rows}
+        self.assertEqual(len(states), len(state_rows))
+        self.assertEqual(len(actions), len(action_rows))
         for workflow in workflows:
             self.assertTrue({row["state"] for row in workflow["states"]} <= states)
             self.assertTrue({row["next_state"] for row in workflow["transitions"]} <= states)
@@ -69,7 +68,7 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if not row["action"].startswith("Submit ")
+                    if row["action"].startswith(("Review ", "Approve ", "Reject ", "Post "))
                 )
             )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
@@ -95,5 +94,13 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                     self.assertIn("doc.purpose == 'Material Transfer'", condition or "")
                     self.assertIn("not doc.add_to_transit", condition or "")
                     self.assertIn("not doc.outgoing_stock_entry", condition or "")
+                elif workflow["document_type"] == "Sales Invoice":
+                    self.assertIn(
+                        condition,
+                        {"doc.is_return and doc.return_against", "not doc.is_return"},
+                    )
+                    if condition == "not doc.is_return":
+                        self.assertIn(transition["action"], {"Submit Sales Invoice", "Cancel Sales Invoice"})
+                        self.assertIn(transition["allowed"], {"Accounts User", "Accounts Manager"})
                 else:
                     self.assertFalse(condition)

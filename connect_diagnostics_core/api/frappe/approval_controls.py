@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, time
@@ -147,7 +148,7 @@ def _canonical_value(value: Any) -> Any:
     if value is None or isinstance(value, (bool, str, int)):
         return value
     if isinstance(value, float):
-        if value != value or value in (float("inf"), float("-inf")):
+        if not math.isfinite(value):
             _fail("Approval evidence contains a non-finite number.")
         return value
     if isinstance(value, (Decimal, date, datetime, time)):

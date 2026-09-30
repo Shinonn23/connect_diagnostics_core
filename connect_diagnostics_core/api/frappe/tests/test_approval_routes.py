@@ -82,7 +82,10 @@ class TestApprovalRoutes(UnitTestCase):
         }
         self.assertEqual(actual, expected)
         credit_note = get_route("sales_invoice_credit_note")
-        self.assertEqual(credit_note.maker_roles, ("Sales User", "Accounts User"))
+        self.assertEqual(credit_note.maker_roles, ("Sales User",))
+        self.assertEqual(credit_note.reviewer_roles, ("Sales Manager",))
+        self.assertEqual(credit_note.final_approver_roles, ("C-Level Approver",))
+        self.assertEqual(credit_note.execution_roles, ("Sales Manager",))
 
     def test_actions_states_and_scopes_are_explicit(self) -> None:
         for route in APPROVAL_ROUTES:
@@ -97,6 +100,15 @@ class TestApprovalRoutes(UnitTestCase):
 
         self.assertIn("ordinary Sales Invoice", get_route("sales_invoice_credit_note").excluded_scope)
         self.assertIn("ERPNext-generated Journal Entry", get_route("manual_journal_entry").excluded_scope)
+
+        credit_note = get_route("sales_invoice_credit_note")
+        self.assertEqual(credit_note.maker_roles, ("Sales User",))
+        self.assertEqual(credit_note.final_approver_roles, ("C-Level Approver",))
+        self.assertEqual(credit_note.execution_roles, ("Sales Manager",))
+        self.assertEqual(credit_note.draft_state, "Sales Invoice Draft")
+        self.assertEqual(credit_note.submitted_state, "Sales Invoice Submitted")
+        self.assertEqual(credit_note.cancel_action, "Cancel Sales Invoice Credit")
+        self.assertEqual(credit_note.cancelled_state, "Sales Invoice Cancelled")
 
     def test_asset_custodian_status_does_not_grant_a_workflow_role(self) -> None:
         route = get_route("asset_movement")

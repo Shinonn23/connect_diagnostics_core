@@ -178,13 +178,6 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Sales Invoice Credit for Review",
-		"workflow_action_name": "Submit Sales Invoice Credit for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Approve Sales Invoice Credit",
 		"workflow_action_name": "Approve Sales Invoice Credit"
 	},
@@ -205,7 +198,7 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-26 16:59:15.738584",
 		"name": "Cancel Sales Invoice Credit",
 		"workflow_action_name": "Cancel Sales Invoice Credit"
 	},
@@ -418,5 +411,47 @@
 		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Cancel Asset Disposal",
 		"workflow_action_name": "Cancel Asset Disposal"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Send Sales Invoice Credit for Review",
+		"workflow_action_name": "Send Sales Invoice Credit for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Resubmit Sales Invoice Credit for Review",
+		"workflow_action_name": "Resubmit Sales Invoice Credit for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Review Sales Invoice Credit",
+		"workflow_action_name": "Review Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Return Sales Invoice Credit",
+		"workflow_action_name": "Return Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Submit Sales Invoice",
+		"workflow_action_name": "Submit Sales Invoice"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Cancel Sales Invoice",
+		"workflow_action_name": "Cancel Sales Invoice"
 	}
 ]

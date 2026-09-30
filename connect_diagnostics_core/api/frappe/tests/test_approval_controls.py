@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import date, datetime, time
 from decimal import Decimal
 from math import inf, nan
+from typing import Any, cast
 from unittest.mock import patch
 
 import frappe
@@ -99,7 +101,7 @@ class TestApprovalControls(UnitTestCase):
     def test_digest_rejects_invalid_root_and_values(self) -> None:
         for payload in ([1], {1: "bad"}, {"value": nan}, {"value": inf}, {"value": object()}):
             with self.subTest(payload=payload), self.assertRaises(frappe.ValidationError):
-                approval_controls.critical_digest(payload)  # type: ignore[arg-type]
+                approval_controls.critical_digest(cast(Mapping[str, Any], payload))
 
     def test_distinct_actors_accepts_mixed_aliases(self) -> None:
         with self._identity_mocks()[0], self._identity_mocks()[1]:
@@ -199,7 +201,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.require_distinct_actors("maker@example.com", "maker@example.com", ())
 
     def test_capture_rechecks_permission_and_returns_frozen_snapshot(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         now = datetime(2026, 9, 26, 10, 30, 0)
         with (
             self._identity_mocks()[0],
@@ -214,10 +216,10 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.acted_at, now)
         self.assertEqual(snapshot.signature, "sig")
         with self.assertRaises(AttributeError):
-            snapshot.signature = "changed"  # type: ignore[misc]
+            snapshot.__setattr__("signature", "changed")
 
     def test_capture_stops_before_employee_data_when_permission_denied(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             patch.object(frappe, "has_permission", return_value=False) as permission,
             patch("frappe.get_all", side_effect=AssertionError("Employee query must not run")),
@@ -228,7 +230,7 @@ class TestApprovalControls(UnitTestCase):
         permission.assert_called_once_with("Asset Movement", ptype="write", doc=doc, user="actor@example.com")
 
     def test_capture_preserves_nonempty_signature_verbatim(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -249,7 +251,7 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.signature, "  signed exactly  ")
 
     def test_capture_rejects_whitespace_only_signature(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -270,7 +272,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.capture_signed_approval_actor(doc, "maker@example.com")
 
     def test_capture_rejects_missing_duplicate_and_unsigned_employees(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         employee = {"name": "EMP-001", "employee_name": "Actor", "user_id": "actor@example.com"}
         for rows in ([], [employee, employee], [{**employee, "approval_signature": ""}]):
             with (

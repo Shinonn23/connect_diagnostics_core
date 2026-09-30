@@ -14,7 +14,7 @@ impacts. Test constants are not policy.
 | D-ASSET | Which asset/equipment routes, identity, custody/site and acknowledgement ordering are enabled? | Asset + Operations | WF-06/08, enabled TSK-512 | Open |
 | D-ASSET-DISPOSAL | Which sale/scrap/write-off routes, authority, dates, accounts and evidence apply? | Asset + Finance | WF-07 | Open |
 | D-SALES | What exposure basis, thresholds, currencies, override authority and critical fields apply? | Sales + Finance | WF-09 | Open |
-| D-CREDIT | What distinguishes physical return, price-only credit, retained credit, write-off and refund; what authority/period rules apply? | Sales + Finance | WF-10 | Open |
+| D-CREDIT | What distinguishes physical return, price-only credit, retained credit, write-off and refund; what authority/period rules apply? | Sales + Finance | WF-10 | Approved by `D-CREDIT-2026-09-26` |
 | D-PROCURE | Are RFQ/direct routes enabled; what supplier evidence, commitment, authority and currency basis apply? | Procurement + Finance | WF-11 | Open |
 | D-AP | What supplier-invoice identity, matching tolerances, receipt owner, advance, direct-expense and Is Paid rules apply? | AP + Procurement | WF-12 | Open |
 | D-PAYMENT | What voucher matrix, beneficiary/account/currency/amount authority, bank evidence and settlement rules apply? | Finance + Management | WF-10/12/13/14, 529 Core | Open |
@@ -22,6 +22,39 @@ impacts. Test constants are not policy.
 | CONFIG-PAYMENT | Retain approved site-owned PE Workflow or retire/replace it; who owns desired state and pending records? | Site Configuration Owner + Finance Owner, to be named | WF-13 / task `CONFIG-PAYMENT` | Conflict open; evidence: `evidence/config-payment.md` (not created until owners approve access) |
 | CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Conflict open; evidence: `evidence/config-dirty-ownership.md` (pending owner) |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
+
+## Approved Credit Note decision — 2026-09-26
+
+```text
+Decision ID: D-CREDIT-2026-09-26
+Owner / approval source: Business-owner approval recorded in the Codex task on 2026-09-26
+Approved policy / desired state: Protect native Sales Invoice Credit Notes that represent either a
+physical goods return or a price-only credit. Every protected Credit Note must be an unsubmitted
+Sales Invoice with is_return=1 and a submitted original Sales Invoice in return_against. Ordinary
+Sales Invoices remain outside this route.
+Revision: 2026-09-26.credit-note.1
+Effective date/timezone: 2026-09-26 / Asia/Bangkok
+Physical return: Native Sales Invoice return with stock effects where ERPNext permits update_stock.
+Price-only credit: Native Sales Invoice return without stock movement; original invoice reference,
+commercial reason, tax and accounting effects remain approval-critical.
+Excluded routes: AR write-off and refund execution. A refund, when enabled, is a separate Payment
+Entry route; this decision does not authorize payment. Named-user mapping, delegation and custom
+posting are excluded.
+Actors: Sales User Maker; Sales Manager Reviewer and native Post/Cancel executor; C-Level Approver
+Final Approver. Maker, Reviewer and Final Approver must be distinct Users. Native ERPNext cancel
+remains the recovery path after submission and is protected by the Sales Manager execution guard.
+Period and source rules: Native ERPNext closed-period, return, company, customer, currency, item,
+quantity, tax and accounting validation remains authoritative. The adapter adds no period bypass.
+Approval evidence: Bind the original invoice identity and current server-read credit-note reason,
+posting/accounting/tax/discount/total/item/warehouse facts. Any approval-critical change requires
+Return, Resubmit and fresh Review/Approval.
+Migration/recovery: Stop on open legacy Workflow Actions, affected pending documents or unrelated
+site-owned collision. Never remap/delete/fabricate history. Posted recovery uses native cancel/reversal.
+Required evidence: Three-actor UI/API/server parity, Sales User Maker, physical and price-only routes,
+ordinary invoice bypass, stale data, direct submit/state spoof, retry, native GL/stock/outstanding and
+cancel/reversal tests.
+Sign-off: Business policy approved; technical/runtime sign-off pending route implementation.
+```
 
 ## Approved Self-Approval/SoD identity decision — 2026-09-26
 
@@ -44,12 +77,12 @@ Stock Reconciliation = Stock User / Stock Manager / Accounts Manager; Asset Move
 Stock Manager / C-Level Approver (the Stock User may also be the asset custodian, but custodian status
 alone grants no Workflow role or document permission); manual Journal Entry = Accounts User /
 Accounts Manager / C-Level Approver; Sales Order credit approval = Sales User / Sales Manager /
-Accounts Manager; Sales Invoice Credit Note = Sales User or Accounts User / Sales Manager /
-Accounts Manager; Purchase Order = Purchase User / Purchase Manager / C-Level Approver; Purchase
+Accounts Manager; Sales Invoice Credit Note = Sales User / Sales Manager / C-Level Approver, with
+Sales Manager as Post/Cancel executor; Purchase Order = Purchase User / Purchase Manager / C-Level Approver; Purchase
 Invoice = Accounts User / Purchase Manager / Accounts Manager; Payment Entry = Accounts User /
 Accounts Manager / C-Level Approver; Payroll Entry = HR User / HR Manager / Accounts Manager.
-Execution after approval: The declared Reviewer may perform the native Post/Submit after a distinct
-Final Approver has approved. Post/Submit is execution, not another approval, and must recheck the
+Execution after approval: The declared execution role may perform the native Post/Submit after a
+distinct Final Approver has approved. Post/Submit is execution, not another approval, and must recheck the
 approved state and snapshots immediately before the native effect.
 Administrator and service identities: Administrator is not a normal business approver and receives
 no Self-Approval/SoD bypass. Background/service identities cannot Review or Approve; they may execute
@@ -63,6 +96,10 @@ Journal Entries and any custom posting/state engine.
 Required negative evidence: self approval, multi-role self approval, reviewer/final reuse, wrong
 role, direct apply_workflow RPC, direct submit/state spoof, permission revocation, stale critical
 data and repeated action. Maker Send/Resubmit must remain possible.
+Sales Invoice Credit Note route states use the native `Sales Invoice Draft` and `Sales Invoice
+Submitted` states because Frappe permits one active Workflow per DocType. The route remains scoped
+to return/credit-note invoices; ordinary Sales Invoices retain their direct native submit path,
+while the intermediate credit-note review states remain route-specific.
 Configuration impact: Protected Review/Approve transitions use allow_self_approval=0. Maker
 Send/Resubmit transitions may use allow_self_approval=1. Existing routes are changed only by their
 own approved domain branch with collision-aware migration and recovery.
