@@ -72,7 +72,14 @@
 			"id": "WF-09",
 			"status": "enabled",
 			"document_type": "Sales Order",
-			"workflow": "Connect Sales Order Blueprint"
+			"workflow": "Connect Sales Order Blueprint",
+			"production_policy_status": "blocked-pending-D-SALES-and-shared-controls",
+			"demo_status": "implementation",
+			"demo_revision": "D-SALES-DEMO-2026-09-23.1",
+			"demo_target_scope": "local.test-only",
+			"demo_route": "Sales User Maker -> Sales Manager Commercial/Credit Reviewer -> C-Level Approver -> native Submit",
+			"demo_activation": "dual-site-config-gated; native Desk configuration; shipped Workflow fixture unchanged",
+			"demo_recovery": "disable site gates, restore captured Workflow and Accounts Settings values, preserve Workflow Action/Version/Timeline history"
 		},
 		{
 			"id": "WF-10",

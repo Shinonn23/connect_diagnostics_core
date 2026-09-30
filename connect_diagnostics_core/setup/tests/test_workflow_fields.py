@@ -27,8 +27,27 @@ class TestWorkflowFields(UnitTestCase):
                 "freeze_exception_reconciliation_scope",
             },
         )
+        self.assertEqual(
+            {row["fieldname"] for row in fields["Sales Order"]},
+            {
+                "approval_revision",
+                "approval_digest",
+                "approval_maker_user",
+                "approval_maker_at",
+                "approval_reviewer_user",
+                "approval_reviewer_at",
+                "approval_approver_user",
+                "approval_approver_at",
+            },
+        )
 
         for rows in fields.values():
             for row in rows:
                 fieldname = str(row["fieldname"])
                 self.assertFalse(fieldname.startswith("custom_"))
+
+    def test_sales_order_approval_fields_are_hidden_read_only_and_no_copy(self) -> None:
+        for field in workflow_fields.CUSTOM_FIELDS["Sales Order"]:
+            self.assertEqual(field["hidden"], 1)
+            self.assertEqual(field["read_only"], 1)
+            self.assertEqual(field["no_copy"], 1)

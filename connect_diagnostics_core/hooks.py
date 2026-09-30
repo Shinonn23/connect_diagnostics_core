@@ -117,6 +117,26 @@ jinja = {
 # any Workflow definition in this app.
 workflow_methods = [
     {
+        "name": "Capture Sales Order Demo Maker",
+        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_maker",
+    },
+    {
+        "name": "Capture Sales Order Demo Review",
+        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_review",
+    },
+    {
+        "name": "Capture Sales Order Demo Final Approval",
+        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_final_approval",
+    },
+    {
+        "name": "Clear Sales Order Demo Approval",
+        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.clear_sales_order_demo_approval",
+    },
+    {
+        "name": "Authorize Sales Order Demo Submission",
+        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.authorize_sales_order_demo_submission",
+    },
+    {
         "name": "Capture Freeze Exception Approval Scope",
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
     },
@@ -283,8 +303,13 @@ doc_events = {
         "validate": [
             "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
+            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo",
         ],
-        "before_submit": "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo_before_submit",
+            "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
+        ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo_before_cancel",
     },
     "Sales Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
