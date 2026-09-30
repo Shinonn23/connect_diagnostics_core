@@ -48,7 +48,12 @@
 			"role": "Accounts Manager",
 			"rights": ["read", "write", "submit", "cancel"]
 		},
-		{ "doctype": "Payroll Entry", "role": "HR User", "rights": ["read", "write"] },
-		{ "doctype": "Payroll Entry", "role": "HR Manager", "rights": ["read", "write", "submit", "cancel"] }
+		{ "doctype": "Payroll Entry", "role": "HR User", "rights": ["read", "write", "create"] },
+		{
+			"doctype": "Payroll Entry",
+			"role": "HR Manager",
+			"rights": ["read", "write", "create", "submit", "cancel"]
+		},
+		{ "doctype": "Payroll Entry", "role": "Accounts Manager", "rights": ["read", "write"] }
 	]
 }

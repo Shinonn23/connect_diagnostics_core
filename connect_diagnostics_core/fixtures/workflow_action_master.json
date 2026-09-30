@@ -317,35 +317,56 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Payroll Entry for Review",
-		"workflow_action_name": "Submit Payroll Entry for Review"
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Send Payroll Entry for Review",
+		"workflow_action_name": "Send Payroll Entry for Review"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Resubmit Payroll Entry for Review",
+		"workflow_action_name": "Resubmit Payroll Entry for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Review Payroll Entry",
+		"workflow_action_name": "Review Payroll Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Return Payroll Entry",
+		"workflow_action_name": "Return Payroll Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Approve Payroll Entry",
 		"workflow_action_name": "Approve Payroll Entry"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Reject Payroll Entry",
 		"workflow_action_name": "Reject Payroll Entry"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Post Payroll Entry",
-		"workflow_action_name": "Post Payroll Entry"
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Submit Payroll Entry",
+		"workflow_action_name": "Submit Payroll Entry"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Cancel Payroll Entry",
 		"workflow_action_name": "Cancel Payroll Entry"
 	},

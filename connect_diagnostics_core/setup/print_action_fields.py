@@ -171,6 +171,9 @@ CUSTOM_FIELDS = {
     doctype: [field for action in actions for field in _fields_for_action(action)]
     for doctype, actions in PRINT_ACTIONS.items()
 }
+for _field_definition in CUSTOM_FIELDS["Payroll Entry"]:
+    if _field_definition["fieldtype"] == "Link":
+        _field_definition["ignore_user_permissions"] = 1
 
 
 def apply_configuration() -> None:

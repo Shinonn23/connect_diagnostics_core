@@ -69,7 +69,9 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if not row["action"].startswith("Submit ")
+                    if row["action"].startswith(
+                        ("Review ", "Return ", "Approve ", "Reject ", "Post ", "Cancel ")
+                    )
                 )
             )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
@@ -97,3 +99,82 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                     self.assertIn("not doc.outgoing_stock_entry", condition or "")
                 else:
                     self.assertFalse(condition)
+
+    def test_payroll_entry_route_has_three_distinct_approval_stages(self) -> None:
+        workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
+        workflow = next(row for row in workflows if row["document_type"] == "Payroll Entry")
+        self.assertEqual(
+            [(row["state"], row["doc_status"], row["allow_edit"]) for row in workflow["states"]],
+            [
+                ("Payroll Entry Draft", "0", "HR User"),
+                ("Payroll Entry Pending Review", "0", "HR Manager"),
+                ("Payroll Entry Reviewed", "0", "Accounts Manager"),
+                ("Payroll Entry Returned", "0", "HR User"),
+                ("Payroll Entry Approved", "0", "HR Manager"),
+                ("Payroll Entry Rejected", "0", "HR User"),
+                ("Payroll Entry Submitted", "1", "HR Manager"),
+                ("Payroll Entry Cancelled", "2", "HR Manager"),
+            ],
+        )
+        transitions = {
+            row["action"]: (
+                row["state"],
+                row["next_state"],
+                row["allowed"],
+                row.get("transition_tasks"),
+            )
+            for row in workflow["transitions"]
+        }
+        self.assertEqual(
+            transitions,
+            {
+                "Send Payroll Entry for Review": (
+                    "Payroll Entry Draft",
+                    "Payroll Entry Pending Review",
+                    "HR User",
+                    "Connect Payroll Entry Maker Snapshot",
+                ),
+                "Resubmit Payroll Entry for Review": (
+                    "Payroll Entry Returned",
+                    "Payroll Entry Pending Review",
+                    "HR User",
+                    "Connect Payroll Entry Maker Snapshot",
+                ),
+                "Review Payroll Entry": (
+                    "Payroll Entry Pending Review",
+                    "Payroll Entry Reviewed",
+                    "HR Manager",
+                    "Connect Payroll Entry Review Snapshot",
+                ),
+                "Return Payroll Entry": (
+                    "Payroll Entry Pending Review",
+                    "Payroll Entry Returned",
+                    "HR Manager",
+                    "Connect Payroll Entry Return Reset",
+                ),
+                "Approve Payroll Entry": (
+                    "Payroll Entry Reviewed",
+                    "Payroll Entry Approved",
+                    "Accounts Manager",
+                    "Connect Payroll Entry Approval Snapshot",
+                ),
+                "Reject Payroll Entry": (
+                    "Payroll Entry Reviewed",
+                    "Payroll Entry Rejected",
+                    "Accounts Manager",
+                    "Connect Payroll Entry Reject Reset",
+                ),
+                "Submit Payroll Entry": (
+                    "Payroll Entry Approved",
+                    "Payroll Entry Submitted",
+                    "HR Manager",
+                    "Connect Payroll Entry Submit Authorization",
+                ),
+                "Cancel Payroll Entry": (
+                    "Payroll Entry Submitted",
+                    "Payroll Entry Cancelled",
+                    "HR Manager",
+                    None,
+                ),
+            },
+        )

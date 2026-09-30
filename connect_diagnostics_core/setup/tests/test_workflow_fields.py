@@ -75,3 +75,12 @@ class TestWorkflowFields(UnitTestCase):
             for row in rows:
                 fieldname = str(row["fieldname"])
                 self.assertFalse(fieldname.startswith("custom_"))
+
+    def test_payroll_actor_links_ignore_employee_user_permission_filters(self) -> None:
+        fields = {str(row["fieldname"]): row for row in workflow_fields.CUSTOM_FIELDS["Payroll Entry"]}
+        for fieldname in (
+            "approval_maker_user",
+            "approval_reviewer_user",
+            "approval_authorized_user",
+        ):
+            self.assertEqual(fields[fieldname]["ignore_user_permissions"], 1)

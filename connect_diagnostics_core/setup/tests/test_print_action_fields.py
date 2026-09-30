@@ -59,6 +59,13 @@ class TestPrintActionFields(UnitTestCase):
             fieldnames = [field["fieldname"] for field in fields]
             self.assertEqual(len(fieldnames), len(set(fieldnames)), doctype)
 
+    def test_payroll_employee_snapshots_ignore_employee_user_permission_filters(self) -> None:
+        fields = {
+            str(field["fieldname"]): field for field in print_action_fields.CUSTOM_FIELDS["Payroll Entry"]
+        }
+        self.assertEqual(fields["checked_by"]["ignore_user_permissions"], 1)
+        self.assertEqual(fields["authorized_by"]["ignore_user_permissions"], 1)
+
     @patch.object(print_action_fields.frappe, "clear_cache")
     @patch.object(print_action_fields, "make_property_setter")
     @patch.object(print_action_fields, "create_custom_fields")

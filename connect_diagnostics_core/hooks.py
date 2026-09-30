@@ -5,6 +5,10 @@ app_description = "Custom app for Connect Diagnostics to manage and implement co
 app_email = "siwat61719@gmail.com"
 app_license = "bsl-1.0"
 
+extend_doctype_class = {
+    "Payroll Entry": ["connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryApprovalMixin"],
+}
+
 # Apps
 # ------------------
 
@@ -116,6 +120,30 @@ jinja = {
 # They snapshot the current Employee and signature without creating or owning
 # any Workflow definition in this app.
 workflow_methods = [
+    {
+        "name": "Capture Payroll Entry Maker",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.capture_maker_snapshot",
+    },
+    {
+        "name": "Capture Payroll Entry Review",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.capture_review_snapshot",
+    },
+    {
+        "name": "Capture Payroll Entry Approval",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.capture_authorization_snapshot",
+    },
+    {
+        "name": "Reset Payroll Entry Review",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.clear_on_return",
+    },
+    {
+        "name": "Reset Payroll Entry Approval",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.clear_on_reject",
+    },
+    {
+        "name": "Authorize Payroll Entry Submit Transition",
+        "method": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.authorize_submit_transition",
+    },
     {
         "name": "Capture Freeze Exception Approval Scope",
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
@@ -300,7 +328,12 @@ doc_events = {
         "validate": "connect_diagnostics_core.api.erpnext.payment_entry.validate",
     },
     "Salary Slip": {
+        "before_insert": "connect_diagnostics_core.api.erpnext.salary_slip.validate_creation",
         "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
+    },
+    "Payroll Entry": {
+        "validate": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_workflow",
+        "before_submit": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_before_submit",
     },
     "Supplier Bank Change Request": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
@@ -614,6 +647,8 @@ fixtures = [
                     "Purchase Invoice Cancelled",
                     "Payroll Entry Draft",
                     "Payroll Entry Pending Review",
+                    "Payroll Entry Reviewed",
+                    "Payroll Entry Returned",
                     "Payroll Entry Approved",
                     "Payroll Entry Rejected",
                     "Payroll Entry Submitted",
@@ -686,10 +721,13 @@ fixtures = [
                     "Reject Purchase Invoice",
                     "Post Purchase Invoice",
                     "Cancel Purchase Invoice",
-                    "Submit Payroll Entry for Review",
+                    "Send Payroll Entry for Review",
+                    "Resubmit Payroll Entry for Review",
+                    "Review Payroll Entry",
+                    "Return Payroll Entry",
                     "Approve Payroll Entry",
                     "Reject Payroll Entry",
-                    "Post Payroll Entry",
+                    "Submit Payroll Entry",
                     "Cancel Payroll Entry",
                     "Submit Emergency Stock Movement for Review",
                     "Approve Emergency Stock Movement",
