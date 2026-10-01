@@ -26,8 +26,7 @@ class PrintAction:
     employee_field: str
     datetime_field: str
     signature_field: str
-    required_signature: bool = False
-    protected: bool = False
+    ignore_employee_user_permissions: bool = False
 
 
 PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
@@ -74,6 +73,22 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
         PrintAction("received", "received_by", "received_at", "received_signature"),
         PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
         PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Purchase Invoice": (
+        PrintAction(
+            "checked",
+            "checked_by",
+            "checked_at",
+            "checked_signature",
+            ignore_employee_user_permissions=True,
+        ),
+        PrintAction(
+            "authorized",
+            "authorized_by",
+            "authorized_at",
+            "authorized_signature",
+            ignore_employee_user_permissions=True,
+        ),
     ),
     "Quotation": (PrintAction("signatory", "signatory_by", "signatory_at", "signatory_signature"),),
     "Material Request": (
@@ -164,7 +179,7 @@ def _fields_for_action(
             "Link",
             f"Print Action: {label} By",
             options="Employee",
-            ignore_user_permissions=1,
+            **({"ignore_user_permissions": 1} if action.ignore_employee_user_permissions else {}),
         ),
         _field(
             action.datetime_field,

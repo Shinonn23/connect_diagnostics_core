@@ -1,11 +1,11 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-26.purchase-order.1",
-	"manifest_status": "dev-enabled",
+	"revision": "2026-09-23.pi-trial.1",
+	"manifest_status": "trial-enabled-local-test",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
 	"records_are_inert": false,
-	"activation_status": "enabled-on-local-test-after-guarded-migration",
+	"activation_status": "guarded-local-test-only",
 	"activation_prerequisites": [
 		"approved-normalized-route-revision",
 		"approved-target-and-scope",
@@ -17,8 +17,8 @@
 		"independent-configuration-review"
 	],
 	"collision_policy": "stop-and-obtain-owner-disposition",
-	"rerun_policy": "deterministic fixture sync and guarded migration rehearsal on local.test",
-	"recovery_policy": "restore the prior reviewed fixture on a matching configuration fingerprint; preserve Workflow Action, Version, and Timeline history",
+	"rerun_policy": "guarded deterministic patch and fixture sync on local.test only",
+	"recovery_policy": "restore the inventoried PI workflow only from a matching reviewed trial fingerprint; preserve Workflow Action, Version, Timeline, AP/GL, and stock history",
 	"routes": [
 		{
 			"id": "WF-01",
@@ -140,13 +140,13 @@
 			"pending_action_policy": "stop-before-write when an affected open PO/MR Workflow Action lacks record-level disposition"
 		},
 		{
-			"id": "TSK-597",
-			"status": "enabled",
+			"id": "WF-12",
+			"status": "trial-enabled-local-test",
 			"document_type": "Purchase Invoice",
 			"workflow": "Connect Purchase Invoice Blueprint",
-			"route_scope": "all standard native Purchase Invoices; ERPNext owns matching and posting",
-			"condition": null,
-			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
+			"revision": "2026-09-23.pi-trial.1",
+			"production_eligible": false,
+			"policy_warning": "Test policy only; replace with Finance-approved policy before UAT or production."
 		},
 		{
 			"id": "TSK-598",

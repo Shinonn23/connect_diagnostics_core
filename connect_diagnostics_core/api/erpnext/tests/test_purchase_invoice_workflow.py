@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from unittest.mock import patch
 
 import frappe
@@ -11,7 +11,6 @@ from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import purchase_invoice_workflow
-from connect_diagnostics_core.api.frappe.approval_controls import SignedApprovalSnapshot
 
 
 class TestPurchaseInvoiceWorkflow(UnitTestCase):
@@ -146,15 +145,8 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
 
     def test_source_verifier_cannot_be_maker(self) -> None:
         doc = self._doc()
-        doc.set("approval_maker_user", doc.owner)
         with (
             patch.object(purchase_invoice_workflow, "_require_sources"),
-            patch.object(purchase_invoice_workflow.approval_controls, "require_permission"),
-            patch.object(
-                purchase_invoice_workflow.approval_controls,
-                "resolve_user",
-                side_effect=lambda identity: identity,
-            ),
             patch.dict(purchase_invoice_workflow.frappe.session, {"user": doc.owner}),
             self.assertRaises(frappe.ValidationError),
         ):
@@ -162,45 +154,31 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
 
     def test_source_snapshot_requires_employee_signature(self) -> None:
         doc = self._doc()
-        doc.set("approval_maker_user", doc.owner)
         with (
             patch.object(purchase_invoice_workflow, "_require_sources"),
-            patch.object(purchase_invoice_workflow.approval_controls, "require_permission"),
-            patch.object(
-                purchase_invoice_workflow.approval_controls,
-                "resolve_user",
-                side_effect=lambda identity: identity,
-            ),
-            patch.object(
-                purchase_invoice_workflow.approval_controls,
-                "_active_employees",
-                return_value=[{"name": "EMP-REVIEWER", "approval_signature": ""}],
-            ),
-            patch.dict(purchase_invoice_workflow.frappe.session, {"user": "reviewer@example.com"}),
+            patch.object(purchase_invoice_workflow, "require_distinct_actors"),
+            patch("connect_diagnostics_core.api.erpnext.print_actions.capture_checked_action"),
             self.assertRaises(frappe.ValidationError),
         ):
             purchase_invoice_workflow.capture_source_verification_snapshot(doc)
 
     def test_source_snapshot_keeps_user_actor_separate_from_employee(self) -> None:
         doc = self._doc()
-        doc.set("approval_maker_user", doc.owner)
+
+        def capture_employee_snapshot(target: Document) -> None:
+            target.set("checked_by", "EMP-REVIEWER")
+            target.set("checked_signature", "data:image/png;base64,reviewer")
 
         with (
             patch.object(purchase_invoice_workflow, "_require_sources"),
+            patch.object(purchase_invoice_workflow, "require_distinct_actors"),
             patch.dict(
                 purchase_invoice_workflow.frappe.session,
                 {"user": "reviewer@example.com"},
             ),
-            patch.object(
-                purchase_invoice_workflow.approval_controls,
-                "capture_signed_approval_actor",
-                return_value=SignedApprovalSnapshot(
-                    user="reviewer@example.com",
-                    employee="EMP-REVIEWER",
-                    employee_name="Reviewer",
-                    acted_at=datetime(2026, 9, 26),
-                    signature="data:image/png;base64,reviewer",
-                ),
+            patch(
+                "connect_diagnostics_core.api.erpnext.print_actions.capture_checked_action",
+                side_effect=capture_employee_snapshot,
             ),
         ):
             purchase_invoice_workflow.capture_source_verification_snapshot(doc)

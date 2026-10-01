@@ -164,12 +164,15 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
         routes = {route["id"]: route for route in manifest["routes"]}
         self.assertEqual(manifest["target_scope"], "DEV:local.test")
         self.assertFalse(manifest["records_are_inert"])
-        self.assertEqual(manifest["schema_version"], 2)
-        self.assertEqual(manifest["activation_status"], "enabled-on-local-test-after-guarded-migration")
+        self.assertEqual(manifest["activation_status"], "guarded-local-test-only")
         self.assertIn("workflow-state-field-setup", manifest["activation_prerequisites"])
         self.assertIn("executable-permission-contract", manifest["activation_prerequisites"])
-        self.assertEqual(set(routes), {f"TSK-{number}" for number in range(590, 600)})
-        self.assertTrue(all(route["status"] == "enabled" for route in routes.values()))
+        self.assertEqual(set(routes), {f"WF-{number:02d}" for number in range(1, 19)})
+        self.assertEqual(routes["WF-08"]["status"], "disabled")
+        self.assertIsNone(routes["WF-08"]["document_type"])
+        self.assertIsNone(routes["WF-08"]["workflow"])
+        self.assertEqual(routes["WF-12"]["status"], "trial-enabled-local-test")
+        self.assertFalse(routes["WF-12"]["production_eligible"])
         self.assertTrue(all(workflow["is_active"] == 1 for workflow in workflows))
         self.assertTrue(all(len(workflow["states"]) >= 6 for workflow in workflows))
         self.assertTrue(all(len(workflow["transitions"]) >= 5 for workflow in workflows))
@@ -193,12 +196,19 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
 
     def test_companion_fixtures_are_referentially_integral(self) -> None:
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
-        state_rows = json.loads((FIXTURES / "workflow_state.json").read_text())
-        action_rows = json.loads((FIXTURES / "workflow_action_master.json").read_text())
-        states = {row["workflow_state_name"] for row in state_rows}
-        actions = {row["workflow_action_name"] for row in action_rows}
-        self.assertEqual(len(states), len(state_rows))
-        self.assertEqual(len(actions), len(action_rows))
+        states = {
+            row["workflow_state_name"] for row in json.loads((FIXTURES / "workflow_state.json").read_text())
+        }
+        actions = {
+            row["workflow_action_name"]
+            for row in json.loads((FIXTURES / "workflow_action_master.json").read_text())
+        }
+        self_service_actions = {
+            "Submit Emergency Stock Movement for Review",
+            "Submit Stock Transfer for Approval",
+            "Submit Purchase Invoice for Review",
+            "Resubmit Purchase Invoice",
+        }
         for workflow in workflows:
             self.assertTrue({row["state"] for row in workflow["states"]} <= states)
             self.assertTrue({row["next_state"] for row in workflow["transitions"]} <= states)
@@ -211,10 +221,18 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if (workflow["document_type"], row["action"]) not in maker_self_actions
-                    and not row["action"].startswith("Submit ")
+                    if row["action"] not in self_service_actions
                 )
             )
+        self.assertEqual(
+            {
+                row["action"]
+                for workflow in workflows
+                for row in workflow["transitions"]
+                if row["allow_self_approval"] == 1
+            },
+            self_service_actions,
+        )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
         referenced_states.update(
             row["next_state"] for workflow in workflows for row in workflow["transitions"]

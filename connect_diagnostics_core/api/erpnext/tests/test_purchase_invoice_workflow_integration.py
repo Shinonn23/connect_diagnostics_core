@@ -13,18 +13,6 @@ from frappe.model.workflow import apply_workflow
 from frappe.tests import IntegrationTestCase
 
 from connect_diagnostics_core.api.erpnext import purchase_invoice_workflow
-from connect_diagnostics_core.api.erpnext.tests.test_purchase_order_workflow_integration import (
-    APPROVER as PO_APPROVER,
-)
-from connect_diagnostics_core.api.erpnext.tests.test_purchase_order_workflow_integration import (
-    MAKER as PO_MAKER,
-)
-from connect_diagnostics_core.api.erpnext.tests.test_purchase_order_workflow_integration import (
-    REVIEWER as PO_REVIEWER,
-)
-from connect_diagnostics_core.api.erpnext.tests.test_purchase_order_workflow_integration import (
-    _prepare_users as prepare_po_users,
-)
 
 
 class TestPurchaseInvoiceWorkflowIntegration(IntegrationTestCase):
@@ -129,32 +117,24 @@ class TestPurchaseInvoiceWorkflowIntegration(IntegrationTestCase):
         )
         if not supplier or not item or not warehouse:
             self.skipTest("Supplier, Item, and company Warehouse are required ERPNext test fixtures")
-        prepare_po_users()
-        with self._as_user(PO_MAKER):
-            po = frappe.get_doc(
-                {
-                    "doctype": "Purchase Order",
-                    "company": company,
-                    "supplier": supplier,
-                    "schedule_date": frappe.utils.today(),
-                    "items": [
-                        {
-                            "item_code": item,
-                            "qty": 1,
-                            "rate": 100,
-                            "warehouse": warehouse,
-                            "schedule_date": frappe.utils.today(),
-                        }
-                    ],
-                }
-            ).insert(ignore_permissions=True)
-            po = apply_workflow(po, "Submit Purchase Order for Review")
-        with self._as_user(PO_REVIEWER):
-            po = apply_workflow(frappe.get_doc("Purchase Order", po.name), "Review Purchase Order")
-        with self._as_user(PO_APPROVER):
-            po = apply_workflow(frappe.get_doc("Purchase Order", po.name), "Approve Purchase Order")
-        with self._as_user(PO_REVIEWER):
-            po = apply_workflow(frappe.get_doc("Purchase Order", po.name), "Post Purchase Order")
+        po = frappe.get_doc(
+            {
+                "doctype": "Purchase Order",
+                "company": company,
+                "supplier": supplier,
+                "schedule_date": frappe.utils.today(),
+                "items": [
+                    {
+                        "item_code": item,
+                        "qty": 1,
+                        "rate": 100,
+                        "warehouse": warehouse,
+                        "schedule_date": frappe.utils.today(),
+                    }
+                ],
+            }
+        ).insert(ignore_permissions=True)
+        po.submit()
         pr = frappe.get_doc(
             {
                 "doctype": "Purchase Receipt",

@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Fail-closed approval controls for the native Purchase Invoice route."""
+"""Fail-closed approval controls for the temporary local.test PI route."""
 
 from __future__ import annotations
 
@@ -13,7 +13,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from connect_diagnostics_core.api.frappe import approval_controls
 from connect_diagnostics_core.api.frappe.approval_controls import (
     critical_digest,
     require_distinct_actors,
@@ -36,6 +35,7 @@ _DIGEST_EXCLUDED = {
     "parenttype",
     "parentfield",
     "workflow_state",
+    "trial_policy_warning",
     "approval_critical_digest",
     "approval_reviewer_user",
     "approval_authorized_user",
@@ -103,22 +103,17 @@ def _require_sources(doc: Document) -> None:
             frappe.throw(_("Purchase Receipt references must be submitted."))
 
 
-def capture_maker_snapshot(doc: Document, method: str | None = None) -> None:
-    del method
-    if str(doc.get("owner") or "") != frappe.session.user:
-        frappe.throw(_("Only the Purchase Invoice owner can send it for review."))
-    doc.set("approval_maker_user", frappe.session.user)
-
-
 def capture_source_verification_snapshot(doc: Document, method: str | None = None) -> None:
     del method
     _require_sources(doc)
-    snapshot = approval_controls.capture_signed_approval_actor(doc, str(doc.get("approval_maker_user") or ""))
+    require_distinct_actors(str(doc.get("owner") or ""), frappe.session.user)
     doc.set("approval_critical_digest", get_approval_digest(doc))
-    doc.set("approval_reviewer_user", snapshot.user)
-    doc.set("checked_by", snapshot.employee)
-    doc.set("checked_at", snapshot.acted_at)
-    doc.set("checked_signature", snapshot.signature)
+    doc.set("approval_reviewer_user", frappe.session.user)
+    from connect_diagnostics_core.api.erpnext.print_actions import capture_checked_action
+
+    capture_checked_action(doc)
+    if not doc.get("checked_by") or not doc.get("checked_signature"):
+        frappe.throw(_("An Employee and approval signature are required for source verification."))
 
 
 def capture_accounting_approval_snapshot(doc: Document, method: str | None = None) -> None:
@@ -126,15 +121,15 @@ def capture_accounting_approval_snapshot(doc: Document, method: str | None = Non
     _require_sources(doc)
     if doc.get("approval_critical_digest") != get_approval_digest(doc):
         frappe.throw(_("The Purchase Invoice changed after source verification and must be reviewed again."))
-    snapshot = approval_controls.capture_signed_approval_actor(
-        doc,
-        str(doc.get("owner") or ""),
-        (str(doc.get("approval_reviewer_user") or ""),),
+    require_distinct_actors(
+        str(doc.get("owner") or ""), frappe.session.user, (str(doc.get("approval_reviewer_user") or ""),)
     )
-    doc.set("approval_authorized_user", snapshot.user)
-    doc.set("authorized_by", snapshot.employee)
-    doc.set("authorized_at", snapshot.acted_at)
-    doc.set("authorized_signature", snapshot.signature)
+    doc.set("approval_authorized_user", frappe.session.user)
+    from connect_diagnostics_core.api.erpnext.print_actions import capture_authorized_action
+
+    capture_authorized_action(doc)
+    if not doc.get("authorized_by") or not doc.get("authorized_signature"):
+        frappe.throw(_("An Employee and approval signature are required for accounting approval."))
 
 
 def clear_approval_snapshots(doc: Document, method: str | None = None) -> None:
@@ -242,9 +237,10 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
         if persisted is None:
             frappe.throw(_("Purchase Invoice approval is missing or stale."))
             return
-        if persisted.get("workflow_state") != APPROVED_STATE or persisted.get(
-            "approval_critical_digest"
-        ) != get_approval_digest(doc):
+        if (
+            persisted.get("workflow_state") != APPROVED_STATE
+            or persisted.get("approval_critical_digest") != get_approval_digest(doc)
+        ):
             frappe.throw(_("Purchase Invoice approval is missing or stale."))
         if not persisted.get("checked_signature") or not persisted.get("authorized_signature"):
             frappe.throw(_("Signed source verification and accounting approval are required."))

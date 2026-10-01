@@ -4,6 +4,87 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Source Verification",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Source Verification"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Accounting Approval",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Accounting Approval"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Returned",
+		"style": "Warning",
+		"workflow_state_name": "Purchase Invoice Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Draft",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Pending Approval",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Pending Approval"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Approved",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Approved"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Rejected",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Submitted",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Asset Movement Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Payment Entry Draft",
 		"style": "Info",
 		"workflow_state_name": "Payment Entry Draft"
@@ -412,15 +493,6 @@
 		"name": "Purchase Invoice Draft",
 		"style": "Info",
 		"workflow_state_name": "Purchase Invoice Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Pending Review"
 	},
 	{
 		"docstatus": 0,

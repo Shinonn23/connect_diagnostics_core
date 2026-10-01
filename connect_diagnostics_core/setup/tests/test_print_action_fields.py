@@ -29,26 +29,16 @@ class TestPrintActionFields(UnitTestCase):
                 ["authorized"],
             )
 
-    def test_baseline_approval_actions_are_protected_and_signed(self) -> None:
-        protected = {
-            "Stock Reconciliation",
-            "Asset Movement",
-            "Journal Entry",
-            "Sales Order",
-            "Sales Invoice",
-            "Material Request",
-            "Purchase Order",
-            "Purchase Invoice",
-            "Payment Entry",
-            "Payroll Entry",
+    def test_purchase_invoice_has_checked_and_authorized_snapshots(self) -> None:
+        self.assertEqual(
+            [action.key for action in print_action_fields.PRINT_ACTIONS["Purchase Invoice"]],
+            ["checked", "authorized"],
+        )
+        fields = {
+            field["fieldname"]: field for field in print_action_fields.CUSTOM_FIELDS["Purchase Invoice"]
         }
-        for doctype in protected:
-            action = next(
-                action for action in print_action_fields.get_actions(doctype) if action.key == "authorized"
-            )
-            with self.subTest(doctype=doctype):
-                self.assertTrue(action.required_signature)
-                self.assertTrue(action.protected)
+        self.assertEqual(fields["checked_by"]["ignore_user_permissions"], 1)
+        self.assertEqual(fields["authorized_by"]["ignore_user_permissions"], 1)
 
     def test_action_definitions_have_hidden_employee_and_datetime_fields(self) -> None:
         for doctype, actions in print_action_fields.PRINT_ACTIONS.items():
