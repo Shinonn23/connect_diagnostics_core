@@ -39,14 +39,13 @@ def capture_print_action(doc: Document, action_key: str) -> None:
         return
 
     if action.protected:
+        previous_actor = doc.get("approval_reviewer_user") if action.key == "authorized" else None
         require_permission(doc)
-        if doc.doctype == "Stock Entry":
-            previous_actor = doc.get("approval_reviewer_user") if action.key == "authorized" else None
-            require_distinct_actors(
-                _text(doc.get("owner")),
-                frappe.session.user,
-                (_text(previous_actor),),
-            )
+        require_distinct_actors(
+            _text(doc.get("owner")),
+            frappe.session.user,
+            (_text(previous_actor),),
+        )
 
     employee = cast(
         Mapping[str, Any] | None,
@@ -82,12 +81,14 @@ def capture_print_action(doc: Document, action_key: str) -> None:
     doc.set(action.datetime_field, now_datetime())
     doc.set(action.signature_field, signature)
 
-    if doc.doctype == "Stock Entry" and action.key == "checked":
-        from connect_diagnostics_core.api.erpnext.stock_entry_workflow import capture_review_snapshot
+    if doc.doctype == "Purchase Order" and action.key == "checked":
+        from connect_diagnostics_core.api.erpnext.purchase_order_workflow import capture_review_snapshot
 
         capture_review_snapshot(doc)
-    elif doc.doctype == "Stock Entry" and action.key == "authorized":
-        from connect_diagnostics_core.api.erpnext.stock_entry_workflow import capture_authorization_snapshot
+    elif doc.doctype == "Purchase Order" and action.key == "authorized":
+        from connect_diagnostics_core.api.erpnext.purchase_order_workflow import (
+            capture_authorization_snapshot,
+        )
 
         capture_authorization_snapshot(doc)
 

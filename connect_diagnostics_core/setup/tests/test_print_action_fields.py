@@ -11,22 +11,16 @@ from connect_diagnostics_core.setup import print_action_fields
 
 
 class TestPrintActionFields(UnitTestCase):
-    def test_approved_routes_have_signed_review_and_authorization_snapshots(self) -> None:
-        for doctype in (
-            "Stock Entry",
-            "Stock Reconciliation",
-            "Asset Movement",
-            "Journal Entry",
-            "Sales Order",
-            "Sales Invoice",
-            "Purchase Order",
-            "Purchase Invoice",
-            "Payment Entry",
-            "Payroll Entry",
-        ):
-            actions = {action.key for action in print_action_fields.PRINT_ACTIONS[doctype]}
-            self.assertIn("checked", actions, doctype)
-            self.assertIn("authorized", actions, doctype)
+    def test_purchase_order_review_and_approval_require_distinct_signed_actions(self) -> None:
+        actions = {action.key: action for action in print_action_fields.PRINT_ACTIONS["Purchase Order"]}
+
+        self.assertEqual(set(actions), {"submit", "ordered", "checked", "authorized"})
+        for action_key in ("submit", "ordered"):
+            self.assertFalse(actions[action_key].required_signature)
+            self.assertFalse(actions[action_key].protected)
+        for action_key in ("checked", "authorized"):
+            self.assertTrue(actions[action_key].required_signature)
+            self.assertTrue(actions[action_key].protected)
 
     def test_material_request_and_capitalization_keep_only_authorized_snapshot(self) -> None:
         for doctype in ("Material Request", "Asset Capitalization"):

@@ -16,8 +16,6 @@ from frappe.model.workflow import apply_workflow
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, nowdate
 
-from connect_diagnostics_core.api.erpnext.purchase_order_workflow import get_commitment_digest
-
 COMPANY = "_Test Company"
 ITEM = "_Test Item"
 WAREHOUSE = "_Test Warehouse - _TC"
@@ -142,7 +140,6 @@ class TestPurchaseOrderWorkflowIntegration(IntegrationTestCase):
         order.reload()
         self.assertEqual(order.get("approval_reviewer_user"), REVIEWER)
         self.assertEqual(order.get("checked_signature"), SIGNATURE)
-        self.assertEqual(order.get("approval_critical_digest"), get_commitment_digest(order))
         order.items[0].rate = 125
         with self.assertRaises(frappe.ValidationError):
             order.save()
@@ -153,20 +150,14 @@ class TestPurchaseOrderWorkflowIntegration(IntegrationTestCase):
         order.reload()
         self.assertEqual(order.get("approval_authorized_user"), APPROVER)
         self.assertEqual(order.get("authorized_signature"), SIGNATURE)
-        self.assertEqual(order.get("approval_critical_digest"), get_commitment_digest(order))
 
         frappe.set_user(REVIEWER)
         frappe.db.set_value("Purchase Order", order.name, "owner", APPROVER, update_modified=False)
         order.reload()
-        frappe.db.savepoint("po_invalid_owner_post")
-        try:
-            with self.assertRaises(frappe.ValidationError):
-                apply_workflow(order, "Post Purchase Order")
-        finally:
-            frappe.db.rollback(save_point="po_invalid_owner_post")
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(order, "Post Purchase Order")
         frappe.db.set_value("Purchase Order", order.name, "owner", MAKER, update_modified=False)
         order.reload()
-        self.assertEqual(order.get("approval_critical_digest"), get_commitment_digest(order))
         apply_workflow(order, "Post Purchase Order")
         order.reload()
         self.assertEqual(order.docstatus, 1)

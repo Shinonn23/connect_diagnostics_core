@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-26.workflow-blueprint.4",
+	"revision": "2026-09-26.purchase-order.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
@@ -133,9 +133,11 @@
 			"status": "enabled",
 			"document_type": "Purchase Order",
 			"workflow": "Connect Purchase Order Blueprint",
-			"route_scope": "all standard native Purchase Orders; Material Request is not a protected route",
-			"condition": null,
-			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
+			"route_scope": "Every Purchase Order; native RFQ/Supplier Quotation references and direct PO are enabled",
+			"decision_revision": "D-PROCURE-PO-2026-09-26",
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"],
+			"disabled_workflow": "Connect Material Request Blueprint",
+			"pending_action_policy": "stop-before-write when an affected open PO/MR Workflow Action lacks record-level disposition"
 		},
 		{
 			"id": "TSK-597",

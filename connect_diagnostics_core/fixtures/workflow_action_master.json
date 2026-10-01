@@ -157,43 +157,29 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Material Request for Review",
-		"workflow_action_name": "Submit Material Request for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Approve Material Request",
-		"workflow_action_name": "Approve Material Request"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Material Request",
-		"workflow_action_name": "Reject Material Request"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Post Material Request",
-		"workflow_action_name": "Post Material Request"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Material Request",
-		"workflow_action_name": "Cancel Material Request"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Submit Purchase Order for Review",
 		"workflow_action_name": "Submit Purchase Order for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 15:12:00.469564",
+		"name": "Review Purchase Order",
+		"workflow_action_name": "Review Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 15:12:00.469564",
+		"name": "Return Purchase Order",
+		"workflow_action_name": "Return Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-26 15:12:00.469564",
+		"name": "Resubmit Purchase Order",
+		"workflow_action_name": "Resubmit Purchase Order"
 	},
 	{
 		"docstatus": 0,

@@ -10,12 +10,13 @@ impacts. Test constants are not policy.
 | D-CORE | What are trusted source/operation/revision/provenance fields and current-state recheck boundary? | Technical + Security | All shared cores/adapters | Approved for the Self-Approval/SoD baseline by `D-CORE-2026-09-26`; domain critical fields remain adapter-owned |
 | D-IDENTITY | What business identity defines requester/maker/checker/approver, scopes, delegation, backup, expiry/revocation and self-approval? | Security + all owners | WF-01–17, 531 Core | Approved for the Self-Approval/SoD baseline by `D-IDENTITY-2026-09-26`; delegation and backup approval remain out of scope |
 | D-STOCK | What count evidence model, cutoff/reference time, blind-count visibility, exclusions, recount authority and monthly/annual adjustment rules apply? | Stock + Finance | WF-03/04/05 | Open; retired code cannot be chosen |
+| D-STOCK-COMPAT | May the existing native-draft generator's incomplete adjustment metadata/tests be repaired without reopening Stock Count policy or posting behavior? | Stock + Repository Technical Owner | TSK-77 compatibility defect; TSK-527 full-gate unblocker | Approved by `D-STOCK-COMPAT-2026-09-26` below; does not resolve D-STOCK |
 | D-TRANSFER | Which direct/transit routes, scopes and receipt ordering are enabled? | Stock + Operations | WF-01/02, enabled TSK-512 | Open |
 | D-ASSET | Which asset/equipment routes, identity, custody/site and acknowledgement ordering are enabled? | Asset + Operations | WF-06/08, enabled TSK-512 | Open |
 | D-ASSET-DISPOSAL | Which sale/scrap/write-off routes, authority, dates, accounts and evidence apply? | Asset + Finance | WF-07 | Open |
 | D-SALES | What exposure basis, thresholds, currencies, override authority and critical fields apply? | Sales + Finance | WF-09 | Open |
-| D-CREDIT | What distinguishes physical return, price-only credit, retained credit, write-off and refund; what authority/period rules apply? | Sales + Finance | WF-10 | Approved by `D-CREDIT-2026-09-26` |
-| D-PROCURE | Are RFQ/direct routes enabled; what supplier evidence, commitment, authority and currency basis apply? | Procurement + Finance | WF-11 | Open |
+| D-CREDIT | What distinguishes physical return, price-only credit, retained credit, write-off and refund; what authority/period rules apply? | Sales + Finance | WF-10 | Open |
+| D-PROCURE | Are RFQ/direct routes enabled; what supplier evidence, commitment, authority and currency basis apply? | Procurement + Finance | WF-11 | Approved for PO route by `D-PROCURE-PO-2026-09-26` below |
 | D-AP | What supplier-invoice identity, matching tolerances, receipt owner, advance, direct-expense and Is Paid rules apply? | AP + Procurement | WF-12 | Open |
 | D-PAYMENT | What voucher matrix, beneficiary/account/currency/amount authority, bank evidence and settlement rules apply? | Finance + Management | WF-10/12/13/14, 529 Core | Open |
 | D-PAYROLL | What cutoff, grouping, off-cycle, correction/recovery, privacy and bank-handoff authority apply? | Payroll + Finance | WF-14 | Open |
@@ -23,139 +24,48 @@ impacts. Test constants are not policy.
 | CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Partially resolved for TSK-590/600 by D-SIGNED-APPROVAL-2026-09-26: preserve all existing dirty work; serialize shared-file integration under the primary agent; all unrelated ownership remains open |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
 
-## Approved Credit Note decision — 2026-09-26
+## Approved Purchase Order decision — 2026-09-26
 
 ```text
-Decision ID: D-CREDIT-2026-09-26
-Owner / approval source: Business-owner approval recorded in the Codex task on 2026-09-26
-Approved policy / desired state: Protect native Sales Invoice Credit Notes that represent either a
-physical goods return or a price-only credit. Every protected Credit Note must be an unsubmitted
-Sales Invoice with is_return=1 and a submitted original Sales Invoice in return_against. Ordinary
-Sales Invoices remain outside this route.
-Revision: 2026-09-26.credit-note.1
+Decision ID: D-PROCURE-PO-2026-09-26
+Owner / backup owner: Siwat Sroisuwan / not assigned
+Approved policy / desired state: Purchase Order is the sole procurement approval boundary. RFQ and Supplier Quotation remain optional native upstream evidence, and direct Purchase Order is enabled. Every Purchase Order, regardless of value or transaction currency, follows Purchase User Maker -> Purchase Manager Reviewer -> C-Level Approver Final Approver. The three protected actors must be distinct users; a multi-role user may not collapse or skip a protected step. No Material Request Workflow is introduced.
+Revision: 2026-09-26.purchase-order.1
 Effective date/timezone: 2026-09-26 / Asia/Bangkok
-Physical return: Native Sales Invoice return with stock effects where ERPNext permits update_stock.
-Price-only credit: Native Sales Invoice return without stock movement; original invoice reference,
-commercial reason, tax and accounting effects remain approval-critical.
-Excluded routes: AR write-off and refund execution. A refund, when enabled, is a separate Payment
-Entry route; this decision does not authorize payment. Named-user mapping, delegation and custom
-posting are excluded.
-Actors: Sales User Maker; Sales Manager Reviewer and native Post/Cancel executor; C-Level Approver
-Final Approver. Maker, Reviewer and Final Approver must be distinct Users. Native ERPNext cancel
-remains the recovery path after submission and is protected by the Sales Manager execution guard.
-Period and source rules: Native ERPNext closed-period, return, company, customer, currency, item,
-quantity, tax and accounting validation remains authoritative. The adapter adds no period bypass.
-Approval evidence: Bind the original invoice identity and current server-read credit-note reason,
-posting/accounting/tax/discount/total/item/warehouse facts. Any approval-critical change requires
-Return, Resubmit and fresh Review/Approval.
-Migration/recovery: Stop on open legacy Workflow Actions, affected pending documents or unrelated
-site-owned collision. Never remap/delete/fabricate history. Posted recovery uses native cancel/reversal.
-Required evidence: Three-actor UI/API/server parity, Sales User Maker, physical and price-only routes,
-ordinary invoice bypass, stale data, direct submit/state spoof, retry, native GL/stock/outstanding and
-cancel/reversal tests.
-Sign-off: Business policy approved; technical/runtime sign-off pending route implementation.
+Enabled routes: Standard ERPNext Purchase Order from native RFQ/Supplier Quotation references and direct Purchase Order
+Deferred/disabled routes and reason: Category-specific mandatory sourcing evidence, threshold/currency bypasses, delegation, and named-user exceptions are disabled until a later approved revision; Material Request approval is removed from the canonical baseline by TSK-602
+Affected existing documents/configuration: Connect Purchase Order Blueprint; Connect Material Request Blueprint; recorded three Purchase Order and two Material Request open Workflow Actions on shared DEV; existing native RFQ, Supplier Quotation, Purchase Receipt, and Purchase Invoice behavior
+Allowed target and mutation scope: implementation, automated tests, and migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test; shared DEV/UAT mutation stops while affected open Workflow Actions lack record-level owner disposition
+Required permissions/roles/scopes: Purchase User Maker, Purchase Manager Reviewer, C-Level Approver Final Approver; current authenticated server identity and current role/permission recheck; Maker, Reviewer, and Final Approver are distinct
+Required tests and evidence: native RFQ/Supplier Quotation and direct-PO paths; role/self-approval/multi-role/API/state-spoof denial; commitment-field mutation and re-approval; retry/concurrency; Return/Reject; native cancel/amend, Purchase Receipt/Purchase Invoice references and pending quantities; migration/re-run/recovery; distinct-user Computer Use and Timeline evidence
+Migration/re-run behavior: deterministic and idempotent PO-only target; preserve Workflow Action, Version, Timeline, and source-document history; if an affected open PO/MR Workflow Action lacks record-level disposition, stop before changing either Workflow
+Collision behavior: stop the WF-11 route on an unrelated active Purchase Order Workflow, changed owned fingerprint, or unresolved affected Workflow Action; never auto-complete, reject, cancel, close, delete, or recreate a pending action
+Rollback/recovery behavior: restore captured prior configuration only while the expected post-migration fingerprint matches; recover submitted Purchase Order effects only through native cancel/amend behavior
+Business sign-off: approved in Codex task on 2026-09-26
+Technical sign-off: pending implementation review
+Security/Finance sign-off (if applicable): pending shared-control and runtime review
 ```
 
-## Approved Self-Approval/SoD identity decision — 2026-09-26
+## Approved Stock Count compatibility remediation — 2026-09-26
 
 ```text
-Decision ID: D-IDENTITY-2026-09-26
-Owner / approval source: Business-owner approval recorded in the Codex task on 2026-09-26
-Approved policy / desired state: The authenticated enabled User is the canonical actor. Maker may
-Send for Review and Resubmit, but may not Review or Approve the same protected document. Reviewers
-and Final Approvers must be distinct where the route declares three actors. Multiple roles never
-erase identity separation. Native Workflow owns transitions; adapters recheck current permission,
-state, distinct actors and approval-bound critical data at the final native boundary.
-Revision: 2026-09-26.sod-baseline.1
+Decision ID: D-STOCK-COMPAT-2026-09-26
+Owner / backup owner: Siwat Sroisuwan / not assigned
+Approved policy / desired state: Complete the metadata and integration-test half of the already-present native-draft boundary introduced by workflow checkpoint d4db188. Monthly holding transfers remain native Stock Entry drafts. Yearly adjustments remain one native Stock Reconciliation draft carrying accepted target quantities. Neither path submits, posts stock/GL effects, or gives the retired Stock Count model Workflow/posting ownership.
+Revision: 2026-09-26.stock-count-compat.1
 Effective date/timezone: 2026-09-26 / Asia/Bangkok
-Trusted identity: Capture maker, reviewer and final approver from frappe.session.user at the
-corresponding native transition. Resolve Employee only server-side for active employment and signed
-snapshot evidence. Client-editable identity fields are never authority. Generated documents retain
-trusted source-document/requester provenance.
-Actor contracts: Stock Entry Material Transfer = Stock User / Stock Manager / C-Level Approver;
-Stock Reconciliation = Stock User / Stock Manager / Accounts Manager; Asset Movement = Stock User /
-Stock Manager / C-Level Approver (the Stock User may also be the asset custodian, but custodian status
-alone grants no Workflow role or document permission); manual Journal Entry = Accounts User /
-Accounts Manager / C-Level Approver; Sales Order credit approval = Sales User / Sales Manager /
-Accounts Manager; Sales Invoice Credit Note = Sales User / Sales Manager / C-Level Approver, with
-Sales Manager as Post/Cancel executor; Purchase Order = Purchase User / Purchase Manager / C-Level Approver; Purchase
-Invoice = Accounts User / Purchase Manager / Accounts Manager; Payment Entry = Accounts User /
-Accounts Manager / C-Level Approver; Payroll Entry = HR User / HR Manager / Accounts Manager.
-Execution after approval: The declared execution role may perform the native Post/Submit after a
-distinct Final Approver has approved. Post/Submit is execution, not another approval, and must recheck the
-approved state and snapshots immediately before the native effect.
-Administrator and service identities: Administrator is not a normal business approver and receives
-no Self-Approval/SoD bypass. Background/service identities cannot Review or Approve; they may execute
-only after complete current approval evidence. Operational recovery is a separate audited path and
-does not fabricate approval history.
-Included routes: The ten actor contracts above. Journal Entry covers manual entries only. Material
-Request is excluded as a protected route but may supply trusted requester provenance to Purchase
-Order. Salary Slip remains submit-through-Payroll-Entry only.
-Excluded routes: Delegation, Backup Approver, named-user mapping, amount thresholds, system-generated
-Journal Entries and any custom posting/state engine.
-Required negative evidence: self approval, multi-role self approval, reviewer/final reuse, wrong
-role, direct apply_workflow RPC, direct submit/state spoof, permission revocation, stale critical
-data and repeated action. Maker Send/Resubmit must remain possible.
-Sales Invoice Credit Note route states use the native `Sales Invoice Draft` and `Sales Invoice
-Submitted` states because Frappe permits one active Workflow per DocType. The route remains scoped
-to return/credit-note invoices; ordinary Sales Invoices retain their direct native submit path,
-while the intermediate credit-note review states remain route-specific.
-Configuration impact: Protected Review/Approve transitions use allow_self_approval=0. Maker
-Send/Resubmit transitions may use allow_self_approval=1. Existing routes are changed only by their
-own approved domain branch with collision-aware migration and recovery.
-Sign-off: Business policy approved; each domain adapter still requires independent plan/code review,
-automated local.test evidence, Computer Use acceptance and final documentation before acceptance.
-```
-
-## Approved Self-Approval/SoD core decision — 2026-09-26
-
-```text
-Decision ID: D-CORE-2026-09-26
-Owner / approval source: Technical implementation decision under the approved
-D-IDENTITY-2026-09-26 business policy
-Approved policy / desired state: Native Workflow remains the state engine and native ERPNext/HRMS
-controllers remain the effect owners. Shared code owns only canonical route declarations, actor
-normalization/separation, signed snapshot capture and server-only snapshot-write capability. Domain
-adapters own critical payloads, trusted source provenance, locks and final native-boundary guards.
-Revision: 2026-09-26.sod-core.1
-Effective date/timezone: 2026-09-26 / Asia/Bangkok
-Source identity: (doctype, name) plus the adapter's trusted source-document/requester references.
-Protected operation identity: declared route, current persisted Workflow state, native action and
-authenticated session User. Equal amounts or matching payloads are never operation identity.
-Revision binding: A deterministic digest is computed only from freshly server-read, adapter-declared
-critical values. Review persists the digest; Final Approval verifies and carries it forward; the
-native submit boundary recomputes and compares it. Any mismatch requires Return/Resubmit/Review.
-Actor persistence: Maker User is captured at the first native Send for Review. Reviewer and Final
-Approver Users and signed Employee snapshots are captured by synchronous native transition tasks.
-The transition, state update and snapshot save remain one database transaction.
-Snapshot write control: Approval fields are hidden/read-only/no-copy as UI hardening, but adapters
-also reject inserted or changed approval fields unless the current document holds an opaque,
-request-local object-identity capability minted by the shared server helper for the declared native
-transition. API/import/state spoof cannot mint that capability. Direct database/server-console access
-is privileged operational access and must never be represented as business approval.
-Interactive actor boundary: Protected Review and Approve require a non-Guest, non-Administrator
-session, a current HTTP request, the declared role, current document permission, exactly one active
-linked Employee and a non-empty approval signature. Background/import/service execution cannot
-Review or Approve. Native execution after approval may run synchronously or in the native submission
-queue only after the adapter's final persisted-evidence recheck.
-Lock and recheck boundary: At each protected transition task and immediately before native submit,
-the adapter locks the source document row with FOR UPDATE, rereads persisted Workflow state and
-approval fields, and rejects stale state, actor reuse, missing snapshot, permission loss or digest
-mismatch. Related domain resources are locked in deterministic order where native invariants require
-it. No approval decision is cached across requests.
-Idempotency: Native Workflow state/docstatus plus the locked source row reject repeated protected
-actions. Native ERPNext/HRMS posting and reversal remain responsible for effect idempotency. If a
-domain needs an additional durable operation claim, that adapter stops and replans an app-owned model
-instead of adding generic persistence.
-Administrator/recovery: Administrator has no protected Review/Approve bypass. Recovery is a separate
-audited operational procedure and cannot write or fabricate business approval snapshots.
-Required tests: capability forgery and direct field mutation through save/API/import, direct state
-spoof, Administrator/Guest/no-request protected actions, background protected action, permission and
-role revocation, stale state/digest, duplicate action, transaction rollback, native queued submit and
-route-specific generated-document exclusions.
-Migration/recovery: Setup-managed fields are additive and idempotent. Route configuration changes
-remain collision-aware domain migrations. Rollback removes only unused added fields while exact
-expected configuration matches; historical evidence is preserved once referenced by a transaction.
+Enabled routes: compatibility persistence of Stock Count Adjustment rows that link a generated native Stock Reconciliation draft; regression verification of the existing monthly native Stock Entry draft path
+Deferred/disabled routes and reason: all unresolved D-STOCK count evidence, cutoff, blind-count, exclusions, recount authority, and adjustment policy remain deferred; no new/changed runtime route, Workflow, permission, posting, or shared-DEV behavior is authorized
+Affected existing documents/configuration: app-owned Stock Count Adjustment child metadata and its focused integration expectations only; existing Stock Count, Stock Entry, Stock Reconciliation, Stock Ledger Entry, GL Entry, Workflow, and Workflow Action records are read-only evidence during this remediation
+Allowed target and mutation scope: on branch feat/wf-tsk-527-procurement-approval from parent feat/workflow-baseline-checkpoint-20260919, the TSK-527 integration owner temporarily owns only stock_count_adjustment.json, test_stock_count_adjustments.py, decisions.md, and the TSK-527 task record to unblock the already-running full-app gate; migrate/test only local.test; no shared DEV/UAT/PROD mutation
+Required permissions/roles/scopes: no production permission change; generated drafts retain native Stock Entry or Stock Reconciliation Workflow/permission ownership
+Required tests and evidence: source and site metadata allow Stock Reconciliation; monthly Stock Entry is docstatus 0 and linked; yearly native Stock Reconciliation is docstatus 0 in Stock Reconciliation Draft state and linked; accepted target quantities and per-line warehouses are preserved; no Stock Ledger Entry or GL Entry exists for either unsubmitted draft; duplicate/type/docstatus guards remain; focused module, full app, pre-commit, and independent review pass
+Migration/re-run behavior: app-owned DocType JSON metadata sync during bench --site local.test migrate is the only migration mechanism; no data patch is required. Before migration, record current field options and distinct persisted adjustment entry_type/link combinations and take a files-inclusive backup. Update the JSON modified timestamp from the site's configured timezone. After the first and repeated migrate, verify the additive option is present, prior rows/links/counts are unchanged, and source/site metadata converge. Clean-install metadata is defined by the same reviewed JSON and its focused metadata assertion.
+Collision behavior: stop if the target has an entry_type outside the prior allowlist plus Stock Reconciliation, a Stock Reconciliation adjustment missing its native link, an unexpected metadata owner/source, or concurrent ownership of either implementation file; do not rewrite, delete, submit, cancel, or fabricate any business document
+Rollback/recovery behavior: before release, revert the additive JSON/test change through Git. After deployment or after any Stock Reconciliation adjustment row exists, the TSK-527 integration owner must inventory distinct values and linked native documents and obtain a new Stock-owner decision before removal; retain the harmless additive option meanwhile. Never rewrite/delete adjustment rows or linked native documents as rollback.
+Business sign-off: approved by the repository owner in the current Codex task on 2026-09-26 with the instruction to continue and fix the discovered Stock Count problem
+Technical sign-off: accepted on 2026-09-26 after focused 11/11, full-app 704 unit + 81 integration, repeated-migrate, all pre-commit hooks, and independent review with no P0/P1/P2 findings
+Security/Finance sign-off (if applicable): no policy, permission, submission, ledger, or GL change; automated no-effect evidence and independent review required before technical sign-off
 ```
 
 ## Decision request format

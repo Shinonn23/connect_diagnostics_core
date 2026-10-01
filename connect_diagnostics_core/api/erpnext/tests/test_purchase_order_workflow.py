@@ -32,13 +32,6 @@ class TestPurchaseOrderWorkflow(UnitTestCase):
         doc.set("owner", "approver@example.com")
         self.assertNotEqual(first, workflow.get_commitment_digest(doc))
 
-    def test_digest_accepts_native_integral_float_conversion(self) -> None:
-        first = self._doc(base_discount_amount=0, items=[{"item_code": "A", "qty": 1}])
-        second = self._doc(base_discount_amount=0.0, items=[{"item_code": "A", "qty": 1.0}])
-        changed = self._doc(base_discount_amount=0.01, items=[{"item_code": "A", "qty": 1.0}])
-        self.assertEqual(workflow.get_commitment_digest(first), workflow.get_commitment_digest(second))
-        self.assertNotEqual(workflow.get_commitment_digest(first), workflow.get_commitment_digest(changed))
-
     @patch.object(workflow.frappe, "throw")
     def test_maker_change_after_review_is_rejected(self, throw: Mock) -> None:
         previous = self._doc(
@@ -81,8 +74,7 @@ class TestPurchaseOrderWorkflow(UnitTestCase):
     @patch.object(workflow.frappe, "session", Mock(user="reviewer@example.com"))
     def test_review_snapshot_captures_revision_evidence(self, _employee: Mock, _permission: Mock) -> None:
         doc = self._doc(owner="maker@example.com", supplier="SUP-1")
-        with patch.object(workflow, "require_distinct_actors"):
-            workflow.capture_review_snapshot(doc)
+        workflow.capture_review_snapshot(doc)
         self.assertEqual(doc.get("approval_digest_version"), workflow.DIGEST_VERSION)
         self.assertEqual(doc.get("approval_reviewer_user"), "reviewer@example.com")
         self.assertEqual(doc.get("checked_by"), "EMP-1")
@@ -134,10 +126,7 @@ class TestPurchaseOrderWorkflow(UnitTestCase):
             workflow._EXECUTION_FLAG,
             workflow._execution_marker(doc, "submit"),
         )
-        with (
-            patch.object(workflow, "_persisted_approval", return_value=persisted),
-            patch.object(workflow, "require_distinct_actors"),
-        ):
+        with patch.object(workflow, "_persisted_approval", return_value=persisted):
             workflow.validate_before_submit(doc)
         throw.assert_not_called()
 

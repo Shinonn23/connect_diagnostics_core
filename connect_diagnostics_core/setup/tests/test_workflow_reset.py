@@ -131,7 +131,12 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if transition["action"].startswith(("Approve ", "Reject ", "Review ", "Post "))
+                        if transition["action"]
+                        not in {
+                            "Submit Purchase Order for Review",
+                            "Resubmit Purchase Order",
+                        }
+                        and not transition["action"].startswith("Submit ")
                     )
                 )
 
@@ -171,7 +176,7 @@ class TestWorkflowReset(UnitTestCase):
                     self.assertEqual(pending.get("send_email", 0), 1)
                     self.assertEqual(approved.get("send_email", 0), 1)
 
-    def test_rejection_is_terminal_or_returns_only_to_maker(self) -> None:
+    def test_rejection_is_terminal_except_for_approved_purchase_order_resubmit(self) -> None:
         workflow_fixture = json.loads(
             Path(hooks.__file__).with_name("fixtures").joinpath("workflow.json").read_text()
         )
@@ -182,18 +187,19 @@ class TestWorkflowReset(UnitTestCase):
             self.assertGreaterEqual(len(rejected_states), 1)
             for rejected in rejected_states:
                 with self.subTest(state=rejected["state"]):
-                    self.assertFalse(
-                        [
-                            transition
-                            for transition in workflow["transitions"]
-                            if transition["state"] == rejected["state"]
-                            and not transition["action"].startswith("Resubmit ")
-                        ]
-                    )
-                    self.assertIn(
-                        rejected["allow_edit"],
-                        self.FLOW_ROLES | {"System Manager", "All"},
-                    )
+                    outgoing = [
+                        transition
+                        for transition in workflow["transitions"]
+                        if transition["state"] == rejected["state"]
+                    ]
+                    if workflow["document_type"] == "Purchase Order":
+                        self.assertEqual(
+                            [(row["action"], row["next_state"]) for row in outgoing],
+                            [("Resubmit Purchase Order", "Purchase Order Pending Review")],
+                        )
+                    else:
+                        self.assertFalse(outgoing)
+                    self.assertIn(rejected["allow_edit"], self.FLOW_ROLES | {"System Manager"})
 
     def test_revise_actions_and_transitions_are_removed(self) -> None:
         workflow_fixture = json.loads(

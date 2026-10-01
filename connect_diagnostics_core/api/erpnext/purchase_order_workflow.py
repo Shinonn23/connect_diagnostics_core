@@ -17,7 +17,6 @@ from connect_diagnostics_core.api.frappe.approval_controls import (
     critical_digest,
     require_distinct_actors,
     require_permission,
-    resolve_user,
 )
 
 DIGEST_VERSION = "purchase-order-commitment-v1"
@@ -256,20 +255,9 @@ def build_commitment_payload(doc: Document | Mapping[str, Any]) -> dict[str, Any
     return payload
 
 
-def _normalize_native_numbers(value: Any) -> Any:
-    """Treat ERPNext's integer-to-float normalization as the same amount."""
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-    if isinstance(value, dict):
-        return {key: _normalize_native_numbers(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [_normalize_native_numbers(item) for item in value]
-    return value
-
-
 def get_commitment_digest(doc: Document | Mapping[str, Any]) -> str:
     """Return the versioned digest of all commitment-critical values."""
-    return critical_digest(_normalize_native_numbers(build_commitment_payload(doc)))
+    return critical_digest(build_commitment_payload(doc))
 
 
 def _employee_snapshot() -> tuple[str, str]:
@@ -290,19 +278,11 @@ def _employee_snapshot() -> tuple[str, str]:
     return str(employee.get("name") or ""), signature
 
 
-def capture_maker_snapshot(doc: Document, method: str | None = None) -> None:
-    del method
-    require_permission(doc, "write")
-    if resolve_user(str(doc.get("owner") or "")) != resolve_user(frappe.session.user):
-        frappe.throw(_("Only the Purchase Order owner can send it for review."))
-    doc.set("approval_maker_user", frappe.session.user)
-
-
 def capture_review_snapshot(doc: Document) -> None:
     """Workflow task: sign the current PO revision as reviewed."""
     require_permission(doc, "write")
     employee, signature = _employee_snapshot()
-    require_distinct_actors(str(doc.get("approval_maker_user") or ""), frappe.session.user, ())
+    require_distinct_actors(str(doc.get("owner") or ""), frappe.session.user)
     digest = get_commitment_digest(doc)
     doc.set("approval_critical_digest", digest)
     doc.set("approval_digest_version", DIGEST_VERSION)
@@ -319,7 +299,7 @@ def capture_authorization_snapshot(doc: Document) -> None:
     require_distinct_actors(
         str(doc.get("owner") or ""),
         frappe.session.user,
-        (str(doc.get("approval_reviewer_user") or ""),),
+        previous=(str(doc.get("approval_reviewer_user") or ""),),
     )
     if not doc.get("approval_critical_digest"):
         frappe.throw(_("Purchase Order review approval is required before final authorization."))
@@ -339,23 +319,10 @@ def clear_approval_snapshots(doc: Document) -> None:
 
 def _reject_critical_changes_after_review(doc: Document) -> None:
     previous = doc.get_doc_before_save()
-    if (
-        not previous
-        or previous.get("workflow_state") not in {APPROVAL_STATE, APPROVED_STATE}
-        or doc.get("workflow_state") not in {APPROVAL_STATE, APPROVED_STATE}
-    ):
+    if not previous or previous.get("workflow_state") not in {APPROVAL_STATE, APPROVED_STATE}:
         return
-    previous_payload = build_commitment_payload(previous)
-    current_payload = build_commitment_payload(doc)
-    changed_fields = [
-        fieldname for fieldname, value in previous_payload.items() if value != current_payload[fieldname]
-    ]
-    if changed_fields:
-        frappe.throw(
-            _("Commitment-critical Purchase Order fields cannot change after approval review: {0}.").format(
-                ", ".join(changed_fields)
-            )
-        )
+    if get_commitment_digest(previous) != get_commitment_digest(doc):
+        frappe.throw(_("Commitment-critical Purchase Order fields cannot change after approval review."))
 
 
 def validate_workflow(doc: Document, method: str | None = None) -> None:
@@ -437,8 +404,8 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
             frappe.throw(
                 _("Purchase Order requires signed review and final authorization before submission.")
             )
-        require_distinct_actors(owner, reviewer, ())
-        require_distinct_actors(owner, approver, (reviewer,))
+        require_distinct_actors(owner, reviewer, previous=())
+        require_distinct_actors(owner, approver, previous=(reviewer,))
     finally:
         _clear_execution_marker()
 
