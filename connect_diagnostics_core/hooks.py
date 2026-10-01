@@ -490,6 +490,13 @@ after_migrate = [
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
+permission_query_conditions = {
+    "Stock Borrow": "connect_diagnostics_core.api.erpnext.stock_borrow.get_permission_query_conditions",
+}
+has_permission = {
+    "Stock Borrow": "connect_diagnostics_core.api.erpnext.stock_borrow.has_permission",
+}
+
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
 }
@@ -633,15 +640,15 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_workflow",
         ],
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.stock_borrow.before_submit",
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-        "before_cancel": [
-            "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_cancel",
-            "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
-        ],
+        "on_submit": "connect_diagnostics_core.api.erpnext.stock_borrow.on_submit",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.stock_borrow.on_cancel",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
     },
     "Delivery Note": {
         "before_submit": [

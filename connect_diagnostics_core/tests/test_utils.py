@@ -88,7 +88,14 @@ def _skip_auto_test_records_for_app_doctypes() -> None:
     framework to skip the walk. It only suppresses generation for our own
     doctypes, never ERPNext's.
     """
-    for doctype in ("Stock Count", "Stock Count Item", "Stock Count Adjustment", "Stock Count Warehouse"):
+    for doctype in (
+        "Stock Borrow",
+        "Stock Borrow Item",
+        "Stock Count",
+        "Stock Count Item",
+        "Stock Count Adjustment",
+        "Stock Count Warehouse",
+    ):
         frappe.local.test_objects.setdefault(doctype, [])
 
 

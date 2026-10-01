@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import frappe
 from frappe import _
 from frappe.model.document import Document
 
@@ -26,4 +27,8 @@ def get_item_dashboard_data(data: dict[str, Any]) -> dict[str, Any]:
 def validate(doc: Document, method: str) -> None:
     """Validate Item regulatory classification and refresh derived coverage."""
     del method
+    if doc.get("allow_borrow") and (
+        not doc.get("is_stock_item") or doc.get("has_serial_no") or doc.get("has_batch_no")
+    ):
+        frappe.throw(_("Only non-serialized, non-batched Stock Items can allow Borrow."))
     regulatory.validate_item_classification(doc)
