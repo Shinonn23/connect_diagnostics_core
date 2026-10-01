@@ -36,6 +36,29 @@ _SHARED_APPROVAL_FIELDS = (
 )
 
 CUSTOM_FIELDS = {
+    "Sales Order": [
+        {
+            "fieldname": fieldname,
+            "label": label,
+            "fieldtype": fieldtype,
+            "options": options,
+            "hidden": 1,
+            "read_only": 1,
+            "allow_on_submit": 1,
+            "no_copy": 1,
+            "is_system_generated": 1,
+        }
+        for fieldname, label, fieldtype, options in (
+            ("approval_revision", "Approval Revision", "Data", ""),
+            ("approval_digest", "Approval Digest", "Data", ""),
+            ("approval_maker_user", "Approval Maker User", "Link", "User"),
+            ("approval_maker_at", "Approval Maker At", "Datetime", ""),
+            ("approval_reviewer_user", "Approval Reviewer User", "Link", "User"),
+            ("approval_reviewer_at", "Approval Reviewer At", "Datetime", ""),
+            ("approval_approver_user", "Approval Approver User", "Link", "User"),
+            ("approval_approver_at", "Approval Approver At", "Datetime", ""),
+        )
+    ],
     "Asset Movement": [
         {
             "fieldname": "workflow_state",

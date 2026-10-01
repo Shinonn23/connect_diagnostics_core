@@ -52,9 +52,26 @@ class TestSalesOrderWorkflow(UnitTestCase):
             sales_order_workflow._disallowed_changed(cast(Document, second), cast(Document, first))
         )
 
-    def test_normalized_route_has_no_demo_gate(self) -> None:
-        self.assertFalse(hasattr(sales_order_workflow, "_enabled"))
-        self.assertEqual(sales_order_workflow.APPROVAL_REVISION, "sales-order-native-v1")
+    def test_demo_guard_requires_both_site_values(self) -> None:
+        with (
+            patch.object(sales_order_workflow.frappe, "get_site_config", return_value={}),
+            patch.object(sales_order_workflow.frappe.local, "site", "local.test"),
+        ):
+            self.assertFalse(sales_order_workflow._enabled())
+
+    def test_string_zero_disables_demo_guard(self) -> None:
+        with (
+            patch.object(
+                sales_order_workflow.frappe,
+                "get_site_config",
+                return_value={
+                    "sales_order_approval_demo_enabled": "0",
+                    "sales_order_approval_demo_site": "local.test",
+                },
+            ),
+            patch.object(sales_order_workflow.frappe.local, "site", "local.test"),
+        ):
+            self.assertFalse(sales_order_workflow._enabled())
 
     def test_final_approval_rejects_policy_change_after_review(self) -> None:
         doc = Document(
@@ -66,10 +83,11 @@ class TestSalesOrderWorkflow(UnitTestCase):
             }
         )
         with (
+            patch.object(sales_order_workflow, "_enabled", return_value=True),
             patch.object(sales_order_workflow, "approval_digest", return_value="changed-policy"),
         ):
             with self.assertRaises(Exception):
-                sales_order_workflow.capture_sales_order_final_approval(doc)
+                sales_order_workflow.capture_sales_order_demo_final_approval(doc)
 
     def test_payment_schedule_is_part_of_approval_digest(self) -> None:
         first = Document(
@@ -130,21 +148,22 @@ class TestSalesOrderWorkflow(UnitTestCase):
             "workflow_state": "Sales Order Approved",
             "approval_digest": "approved-digest",
         }
-        sales_order_workflow.frappe.flags.sales_order_submission = {
+        sales_order_workflow.frappe.flags.sales_order_demo_submission = {
             "doctype": "Sales Order",
             "name": "SO-1",
-            "approval_revision": sales_order_workflow.APPROVAL_REVISION,
+            "approval_revision": sales_order_workflow.DEMO_REVISION,
             "approval_digest": "approved-digest",
             "action": "Post Sales Order",
             "actor": "Administrator",
         }
         with (
+            patch.object(sales_order_workflow, "_enabled", return_value=True),
             patch.object(sales_order_workflow, "approval_digest", return_value="changed-current-payload"),
             patch.object(sales_order_workflow.frappe.db, "get_value", return_value=persisted),
             patch.object(sales_order_workflow.frappe, "session", user="Administrator"),
         ):
             with self.assertRaises(Exception):
-                sales_order_workflow.validate_sales_order_before_submit(doc)
+                sales_order_workflow.validate_sales_order_demo_before_submit(doc)
 
     def test_credit_payload_contains_native_precedence_inputs(self) -> None:
         doc = Document({"doctype": "Sales Order", "customer": "CUST-1", "company": "COMP-1"})
@@ -170,50 +189,12 @@ class TestSalesOrderWorkflow(UnitTestCase):
 
     def test_submission_marker_is_cleared_after_failure(self) -> None:
         with (
+            patch.object(sales_order_workflow, "_enabled", return_value=True),
             patch.object(sales_order_workflow.frappe.db, "get_value", return_value=None),
             patch.object(sales_order_workflow.frappe, "throw", side_effect=Exception("blocked")),
         ):
             doc = Document({"doctype": "Sales Order", "name": "SO-1"})
-            sales_order_workflow.frappe.flags.sales_order_submission = {"stale": True}
+            sales_order_workflow.frappe.flags.sales_order_demo_submission = {"stale": True}
             with self.assertRaises(Exception):
-                sales_order_workflow.validate_sales_order_before_submit(doc)
-            self.assertIsNone(getattr(sales_order_workflow.frappe.flags, "sales_order_submission", None))
-
-    def test_direct_cancel_fails_closed_and_clears_marker(self) -> None:
-        doc = Document(
-            {
-                "doctype": "Sales Order",
-                "name": "SO-1",
-                "workflow_state": "Sales Order Cancelled",
-            }
-        )
-        setattr(sales_order_workflow.frappe.flags, sales_order_workflow._CANCELLATION_FLAG, None)
-        with patch.object(
-            sales_order_workflow.frappe.db,
-            "get_value",
-            return_value={"workflow_state": "Sales Order Submitted", "docstatus": 1},
-        ):
-            with self.assertRaises(Exception):
-                sales_order_workflow.validate_sales_order_before_cancel(doc)
-        self.assertIsNone(
-            getattr(sales_order_workflow.frappe.flags, sales_order_workflow._CANCELLATION_FLAG, None)
-        )
-
-    def test_cancel_authorization_is_consumed_by_cancel_guard(self) -> None:
-        doc = Document(
-            {
-                "doctype": "Sales Order",
-                "name": "SO-1",
-                "workflow_state": "Sales Order Cancelled",
-            }
-        )
-        persisted = {"workflow_state": "Sales Order Submitted", "docstatus": 1}
-        with (
-            patch.object(sales_order_workflow.frappe.db, "get_value", return_value=persisted),
-            patch.object(sales_order_workflow.frappe, "has_permission", return_value=True),
-        ):
-            sales_order_workflow.authorize_sales_order_cancellation(doc)
-            sales_order_workflow.validate_sales_order_before_cancel(doc)
-        self.assertIsNone(
-            getattr(sales_order_workflow.frappe.flags, sales_order_workflow._CANCELLATION_FLAG, None)
-        )
+                sales_order_workflow.validate_sales_order_demo_before_submit(doc)
+            self.assertIsNone(getattr(sales_order_workflow.frappe.flags, "sales_order_demo_submission", None))

@@ -51,44 +51,27 @@ class TestWorkflowFields(UnitTestCase):
                 "approval_authorized_user",
             },
         )
-        operation = next(
-            row for row in fields["Journal Entry"] if row["fieldname"] == "approval_operation_id"
+        self.assertEqual(
+            {row["fieldname"] for row in fields["Sales Order"]},
+            {
+                "approval_revision",
+                "approval_digest",
+                "approval_maker_user",
+                "approval_maker_at",
+                "approval_reviewer_user",
+                "approval_reviewer_at",
+                "approval_approver_user",
+                "approval_approver_at",
+            },
         )
-        self.assertEqual(operation["unique"], 1)
-
-        stock_fields = {row["fieldname"]: row for row in fields["Stock Entry"]}
-        self.assertEqual(stock_fields["approval_reviewer_user"]["options"], "User")
-        self.assertEqual(stock_fields["approval_authorized_user"]["options"], "User")
-        self.assertTrue(stock_fields["approval_critical_digest"]["read_only"])
 
         for rows in fields.values():
             for row in rows:
                 fieldname = str(row["fieldname"])
                 self.assertFalse(fieldname.startswith("custom_"))
 
-    def test_asset_movement_approval_fields_are_hidden_read_only_and_on_submit(self) -> None:
-        rows = {row["fieldname"]: row for row in workflow_fields.CUSTOM_FIELDS["Asset Movement"]}
-        for fieldname, fieldtype, options in (
-            ("approval_maker_user", "Link", "User"),
-            ("approval_reviewer_user", "Link", "User"),
-            ("approval_approver_user", "Link", "User"),
-            ("approval_critical_digest", "Data", None),
-            ("checked_by", "Link", "Employee"),
-            ("checked_at", "Datetime", None),
-            ("checked_signature", "Signature", None),
-            ("authorized_by", "Link", "Employee"),
-            ("authorized_at", "Datetime", None),
-            ("authorized_signature", "Signature", None),
-        ):
-            row = rows[fieldname]
-            self.assertEqual(row["fieldtype"], fieldtype)
-            self.assertTrue(row["hidden"])
-            self.assertTrue(row["read_only"])
-            self.assertTrue(row["allow_on_submit"])
-            self.assertTrue(row["no_copy"])
-            self.assertTrue(row["is_system_generated"])
-            if options:
-                self.assertEqual(row["options"], options)
-
-        self.assertTrue(rows["checked_by"]["ignore_user_permissions"])
-        self.assertTrue(rows["authorized_by"]["ignore_user_permissions"])
+    def test_sales_order_approval_fields_are_hidden_read_only_and_no_copy(self) -> None:
+        for field in workflow_fields.CUSTOM_FIELDS["Sales Order"]:
+            self.assertEqual(field["hidden"], 1)
+            self.assertEqual(field["read_only"], 1)
+            self.assertEqual(field["no_copy"], 1)

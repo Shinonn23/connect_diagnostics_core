@@ -13,14 +13,14 @@ import frappe
 from erpnext.selling.doctype.customer.customer import get_credit_limit
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import cint, now_datetime
 
-APPROVAL_REVISION = "sales-order-native-v1"
-_CANCELLATION_FLAG = "connect_sales_order_cancellation"
+DEMO_REVISION = "D-SALES-DEMO-2026-09-23.1"
+DEMO_SITE = "local.test"
 APPROVAL_STATES = frozenset(
     {
-        "Sales Order Pending Review",
-        "Sales Order Reviewed",
+        "Sales Order Pending Commercial/Credit Review",
+        "Sales Order Pending Final Approval",
         "Sales Order Approved",
     }
 )
@@ -148,6 +148,15 @@ SNAPSHOT_FIELDS = frozenset(
 )
 
 
+def _enabled() -> bool:
+    config = frappe.get_site_config()
+    return (
+        cint(config.get("sales_order_approval_demo_enabled")) == 1
+        and str(config.get("sales_order_approval_demo_site") or "") == DEMO_SITE
+        and str(getattr(frappe.local, "site", "")) == DEMO_SITE
+    )
+
+
 def _text(value: Any) -> str:
     return str(value or "").strip()
 
@@ -203,7 +212,7 @@ def _credit_inputs(doc: Document) -> dict[str, Any]:
 
 
 def approval_payload(doc: Document) -> dict[str, Any]:
-    payload: dict[str, Any] = {"revision": APPROVAL_REVISION, "credit": _credit_inputs(doc)}
+    payload: dict[str, Any] = {"revision": DEMO_REVISION, "credit": _credit_inputs(doc)}
     for fieldname, value in doc.as_dict(no_nulls=True).items():
         if (
             fieldname in SNAPSHOT_FIELDS
@@ -244,6 +253,11 @@ def approval_digest(doc: Document) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def _require_enabled() -> None:
+    if not _enabled():
+        frappe.throw(_("Sales Order approval demo is not enabled on this site."))
+
+
 def _employee_signature(user: str) -> tuple[str, str]:
     row = frappe.db.get_value("Employee", {"user_id": user}, ["name", "approval_signature"], as_dict=True)
     if not row or not _text(row.get("name")) or not _text(row.get("approval_signature")):
@@ -260,10 +274,11 @@ def _distinct_actors(doc: Document) -> bool:
     return all(_text(actor) for actor in actors) and len(set(actors)) == 3
 
 
-def capture_sales_order_maker(doc: Document) -> None:
+def capture_sales_order_demo_maker(doc: Document) -> None:
+    _require_enabled()
     if doc.doctype != "Sales Order":
         frappe.throw(_("This transition task only supports Sales Order."))
-    if doc.get("workflow_state") != "Sales Order Pending Review":
+    if doc.get("workflow_state") != "Sales Order Pending Commercial/Credit Review":
         frappe.throw(_("Sales Order maker capture requires the commercial/credit review state."))
     if any(
         doc.get(fieldname)
@@ -277,14 +292,15 @@ def capture_sales_order_maker(doc: Document) -> None:
         frappe.throw(_("Sales Order approval maker is already recorded."))
     doc.set("approval_maker_user", frappe.session.user)
     doc.set("approval_maker_at", now_datetime())
-    doc.set("approval_revision", APPROVAL_REVISION)
+    doc.set("approval_revision", DEMO_REVISION)
     doc.set("approval_digest", approval_digest(doc))
 
 
-def capture_sales_order_review(doc: Document) -> None:
-    if doc.get("workflow_state") != "Sales Order Reviewed" or doc.get("approval_digest") != approval_digest(
-        doc
-    ):
+def capture_sales_order_demo_review(doc: Document) -> None:
+    _require_enabled()
+    if doc.get("workflow_state") != "Sales Order Pending Final Approval" or doc.get(
+        "approval_digest"
+    ) != approval_digest(doc):
         frappe.throw(_("Sales Order changed before commercial/credit review."))
     employee, signature = _employee_signature(frappe.session.user)
     if frappe.session.user == doc.get("approval_maker_user") or not _text(doc.get("approval_maker_user")):
@@ -299,7 +315,8 @@ def capture_sales_order_review(doc: Document) -> None:
         frappe.throw(_("Sales Order checked signature is required before review."))
 
 
-def capture_sales_order_final_approval(doc: Document) -> None:
+def capture_sales_order_demo_final_approval(doc: Document) -> None:
+    _require_enabled()
     if doc.get("workflow_state") != "Sales Order Approved" or not _text(doc.get("checked_signature")):
         frappe.throw(_("Sales Order review evidence is incomplete or stale."))
     if doc.get("approval_digest") != approval_digest(doc):
@@ -317,7 +334,8 @@ def capture_sales_order_final_approval(doc: Document) -> None:
         frappe.throw(_("Sales Order authorized signature is required before final approval."))
 
 
-def clear_sales_order_approval(doc: Document) -> None:
+def clear_sales_order_demo_approval(doc: Document) -> None:
+    _require_enabled()
     for fieldname in (
         "approval_revision",
         "approval_digest",
@@ -337,12 +355,13 @@ def clear_sales_order_approval(doc: Document) -> None:
         doc.set(fieldname, None)
 
 
-def authorize_sales_order_submission(doc: Document) -> None:
+def authorize_sales_order_demo_submission(doc: Document) -> None:
+    _require_enabled()
     if doc.doctype != "Sales Order" or doc.get("workflow_state") != "Sales Order Submitted":
         frappe.throw(_("Sales Order must be approved before posting."))
     if frappe.session.user != doc.get("approval_approver_user") or not _distinct_actors(doc):
         frappe.throw(_("Current Sales Order approval evidence is missing or stale."))
-    frappe.flags.sales_order_submission = {
+    frappe.flags.sales_order_demo_submission = {
         "doctype": doc.doctype,
         "name": doc.name,
         "approval_revision": doc.get("approval_revision"),
@@ -352,38 +371,8 @@ def authorize_sales_order_submission(doc: Document) -> None:
     }
 
 
-def clear_sales_order_submission() -> None:
-    frappe.flags.sales_order_submission = None
-
-
-def _cancellation_marker(doc: Document) -> dict[str, str]:
-    return {
-        "doctype": doc.doctype,
-        "name": str(doc.name or ""),
-        "action": "cancel",
-        "user": str(frappe.session.user or ""),
-    }
-
-
-def authorize_sales_order_cancellation(doc: Document) -> None:
-    if doc.doctype != "Sales Order" or not doc.name or doc.get("workflow_state") != "Sales Order Cancelled":
-        frappe.throw(_("Sales Order cancel authorization requires the native Workflow transition."))
-    persisted = frappe.db.get_value(
-        "Sales Order",
-        doc.name,
-        ["workflow_state", "docstatus"],
-        as_dict=True,
-        for_update=True,
-    )
-    if (
-        not persisted
-        or persisted.get("workflow_state") != "Sales Order Submitted"
-        or persisted.get("docstatus") != 1
-    ):
-        frappe.throw(_("Only a submitted Sales Order can be cancelled through this transition."))
-    if not frappe.has_permission("Sales Order", "cancel", doc=doc):
-        frappe.throw(_("You do not have permission to cancel this Sales Order."))
-    setattr(frappe.flags, _CANCELLATION_FLAG, _cancellation_marker(doc))
+def clear_sales_order_demo_submission() -> None:
+    frappe.flags.sales_order_demo_submission = None
 
 
 def _critical_changed(doc: Document, previous: Document) -> bool:
@@ -409,20 +398,22 @@ def _disallowed_changed(doc: Document, previous: Document) -> bool:
     return False
 
 
-def validate_sales_order(doc: Document, method: str | None = None) -> None:
+def validate_sales_order_demo(doc: Document, method: str | None = None) -> None:
     del method
+    if not _enabled():
+        return
     previous = doc.get_doc_before_save()
     if (
         previous
         and previous.get("workflow_state") == "Sales Order Draft"
-        and doc.get("workflow_state") == "Sales Order Pending Review"
+        and doc.get("workflow_state") == "Sales Order Pending Commercial/Credit Review"
         and doc.get("approval_maker_user")
     ):
         doc.set("approval_digest", approval_digest(doc))
     if (
         previous
-        and previous.get("workflow_state") == "Sales Order Pending Review"
-        and doc.get("workflow_state") == "Sales Order Reviewed"
+        and previous.get("workflow_state") == "Sales Order Pending Commercial/Credit Review"
+        and doc.get("workflow_state") == "Sales Order Pending Final Approval"
     ):
         doc.set("approval_digest", approval_digest(doc))
     if (
@@ -437,12 +428,14 @@ def validate_sales_order(doc: Document, method: str | None = None) -> None:
                 )
             )
     if doc.get("amended_from") and doc.get("docstatus") == 0:
-        clear_sales_order_approval(doc)
+        clear_sales_order_demo_approval(doc)
 
 
-def validate_sales_order_before_submit(doc: Document, method: str | None = None) -> None:
+def validate_sales_order_demo_before_submit(doc: Document, method: str | None = None) -> None:
     del method
-    marker = getattr(frappe.flags, "sales_order_submission", None)
+    if not _enabled():
+        return
+    marker = getattr(frappe.flags, "sales_order_demo_submission", None)
     try:
         persisted = frappe.db.get_value(
             "Sales Order",
@@ -473,7 +466,7 @@ def validate_sales_order_before_submit(doc: Document, method: str | None = None)
         expected = {
             "doctype": "Sales Order",
             "name": doc.name,
-            "approval_revision": APPROVAL_REVISION,
+            "approval_revision": DEMO_REVISION,
             "approval_digest": doc.get("approval_digest"),
             "action": "Post Sales Order",
             "actor": frappe.session.user,
@@ -494,29 +487,12 @@ def validate_sales_order_before_submit(doc: Document, method: str | None = None)
         ):
             frappe.throw(_("Sales Order approval evidence is incomplete."))
     finally:
-        clear_sales_order_submission()
+        clear_sales_order_demo_submission()
 
 
-def validate_sales_order_before_cancel(doc: Document, method: str | None = None) -> None:
+def validate_sales_order_demo_before_cancel(doc: Document, method: str | None = None) -> None:
     del method
-    try:
-        marker = getattr(frappe.flags, _CANCELLATION_FLAG, None)
-        persisted = frappe.db.get_value(
-            "Sales Order",
-            doc.name,
-            ["workflow_state", "docstatus"],
-            as_dict=True,
-            for_update=True,
-        )
-        if (
-            marker != _cancellation_marker(doc)
-            or not persisted
-            or persisted.get("workflow_state") != "Sales Order Submitted"
-            or persisted.get("docstatus") != 1
-            or doc.get("workflow_state") != "Sales Order Cancelled"
-        ):
+    if _enabled():
+        persisted = frappe.db.get_value("Sales Order", doc.name, "workflow_state", for_update=True)
+        if persisted != "Sales Order Submitted" or doc.get("workflow_state") != "Sales Order Cancelled":
             frappe.throw(_("Sales Order cancellation must use the native Post-to-Cancel transition."))
-        if not frappe.has_permission("Sales Order", "cancel", doc=doc):
-            frappe.throw(_("You do not have permission to cancel this Sales Order."))
-    finally:
-        setattr(frappe.flags, _CANCELLATION_FLAG, None)
