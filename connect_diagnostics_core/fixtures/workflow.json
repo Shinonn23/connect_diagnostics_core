@@ -2470,5 +2470,225 @@
 		"workflow_data": null,
 		"workflow_name": "Connect Payroll Entry Blueprint",
 		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Asset",
+		"enable_action_confirmation": 0,
+		"is_active": 1,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Connect Asset Disposal Blueprint",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Asset Disposal Draft" },
+			{ "allow_edit": "Stock User", "doc_status": "0", "state": "Asset Disposal Pending Review" },
+			{ "allow_edit": "Stock Manager", "doc_status": "0", "state": "Asset Disposal Approved" },
+			{ "allow_edit": "Stock Manager", "doc_status": "0", "state": "Asset Disposal Rejected" },
+			{ "allow_edit": "Stock Manager", "doc_status": "1", "state": "Asset Disposal Submitted" },
+			{ "allow_edit": "Stock Manager", "doc_status": "2", "state": "Asset Disposal Cancelled" }
+		],
+		"transitions": [
+			{
+				"action": "Submit Asset Disposal for Review",
+				"allow_self_approval": 0,
+				"allowed": "Stock User",
+				"condition": null,
+				"state": "Asset Disposal Draft",
+				"next_state": "Asset Disposal Pending Review"
+			},
+			{
+				"action": "Approve Asset Disposal",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": null,
+				"state": "Asset Disposal Pending Review",
+				"next_state": "Asset Disposal Approved"
+			},
+			{
+				"action": "Reject Asset Disposal",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": null,
+				"state": "Asset Disposal Pending Review",
+				"next_state": "Asset Disposal Rejected"
+			},
+			{
+				"action": "Post Asset Disposal",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": null,
+				"state": "Asset Disposal Approved",
+				"next_state": "Asset Disposal Submitted"
+			},
+			{
+				"action": "Cancel Asset Disposal",
+				"allow_self_approval": 0,
+				"allowed": "Stock Manager",
+				"condition": null,
+				"state": "Asset Disposal Submitted",
+				"next_state": "Asset Disposal Cancelled"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Asset Disposal Blueprint",
+		"workflow_state_field": "workflow_state"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow",
+		"document_type": "Journal Entry",
+		"enable_action_confirmation": 1,
+		"is_active": 1,
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Connect Journal Entry Approval",
+		"override_status": 0,
+		"send_email_alert": 0,
+		"states": [
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Draft"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Pending Review"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Reviewed"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Approved"
+			},
+			{
+				"allow_edit": "Accounts User",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Returned"
+			},
+			{
+				"allow_edit": "C-Level Approver",
+				"doc_status": "0",
+				"send_email": 0,
+				"state": "Journal Entry Rejected"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "1",
+				"send_email": 0,
+				"state": "Journal Entry Submitted"
+			},
+			{
+				"allow_edit": "Accounts Manager",
+				"doc_status": "2",
+				"send_email": 0,
+				"state": "Journal Entry Cancelled"
+			}
+		],
+		"transitions": [
+			{
+				"action": "Send Journal Entry for Review",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"next_state": "Journal Entry Pending Review",
+				"state": "Journal Entry Draft",
+				"transition_tasks": "Connect Journal Entry Capture Maker"
+			},
+			{
+				"action": "Review Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Reviewed",
+				"state": "Journal Entry Pending Review",
+				"transition_tasks": "Connect Journal Entry Capture Checker"
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Pending Review",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Approve Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Approved",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": "Connect Journal Entry Capture Approver"
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Reject Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Rejected",
+				"state": "Journal Entry Reviewed",
+				"transition_tasks": null
+			},
+			{
+				"action": "Return Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "C-Level Approver",
+				"condition": null,
+				"next_state": "Journal Entry Returned",
+				"state": "Journal Entry Approved",
+				"transition_tasks": "Connect Journal Entry Clear Approval"
+			},
+			{
+				"action": "Resubmit Journal Entry for Review",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": null,
+				"next_state": "Journal Entry Pending Review",
+				"state": "Journal Entry Returned",
+				"transition_tasks": "Connect Journal Entry Capture Maker"
+			},
+			{
+				"action": "Submit Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Submitted",
+				"state": "Journal Entry Approved",
+				"transition_tasks": "Connect Journal Entry Submit Execution"
+			},
+			{
+				"action": "Cancel Journal Entry",
+				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
+				"condition": null,
+				"next_state": "Journal Entry Cancelled",
+				"state": "Journal Entry Submitted",
+				"transition_tasks": "Connect Journal Entry Cancel Execution"
+			}
+		],
+		"workflow_data": null,
+		"workflow_name": "Connect Journal Entry Approval",
+		"workflow_state_field": "workflow_state"
 	}
 ]

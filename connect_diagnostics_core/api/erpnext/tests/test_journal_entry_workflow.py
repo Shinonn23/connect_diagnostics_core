@@ -63,10 +63,7 @@ class TestJournalEntryWorkflow(UnitTestCase):
 
     def test_approval_requires_distinct_signed_checker_and_approver(self) -> None:
         doc = self._doc()
-        with (
-            patch.object(workflow, "_signature", return_value=("EMP-1", "sig")),
-            patch.object(workflow, "require_distinct_actors"),
-        ):
+        with patch.object(workflow, "_signature", return_value=("EMP-1", "sig")):
             with patch.object(workflow, "get_approval_digest", return_value="je-approval-v1:test"):
                 workflow.capture_checker_snapshot(doc)
                 self.assertEqual(doc.get("approval_digest"), "je-approval-v1:test")
@@ -102,7 +99,6 @@ class TestJournalEntryWorkflow(UnitTestCase):
             patch.object(workflow, "get_approval_digest", return_value="digest"),
             patch.object(workflow, "approval_digest_schema", return_value="schema"),
             patch.object(workflow, "_proof", return_value="proof"),
-            patch.object(workflow, "resolve_user", side_effect=lambda value: value),
             patch.object(workflow.frappe.db, "get_value", return_value=persisted),
             patch.object(workflow.frappe.db, "set_value") as set_value,
             patch.object(workflow, "_actor_has_permission"),

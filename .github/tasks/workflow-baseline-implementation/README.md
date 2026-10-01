@@ -8,9 +8,9 @@ not additional business workflows. The old mapping remains below as historical t
 TSK-602 completes the reviewed manifest and task-register migration.
 
 This record supersedes conflicting assumptions in the eight attached plans. It does not treat
-planning text, task status, fixture presence, or old tests as runtime evidence. The active goal is
-the normalized ten-route baseline and its evidence gates. WF-01–18 obligations appear only as
-historical context and do not authorize or require retired business workflows.
+planning text, task status, fixture presence, or old tests as runtime evidence. The complete goal
+remains all required WF-01–19 implementation and evidence gates; this checkpoint does not narrow
+that goal.
 
 ## Fixed constraints
 
@@ -33,7 +33,8 @@ historical context and do not authorize or require retired business workflows.
 - Repository and installed-source audits completed on 2026-09-17 against the `local` audit site.
 - Reproducible source/configuration evidence is recorded in `verification.md`.
 - Decision and configuration questions are recorded in `decisions.md`.
-- Plan 01–08 corrections and WF-01–18 ownership are recorded in `spec.md`.
+- Plan 01–08 corrections and WF-01–19 ownership are recorded in `spec.md`; WF-19 is the
+  owner-confirmed Journal Entry route recorded in `slices/tsk-603-journal-entry.md`.
 - `slices/shared-531-core.md` is the selected first runtime slice. Its plan is bounded, but the
   slice is blocked until D-CORE, required D-IDENTITY decisions, target approval, exact files, and
   a second independent readiness review are complete.

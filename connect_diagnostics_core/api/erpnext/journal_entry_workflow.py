@@ -331,7 +331,7 @@ def capture_checker_snapshot(doc: Document, method: str | None = None) -> None:
     maker = str(doc.get("approval_maker_user") or "")
     if not maker:
         frappe.throw(_("Journal Entry Maker evidence is required before review."))
-    require_distinct_actors(maker, frappe.session.user, ())
+    require_distinct_actors(maker, frappe.session.user)
     employee, signature = _signature(frappe.session.user)
     digest = get_approval_digest(doc)
     doc.set("approval_digest", digest)
@@ -588,6 +588,12 @@ def authorize_transition(doc: Document, action: str) -> None:
     )
     actor = resolve_user(frappe.session.user)
     require_permission(doc, action)
+    if action == "cancel":
+        from connect_diagnostics_core.api.erpnext.journal_entry_generators import (
+            validate_generated_source_cancel,
+        )
+
+        validate_generated_source_cancel(doc)
     fieldname = "approval_submit_proof" if action == "submit" else "approval_cancel_proof"
     actor_field = "approval_submit_actor" if action == "submit" else "approval_cancel_actor"
     proof = _proof(action, doc, source, target, digest, schema, actor)
@@ -615,3 +621,41 @@ def authorize_submit_transition(doc: Document, method: str | None = None) -> Non
 def authorize_cancel_transition(doc: Document, method: str | None = None) -> None:
     del method
     authorize_transition(doc, "cancel")
+
+
+class JournalEntryWorkflowMixin:
+    """Small extension point retaining the installed ERPNext controller behavior."""
+
+    def before_submit(self: Any) -> None:
+        super().before_submit()
+
+    def before_cancel(self: Any) -> None:
+        super().before_cancel()
+
+    def submit(self: Any) -> Any:
+        context = getattr(frappe.flags, "journal_entry_draft_context", None)
+        if context:
+            from connect_diagnostics_core.api.erpnext.journal_entry_generators import (
+                save_trusted_generated_draft,
+            )
+
+            return save_trusted_generated_draft(cast(Document, self), context)
+        return super().submit()
+
+    def save(self: Any, *args: Any, **kwargs: Any) -> Any:
+        context = getattr(frappe.flags, "journal_entry_draft_context", None)
+        if not context:
+            return super().save(*args, **kwargs)
+        from connect_diagnostics_core.api.erpnext.journal_entry_generators import (
+            _seal_source_provenance,
+            prepare_trusted_generated_draft,
+            set_deferred_operation_key,
+        )
+
+        set_deferred_operation_key(self, context)
+        existing = prepare_trusted_generated_draft(cast(Document, self), context)
+        if existing:
+            return existing
+        result = super().save(*args, **kwargs)
+        _seal_source_provenance(self)
+        return result

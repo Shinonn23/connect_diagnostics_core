@@ -1,8 +1,8 @@
 {
 	"schema_version": 1,
 	"revision": "2026-09-17.permission-blueprint.1",
-	"target_scope": "repository-only",
-	"executable": false,
+	"target_scope": "DEV:local.test",
+	"executable": true,
 	"assignments": [],
 	"rights": [
 		{ "doctype": "Stock Entry", "role": "Stock User", "rights": ["read", "write"] },
@@ -48,12 +48,14 @@
 			"role": "Accounts Manager",
 			"rights": ["read", "write", "submit", "cancel"]
 		},
-		{ "doctype": "Payroll Entry", "role": "HR User", "rights": ["read", "write", "create"] },
+		{ "doctype": "Payroll Entry", "role": "HR User", "rights": ["read", "write"] },
+		{ "doctype": "Payroll Entry", "role": "HR Manager", "rights": ["read", "write", "submit", "cancel"] },
+		{ "doctype": "Journal Entry", "role": "Accounts User", "rights": ["read", "write", "create"] },
 		{
-			"doctype": "Payroll Entry",
-			"role": "HR Manager",
+			"doctype": "Journal Entry",
+			"role": "Accounts Manager",
 			"rights": ["read", "write", "create", "submit", "cancel"]
 		},
-		{ "doctype": "Payroll Entry", "role": "Accounts Manager", "rights": ["read", "write"] }
+		{ "doctype": "Journal Entry", "role": "C-Level Approver", "rights": ["read", "write"] }
 	]
 }
