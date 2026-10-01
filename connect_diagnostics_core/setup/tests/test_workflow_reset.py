@@ -132,7 +132,9 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if not transition["action"].startswith(("Submit ", "Send ", "Resubmit ", "Cancel "))
+                        if not transition["action"].startswith("Submit ")
+                        and transition["action"]
+                        not in {"Send Asset Movement for Review", "Resubmit Asset Movement"}
                     )
                 )
 
@@ -197,9 +199,13 @@ class TestWorkflowReset(UnitTestCase):
                         for transition in workflow["transitions"]
                         if transition["state"] == rejected["state"]
                     ]
-                    self.assertTrue(
-                        all(transition["action"].startswith("Resubmit ") for transition in outgoing)
-                    )
+                    if workflow["document_type"] == "Asset Movement":
+                        self.assertEqual(
+                            [(row["action"], row["next_state"], row["allowed"]) for row in outgoing],
+                            [("Resubmit Asset Movement", "Asset Movement Pending Review", "Stock User")],
+                        )
+                    else:
+                        self.assertFalse(outgoing)
                     self.assertIn(rejected["allow_edit"], self.FLOW_ROLES | {"System Manager"})
 
     def test_revise_actions_and_transitions_are_removed(self) -> None:

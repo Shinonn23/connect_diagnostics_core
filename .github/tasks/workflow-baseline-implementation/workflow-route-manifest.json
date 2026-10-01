@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-23.warehouse-transfer.1",
+	"revision": "2026-09-26.asset-movement.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
@@ -38,6 +38,42 @@
 		},
 		{
 			"id": "WF-03",
+			"status": "enabled",
+			"document_type": "Stock Entry",
+			"workflow": "Connect Stock Transfer Approval",
+			"route_scope": "Freeze/Exception controls in the shared Stock Entry Workflow"
+		},
+		{
+			"id": "WF-04",
+			"status": "enabled",
+			"document_type": "Stock Reconciliation",
+			"workflow": "Connect Stock Reconciliation Blueprint"
+		},
+		{
+			"id": "WF-05",
+			"status": "enabled",
+			"document_type": "Stock Reconciliation",
+			"workflow": "Connect Stock Reconciliation Blueprint"
+		},
+		{
+			"id": "WF-06",
+			"status": "enabled",
+			"document_type": "Asset Movement",
+			"workflow": "Connect Asset Movement Approval",
+			"decision": "D-ASSET-2026-09-26",
+			"route_scope": "Generic native Asset Movement; Borrow/Demo, Equipment Assignment/Installation, exact-location engines, and Asset Disposal excluded",
+			"approval_route": ["Stock User", "Stock Manager", "C-Level Approver"],
+			"shared_controls": ["TSK-600", "TSK-601"],
+			"native_exception": "Exact ERPNext Asset-generated Receipt and Cancel only"
+		},
+		{
+			"id": "WF-07",
+			"status": "enabled",
+			"document_type": "Asset",
+			"workflow": "Connect Asset Disposal Blueprint"
+		},
+		{
+			"id": "WF-08",
 			"status": "disabled",
 			"document_type": null,
 			"workflow": null,

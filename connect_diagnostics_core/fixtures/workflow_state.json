@@ -4,81 +4,9 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Approved",
+		"name": "Payment Entry Draft",
 		"style": "Info",
-		"workflow_state_name": "Asset Movement Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Draft",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Pending Approval",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Pending Approval"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Asset Movement Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Rejected",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Submitted",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Approved",
-		"style": "Success",
-		"workflow_state_name": "Journal Entry Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Cancelled",
-		"style": "Danger",
-		"workflow_state_name": "Journal Entry Cancelled"
+		"workflow_state_name": "Payment Entry Draft"
 	},
 	{
 		"docstatus": 0,
@@ -714,45 +642,63 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Stock Entry Cancelled",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Draft",
 		"style": "Info",
-		"workflow_state_name": "Stock Entry Cancelled"
+		"workflow_state_name": "Asset Movement Draft"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Stock Entry Submitted",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Pending Review",
 		"style": "Info",
-		"workflow_state_name": "Stock Entry Submitted"
+		"workflow_state_name": "Asset Movement Pending Review"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Stock Transfer Pending Review",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Pending Approval",
 		"style": "Info",
-		"workflow_state_name": "Stock Transfer Pending Review"
+		"workflow_state_name": "Asset Movement Pending Approval"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Stock Transfer Returned",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Approved",
 		"style": "Info",
-		"workflow_state_name": "Stock Transfer Returned"
+		"workflow_state_name": "Asset Movement Approved"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Stock Transfer Reviewed",
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Rejected",
 		"style": "Info",
-		"workflow_state_name": "Stock Transfer Reviewed"
+		"workflow_state_name": "Asset Movement Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Submitted",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Asset Movement Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Asset Movement Cancelled"
 	}
 ]

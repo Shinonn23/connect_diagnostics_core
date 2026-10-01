@@ -10,6 +10,13 @@ app_license = "bsl-1.0"
 
 required_apps = ["erpnext", "erpnext_thailand", "hrms"]
 
+extend_doctype_class = {
+    "Asset": ["connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementNativeMixin"],
+    "Asset Movement": [
+        "connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementWorkflowMixin"
+    ],
+}
+
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
@@ -181,8 +188,36 @@ workflow_methods = [
     {"name": name, "method": method} for name, method in _normalized_workflow_methods.items()
 ] + [
     {
-        "name": "Clear Stock Transfer Approval Snapshots",
-        "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.clear_approval_snapshots",
+        "name": "Capture Asset Movement Maker",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_maker",
+    },
+    {
+        "name": "Capture Asset Movement Review",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_review",
+    },
+    {
+        "name": "Capture Asset Movement Approval",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.capture_approval",
+    },
+    {
+        "name": "Reset Asset Movement Approval",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.reset_approval",
+    },
+    {
+        "name": "Authorize Asset Movement Submit Transition",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.authorize_submit_transition",
+    },
+    {
+        "name": "Authorize Asset Movement Cancel Transition",
+        "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.authorize_cancel_transition",
+    },
+    {
+        "name": "Capture Freeze Exception Approval Scope",
+        "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
+    },
+    {
+        "name": "Authorize Freeze Exception Execution",
+        "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.authorize_freeze_exception_execution",
     },
     {
         "name": "Capture Print Action: Submit",
@@ -663,6 +698,7 @@ fixtures = [
                     "Asset Movement Approved",
                     "Asset Movement Cancelled",
                     "Asset Movement Draft",
+                    "Asset Movement Pending Review",
                     "Asset Movement Pending Approval",
                     "Asset Movement Pending Review",
                     "Asset Movement Rejected",
@@ -750,8 +786,15 @@ fixtures = [
                 "name",
                 "in",
                 [
+                    "Send Asset Movement for Review",
+                    "Review Asset Movement",
+                    "Return Asset Movement",
                     "Approve Asset Movement",
-                    "Approve Journal Entry",
+                    "Reject Asset Movement",
+                    "Resubmit Asset Movement",
+                    "Submit Asset Movement",
+                    "Cancel Asset Movement",
+                    "Submit Payment Entry for Approval",
                     "Approve Payment Entry",
                     "Approve Payroll Entry",
                     "Approve Purchase Invoice",

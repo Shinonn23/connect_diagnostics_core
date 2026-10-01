@@ -107,8 +107,7 @@ FREEZE-08-SIGNOFF waits for every required WF-01–17 and G0–G4.
 | DECISION-REGISTER           | Active                             | Audit                                                     | Approved revision/effective date and route scope per decision               |
 | TSK-512-ENABLED-ROUTES      | Paused/incomplete external task    | D-TRANSFER or D-ASSET per route                           | Canonical Item Request/tracked-equipment evidence for each enabled consumer |
 | TSK-521-TRANSFER            | Required; not accepted             | D-TRANSFER, 531 Core                                      | WF-01/02 native direct/transit, receipt, retry and conservation evidence    |
-| TSK-600-SIGNED-SNAPSHOT     | Blocked at combined automated gate | D-SIGNED-APPROVAL-2026-09-26                              | Focused implementation/review passed; TSK-590 and Stock Count gates block  |
-| TSK-523-ASSET-EQUIPMENT     | Required; not accepted             | D-ASSET, 531 Core; 512 for enabled generated routes       | WF-06/08 custody/site/receipt/installation/reversal evidence                |
+| TSK-523-ASSET-EQUIPMENT     | Blocked at Computer Use acceptance | D-ASSET-2026-09-26, accepted TSK-600/601 shared controls  | Browser-capable host; final docs after acceptance; WF-08 remains disabled   |
 | TSK-524-ASSET-DISPOSAL      | Required; not accepted             | D-ASSET-DISPOSAL, 531 Core; 529 for receipt/refund        | WF-07 Asset Register/GL/reversal evidence                                   |
 | SHARED-531-CORE             | Blocked                            | D-CORE, required D-IDENTITY, approved target, plan review | Contract tests; no domain/config ownership                                  |
 | SHARED-531-ADAPTER-COVERAGE | Blocked                            | Core plus enabled adapters                                | WF-15/16/17 evidence across every protected route                           |

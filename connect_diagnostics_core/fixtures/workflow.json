@@ -575,7 +575,7 @@
 				"next_state": "Asset Movement Approved",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Pending Approval",
-				"transition_tasks": "Connect Signed Approval Snapshot",
+				"transition_tasks": "Connect Asset Movement Approval Snapshot",
 				"workflow_builder_id": null
 			},
 			{
@@ -586,7 +586,7 @@
 				"next_state": "Asset Movement Draft",
 				"send_email_to_creator": 0,
 				"state": "Asset Movement Pending Approval",
-				"transition_tasks": "Connect Signed Approval Snapshot",
+				"transition_tasks": "Connect Asset Movement Approval Reset",
 				"workflow_builder_id": null
 			},
 			{

@@ -23,49 +23,26 @@ impacts. Test constants are not policy.
 | CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Partially resolved for TSK-590/600 by D-SIGNED-APPROVAL-2026-09-26: preserve all existing dirty work; serialize shared-file integration under the primary agent; all unrelated ownership remains open |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
 
-## Approved route decision — 2026-09-23
+## Approved Asset Movement route decision — 2026-09-26
 
 ```text
-Decision ID: D-TRANSFER-2026-09-23
+Decision ID: D-ASSET-2026-09-26
 Owner / backup owner: Siwat Sroisuwan / not assigned
-Approved policy / desired state: Direct Material Transfer only. Stock User is Maker, Stock Manager is Reviewer, and C-Level Approver is Final Approver. Maker may Send/Resubmit. Maker may not Review or Approve, and Reviewer may not Final Approve. Review and Approve require signed action snapshots; Return and Reject do not. Emergency Freeze is removed from the active baseline by the baseline migration owner while historical records remain intact. TSK-600/601 shared controls are implemented before TSK-590 wiring and are not duplicated in the Stock Entry adapter.
-Revision: 2026-09-23.warehouse-transfer.1
-Effective date/timezone: 2026-09-23 / Asia/Bangkok
-Enabled routes: Stock Entry purpose = Material Transfer, excluding add_to_transit and outgoing_stock_entry transit legs
-Deferred/disabled routes and reason: Native transit legs deferred until receipt/approval ordering is approved; Emergency Freeze, Borrow/Demo, exact-location/WMS, and custom posting are outside this route
-Affected existing documents/configuration: Connect Stock Transfer Approval and its normal direct-transfer states/actions; legacy Emergency states/actions require non-destructive TSK-602 disposition
-Allowed target and mutation scope: automated tests and migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test
-Dirty-work ownership: Existing dirty Stock Entry route/configuration changes remain TSK-590-owned and must be preserved. TSK-600 may extend the shared declaration/helper and only non-Stock-Entry Workflow rows after TSK-590 writing stops; the primary agent owns the serialized integration. No unrelated dirty file is authorized for modification or discard.
-Required permissions/roles/scopes: Stock User Maker, Stock Manager Reviewer, C-Level Approver Final Approver; authenticated server identity and current role/permission recheck
-Required tests and evidence: TSK-590 automated matrix, full app tests, pre-commit, independent review, and Computer Use acceptance
-Migration/re-run behavior: deterministic and idempotent; do not fabricate or delete Workflow Action, Version, or Timeline history
-Collision behavior: stop only the Stock Entry route on an unrelated site-owned collision and obtain owner disposition
-Rollback/recovery behavior: restore the prior active configuration from captured evidence; native cancel/reversal owns posted-stock recovery
-Business sign-off: approved in Codex task on 2026-09-23
-Technical sign-off: pending implementation review
-Security/Finance sign-off (if applicable): pending shared-control and runtime review
-```
-
-## Approved signed-action decision — 2026-09-26
-
-```text
-Decision ID: D-SIGNED-APPROVAL-2026-09-26
-Owner / backup owner: Siwat Sroisuwan / not assigned
-Approved policy / desired state: Every baseline Approve action for Stock Entry, Stock Reconciliation, Asset Movement, Journal Entry, Sales Order, Sales Invoice Credit, Material Request, Purchase Order, Purchase Invoice, Payment Entry, and Payroll Entry requires a server-resolved active Employee approval signature. Review requires a signature only for Stock Entry. Return, Reject, Submit/Post, and other print events are not made protected by this decision.
-Revision: 2026-09-26.signed-approval.1
+Approved policy / desired state: Generic native Asset Movement uses Stock User Maker, Stock Manager Reviewer, and C-Level Approver Final Approver. Maker, Reviewer, and Final Approver must be distinct server-resolved users. Review and Approve require signed TSK-600 snapshots and TSK-601 separation-of-duties enforcement. Return and Reject do not change Asset location/custodian. Native Asset-generated Receipt and Cancel operations are exempt only through the reviewed server-only object capability and exact native shape validation; no client-visible field or reference tuple grants a bypass. Every user-created Asset Movement, including intentionally linked Material Request movements, requires approval.
+Revision: 2026-09-26.asset-movement.1
 Effective date/timezone: 2026-09-26 / Asia/Bangkok
-Enabled routes: Existing approved or manifest-declared baseline Workflows; Journal Entry declaration/fields only until a separate Journal Entry Workflow is approved
-Deferred/disabled routes and reason: Journal Entry transition wiring is deferred because the current manifest has no Journal Entry Workflow; no Workflow may be invented by this cross-cutting slice
-Affected existing documents/configuration: Existing compatible *_by, *_at, and *_signature fields; Employee.approval_signature remains the sole signature source
-Allowed target and mutation scope: automated tests and migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test
-Required permissions/roles/scopes: Existing Workflow roles and permissions remain authoritative; this decision adds only the signed-action requirement
-Required tests and evidence: declaration coverage, server-identity and fail-closed tests, idempotent migration, two Workflow integrations, full app tests, pre-commit, independent review, and Computer Use acceptance
-Migration/re-run behavior: additive, collision-checked, deterministic, and idempotent; no duplicate fields or transition tasks
-Collision behavior: stop the affected route on an unrelated site-owned field/task conflict and obtain owner disposition
-Rollback/recovery behavior: restore only exact configuration owned by this slice; preserve document snapshots and native Workflow Action, Version, and Timeline history
-Business sign-off: approved in Codex task on 2026-09-26
-Technical sign-off: pending implementation review
-Security/Finance sign-off (if applicable): pending implementation and runtime review
+Enabled routes: WF-06 generic ERPNext Asset Movement purposes Issue, Receipt, Transfer, and Transfer and Issue; linked Material Request validation remains an additional constraint
+Deferred/disabled routes and reason: WF-08 Equipment Assignment/Installation, Borrow/Demo business workflows, exact-location engines, and Asset Disposal remain outside this baseline
+Affected existing documents/configuration: Connect Asset Movement Approval, its Asset Movement states/actions/tasks, setup-managed approval fields, and pending draft Asset Movement documents; historical Workflow Action, Version, Timeline, submitted Asset Movement, and Asset Activity records are preserved
+Allowed target and mutation scope: automated tests and guarded migration rehearsal on local.test; Computer Use on dev.erp.connectdiagnostics.test after automated gates
+Required permissions/roles/scopes: Stock User Maker, Stock Manager Reviewer/authorized native Submit and Cancel, C-Level Approver Final Approver; current document permission is rechecked server-side at each protected boundary
+Required tests and evidence: generic no-MR and linked-MR paths, Return/Reject, self-approval/wrong-role/direct-submit/state-spoof/stale mutation, native Asset Receipt/Cancel, retry/concurrency, multi-Asset native state/history, migration repeat/recovery, full app tests, pre-commit, independent review, and Computer Use acceptance
+Migration/re-run behavior: collision-aware, deterministic, and idempotent; do not fabricate or delete Workflow Action, Version, Timeline, Asset Movement, or Asset Activity history
+Collision behavior: stop WF-06 on an unrelated active Asset Movement Workflow, incompatible same-name record, conflicting transition task, incompatible setup field, or unresolved pending action and obtain owner disposition
+Rollback/recovery behavior: restore the captured prior WF-06 configuration only on the expected post-migration fingerprint; recover submitted movements through native cancel/reversal, never direct Asset writes
+Business sign-off: requester confirmed the proposed roles and native Asset Receipt/Cancel exemption in the Codex task on 2026-09-26
+Technical sign-off: TSK-523A native-boundary plan, code, migration, and focused integration evidence independently reviewed with no P0/P1 findings; Computer Use acceptance is blocked by unavailable browser capability
+Security sign-off: shared TSK-600/601 integration and full route re-review pending
 ```
 
 ## Decision request format
