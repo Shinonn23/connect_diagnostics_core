@@ -65,8 +65,8 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
     "Purchase Order": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("ordered", "ordered_by", "ordered_at", "ordered_signature"),
-        PrintAction("checked", "checked_by", "checked_at", "checked_signature", True, True),
-        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
     ),
     "Purchase Receipt": (
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
@@ -110,6 +110,26 @@ PRINT_ACTIONS: dict[str, tuple[PrintAction, ...]] = {
         PrintAction("submit", "submit_by", "submit_at", "submit_signature"),
         PrintAction("checked", "checked_by", "checked_at", "checked_signature", True, True),
         PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature", True, True),
+    ),
+    "Stock Reconciliation": (
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Asset Movement": (
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Journal Entry": (
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Purchase Invoice": (
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
+    ),
+    "Payroll Entry": (
+        PrintAction("checked", "checked_by", "checked_at", "checked_signature"),
+        PrintAction("authorized", "authorized_by", "authorized_at", "authorized_signature"),
     ),
     "Stock Reconciliation": (
         PrintAction("checked", "checked_by", "checked_at", "checked_signature"),

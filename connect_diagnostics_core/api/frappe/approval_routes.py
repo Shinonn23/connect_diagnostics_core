@@ -34,8 +34,6 @@ class ApprovalRoute:
     submitted_state: str
     excluded_scope: tuple[str, ...] = ()
     requires_distinct_actors: bool = True
-    cancel_action: str = ""
-    cancelled_state: str = ""
 
     @property
     def protected_actions(self) -> tuple[str, str]:
@@ -139,7 +137,7 @@ APPROVAL_ROUTES: tuple[ApprovalRoute, ...] = (
         key="sales_order_credit",
         doctype="Sales Order",
         scope_key="credit_approval",
-        maker_roles=("Sales User", "Accounts User"),
+        maker_roles=("Sales User",),
         reviewer_roles=("Sales Manager",),
         final_approver_roles=("Accounts Manager",),
         execution_roles=("Sales Manager",),
@@ -162,10 +160,10 @@ APPROVAL_ROUTES: tuple[ApprovalRoute, ...] = (
         key="sales_invoice_credit_note",
         doctype="Sales Invoice",
         scope_key="credit_note",
-        maker_roles=("Sales User",),
+        maker_roles=("Sales User", "Accounts User"),
         reviewer_roles=("Sales Manager",),
-        final_approver_roles=("C-Level Approver",),
-        execution_roles=("Sales Manager",),
+        final_approver_roles=("Accounts Manager",),
+        execution_roles=("Accounts Manager",),
         send_action="Send Sales Invoice Credit for Review",
         resubmit_action="Resubmit Sales Invoice Credit for Review",
         review_action="Review Sales Invoice Credit",
@@ -179,8 +177,6 @@ APPROVAL_ROUTES: tuple[ApprovalRoute, ...] = (
         returned_state="Sales Invoice Credit Returned",
         approved_state="Sales Invoice Credit Approved",
         submitted_state="Sales Invoice Submitted",
-        cancel_action="Cancel Sales Invoice Credit",
-        cancelled_state="Sales Invoice Cancelled",
         excluded_scope=("ordinary Sales Invoice",),
     ),
     ApprovalRoute(
