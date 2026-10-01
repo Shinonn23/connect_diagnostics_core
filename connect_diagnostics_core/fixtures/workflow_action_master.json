@@ -24,8 +24,225 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Approve Payroll Entry",
-		"workflow_action_name": "Approve Payroll Entry"
+		"name": "Reject Payment Entry",
+		"workflow_action_name": "Reject Payment Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Payment Entry",
+		"workflow_action_name": "Post Payment Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Payment Entry",
+		"workflow_action_name": "Cancel Payment Entry"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Stock Transfer",
+		"workflow_action_name": "Approve Stock Transfer"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Stock Transfer",
+		"workflow_action_name": "Reject Stock Transfer"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Stock Transfer",
+		"workflow_action_name": "Cancel Stock Transfer"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Stock Reconciliation for Review",
+		"workflow_action_name": "Submit Stock Reconciliation for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Stock Reconciliation",
+		"workflow_action_name": "Approve Stock Reconciliation"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Stock Reconciliation",
+		"workflow_action_name": "Reject Stock Reconciliation"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Stock Reconciliation",
+		"workflow_action_name": "Post Stock Reconciliation"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Stock Reconciliation",
+		"workflow_action_name": "Cancel Stock Reconciliation"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Sales Order for Review",
+		"workflow_action_name": "Submit Sales Order for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Sales Order",
+		"workflow_action_name": "Approve Sales Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Sales Order",
+		"workflow_action_name": "Reject Sales Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Sales Order",
+		"workflow_action_name": "Post Sales Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Sales Order",
+		"workflow_action_name": "Cancel Sales Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Sales Invoice Credit for Review",
+		"workflow_action_name": "Submit Sales Invoice Credit for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Sales Invoice Credit",
+		"workflow_action_name": "Approve Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Sales Invoice Credit",
+		"workflow_action_name": "Reject Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Sales Invoice Credit",
+		"workflow_action_name": "Post Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Sales Invoice Credit",
+		"workflow_action_name": "Cancel Sales Invoice Credit"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Material Request for Review",
+		"workflow_action_name": "Submit Material Request for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Material Request",
+		"workflow_action_name": "Approve Material Request"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Material Request",
+		"workflow_action_name": "Reject Material Request"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Material Request",
+		"workflow_action_name": "Post Material Request"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Material Request",
+		"workflow_action_name": "Cancel Material Request"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Purchase Order for Review",
+		"workflow_action_name": "Submit Purchase Order for Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Approve Purchase Order",
+		"workflow_action_name": "Approve Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Reject Purchase Order",
+		"workflow_action_name": "Reject Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Post Purchase Order",
+		"workflow_action_name": "Post Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Cancel Purchase Order",
+		"workflow_action_name": "Cancel Purchase Order"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow Action Master",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Submit Purchase Invoice for Review",
+		"workflow_action_name": "Submit Purchase Invoice for Review"
 	},
 	{
 		"docstatus": 0,
@@ -101,57 +318,8 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Purchase Invoice",
-		"workflow_action_name": "Cancel Purchase Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Purchase Order",
-		"workflow_action_name": "Cancel Purchase Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Cancel Sales Invoice",
-		"workflow_action_name": "Cancel Sales Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Sales Invoice Credit",
-		"workflow_action_name": "Cancel Sales Invoice Credit"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Sales Order",
-		"workflow_action_name": "Cancel Sales Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-23 15:16:23.226397",
-		"name": "Cancel Stock Entry",
-		"workflow_action_name": "Cancel Stock Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Stock Reconciliation",
-		"workflow_action_name": "Cancel Stock Reconciliation"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Cancel Stock Transfer",
-		"workflow_action_name": "Cancel Stock Transfer"
+		"name": "Submit Asset Disposal for Review",
+		"workflow_action_name": "Submit Asset Disposal for Review"
 	},
 	{
 		"docstatus": 0,
@@ -178,134 +346,15 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Asset Movement",
-		"workflow_action_name": "Reject Asset Movement"
+		"name": "Cancel Asset Disposal",
+		"workflow_action_name": "Cancel Asset Disposal"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Reject Journal Entry",
-		"workflow_action_name": "Reject Journal Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Payment Entry",
-		"workflow_action_name": "Reject Payment Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Payroll Entry",
-		"workflow_action_name": "Reject Payroll Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Purchase Invoice",
-		"workflow_action_name": "Reject Purchase Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Purchase Order",
-		"workflow_action_name": "Reject Purchase Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Sales Invoice Credit",
-		"workflow_action_name": "Reject Sales Invoice Credit"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Sales Order",
-		"workflow_action_name": "Reject Sales Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Stock Reconciliation",
-		"workflow_action_name": "Reject Stock Reconciliation"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Reject Stock Transfer",
-		"workflow_action_name": "Reject Stock Transfer"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Asset Movement",
-		"workflow_action_name": "Resubmit Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Journal Entry for Review",
-		"workflow_action_name": "Resubmit Journal Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Payment Entry for Review",
-		"workflow_action_name": "Resubmit Payment Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Payroll Entry for Review",
-		"workflow_action_name": "Resubmit Payroll Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Resubmit Purchase Invoice",
-		"workflow_action_name": "Resubmit Purchase Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 15:12:00.469564",
-		"name": "Resubmit Purchase Order",
-		"workflow_action_name": "Resubmit Purchase Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Sales Invoice Credit for Review",
-		"workflow_action_name": "Resubmit Sales Invoice Credit for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Sales Order for Review",
-		"workflow_action_name": "Resubmit Sales Order for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Stock Reconciliation for Review",
-		"workflow_action_name": "Resubmit Stock Reconciliation for Review"
+		"modified": "2026-09-23 15:16:23.226397",
+		"name": "Cancel Stock Entry",
+		"workflow_action_name": "Cancel Stock Entry"
 	},
 	{
 		"docstatus": 0,
@@ -317,128 +366,9 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Asset Movement",
-		"workflow_action_name": "Return Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Journal Entry",
-		"workflow_action_name": "Return Journal Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Payment Entry",
-		"workflow_action_name": "Return Payment Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Payroll Entry",
-		"workflow_action_name": "Return Payroll Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Return Purchase Invoice",
-		"workflow_action_name": "Return Purchase Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 15:12:00.469564",
-		"name": "Return Purchase Order",
-		"workflow_action_name": "Return Purchase Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Sales Invoice Credit",
-		"workflow_action_name": "Return Sales Invoice Credit"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Sales Order",
-		"workflow_action_name": "Return Sales Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Stock Reconciliation",
-		"workflow_action_name": "Return Stock Reconciliation"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
 		"modified": "2026-09-23 15:16:23.226397",
 		"name": "Return Stock Transfer",
 		"workflow_action_name": "Return Stock Transfer"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Asset Movement",
-		"workflow_action_name": "Review Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Journal Entry",
-		"workflow_action_name": "Review Journal Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Payment Entry",
-		"workflow_action_name": "Review Payment Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Payroll Entry",
-		"workflow_action_name": "Review Payroll Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 15:12:00.469564",
-		"name": "Review Purchase Order",
-		"workflow_action_name": "Review Purchase Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Sales Invoice Credit",
-		"workflow_action_name": "Review Sales Invoice Credit"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Sales Order",
-		"workflow_action_name": "Review Sales Order"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Stock Reconciliation",
-		"workflow_action_name": "Review Stock Reconciliation"
 	},
 	{
 		"docstatus": 0,
@@ -450,114 +380,9 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Asset Movement for Review",
-		"workflow_action_name": "Send Asset Movement for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Journal Entry for Review",
-		"workflow_action_name": "Send Journal Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Payment Entry for Review",
-		"workflow_action_name": "Send Payment Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Payroll Entry for Review",
-		"workflow_action_name": "Send Payroll Entry for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Sales Invoice Credit for Review",
-		"workflow_action_name": "Send Sales Invoice Credit for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Sales Order for Review",
-		"workflow_action_name": "Send Sales Order for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Stock Reconciliation for Review",
-		"workflow_action_name": "Send Stock Reconciliation for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
 		"modified": "2026-09-23 15:16:23.226397",
 		"name": "Send Stock Transfer for Review",
 		"workflow_action_name": "Send Stock Transfer for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Asset Movement",
-		"workflow_action_name": "Submit Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Journal Entry",
-		"workflow_action_name": "Submit Journal Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Payment Entry",
-		"workflow_action_name": "Submit Payment Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Payroll Entry",
-		"workflow_action_name": "Submit Payroll Entry"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Purchase Invoice for Review",
-		"workflow_action_name": "Submit Purchase Invoice for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Purchase Order for Review",
-		"workflow_action_name": "Submit Purchase Order for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Sales Invoice",
-		"workflow_action_name": "Submit Sales Invoice"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Sales Order",
-		"workflow_action_name": "Submit Sales Order"
 	},
 	{
 		"docstatus": 0,
@@ -569,22 +394,8 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Stock Reconciliation",
-		"workflow_action_name": "Submit Stock Reconciliation"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
 		"modified": "2026-09-23 15:16:23.226397",
 		"name": "Submit Stock Transfer",
 		"workflow_action_name": "Submit Stock Transfer"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Verify Purchase Invoice Source",
-		"workflow_action_name": "Verify Purchase Invoice Source"
 	}
 ]

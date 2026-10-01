@@ -1,7 +1,6 @@
 {
-	"schema_version": 2,
-	"revision": "2026-09-26.normalized-workflow-baseline.1",
-	"predecessor_sha256": "61a876fa98dba63dba709b439199b275061d73f58ec4578de6cc79e31f90257e",
+	"schema_version": 1,
+	"revision": "2026-09-23.warehouse-transfer.1",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
@@ -17,23 +16,32 @@
 		"migration-rerun-recovery-validation",
 		"independent-configuration-review"
 	],
-	"collision_policy": "stop-affected-route-on-name-doctype-or-transition-scope-collision",
-	"rerun_policy": "deterministic-idempotent-guarded-apply",
-	"recovery_policy": "restore-captured-predecessor-only-on-matching-post-migration-fingerprint",
-	"history_policy": "never-delete-or-fabricate-workflow-action-version-comment-or-document-history",
-	"shared_controls": [
-		"TSK-600 Approval Action Snapshot",
-		"TSK-601 Self-Approval and Segregation of Duties"
-	],
+	"collision_policy": "stop-and-obtain-owner-disposition",
+	"rerun_policy": "deterministic fixture sync and guarded migration rehearsal on local.test",
+	"recovery_policy": "restore the prior reviewed fixture on a matching configuration fingerprint; preserve Workflow Action, Version, and Timeline history",
 	"routes": [
 		{
-			"id": "TSK-590",
+			"id": "WF-01",
+			"status": "disabled",
+			"document_type": null,
+			"workflow": null,
+			"reason": "The normalized baseline excludes the custom Internal Location Transfer/exact-location route."
+		},
+		{
+			"id": "WF-02",
 			"status": "enabled",
 			"document_type": "Stock Entry",
 			"workflow": "Connect Stock Transfer Approval",
-			"route_scope": "purpose is Material Transfer and add_to_transit is false and outgoing_stock_entry is empty",
-			"condition": "doc.purpose == 'Material Transfer' and not doc.add_to_transit and not doc.outgoing_stock_entry",
-			"migration_rule": "replace only an allowlisted predecessor fingerprint; preserve legacy Emergency history"
+			"route_scope": "Direct Material Transfer only; native transit legs are deferred",
+			"decision_revision": "D-TRANSFER-2026-09-23",
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"]
+		},
+		{
+			"id": "WF-03",
+			"status": "disabled",
+			"document_type": null,
+			"workflow": null,
+			"reason": "Emergency Movement During Freeze is removed from active baseline ownership; historical records remain auditable."
 		},
 		{
 			"id": "TSK-591",

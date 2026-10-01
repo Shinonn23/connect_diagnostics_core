@@ -181,6 +181,10 @@ workflow_methods = [
     {"name": name, "method": method} for name, method in _normalized_workflow_methods.items()
 ] + [
     {
+        "name": "Clear Stock Transfer Approval Snapshots",
+        "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.clear_approval_snapshots",
+    },
+    {
         "name": "Capture Print Action: Submit",
         "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_submit_action",
     },
