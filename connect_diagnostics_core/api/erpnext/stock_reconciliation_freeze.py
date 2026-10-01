@@ -188,9 +188,23 @@ def validate_transaction(doc: Document, method: str | None = None) -> None:
     if doc.doctype in _UPDATE_STOCK_DOCTYPES and not doc.get("update_stock"):
         return
 
-    pairs, warehouses = _rows_to_check(doc)
-    if not pairs and not warehouses:
-        return
+    execution_marker = getattr(frappe.flags, "freeze_exception_execution", None)
+    try:
+        if doc.doctype == "Stock Entry":
+            from connect_diagnostics_core.api.erpnext.stock_entry_workflow import (
+                is_authorized_freeze_exception,
+            )
+
+            if is_authorized_freeze_exception(doc):
+                return
+            if doc.get("workflow_state") == "Emergency Stock Movement Submitted":
+                frappe.throw(
+                    _("Emergency Stock Movement must be approved through the native Workflow before posting.")
+                )
+
+        pairs, warehouses = _rows_to_check(doc)
+        if not pairs and not warehouses:
+            return
 
         exclude_name = doc.name if doc.doctype == "Stock Reconciliation" else None
         messages = _check_item_level(pairs, exclude_name=exclude_name) + _check_warehouse_level(
@@ -203,6 +217,8 @@ def validate_transaction(doc: Document, method: str | None = None) -> None:
             from connect_diagnostics_core.api.erpnext.stock_entry_workflow import (
                 clear_freeze_exception_execution,
             )
+
+            clear_freeze_exception_execution()
 
 
 def validate_before_submit(doc: Document, method: str | None = None) -> None:
