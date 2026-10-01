@@ -7,6 +7,7 @@ from typing import cast
 
 import frappe
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import StockReconciliation
 from frappe.tests import IntegrationTestCase
 
 from connect_diagnostics_core.api.erpnext import stock_count
@@ -21,8 +22,8 @@ HOLDING_WAREHOUSE = "_Test Stock Count Holding - _TC"
 
 # IntegrationTestCase rolls the whole class's DB changes back in a class cleanup,
 # so these tests never delete what they create -- and must not, because the docs
-# and the Stock Entries they post are submitted (docstatus 1), which delete_doc
-# refuses. The rollback is the cleanup.
+# and the draft stock documents they create are linked to submitted Stock Counts.
+# The rollback is the cleanup.
 
 
 def _ensure_holding_warehouse() -> str:
@@ -109,11 +110,11 @@ class TestGenerateHoldingTransfer(IntegrationTestCase):
         _prepare_environment()
         self.doc = _submitted_stock_count()
 
-    def test_creates_submitted_material_transfer(self) -> None:
+    def test_creates_material_transfer_draft_for_workflow(self) -> None:
         result = stock_count.generate_holding_transfer(self.doc.name)
 
         entry = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["stock_entry"]))
-        self.assertEqual(entry.docstatus, 1)
+        self.assertEqual(entry.docstatus, 0)
         self.assertEqual(entry.purpose, "Material Transfer")
         self.assertEqual(entry.from_warehouse, WAREHOUSE)
         self.assertEqual(entry.to_warehouse, HOLDING_WAREHOUSE)
@@ -123,6 +124,7 @@ class TestGenerateHoldingTransfer(IntegrationTestCase):
         self.doc.reload()
         self.assertEqual(len(self.doc.adjustments), 1)
         self.assertEqual(self.doc.adjustments[0].entry_type, "Material Transfer")
+        self.assertEqual(self.doc.adjustments[0].stock_entry, entry.name)
 
     def test_rejects_second_generation(self) -> None:
         stock_count.generate_holding_transfer(self.doc.name)
@@ -170,24 +172,27 @@ class TestGenerateStockAdjustment(IntegrationTestCase):
             ],
         )
 
-    def test_posts_receipt_for_surplus_and_issue_for_shortage(self) -> None:
+    def test_creates_one_reconciliation_draft_for_surplus_and_shortage(self) -> None:
         result = stock_count.generate_stock_adjustment(self.doc.name)
 
-        receipt = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["receipt_entry"]))
-        self.assertEqual(receipt.purpose, "Material Receipt")
-        self.assertEqual(receipt.items[0].qty, 2)
-        self.assertEqual(receipt.items[0].t_warehouse, WAREHOUSE)
-
-        issue = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["issue_entry"]))
-        self.assertEqual(issue.purpose, "Material Issue")
-        self.assertEqual(issue.items[0].qty, 2)
-        self.assertEqual(issue.items[0].s_warehouse, WAREHOUSE)
+        reconciliation = cast(
+            StockReconciliation,
+            frappe.get_doc("Stock Reconciliation", result["data"]["stock_reconciliation"]),
+        )
+        self.assertEqual(reconciliation.docstatus, 0)
+        self.assertEqual(reconciliation.purpose, "Stock Reconciliation")
+        self.assertEqual(reconciliation.get("stock_count"), self.doc.name)
+        self.assertEqual(result["data"]["count"], 2)
+        quantities = {row.item_code: row.qty for row in reconciliation.items}
+        self.assertEqual(quantities, {"_Test Item": 8, "_Test Item 2": 7})
+        self.assertTrue(all(row.warehouse == WAREHOUSE for row in reconciliation.items))
 
         self.doc.reload()
-        entry_types = {row.entry_type for row in self.doc.adjustments}
-        self.assertEqual(entry_types, {"Material Receipt", "Material Issue"})
+        self.assertEqual(len(self.doc.adjustments), 1)
+        self.assertEqual(self.doc.adjustments[0].entry_type, "Stock Reconciliation")
+        self.assertEqual(self.doc.adjustments[0].get("stock_reconciliation"), reconciliation.name)
 
-    def test_posts_per_row_warehouse_across_multiple_warehouses(self) -> None:
+    def test_preserves_per_row_warehouse_in_reconciliation_draft(self) -> None:
         second = _ensure_second_warehouse()
         doc = _submitted_stock_count(
             count_type=stock_count.YEARLY,
@@ -200,11 +205,13 @@ class TestGenerateStockAdjustment(IntegrationTestCase):
 
         result = stock_count.generate_stock_adjustment(doc.name)
 
-        receipt = cast(StockEntry, frappe.get_doc("Stock Entry", result["data"]["receipt_entry"]))
-        self.assertFalse(receipt.to_warehouse)  # rows span two warehouses: no single header value
-        target_by_item = {row.item_code: row.t_warehouse for row in receipt.items}
-        self.assertEqual(target_by_item["_Test Item"], WAREHOUSE)
-        self.assertEqual(target_by_item["_Test Item 2"], second)
+        reconciliation = cast(
+            StockReconciliation,
+            frappe.get_doc("Stock Reconciliation", result["data"]["stock_reconciliation"]),
+        )
+        self.assertEqual(reconciliation.docstatus, 0)
+        warehouse_by_item = {row.item_code: row.warehouse for row in reconciliation.items}
+        self.assertEqual(warehouse_by_item, {"_Test Item": WAREHOUSE, "_Test Item 2": second})
 
     def test_rejects_second_generation(self) -> None:
         stock_count.generate_stock_adjustment(self.doc.name)

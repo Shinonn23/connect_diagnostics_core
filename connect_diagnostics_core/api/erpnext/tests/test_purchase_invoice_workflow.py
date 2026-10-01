@@ -1,0 +1,294 @@
+# Copyright (c) 2026, Siwat Sroisuwan and contributors
+# For license information, please see license.txt
+
+from __future__ import annotations
+
+from datetime import date, datetime
+from unittest.mock import patch
+
+import frappe
+from frappe.model.document import Document
+from frappe.tests import UnitTestCase
+
+from connect_diagnostics_core.api.erpnext import purchase_invoice_workflow
+from connect_diagnostics_core.api.frappe.approval_controls import SignedApprovalSnapshot
+
+
+class TestPurchaseInvoiceWorkflow(UnitTestCase):
+    def _doc(self) -> Document:
+        return frappe.get_doc(
+            {
+                "doctype": "Purchase Invoice",
+                "name": "PI-TEST",
+                "owner": "maker@example.com",
+                "workflow_state": purchase_invoice_workflow.SUBMITTED_STATE,
+                "company": "_Test Company",
+                "supplier": "_Test Supplier",
+                "credit_to": "Creditors - _TC",
+                "items": [
+                    {
+                        "purchase_order": "PO-1",
+                        "purchase_receipt": "PR-1",
+                        "item_code": "ITEM-1",
+                        "qty": 1,
+                        "rate": 100,
+                        "expense_account": "Expenses - _TC",
+                    }
+                ],
+            }
+        )
+
+    def _first_item(self, doc: Document) -> Document:
+        return doc.get("items")[0]
+
+    def test_direct_submit_without_transition_marker_is_denied(self) -> None:
+        with (
+            patch.object(purchase_invoice_workflow, "_require_sources"),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.validate_before_submit(self._doc())
+
+    def test_paid_invoice_is_denied(self) -> None:
+        doc = self._doc()
+        doc.set("is_paid", 1)
+        with self.assertRaises(frappe.ValidationError):
+            purchase_invoice_workflow.authorize_submit_execution(doc)
+
+    def test_digest_binds_all_posting_values_and_children(self) -> None:
+        mutations = (
+            ("credit_to", "Other Creditors - _TC"),
+            ("cash_bank_account", "Bank - _TC"),
+            ("paid_amount", 25),
+            ("write_off_amount", 5),
+            ("taxes_and_charges_added", 7),
+            ("base_rounding_adjustment", 0.5),
+            ("taxes", [{"account_head": "VAT - _TC", "tax_amount": 7}]),
+            ("payment_schedule", [{"due_date": "2026-10-01", "payment_amount": 100}]),
+            ("advances", [{"reference_name": "PE-1", "allocated_amount": 20}]),
+        )
+        for fieldname, value in mutations:
+            doc = self._doc()
+            baseline = purchase_invoice_workflow.get_approval_digest(doc)
+            doc.set(fieldname, value)
+            self.assertNotEqual(
+                baseline,
+                purchase_invoice_workflow.get_approval_digest(doc),
+                fieldname,
+            )
+
+        for fieldname, value in (
+            ("expense_account", "Other Expense - _TC"),
+            ("deferred_expense_account", "Deferred - _TC"),
+            ("net_amount", 90),
+            ("department", "_Test Department"),
+        ):
+            doc = self._doc()
+            baseline = purchase_invoice_workflow.get_approval_digest(doc)
+            self._first_item(doc).set(fieldname, value)
+            self.assertNotEqual(
+                baseline,
+                purchase_invoice_workflow.get_approval_digest(doc),
+                fieldname,
+            )
+
+    def test_digest_ignores_only_transition_and_snapshot_values(self) -> None:
+        doc = self._doc()
+        baseline = purchase_invoice_workflow.get_approval_digest(doc)
+        for fieldname, value in (
+            ("workflow_state", "Purchase Invoice Approved"),
+            ("approval_critical_digest", "digest"),
+            ("approval_reviewer_user", "reviewer@example.com"),
+            ("checked_signature", "data:image/png;base64,test"),
+        ):
+            doc.set(fieldname, value)
+        self.assertEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
+
+    def test_digest_ignores_only_system_managed_posting_time(self) -> None:
+        doc = self._doc()
+        doc.set("set_posting_time", 0)
+        doc.set("posting_time", "12:00:00")
+        baseline = purchase_invoice_workflow.get_approval_digest(doc)
+        doc.set("posting_time", "12:00:01")
+        self.assertEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
+
+        doc.set("set_posting_time", 1)
+        baseline = purchase_invoice_workflow.get_approval_digest(doc)
+        doc.set("posting_time", "12:00:02")
+        self.assertNotEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
+
+    def test_digest_normalizes_dates_and_ignores_submit_generated_remarks(self) -> None:
+        doc = self._doc()
+        doc.set("posting_date", date(2026, 9, 23))
+        baseline = purchase_invoice_workflow.get_approval_digest(doc)
+        doc.set("posting_date", "2026-09-23")
+        doc.set("remarks", "Against Supplier Invoice TEST-1")
+        self.assertEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
+
+        doc.set("posting_date", "2026-09-24")
+        self.assertNotEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
+
+    def test_source_policy_requires_po_and_purchase_receipt_on_every_item(self) -> None:
+        doc = self._doc()
+        self._first_item(doc).set("purchase_receipt", None)
+        with self.assertRaises(frappe.ValidationError):
+            purchase_invoice_workflow._require_sources(doc)
+
+        self._first_item(doc).set("purchase_receipt", "PR-1")
+        with (
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "exists",
+                side_effect=(True, False),
+            ),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+    def test_source_verifier_cannot_be_maker(self) -> None:
+        doc = self._doc()
+        doc.set("approval_maker_user", doc.owner)
+        with (
+            patch.object(purchase_invoice_workflow, "_require_sources"),
+            patch.object(purchase_invoice_workflow.approval_controls, "require_permission"),
+            patch.object(
+                purchase_invoice_workflow.approval_controls,
+                "resolve_user",
+                side_effect=lambda identity: identity,
+            ),
+            patch.dict(purchase_invoice_workflow.frappe.session, {"user": doc.owner}),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.capture_source_verification_snapshot(doc)
+
+    def test_source_snapshot_requires_employee_signature(self) -> None:
+        doc = self._doc()
+        doc.set("approval_maker_user", doc.owner)
+        with (
+            patch.object(purchase_invoice_workflow, "_require_sources"),
+            patch.object(purchase_invoice_workflow.approval_controls, "require_permission"),
+            patch.object(
+                purchase_invoice_workflow.approval_controls,
+                "resolve_user",
+                side_effect=lambda identity: identity,
+            ),
+            patch.object(
+                purchase_invoice_workflow.approval_controls,
+                "_active_employees",
+                return_value=[{"name": "EMP-REVIEWER", "approval_signature": ""}],
+            ),
+            patch.dict(purchase_invoice_workflow.frappe.session, {"user": "reviewer@example.com"}),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.capture_source_verification_snapshot(doc)
+
+    def test_source_snapshot_keeps_user_actor_separate_from_employee(self) -> None:
+        doc = self._doc()
+        doc.set("approval_maker_user", doc.owner)
+
+        with (
+            patch.object(purchase_invoice_workflow, "_require_sources"),
+            patch.dict(
+                purchase_invoice_workflow.frappe.session,
+                {"user": "reviewer@example.com"},
+            ),
+            patch.object(
+                purchase_invoice_workflow.approval_controls,
+                "capture_signed_approval_actor",
+                return_value=SignedApprovalSnapshot(
+                    user="reviewer@example.com",
+                    employee="EMP-REVIEWER",
+                    employee_name="Reviewer",
+                    acted_at=datetime(2026, 9, 26),
+                    signature="data:image/png;base64,reviewer",
+                ),
+            ),
+        ):
+            purchase_invoice_workflow.capture_source_verification_snapshot(doc)
+
+        self.assertEqual(doc.get("approval_reviewer_user"), "reviewer@example.com")
+        self.assertEqual(doc.get("checked_by"), "EMP-REVIEWER")
+
+    def test_new_blank_state_is_allowed_but_existing_blank_state_is_denied(self) -> None:
+        doc = self._doc()
+        doc.set("workflow_state", None)
+        with patch.object(doc, "is_new", return_value=True):
+            purchase_invoice_workflow.validate_workflow(doc)
+        with (
+            patch.object(doc, "is_new", return_value=False),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.validate_workflow(doc)
+
+    def test_critical_mutation_after_review_is_denied(self) -> None:
+        previous = self._doc()
+        previous.set("workflow_state", "Purchase Invoice Pending Accounting Approval")
+        previous.set("approval_critical_digest", purchase_invoice_workflow.get_approval_digest(previous))
+        current = self._doc()
+        current.set("workflow_state", "Purchase Invoice Pending Accounting Approval")
+        current.set("approval_critical_digest", previous.get("approval_critical_digest"))
+        current.set("credit_to", "Other Creditors - _TC")
+        with (
+            patch.object(current, "get_doc_before_save", return_value=previous),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.validate_workflow(current)
+
+    def test_cancel_requires_permission_marker_and_consumes_marker(self) -> None:
+        doc = self._doc()
+        doc.set("workflow_state", "Purchase Invoice Cancelled")
+        with self.assertRaises(frappe.ValidationError):
+            purchase_invoice_workflow.validate_before_cancel(doc)
+        with (
+            patch.object(purchase_invoice_workflow, "require_permission") as permission,
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_value",
+                return_value=purchase_invoice_workflow.SUBMITTED_STATE,
+            ),
+            patch.dict(
+                purchase_invoice_workflow.frappe.flags,
+                {
+                    "purchase_invoice_cancel_execution": {
+                        "doctype": doc.doctype,
+                        "name": doc.name,
+                    }
+                },
+            ),
+        ):
+            purchase_invoice_workflow.validate_before_cancel(doc)
+        permission.assert_called_once_with(doc, "cancel")
+        self.assertIsNone(
+            getattr(purchase_invoice_workflow.frappe.flags, "purchase_invoice_cancel_execution", None)
+        )
+
+    def test_submit_rechecks_sources_and_current_persisted_approval(self) -> None:
+        doc = self._doc()
+        digest = purchase_invoice_workflow.get_approval_digest(doc)
+        with (
+            patch.object(purchase_invoice_workflow, "_require_sources") as sources,
+            patch.object(purchase_invoice_workflow, "require_permission"),
+            patch.object(purchase_invoice_workflow, "require_distinct_actors"),
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_value",
+                return_value={
+                    "workflow_state": purchase_invoice_workflow.APPROVED_STATE,
+                    "approval_critical_digest": digest,
+                    "approval_reviewer_user": "reviewer@example.com",
+                    "approval_authorized_user": "approver@example.com",
+                    "checked_signature": "checked",
+                    "authorized_signature": "authorized",
+                },
+            ),
+            patch.dict(
+                purchase_invoice_workflow.frappe.flags,
+                {
+                    "purchase_invoice_execution": {
+                        "doctype": "Purchase Invoice",
+                        "name": "PI-TEST",
+                    }
+                },
+            ),
+        ):
+            purchase_invoice_workflow.validate_before_submit(doc)
+        sources.assert_called_once_with(doc)

@@ -21,6 +21,8 @@ into `developments`.
 | TSK-530 / Plan 07    | WF-14 Payroll Processing/Review                                               | `feat/wf-tsk-530-payroll-review`       |
 | TSK-531              | WF-15 Role/Scope Assignment, WF-16 Delegation, WF-17 Self-Approval Protection | `feat/wf-tsk-531-approval-controls`    |
 | TSK-532 / Plan 08    | WF-18 Workflow Baseline Freeze                                                | `feat/wf-tsk-532-baseline-freeze`      |
+| TSK-603              | Canonical manual Journal Entry route                                          | `feat/wf-tsk-603-journal-entry`        |
+| TSK-602              | Cross-cutting normalized-baseline integration and migration                   | parent integration branch              |
 
 ## Merge flow
 

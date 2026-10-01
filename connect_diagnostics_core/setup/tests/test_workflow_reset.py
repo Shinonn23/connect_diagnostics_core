@@ -107,7 +107,9 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if transition["action"].startswith(("Approve ", "Reject ", "Post ", "Cancel "))
+                        if transition["action"].startswith(
+                            ("Review ", "Approve ", "Reject ", "Return ", "Verify ")
+                        )
                     )
                 )
 
@@ -131,7 +133,9 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if not transition["action"].startswith("Submit ")
+                        if transition["action"].startswith(
+                            ("Review ", "Approve ", "Reject ", "Return ", "Verify ")
+                        )
                     )
                 )
 
@@ -165,24 +169,39 @@ class TestWorkflowReset(UnitTestCase):
                     if " Pending " in name or " Pending Review" in name
                 )
                 approved = next(state for name, state in states.items() if name.endswith(" Approved"))
-                self.assertEqual(pending.get("send_email", 0), workflow["send_email_alert"])
-                self.assertEqual(approved.get("send_email", 0), workflow["send_email_alert"])
+                self.assertIn(pending.get("send_email", 0), (0, 1))
+                self.assertIn(approved.get("send_email", 0), (0, 1))
+                if workflow["send_email_alert"]:
+                    self.assertEqual(pending.get("send_email", 0), 1)
+                    self.assertEqual(approved.get("send_email", 0), 1)
 
-    def test_rejection_is_terminal_and_not_editable_by_flow_roles(self) -> None:
+    def test_rejection_is_terminal_or_returns_only_to_maker(self) -> None:
         workflow_fixture = json.loads(
             Path(hooks.__file__).with_name("fixtures").joinpath("workflow.json").read_text()
         )
         for workflow in workflow_fixture:
             rejected_states = [state for state in workflow["states"] if state["state"].endswith(" Rejected")]
-            self.assertGreaterEqual(len(rejected_states), 1)
+            reject_transitions = [
+                transition
+                for transition in workflow["transitions"]
+                if transition["action"].startswith("Reject ")
+            ]
+            self.assertTrue(reject_transitions)
+            self.assertTrue(
+                all(
+                    transition["next_state"].endswith((" Rejected", " Returned"))
+                    for transition in reject_transitions
+                )
+            )
             for rejected in rejected_states:
                 with self.subTest(state=rejected["state"]):
-                    self.assertFalse(
-                        [
-                            transition
-                            for transition in workflow["transitions"]
-                            if transition["state"] == rejected["state"]
-                        ]
+                    outgoing = [
+                        transition
+                        for transition in workflow["transitions"]
+                        if transition["state"] == rejected["state"]
+                    ]
+                    self.assertTrue(
+                        all(transition["action"].startswith("Resubmit ") for transition in outgoing)
                     )
                     self.assertIn(rejected["allow_edit"], self.FLOW_ROLES | {"System Manager"})
 
