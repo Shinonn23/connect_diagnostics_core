@@ -192,15 +192,17 @@ def validate_transaction(doc: Document, method: str | None = None) -> None:
     if not pairs and not warehouses:
         return
 
-    exclude_name = str(doc.name) if doc.doctype == "Stock Reconciliation" and doc.name else None
-    if exclude_name:
+        exclude_name = doc.name if doc.doctype == "Stock Reconciliation" else None
         messages = _check_item_level(pairs, exclude_name=exclude_name) + _check_warehouse_level(
             warehouses, exclude_name=exclude_name
         )
-    else:
-        messages = _check_item_level(pairs) + _check_warehouse_level(warehouses)
-    if messages:
-        frappe.throw("<br>".join(messages), title=_("Stock Reconciliation in progress"))
+        if messages:
+            frappe.throw("<br>".join(messages), title=_("Stock Reconciliation in progress"))
+    finally:
+        if execution_marker is not None:
+            from connect_diagnostics_core.api.erpnext.stock_entry_workflow import (
+                clear_freeze_exception_execution,
+            )
 
 
 def validate_before_submit(doc: Document, method: str | None = None) -> None:
@@ -269,6 +271,7 @@ _ITEM_SCOPE_QUERY = (
     + """
         and sri.item_code in %(item_codes)s
         and sri.warehouse in %(warehouses)s
+        and (%(exclude_name)s is null or sr.name != %(exclude_name)s)
     """
 )
 _WAREHOUSE_SCOPE_QUERY = (
@@ -280,6 +283,7 @@ _WAREHOUSE_SCOPE_QUERY = (
     + _ACTIVE_RECONCILIATION_CLAUSE
     + """
         and sri.warehouse in %(warehouses)s
+        and (%(exclude_name)s is null or sr.name != %(exclude_name)s)
     """
 )
 
