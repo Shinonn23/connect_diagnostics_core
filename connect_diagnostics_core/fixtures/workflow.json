@@ -1962,61 +1962,117 @@
 		"docstatus": 0,
 		"doctype": "Workflow",
 		"document_type": "Sales Invoice",
-		"enable_action_confirmation": 0,
+		"enable_action_confirmation": 1,
 		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-26 00:00:00.000000",
 		"name": "Connect Sales Invoice Credit Blueprint",
 		"override_status": 0,
 		"send_email_alert": 0,
 		"states": [
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Draft" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Pending Review" },
+			{ "allow_edit": "All", "doc_status": "0", "state": "Sales Invoice Draft" },
+			{ "allow_edit": "All", "doc_status": "0", "state": "Sales Invoice Credit Pending Review" },
+			{ "allow_edit": "Sales Manager", "doc_status": "0", "state": "Sales Invoice Credit Reviewed" },
+			{ "allow_edit": "All", "doc_status": "0", "state": "Sales Invoice Credit Returned" },
 			{ "allow_edit": "Sales Manager", "doc_status": "0", "state": "Sales Invoice Credit Approved" },
-			{ "allow_edit": "Sales User", "doc_status": "0", "state": "Sales Invoice Credit Rejected" },
-			{ "allow_edit": "Sales Manager", "doc_status": "1", "state": "Sales Invoice Credit Submitted" },
-			{ "allow_edit": "Sales Manager", "doc_status": "2", "state": "Sales Invoice Credit Cancelled" }
+			{ "allow_edit": "All", "doc_status": "1", "state": "Sales Invoice Submitted" },
+			{ "allow_edit": "All", "doc_status": "2", "state": "Sales Invoice Cancelled" }
 		],
 		"transitions": [
 			{
-				"action": "Submit Sales Invoice Credit for Review",
-				"allow_self_approval": 0,
+				"action": "Submit Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts User",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Draft",
+				"next_state": "Sales Invoice Submitted"
+			},
+			{
+				"action": "Submit Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts Manager",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Draft",
+				"next_state": "Sales Invoice Submitted"
+			},
+			{
+				"action": "Cancel Sales Invoice",
+				"allow_self_approval": 1,
+				"allowed": "Accounts Manager",
+				"condition": "not doc.is_return",
+				"state": "Sales Invoice Submitted",
+				"next_state": "Sales Invoice Cancelled"
+			},
+			{
+				"action": "Send Sales Invoice Credit for Review",
+				"allow_self_approval": 1,
 				"allowed": "Sales User",
-				"condition": null,
-				"state": "Sales Invoice Credit Draft",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Draft",
+				"transition_tasks": "Connect Sales Invoice Credit Send",
 				"next_state": "Sales Invoice Credit Pending Review"
+			},
+			{
+				"action": "Resubmit Sales Invoice Credit for Review",
+				"allow_self_approval": 1,
+				"allowed": "Sales User",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Credit Returned",
+				"transition_tasks": "Connect Sales Invoice Credit Resubmit",
+				"next_state": "Sales Invoice Credit Pending Review"
+			},
+			{
+				"action": "Review Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Credit Pending Review",
+				"transition_tasks": "Connect Sales Invoice Credit Review",
+				"next_state": "Sales Invoice Credit Reviewed"
+			},
+			{
+				"action": "Return Sales Invoice Credit",
+				"allow_self_approval": 0,
+				"allowed": "Sales Manager",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Credit Pending Review",
+				"transition_tasks": "Connect Sales Invoice Credit Return",
+				"next_state": "Sales Invoice Credit Returned"
 			},
 			{
 				"action": "Approve Sales Invoice Credit",
 				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Pending Review",
-				"next_state": "Sales Invoice Credit Approved",
-				"transition_tasks": "Connect Signed Approval Snapshot"
+				"allowed": "C-Level Approver",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Credit Reviewed",
+				"transition_tasks": "Connect Sales Invoice Credit Approve",
+				"next_state": "Sales Invoice Credit Approved"
 			},
 			{
 				"action": "Reject Sales Invoice Credit",
 				"allow_self_approval": 0,
-				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Pending Review",
-				"next_state": "Sales Invoice Credit Rejected"
+				"allowed": "C-Level Approver",
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Credit Reviewed",
+				"transition_tasks": "Connect Sales Invoice Credit Reject",
+				"next_state": "Sales Invoice Credit Returned"
 			},
 			{
 				"action": "Post Sales Invoice Credit",
 				"allow_self_approval": 0,
 				"allowed": "Sales Manager",
-				"condition": null,
+				"condition": "doc.is_return and doc.return_against",
 				"state": "Sales Invoice Credit Approved",
-				"next_state": "Sales Invoice Credit Submitted"
+				"transition_tasks": "Connect Sales Invoice Credit Post",
+				"next_state": "Sales Invoice Submitted"
 			},
 			{
 				"action": "Cancel Sales Invoice Credit",
 				"allow_self_approval": 0,
 				"allowed": "Sales Manager",
-				"condition": null,
-				"state": "Sales Invoice Credit Submitted",
-				"next_state": "Sales Invoice Credit Cancelled"
+				"condition": "doc.is_return and doc.return_against",
+				"state": "Sales Invoice Submitted",
+				"transition_tasks": "Connect Sales Invoice Credit Cancel",
+				"next_state": "Sales Invoice Cancelled"
 			}
 		],
 		"workflow_data": null,

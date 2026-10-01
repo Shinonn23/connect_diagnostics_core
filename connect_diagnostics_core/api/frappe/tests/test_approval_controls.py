@@ -3,12 +3,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import date, datetime, time
 from decimal import Decimal
 from math import inf, nan
+from typing import Any, cast
 from unittest.mock import patch
 
 import frappe
+from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.frappe import approval_controls
@@ -53,6 +56,11 @@ class TestCriticalDigest(UnitTestCase):
 
 
 class TestApprovalControls(UnitTestCase):
+    def tearDown(self) -> None:
+        if hasattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY):
+            delattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY)
+        super().tearDown()
+
     def _identity_mocks(self):
         def exists(doctype, name):
             return doctype == "User" and name in {"maker@example.com", "actor@example.com"}
@@ -93,7 +101,7 @@ class TestApprovalControls(UnitTestCase):
     def test_digest_rejects_invalid_root_and_values(self) -> None:
         for payload in ([1], {1: "bad"}, {"value": nan}, {"value": inf}, {"value": object()}):
             with self.subTest(payload=payload), self.assertRaises(frappe.ValidationError):
-                approval_controls.critical_digest(payload)  # type: ignore[arg-type]
+                approval_controls.critical_digest(cast(Mapping[str, Any], payload))
 
     def test_distinct_actors_accepts_mixed_aliases(self) -> None:
         with self._identity_mocks()[0], self._identity_mocks()[1]:
@@ -193,7 +201,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.require_distinct_actors("maker@example.com", "maker@example.com", ())
 
     def test_capture_rechecks_permission_and_returns_frozen_snapshot(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         now = datetime(2026, 9, 26, 10, 30, 0)
         with (
             self._identity_mocks()[0],
@@ -208,10 +216,10 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.acted_at, now)
         self.assertEqual(snapshot.signature, "sig")
         with self.assertRaises(AttributeError):
-            snapshot.signature = "changed"  # type: ignore[misc]
+            snapshot.__setattr__("signature", "changed")
 
     def test_capture_stops_before_employee_data_when_permission_denied(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             patch.object(frappe, "has_permission", return_value=False) as permission,
             patch("frappe.get_all", side_effect=AssertionError("Employee query must not run")),
@@ -222,7 +230,7 @@ class TestApprovalControls(UnitTestCase):
         permission.assert_called_once_with("Asset Movement", ptype="write", doc=doc, user="actor@example.com")
 
     def test_capture_preserves_nonempty_signature_verbatim(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -243,7 +251,7 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.signature, "  signed exactly  ")
 
     def test_capture_rejects_whitespace_only_signature(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -264,7 +272,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.capture_signed_approval_actor(doc, "maker@example.com")
 
     def test_capture_rejects_missing_duplicate_and_unsigned_employees(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         employee = {"name": "EMP-001", "employee_name": "Actor", "user_id": "actor@example.com"}
         for rows in ([], [employee, employee], [{**employee, "approval_signature": ""}]):
             with (
@@ -276,3 +284,167 @@ class TestApprovalControls(UnitTestCase):
                 self.assertRaises(frappe.ValidationError),
             ):
                 approval_controls.capture_signed_approval_actor(doc, "maker@example.com")
+
+    def test_interactive_actor_mints_one_use_exact_document_grant(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            snapshot = approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+            self.assertEqual(snapshot.user, "actor@example.com")
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
+            with self.assertRaises(frappe.ValidationError):
+                approval_controls.consume_approval_field_grant(
+                    doc,
+                    "asset_movement",
+                    "Review Asset Movement",
+                )
+
+    def test_grant_rejects_cross_document_route_action_and_forged_lookalike(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        lookalike = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+            invalid = (
+                (lookalike, "asset_movement", "Review Asset Movement"),
+                (doc, "payment_entry", "Review Asset Movement"),
+                (doc, "asset_movement", "Approve Asset Movement"),
+            )
+            for candidate, route, action in invalid:
+                with self.subTest(route=route, action=action), self.assertRaises(frappe.ValidationError):
+                    approval_controls.consume_approval_field_grant(candidate, route, action)
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
+
+    def test_interactive_actor_rejects_noninteractive_and_unauthorized_users(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        for user, roles, request in (
+            ("Guest", ["Stock Manager"], object()),
+            ("Administrator", ["Stock Manager"], object()),
+            ("actor@example.com", ["Stock User"], object()),
+            ("actor@example.com", ["Stock Manager"], None),
+        ):
+            with (
+                self.subTest(user=user, roles=roles, request=request),
+                self._identity_mocks()[0],
+                self._identity_mocks()[1],
+                patch.object(frappe, "has_permission", return_value=True),
+                patch.object(frappe, "get_roles", return_value=roles),
+                patch.dict(frappe.session, {"user": user}),
+                patch.object(frappe.local, "request", request, create=True),
+                self.assertRaises(frappe.ValidationError),
+            ):
+                approval_controls.authorize_approval_field_write(
+                    doc,
+                    "asset_movement",
+                    "Review Asset Movement",
+                    ("Stock Manager",),
+                    "maker@example.com",
+                )
+
+    def test_permission_revocation_does_not_mint_a_grant(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        with (
+            self._identity_mocks()[0],
+            self._identity_mocks()[1],
+            patch.object(frappe, "has_permission", return_value=False),
+            patch.object(frappe, "get_roles", return_value=["Stock Manager"]),
+            patch.dict(frappe.session, {"user": "actor@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+            self.assertRaises(frappe.PermissionError),
+        ):
+            approval_controls.authorize_approval_field_write(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+                ("Stock Manager",),
+                "maker@example.com",
+            )
+        with self.assertRaises(frappe.ValidationError):
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Review Asset Movement",
+            )
+
+    def test_maker_action_allows_self_without_employee_signature(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+
+        def get_value(doctype, filters, fieldname, **kwargs):
+            return 1 if doctype == "User" and filters == "maker@example.com" else None
+
+        with (
+            patch.object(frappe.db, "exists", return_value=True),
+            patch.object(frappe.db, "get_value", side_effect=get_value),
+            patch("frappe.get_all", return_value=[]),
+            patch.object(frappe, "has_permission", return_value=True),
+            patch.object(frappe, "get_roles", return_value=["Stock User"]),
+            patch.dict(frappe.session, {"user": "maker@example.com"}),
+            patch.object(frappe.local, "request", object(), create=True),
+        ):
+            user = approval_controls.authorize_workflow_field_write(
+                doc,
+                "asset_movement",
+                "Send Asset Movement for Review",
+                ("Stock User",),
+            )
+            self.assertEqual(user, "maker@example.com")
+            approval_controls.consume_approval_field_grant(
+                doc,
+                "asset_movement",
+                "Send Asset Movement for Review",
+            )
+
+    def test_nonapproval_action_still_rechecks_role_permission_and_request(self) -> None:
+        doc = Document({"doctype": "Asset Movement", "name": "AM-1"})
+        cases = (
+            (["Stock Manager"], True, object(), frappe.ValidationError),
+            (["Stock User"], False, object(), frappe.PermissionError),
+            (["Stock User"], True, None, frappe.ValidationError),
+        )
+        for roles, permitted, request, error in cases:
+            with (
+                self.subTest(roles=roles, permitted=permitted, request=request),
+                patch.object(frappe, "get_roles", return_value=roles),
+                patch.object(frappe, "has_permission", return_value=permitted),
+                patch.dict(frappe.session, {"user": "maker@example.com"}),
+                patch.object(frappe.local, "request", request, create=True),
+                self.assertRaises(error),
+            ):
+                approval_controls.authorize_workflow_field_write(
+                    doc,
+                    "asset_movement",
+                    "Send Asset Movement for Review",
+                    ("Stock User",),
+                )

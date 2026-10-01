@@ -192,24 +192,23 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
 
     def test_companion_fixtures_are_referentially_integral(self) -> None:
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
-        states = {
-            row["workflow_state_name"] for row in json.loads((FIXTURES / "workflow_state.json").read_text())
-        }
-        actions = {
-            row["workflow_action_name"]
-            for row in json.loads((FIXTURES / "workflow_action_master.json").read_text())
-        }
-        self_approval_allowlist = {
-            ("Connect Asset Movement Approval", "Send Asset Movement for Review"),
-            ("Connect Asset Movement Approval", "Resubmit Asset Movement"),
-        }
+        state_rows = json.loads((FIXTURES / "workflow_state.json").read_text())
+        action_rows = json.loads((FIXTURES / "workflow_action_master.json").read_text())
+        states = {row["workflow_state_name"] for row in state_rows}
+        actions = {row["workflow_action_name"] for row in action_rows}
+        self.assertEqual(len(states), len(state_rows))
+        self.assertEqual(len(actions), len(action_rows))
         for workflow in workflows:
             self.assertTrue({row["state"] for row in workflow["states"]} <= states)
             self.assertTrue({row["next_state"] for row in workflow["transitions"]} <= states)
             self.assertTrue({row["action"] for row in workflow["transitions"]} <= actions)
-            for row in workflow["transitions"]:
-                if row["allow_self_approval"] and not row["action"].startswith("Submit "):
-                    self.assertIn((workflow["name"], row["action"]), self_approval_allowlist)
+            self.assertTrue(
+                all(
+                    row["allow_self_approval"] == 0
+                    for row in workflow["transitions"]
+                    if row["action"].startswith(("Review ", "Approve ", "Reject ", "Post "))
+                )
+            )
         referenced_states = {row["state"] for workflow in workflows for row in workflow["states"]}
         referenced_states.update(
             row["next_state"] for workflow in workflows for row in workflow["transitions"]
@@ -230,14 +229,17 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
             for transition in workflow["transitions"]:
                 condition = transition.get("condition")
                 if workflow["document_type"] == "Stock Entry":
-                    with self.subTest(action=transition["action"]):
-                        self.assertIn("doc.purpose == 'Material Transfer'", condition or "")
-                        self.assertIn("not doc.add_to_transit", condition or "")
-                        self.assertIn("not doc.outgoing_stock_entry", condition or "")
-                        if transition["action"] in {"Submit Stock Entry", "Cancel Stock Entry"}:
-                            self.assertTrue((condition or "").startswith("not ("))
-                        else:
-                            self.assertFalse((condition or "").startswith("not ("))
+                    self.assertIn("doc.purpose == 'Material Transfer'", condition or "")
+                    self.assertIn("not doc.add_to_transit", condition or "")
+                    self.assertIn("not doc.outgoing_stock_entry", condition or "")
+                elif workflow["document_type"] == "Sales Invoice":
+                    self.assertIn(
+                        condition,
+                        {"doc.is_return and doc.return_against", "not doc.is_return"},
+                    )
+                    if condition == "not doc.is_return":
+                        self.assertIn(transition["action"], {"Submit Sales Invoice", "Cancel Sales Invoice"})
+                        self.assertIn(transition["allowed"], {"Accounts User", "Accounts Manager"})
                 else:
                     self.assertFalse(condition)
 

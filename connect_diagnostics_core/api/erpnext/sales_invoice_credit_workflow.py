@@ -46,7 +46,7 @@ APPROVAL_FIELDS = frozenset(
 
 
 def is_credit_note(doc: Document) -> bool:
-    """Use persisted return identity, never a client-only workflow state."""
+    """Identify the protected route without trusting source validity as a bypass."""
     if doc.get("doctype") != "Sales Invoice":
         return False
     identity = doc
@@ -55,24 +55,12 @@ def is_credit_note(doc: Document) -> bool:
             frappe.db.get_value(
                 "Sales Invoice",
                 doc.name,
-                ["is_return", "return_against", "company", "customer", "currency"],
+                ["is_return", "return_against"],
                 as_dict=True,
             )
             or {}
         )
-    original = str(identity.get("return_against") or "").strip()
-    if not identity.get("is_return") or not original:
-        return False
-    original_row = frappe.db.get_value(
-        "Sales Invoice", original, ["docstatus", "company", "customer", "currency"], as_dict=True
-    )
-    return bool(
-        original_row
-        and original_row.docstatus == 1
-        and original_row.company == identity.get("company")
-        and original_row.customer == identity.get("customer")
-        and original_row.currency == identity.get("currency")
-    )
+    return bool(identity.get("is_return") and str(identity.get("return_against") or "").strip())
 
 
 def _payload(doc: Document) -> dict[str, Any]:
@@ -83,11 +71,29 @@ def _payload(doc: Document) -> dict[str, Any]:
         "customer",
         "currency",
         "posting_date",
+        "set_posting_time",
         "posting_time",
         "due_date",
         "credit_note_reason",
         "conversion_rate",
         "selling_price_list",
+        "update_stock",
+        "is_pos",
+        "allocate_advances_automatically",
+        "payment_terms_template",
+        "cash_bank_account",
+        "change_amount",
+        "account_for_change_amount",
+        "write_off_amount",
+        "write_off_outstanding_amount_automatically",
+        "write_off_account",
+        "write_off_cost_center",
+        "redeem_loyalty_points",
+        "loyalty_points",
+        "loyalty_amount",
+        "coupon_code",
+        "apply_discount_on",
+        "discount_amount",
         "additional_discount_percentage",
         "grand_total",
         "total_taxes_and_charges",
@@ -97,6 +103,13 @@ def _payload(doc: Document) -> dict[str, Any]:
         "digest_version": DIGEST_VERSION,
         **{field: doc.get(field) for field in fields},
     }
+    for field in ("posting_date", "due_date"):
+        if payload[field] is not None:
+            payload[field] = str(payload[field])
+    if not payload["set_posting_time"]:
+        payload["posting_time"] = None
+    elif payload["posting_time"] is not None:
+        payload["posting_time"] = str(payload["posting_time"])
     dimensions = sorted(str(value) for value in get_accounting_dimensions() or [])
     payload["dimensions"] = {field: doc.get(field) for field in dimensions}
     item_fields = (
@@ -134,6 +147,37 @@ def _payload(doc: Document) -> dict[str, Any]:
         {**{key: row.get(key) for key in tax_fields}, **{field: row.get(field) for field in dimensions}}
         for row in doc.get("taxes", [])
     ]
+    child_fields = {
+        "advances": (
+            "reference_type",
+            "reference_name",
+            "reference_row",
+            "advance_amount",
+            "allocated_amount",
+            "exchange_gain_loss",
+            "ref_exchange_rate",
+            "difference_posting_date",
+        ),
+        "payment_schedule": (
+            "payment_term",
+            "due_date",
+            "invoice_portion",
+            "payment_amount",
+            "mode_of_payment",
+            "discount_date",
+            "discount_type",
+            "discount",
+        ),
+        "payments": (
+            "mode_of_payment",
+            "amount",
+            "account",
+            "type",
+            "reference_no",
+        ),
+    }
+    for table, table_fields in child_fields.items():
+        payload[table] = [{field: row.get(field) for field in table_fields} for row in doc.get(table, [])]
     original = str(doc.get("return_against") or "")
     payload["original"] = (
         dict(
@@ -249,11 +293,25 @@ def clear_on_reject(doc: Document, method: str | None = None) -> None:
 
 def validate_approval_fields(doc: Document, method: str | None = None) -> None:
     del method
+    if (
+        doc.get("doctype") == "Sales Invoice"
+        and doc.get("is_return")
+        and not str(doc.get("return_against") or "").strip()
+    ):
+        frappe.throw(_("Credit Note must reference a submitted Sales Invoice."))
     if not is_credit_note(doc):
+        return
+    route = get_route(ROUTE)
+    if doc.is_new():
+        if doc.get("amended_from"):
+            doc.set("workflow_state", route.draft_state)
+            for field in APPROVAL_FIELDS:
+                doc.set(field, None)
+        elif any(doc.get(field) for field in APPROVAL_FIELDS):
+            frappe.throw(_("New Credit Notes cannot contain pre-existing approval evidence."))
         return
     previous = doc.get_doc_before_save()
     if previous:
-        route = get_route(ROUTE)
         before, after = previous.get("workflow_state"), doc.get("workflow_state")
         action = next(
             (
@@ -308,6 +366,16 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
     route = get_route(ROUTE)
     if doc.get("workflow_state") != SUBMITTED_STATE:
         frappe.throw(_("Credit Notes must be approved through the Sales Invoice Credit Workflow."))
+    source_name = str(doc.get("return_against") or "").strip()
+    if not source_name:
+        frappe.throw(_("Credit Note must reference a submitted Sales Invoice."))
+    source = frappe.db.get_value(
+        "Sales Invoice",
+        source_name,
+        ["docstatus", "company", "customer", "currency"],
+        as_dict=True,
+        for_update=True,
+    )
     persisted = frappe.db.get_value(
         "Sales Invoice",
         doc.name,
@@ -327,18 +395,12 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
         as_dict=True,
         for_update=True,
     )
+    # Native ERPNext validation remains authoritative for quantities, taxes, and
+    # stock. Run it under both locks before comparing approval-critical values
+    # because validation may normalize them.
+    doc.validate()  # ty: ignore[unresolved-attribute] - ERPNext Sales Invoice controller method
     if not persisted or persisted.workflow_state != APPROVED_STATE:
         frappe.throw(_("Credit Note approval is stale; resubmit the document for review."))
-    source_name = str(doc.get("return_against") or "").strip()
-    if not source_name:
-        frappe.throw(_("Credit Note must reference a submitted Sales Invoice."))
-    source = frappe.db.get_value(
-        "Sales Invoice",
-        source_name,
-        ["docstatus", "company", "customer", "currency"],
-        as_dict=True,
-        for_update=True,
-    )
     if (
         not source
         or source.docstatus != 1
@@ -376,10 +438,6 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
     if not set(frappe.get_roles(current_user)).intersection(route.execution_roles):
         frappe.throw(_("Only an authorized Sales Manager may post this Credit Note."))
     require_permission(doc, "submit")
-    # ERPNext remains the authority for return quantities, taxes, and stock behavior.
-    # Running its controller validation while both documents are locked closes the
-    # concurrent partial-return gap without duplicating native calculations.
-    doc.validate()  # ty: ignore[unresolved-attribute] - ERPNext Sales Invoice controller method
     consume_approval_field_grant(doc, ROUTE, route.execute_action)
 
 
@@ -390,3 +448,29 @@ def authorize_submit_transition(doc: Document, method: str | None = None) -> Non
         authorize_workflow_field_write(
             doc, ROUTE, route.execute_action, route.execution_roles, permission="submit"
         )
+
+
+def authorize_cancel_transition(doc: Document, method: str | None = None) -> None:
+    del method
+    if is_credit_note(doc):
+        route = get_route(ROUTE)
+        authorize_workflow_field_write(
+            doc, ROUTE, route.cancel_action, route.execution_roles, permission="cancel"
+        )
+
+
+def validate_before_cancel(doc: Document, method: str | None = None) -> None:
+    del method
+    if not is_credit_note(doc):
+        return
+    route = get_route(ROUTE)
+    if doc.get("workflow_state") != route.cancelled_state:
+        frappe.throw(_("Credit Notes must be cancelled through the Sales Invoice Credit Workflow."))
+    persisted_state = frappe.db.get_value("Sales Invoice", doc.name, "workflow_state", for_update=True)
+    if persisted_state != route.submitted_state:
+        frappe.throw(_("Credit Note cancellation state is stale; reload the document and try again."))
+    current_user = resolve_user(str(frappe.session.user or ""))
+    if not set(frappe.get_roles(current_user)).intersection(route.execution_roles):
+        frappe.throw(_("Only an authorized Sales Manager may cancel this Credit Note."))
+    require_permission(doc, "cancel")
+    consume_approval_field_grant(doc, ROUTE, route.cancel_action)

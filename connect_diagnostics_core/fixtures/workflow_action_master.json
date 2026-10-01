@@ -129,13 +129,6 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Submit Sales Invoice Credit for Review",
-		"workflow_action_name": "Submit Sales Invoice Credit for Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Approve Sales Invoice Credit",
 		"workflow_action_name": "Approve Sales Invoice Credit"
 	},
@@ -156,7 +149,7 @@
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-26 16:59:15.738584",
 		"name": "Cancel Sales Invoice Credit",
 		"workflow_action_name": "Cancel Sales Invoice Credit"
 	},
@@ -346,56 +339,42 @@
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Send Asset Movement for Review",
-		"workflow_action_name": "Send Asset Movement for Review"
+		"name": "Send Sales Invoice Credit for Review",
+		"workflow_action_name": "Send Sales Invoice Credit for Review"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Review Asset Movement",
-		"workflow_action_name": "Review Asset Movement"
+		"name": "Resubmit Sales Invoice Credit for Review",
+		"workflow_action_name": "Resubmit Sales Invoice Credit for Review"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Return Asset Movement",
-		"workflow_action_name": "Return Asset Movement"
+		"name": "Review Sales Invoice Credit",
+		"workflow_action_name": "Review Sales Invoice Credit"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Approve Asset Movement",
-		"workflow_action_name": "Approve Asset Movement"
+		"name": "Return Sales Invoice Credit",
+		"workflow_action_name": "Return Sales Invoice Credit"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Reject Asset Movement",
-		"workflow_action_name": "Reject Asset Movement"
+		"name": "Submit Sales Invoice",
+		"workflow_action_name": "Submit Sales Invoice"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow Action Master",
 		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Resubmit Asset Movement",
-		"workflow_action_name": "Resubmit Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Submit Asset Movement",
-		"workflow_action_name": "Submit Asset Movement"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow Action Master",
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Cancel Asset Movement",
-		"workflow_action_name": "Cancel Asset Movement"
+		"name": "Cancel Sales Invoice",
+		"workflow_action_name": "Cancel Sales Invoice"
 	}
 ]

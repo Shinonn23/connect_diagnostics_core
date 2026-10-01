@@ -1,6 +1,6 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-26.asset-movement.1",
+	"revision": "2026-09-26.workflow-blueprint.4",
 	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
@@ -124,9 +124,9 @@
 			"status": "enabled",
 			"document_type": "Sales Invoice",
 			"workflow": "Connect Sales Invoice Credit Blueprint",
-			"route_scope": "native return and credit-note Sales Invoices only",
-			"condition": "doc.is_return == 1",
-			"migration_rule": "rename/update the exact app-owned credit blueprint predecessor only"
+			"route_scope": "Native Sales Invoice returns with is_return=1 and a submitted return_against; ordinary invoices use native passthrough transitions",
+			"decision_revision": "D-CREDIT-2026-09-26",
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"]
 		},
 		{
 			"id": "TSK-596",

@@ -26,6 +26,120 @@ class SignedApprovalSnapshot:
     signature: str
 
 
+@dataclass(frozen=True)
+class _ApprovalGrant:
+    doc: Document
+    doctype: str
+    name: str
+    route: str
+    action: str
+
+
+_APPROVAL_GRANTS_KEY = "_connect_diagnostics_approval_field_grants"
+
+
+def _approval_grants() -> list[_ApprovalGrant]:
+    grants = getattr(frappe.local, _APPROVAL_GRANTS_KEY, None)
+    if grants is None:
+        grants = []
+        setattr(frappe.local, _APPROVAL_GRANTS_KEY, grants)
+    return grants
+
+
+def require_interactive_actor(
+    doc: Document,
+    roles: Iterable[str],
+    maker_identity: str,
+    previous_identities: Iterable[str] = (),
+    permission: str = "write",
+) -> SignedApprovalSnapshot:
+    """Validate and capture the live interactive business actor."""
+    user = str(frappe.session.user or "")
+    if user in {"", "Guest", "Administrator"} or getattr(frappe.local, "request", None) is None:
+        _fail("Approval requires an interactive business User request.")
+    allowed_roles = {role for role in roles if role}
+    if not allowed_roles or not set(frappe.get_roles(user)).intersection(allowed_roles):
+        _fail("You do not have the role required for this approval action.")
+    return capture_signed_approval_actor(doc, maker_identity, previous_identities, permission)
+
+
+def require_interactive_user(
+    doc: Document,
+    roles: Iterable[str],
+    permission: str = "write",
+) -> str:
+    """Validate a current interactive User for a non-approval Workflow action."""
+    user = str(frappe.session.user or "")
+    if user in {"", "Guest", "Administrator"} or getattr(frappe.local, "request", None) is None:
+        _fail("Workflow action requires an interactive business User request.")
+    allowed_roles = {role for role in roles if role}
+    if not allowed_roles or not set(frappe.get_roles(user)).intersection(allowed_roles):
+        _fail("You do not have the role required for this Workflow action.")
+    require_permission(doc, permission)
+    return resolve_user(user)
+
+
+def _mint_approval_field_grant(doc: Document, route: str, action: str) -> None:
+    if not isinstance(doc, Document):
+        _fail("Approval field grants require a document object.")
+    if not route.strip() or not action.strip():
+        _fail("Approval route and action are required.")
+    grant = _ApprovalGrant(doc, doc.doctype, str(doc.name or ""), route, action)
+    _approval_grants().append(grant)
+
+
+def authorize_workflow_field_write(
+    doc: Document,
+    route: str,
+    action: str,
+    roles: Iterable[str],
+    permission: str = "write",
+) -> str:
+    """Authorize one evidence write for a non-approval Workflow action."""
+    user = require_interactive_user(doc, roles, permission)
+    _mint_approval_field_grant(doc, route, action)
+    return user
+
+
+def authorize_approval_field_write(
+    doc: Document,
+    route: str,
+    action: str,
+    roles: Iterable[str],
+    maker_identity: str,
+    previous_identities: Iterable[str] = (),
+    permission: str = "write",
+) -> SignedApprovalSnapshot:
+    """Capture a protected actor and mint one field-write grant for adapter validation."""
+    snapshot = require_interactive_actor(
+        doc,
+        roles,
+        maker_identity,
+        previous_identities,
+        permission,
+    )
+    _mint_approval_field_grant(doc, route, action)
+    return snapshot
+
+
+def consume_approval_field_grant(doc: Document, route: str, action: str) -> None:
+    """Consume the exact grant; grants cannot cross documents, actions, or requests."""
+    grants = _approval_grants()
+    for index, grant in enumerate(grants):
+        if (
+            grant.doc is doc
+            and grant.doctype == doc.doctype
+            and grant.name == str(doc.name or "")
+            and grant.route == route
+            and grant.action == action
+        ):
+            grants.pop(index)
+            if not grants:
+                delattr(frappe.local, _APPROVAL_GRANTS_KEY)
+            return
+    _fail("Approval field write is not authorized for this transition.")
+
+
 def _fail(message: str) -> None:
     frappe.throw(_(message))
 

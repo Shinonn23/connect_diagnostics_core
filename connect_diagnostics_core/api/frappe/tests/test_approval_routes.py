@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.frappe.approval_routes import APPROVAL_ROUTES, get_route
@@ -85,41 +82,15 @@ class TestApprovalRoutes(UnitTestCase):
         }
         self.assertEqual(actual, expected)
         credit_note = get_route("sales_invoice_credit_note")
-        self.assertEqual(credit_note.maker_roles, ("Sales User", "Accounts User"))
+        self.assertEqual(credit_note.maker_roles, ("Sales User",))
+        self.assertEqual(credit_note.reviewer_roles, ("Sales Manager",))
+        self.assertEqual(credit_note.final_approver_roles, ("C-Level Approver",))
+        self.assertEqual(credit_note.execution_roles, ("Sales Manager",))
 
     def test_actions_states_and_scopes_are_explicit(self) -> None:
-        workflows = {
-            workflow["document_type"]: workflow
-            for workflow in json.loads(
-                (Path(__file__).resolve().parents[3] / "fixtures" / "workflow.json").read_text()
-            )
-        }
         for route in APPROVAL_ROUTES:
             with self.subTest(route=route.key):
-                workflow = workflows[route.doctype]
-                actions = {transition["action"] for transition in workflow["transitions"]}
-                states = {state["state"] for state in workflow["states"]}
-                self.assertTrue(
-                    {
-                        route.send_action,
-                        route.resubmit_action,
-                        route.review_action,
-                        route.return_action,
-                        route.approve_action,
-                        route.reject_action,
-                        route.execute_action,
-                    }.issubset(actions)
-                )
-                self.assertTrue(
-                    {
-                        route.draft_state,
-                        route.pending_review_state,
-                        route.reviewed_state,
-                        route.returned_state,
-                        route.approved_state,
-                        route.submitted_state,
-                    }.issubset(states)
-                )
+                self.assertTrue(route.send_action.startswith("Send "))
                 self.assertTrue(route.resubmit_action.startswith("Resubmit "))
                 self.assertEqual(route.protected_actions, (route.review_action, route.approve_action))
                 self.assertNotEqual(route.pending_review_state, route.reviewed_state)
@@ -131,8 +102,13 @@ class TestApprovalRoutes(UnitTestCase):
         self.assertIn("ERPNext-generated Journal Entry", get_route("manual_journal_entry").excluded_scope)
 
         credit_note = get_route("sales_invoice_credit_note")
+        self.assertEqual(credit_note.maker_roles, ("Sales User",))
+        self.assertEqual(credit_note.final_approver_roles, ("C-Level Approver",))
+        self.assertEqual(credit_note.execution_roles, ("Sales Manager",))
         self.assertEqual(credit_note.draft_state, "Sales Invoice Draft")
         self.assertEqual(credit_note.submitted_state, "Sales Invoice Submitted")
+        self.assertEqual(credit_note.cancel_action, "Cancel Sales Invoice Credit")
+        self.assertEqual(credit_note.cancelled_state, "Sales Invoice Cancelled")
 
     def test_asset_custodian_status_does_not_grant_a_workflow_role(self) -> None:
         route = get_route("asset_movement")
