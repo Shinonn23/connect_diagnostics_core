@@ -2322,70 +2322,56 @@
 		"document_type": "Payroll Entry",
 		"enable_action_confirmation": 0,
 		"is_active": 1,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Connect Payroll Entry Blueprint",
 		"override_status": 0,
 		"send_email_alert": 0,
 		"states": [
-			{
-				"allow_edit": "HR User",
-				"doc_status": "0",
-				"send_email": 0,
-				"state": "Payroll Entry Draft"
-			},
-			{
-				"allow_edit": "HR Manager",
-				"doc_status": "0",
-				"send_email": 1,
-				"state": "Payroll Entry Pending Review"
-			},
-			{
-				"allow_edit": "Accounts Manager",
-				"doc_status": "0",
-				"send_email": 1,
-				"state": "Payroll Entry Reviewed"
-			},
-			{
-				"allow_edit": "HR User",
-				"doc_status": "0",
-				"send_email": 0,
-				"state": "Payroll Entry Returned"
-			},
-			{
-				"allow_edit": "HR Manager",
-				"doc_status": "0",
-				"send_email": 1,
-				"state": "Payroll Entry Approved"
-			},
-			{
-				"allow_edit": "System Manager",
-				"doc_status": "0",
-				"send_email": 0,
-				"state": "Payroll Entry Rejected"
-			},
-			{
-				"allow_edit": "HR Manager",
-				"doc_status": "1",
-				"send_email": 0,
-				"state": "Payroll Entry Submitted"
-			},
-			{
-				"allow_edit": "HR Manager",
-				"doc_status": "2",
-				"send_email": 0,
-				"state": "Payroll Entry Cancelled"
-			}
+			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Draft" },
+			{ "allow_edit": "HR Manager", "doc_status": "0", "state": "Payroll Entry Pending Review" },
+			{ "allow_edit": "Accounts Manager", "doc_status": "0", "state": "Payroll Entry Reviewed" },
+			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Returned" },
+			{ "allow_edit": "HR Manager", "doc_status": "0", "state": "Payroll Entry Approved" },
+			{ "allow_edit": "HR User", "doc_status": "0", "state": "Payroll Entry Rejected" },
+			{ "allow_edit": "HR Manager", "doc_status": "1", "state": "Payroll Entry Submitted" },
+			{ "allow_edit": "HR Manager", "doc_status": "2", "state": "Payroll Entry Cancelled" }
 		],
 		"transitions": [
 			{
-				"state": "Payroll Entry Draft",
 				"action": "Send Payroll Entry for Review",
-				"next_state": "Payroll Entry Pending Review",
-				"allowed": "HR User",
 				"allow_self_approval": 1,
+				"allowed": "HR User",
 				"condition": null,
-				"send_email_to_creator": 0,
-				"transition_tasks": "Connect Payroll Entry Capture Maker"
+				"state": "Payroll Entry Draft",
+				"next_state": "Payroll Entry Pending Review",
+				"transition_tasks": "Connect Payroll Entry Maker Snapshot"
+			},
+			{
+				"action": "Resubmit Payroll Entry for Review",
+				"allow_self_approval": 1,
+				"allowed": "HR User",
+				"condition": null,
+				"state": "Payroll Entry Returned",
+				"next_state": "Payroll Entry Pending Review",
+				"transition_tasks": "Connect Payroll Entry Maker Snapshot"
+			},
+			{
+				"action": "Review Payroll Entry",
+				"allow_self_approval": 0,
+				"allowed": "HR Manager",
+				"condition": null,
+				"state": "Payroll Entry Pending Review",
+				"next_state": "Payroll Entry Reviewed",
+				"transition_tasks": "Connect Payroll Entry Review Snapshot"
+			},
+			{
+				"action": "Return Payroll Entry",
+				"allow_self_approval": 0,
+				"allowed": "HR Manager",
+				"condition": null,
+				"state": "Payroll Entry Pending Review",
+				"next_state": "Payroll Entry Returned",
+				"transition_tasks": "Connect Payroll Entry Return Reset"
 			},
 			{
 				"state": "Payroll Entry Pending Review",
@@ -2413,10 +2399,11 @@
 				"next_state": "Payroll Entry Approved",
 				"allowed": "Accounts Manager",
 				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
 				"condition": null,
-				"state": "Payroll Entry Pending Review",
+				"state": "Payroll Entry Reviewed",
 				"next_state": "Payroll Entry Approved",
-				"transition_tasks": "Connect Signed Approval Snapshot"
+				"transition_tasks": "Connect Payroll Entry Approval Snapshot"
 			},
 			{
 				"state": "Payroll Entry Reviewed",
@@ -2434,19 +2421,20 @@
 				"next_state": "Payroll Entry Rejected",
 				"allowed": "Accounts Manager",
 				"allow_self_approval": 0,
+				"allowed": "Accounts Manager",
 				"condition": null,
-				"send_email_to_creator": 0,
-				"transition_tasks": "Connect Payroll Entry Clear Approval"
+				"state": "Payroll Entry Reviewed",
+				"next_state": "Payroll Entry Rejected",
+				"transition_tasks": "Connect Payroll Entry Reject Reset"
 			},
 			{
-				"state": "Payroll Entry Approved",
-				"action": "Return Payroll Entry",
-				"next_state": "Payroll Entry Returned",
-				"allowed": "Accounts Manager",
+				"action": "Submit Payroll Entry",
 				"allow_self_approval": 0,
+				"allowed": "HR Manager",
 				"condition": null,
-				"send_email_to_creator": 0,
-				"transition_tasks": "Connect Payroll Entry Clear Approval"
+				"state": "Payroll Entry Approved",
+				"next_state": "Payroll Entry Submitted",
+				"transition_tasks": "Connect Payroll Entry Submit Authorization"
 			},
 			{
 				"state": "Payroll Entry Returned",

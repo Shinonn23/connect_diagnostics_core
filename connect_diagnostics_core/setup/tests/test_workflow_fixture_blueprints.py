@@ -221,7 +221,9 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 all(
                     row["allow_self_approval"] == 0
                     for row in workflow["transitions"]
-                    if row["action"] not in self_service_actions
+                    if row["action"].startswith(
+                        ("Review ", "Return ", "Approve ", "Reject ", "Post ", "Cancel ")
+                    )
                 )
             )
         self.assertEqual(
@@ -267,46 +269,81 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
                 else:
                     self.assertFalse(condition)
 
-    def test_purchase_order_has_three_distinct_role_stages_and_rework_paths(self) -> None:
+    def test_payroll_entry_route_has_three_distinct_approval_stages(self) -> None:
         workflows: list[dict[str, Any]] = json.loads((FIXTURES / "workflow.json").read_text())
-        workflow = next(row for row in workflows if row["document_type"] == "Purchase Order")
+        workflow = next(row for row in workflows if row["document_type"] == "Payroll Entry")
+        self.assertEqual(
+            [(row["state"], row["doc_status"], row["allow_edit"]) for row in workflow["states"]],
+            [
+                ("Payroll Entry Draft", "0", "HR User"),
+                ("Payroll Entry Pending Review", "0", "HR Manager"),
+                ("Payroll Entry Reviewed", "0", "Accounts Manager"),
+                ("Payroll Entry Returned", "0", "HR User"),
+                ("Payroll Entry Approved", "0", "HR Manager"),
+                ("Payroll Entry Rejected", "0", "HR User"),
+                ("Payroll Entry Submitted", "1", "HR Manager"),
+                ("Payroll Entry Cancelled", "2", "HR Manager"),
+            ],
+        )
         transitions = {
-            (row["state"], row["action"]): (row["next_state"], row["allowed"])
-            for row in workflow["transitions"]
-        }
-
-        self.assertEqual(
-            transitions[("Purchase Order Draft", "Submit Purchase Order for Review")],
-            ("Purchase Order Pending Review", "Purchase User"),
-        )
-        self.assertEqual(
-            transitions[("Purchase Order Pending Review", "Review Purchase Order")],
-            ("Purchase Order Pending Approval", "Purchase Manager"),
-        )
-        self.assertEqual(
-            transitions[("Purchase Order Pending Approval", "Approve Purchase Order")],
-            ("Purchase Order Approved", "C-Level Approver"),
-        )
-        self.assertEqual(
-            transitions[("Purchase Order Rejected", "Resubmit Purchase Order")],
-            ("Purchase Order Pending Review", "Purchase User"),
-        )
-        maker_actions = {
-            row["action"]: row["allow_self_approval"]
-            for row in workflow["transitions"]
-            if row["allowed"] == "Purchase User"
-        }
-        self.assertEqual(
-            maker_actions,
-            {
-                "Submit Purchase Order for Review": 1,
-                "Resubmit Purchase Order": 1,
-            },
-        )
-        self.assertTrue(
-            all(
-                row["allow_self_approval"] == 0
-                for row in workflow["transitions"]
-                if row["allowed"] != "Purchase User"
+            row["action"]: (
+                row["state"],
+                row["next_state"],
+                row["allowed"],
+                row.get("transition_tasks"),
             )
+            for row in workflow["transitions"]
+        }
+        self.assertEqual(
+            transitions,
+            {
+                "Send Payroll Entry for Review": (
+                    "Payroll Entry Draft",
+                    "Payroll Entry Pending Review",
+                    "HR User",
+                    "Connect Payroll Entry Maker Snapshot",
+                ),
+                "Resubmit Payroll Entry for Review": (
+                    "Payroll Entry Returned",
+                    "Payroll Entry Pending Review",
+                    "HR User",
+                    "Connect Payroll Entry Maker Snapshot",
+                ),
+                "Review Payroll Entry": (
+                    "Payroll Entry Pending Review",
+                    "Payroll Entry Reviewed",
+                    "HR Manager",
+                    "Connect Payroll Entry Review Snapshot",
+                ),
+                "Return Payroll Entry": (
+                    "Payroll Entry Pending Review",
+                    "Payroll Entry Returned",
+                    "HR Manager",
+                    "Connect Payroll Entry Return Reset",
+                ),
+                "Approve Payroll Entry": (
+                    "Payroll Entry Reviewed",
+                    "Payroll Entry Approved",
+                    "Accounts Manager",
+                    "Connect Payroll Entry Approval Snapshot",
+                ),
+                "Reject Payroll Entry": (
+                    "Payroll Entry Reviewed",
+                    "Payroll Entry Rejected",
+                    "Accounts Manager",
+                    "Connect Payroll Entry Reject Reset",
+                ),
+                "Submit Payroll Entry": (
+                    "Payroll Entry Approved",
+                    "Payroll Entry Submitted",
+                    "HR Manager",
+                    "Connect Payroll Entry Submit Authorization",
+                ),
+                "Cancel Payroll Entry": (
+                    "Payroll Entry Submitted",
+                    "Payroll Entry Cancelled",
+                    "HR Manager",
+                    None,
+                ),
+            },
         )

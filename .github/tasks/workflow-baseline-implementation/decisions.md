@@ -19,12 +19,52 @@ impacts. Test constants are not policy.
 | D-PROCURE | Are RFQ/direct routes enabled; what supplier evidence, commitment, authority and currency basis apply? | Procurement + Finance | WF-11 | Open |
 | D-AP | What supplier-invoice identity, matching tolerances, receipt owner, advance, direct-expense and Is Paid rules apply? | AP + Procurement | WF-12 | Temporary local.test policy approved as D-AP-TRIAL-2026-09-23; production decision remains open |
 | D-PAYMENT | What voucher matrix, beneficiary/account/currency/amount authority, bank evidence and settlement rules apply? | Finance + Management | WF-10/12/13/14, 529 Core | Open |
-| D-PAYROLL | What cutoff, grouping, off-cycle, correction/recovery, privacy and bank-handoff authority apply? | Payroll + Finance | WF-14 | Open |
+| D-PAYROLL | What cutoff, grouping, off-cycle, correction/recovery, privacy and bank-handoff authority apply? | Payroll + Finance | WF-14 | Approved by `D-PAYROLL-2026-09-26` |
 | CONFIG-PAYMENT | Retain approved site-owned PE Workflow or retire/replace it; who owns desired state and pending records? | Site Configuration Owner + Finance Owner, to be named | WF-13 / task `CONFIG-PAYMENT` | Conflict open; evidence: `evidence/config-payment.md` (not created until owners approve access) |
 | CONFIG-DIRTY | Who owns each dirty hooks/fixture/custom/setup/patch change, and which may be edited or discarded? | Repository Technical Owner, to be named | task `CONFIG-DIRTY-OWNERSHIP` | Partially resolved for TSK-590/600 by D-SIGNED-APPROVAL-2026-09-26: preserve all existing dirty work; serialize shared-file integration under the primary agent; all unrelated ownership remains open |
 | CONFIG-PENDING | How are 7 open legacy Workflow Actions and their source documents resolved without fabricated history? | Material Request, Purchase Order and Stock business owners, to be named | task `CONFIG-PENDING-ACTIONS` | Conflict open; evidence: `evidence/config-pending-actions.md` (pending authorized investigation) |
 
-## Temporary Purchase Invoice trial decision — 2026-09-23
+## Approved Payroll Entry decision — 2026-09-26
+
+```text
+Decision ID: D-PAYROLL-2026-09-26
+Owner / approval source: Business-owner approval recorded in the Codex task on 2026-09-26
+Approved policy / desired state: Protect every native Payroll Entry, including regular and off-cycle
+runs, with HR User Maker, HR Manager Reviewer, Accounts Manager Final Approver and HR Manager native
+Submit executor. Maker, Reviewer and Final Approver must be distinct Users.
+Revision: 2026-09-26.payroll-entry.1
+Effective date/timezone: 2026-09-26 / Asia/Bangkok
+Cutoff/grouping: Native HRMS company, payroll frequency, start/end dates, employee filters and payroll
+settings remain authoritative. No custom cutoff, grouping or second payroll engine is introduced.
+Correction/recovery: Use native Payroll Entry and HRMS cancel, amend, reprocess, failed-job and retry
+paths. Never edit Salary Slips, Journal Entries or payroll status directly in the database.
+Privacy: HR owns employee-level payroll preparation and review. Accounts Manager receives the native
+Payroll Entry access needed for aggregate financial approval; approval evidence must not copy Salary
+Slip amounts or private employee detail into shared audit fields, Workflow comments or notifications.
+Bank handoff: Payroll Entry approval does not itself grant bank-payment authority. Preserve native
+HRMS `Make Bank Entry`, which creates the standard Bank/Cash Journal Entry and source references;
+do not replace it with or duplicate it through Payment Entry. Any separately initiated Payment Entry
+continues to use its own Workflow and D-PAYMENT policy, and an applicable Journal Entry approval
+control remains independently authoritative.
+Native side effects: Salary Slips remain submit-through-Payroll-Entry only. Payroll approval does not
+replace or delay HRMS accrual or Bank/Cash Journal Entry generation. Where an independently accepted
+Journal Entry Workflow is installed, its generated-entry adapter remains authoritative for the JE;
+otherwise HRMS retains its standard Journal Entry lifecycle. Payroll never infers authority from
+remarks, titles, client flags or `ignore_permissions`, and never introduces a broad service bypass.
+Approval evidence: Bind current server-read Payroll Entry dates, company/frequency/filter/accounting
+configuration and a privacy-preserving deterministic selected-employee/slip revision digest. Any
+critical change requires Return, Resubmit and fresh Review/Approval.
+Migration/recovery: Stop on open legacy actions, pending approval, affected documents or in-flight
+payroll jobs. Preserve Workflow/Salary Slip/Journal Entry/job history and use native recovery.
+Required evidence: regular and off-cycle flows, three actors, direct-submit/state-spoof denial,
+permission revoke, stale revision, small/queued processing, failed-job recovery, Salary Slip guard,
+trusted generated JE, native cancellation and privacy assertions.
+Sign-off: Business policy approved; technical/runtime sign-off pending route implementation. A
+separate Journal Entry Workflow is independently gated and is not a prerequisite for Payroll Entry
+review/approval.
+```
+
+## Approved Self-Approval/SoD identity decision — 2026-09-26
 
 ```text
 Decision ID: D-TARGET-PI-TRIAL-2026-09-23

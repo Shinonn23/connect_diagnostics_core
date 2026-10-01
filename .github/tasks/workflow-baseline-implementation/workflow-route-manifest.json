@@ -1,7 +1,7 @@
 {
 	"schema_version": 1,
-	"revision": "2026-09-23.pi-trial.1",
-	"manifest_status": "trial-enabled-local-test",
+	"revision": "2026-09-27.payroll-entry-review.1",
+	"manifest_status": "dev-enabled",
 	"target_scope": "DEV:local.test",
 	"configuration_owner": "TSK-602 normalized workflow baseline",
 	"records_are_inert": false,
@@ -162,9 +162,24 @@
 			"status": "enabled",
 			"document_type": "Payroll Entry",
 			"workflow": "Connect Payroll Entry Blueprint",
-			"route_scope": "all native Payroll Entries; no Salary Slip Workflow",
-			"condition": null,
-			"migration_rule": "rename/update the exact app-owned blueprint predecessor only"
-		}
+			"decision": "D-PAYROLL-2026-09-26",
+			"route_scope": "All regular and off-cycle native HRMS Payroll Entries",
+			"actors": {
+				"maker": "HR User",
+				"reviewer": "HR Manager",
+				"final_approver": "Accounts Manager",
+				"submit_executor": "HR Manager"
+			},
+			"shared_controls": ["TSK-600 Approval Action Snapshot", "TSK-601 Self-Approval/SoD"],
+			"native_boundaries": [
+				"Salary Slips submit only through Payroll Entry",
+				"HRMS owns accrual and Bank/Cash Journal Entry generation",
+				"Payment Entry is not created or duplicated by this route"
+			]
+		},
+		{ "id": "WF-15", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-16", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-17", "status": "no-record", "document_type": null, "workflow": null },
+		{ "id": "WF-18", "status": "no-record", "document_type": null, "workflow": null }
 	]
 }

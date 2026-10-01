@@ -96,8 +96,11 @@ class TestWorkflowFields(UnitTestCase):
                 fieldname = str(row["fieldname"])
                 self.assertFalse(fieldname.startswith("custom_"))
 
-    def test_sales_order_approval_fields_are_hidden_read_only_and_no_copy(self) -> None:
-        for field in workflow_fields.CUSTOM_FIELDS["Sales Order"]:
-            self.assertEqual(field["hidden"], 1)
-            self.assertEqual(field["read_only"], 1)
-            self.assertEqual(field["no_copy"], 1)
+    def test_payroll_actor_links_ignore_employee_user_permission_filters(self) -> None:
+        fields = {str(row["fieldname"]): row for row in workflow_fields.CUSTOM_FIELDS["Payroll Entry"]}
+        for fieldname in (
+            "approval_maker_user",
+            "approval_reviewer_user",
+            "approval_authorized_user",
+        ):
+            self.assertEqual(fields[fieldname]["ignore_user_permissions"], 1)

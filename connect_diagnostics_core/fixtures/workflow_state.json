@@ -534,7 +534,7 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Payroll Entry Draft",
 		"style": "Info",
 		"workflow_state_name": "Payroll Entry Draft"
@@ -543,7 +543,7 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Payroll Entry Pending Review",
 		"style": "Info",
 		"workflow_state_name": "Payroll Entry Pending Review"
@@ -552,7 +552,34 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Payroll Entry Reviewed",
+		"style": "Info",
+		"workflow_state_name": "Payroll Entry Reviewed"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Payroll Entry Returned",
+		"style": "Info",
+		"workflow_state_name": "Payroll Entry Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Payroll Entry Approved",
+		"style": "Info",
+		"workflow_state_name": "Payroll Entry Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Payroll Entry Rejected",
 		"style": "Info",
 		"workflow_state_name": "Payroll Entry Rejected"
@@ -561,25 +588,7 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Payroll Entry Returned",
-		"workflow_state_name": "Payroll Entry Returned",
-		"style": "Info"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Payroll Entry Reviewed",
-		"workflow_state_name": "Payroll Entry Reviewed",
-		"style": "Info"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
+		"modified": "2026-09-27 15:00:12.067930",
 		"name": "Payroll Entry Submitted",
 		"style": "Info",
 		"workflow_state_name": "Payroll Entry Submitted"
@@ -588,8 +597,8 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Approved",
+		"modified": "2026-09-27 15:00:12.067930",
+		"name": "Payroll Entry Cancelled",
 		"style": "Info",
 		"workflow_state_name": "Purchase Invoice Approved"
 	},

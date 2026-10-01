@@ -416,6 +416,11 @@ for _doctype in (
             "allow_on_submit": 1,
             "no_copy": 1,
             "is_system_generated": 1,
+            **(
+                {"ignore_user_permissions": 1}
+                if _doctype == "Payroll Entry" and field["fieldtype"] == "Link"
+                else {}
+            ),
         }
         for field in _APPROVAL_FIELDS
         if str(field["fieldname"]) not in existing

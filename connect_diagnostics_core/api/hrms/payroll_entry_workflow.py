@@ -66,6 +66,116 @@ CRITICAL_FIELDS: tuple[str, ...] = (
 )
 
 
+def _payroll_source_revisions(doc: Document | Mapping[str, Any]) -> dict[str, Any]:
+    """Fingerprint mutable native sources without persisting private payroll values."""
+    employee_names = sorted(
+        {str(row.get("employee")) for row in (doc.get("employees") or []) if row.get("employee")}
+    )
+    if not employee_names:
+        return {
+            "employees": [],
+            "salary_structure_assignments": [],
+            "salary_structures": [],
+            "income_tax_slabs": [],
+            "salary_components": [],
+            "payroll_settings_modified": frappe.db.get_single_value("Payroll Settings", "modified"),
+        }
+
+    employees = frappe.get_all(
+        "Employee",
+        filters={"name": ("in", employee_names)},
+        fields=["name", "modified", "status", "company", "date_of_joining", "relieving_date"],
+        order_by="name asc",
+    )
+    assignments = frappe.get_all(
+        "Salary Structure Assignment",
+        filters={
+            "employee": ("in", employee_names),
+            "docstatus": 1,
+            "from_date": ("<=", doc.get("end_date")),
+        },
+        fields=[
+            "name",
+            "modified",
+            "employee",
+            "salary_structure",
+            "from_date",
+            "company",
+            "currency",
+            "payroll_payable_account",
+            "income_tax_slab",
+            "grade",
+        ],
+        order_by="employee asc, from_date asc, name asc",
+    )
+    structure_names = sorted(
+        {str(row.get("salary_structure")) for row in assignments if row.get("salary_structure")}
+    )
+    tax_slab_names = sorted(
+        {str(row.get("income_tax_slab")) for row in assignments if row.get("income_tax_slab")}
+    )
+    structures = (
+        frappe.get_all(
+            "Salary Structure",
+            filters={"name": ("in", structure_names)},
+            fields=[
+                "name",
+                "modified",
+                "docstatus",
+                "is_active",
+                "company",
+                "currency",
+                "payroll_frequency",
+                "salary_slip_based_on_timesheet",
+            ],
+            order_by="name asc",
+        )
+        if structure_names
+        else []
+    )
+    salary_details = (
+        frappe.get_all(
+            "Salary Detail",
+            filters={"parenttype": "Salary Structure", "parent": ("in", structure_names)},
+            fields=["parent", "salary_component"],
+            order_by="parent asc, idx asc",
+        )
+        if structure_names
+        else []
+    )
+    component_names = sorted(
+        {str(row.get("salary_component")) for row in salary_details if row.get("salary_component")}
+    )
+    components = (
+        frappe.get_all(
+            "Salary Component",
+            filters={"name": ("in", component_names)},
+            fields=["name", "modified", "disabled", "type"],
+            order_by="name asc",
+        )
+        if component_names
+        else []
+    )
+    tax_slabs = (
+        frappe.get_all(
+            "Income Tax Slab",
+            filters={"name": ("in", tax_slab_names)},
+            fields=["name", "modified", "docstatus", "disabled", "currency"],
+            order_by="name asc",
+        )
+        if tax_slab_names
+        else []
+    )
+    return {
+        "employees": employees,
+        "salary_structure_assignments": assignments,
+        "salary_structures": structures,
+        "income_tax_slabs": tax_slabs,
+        "salary_components": components,
+        "payroll_settings_modified": frappe.db.get_single_value("Payroll Settings", "modified"),
+    }
+
+
 def approval_payload(doc: Document | Mapping[str, Any]) -> dict[str, Any]:
     """Build a privacy-preserving, server-read digest payload for the payroll batch."""
     get = doc.get
@@ -86,6 +196,7 @@ def approval_payload(doc: Document | Mapping[str, Any]) -> dict[str, Any]:
         }
         for row in employees
     ]
+    payload["source_revisions"] = _payroll_source_revisions(doc)
     return payload
 
 
@@ -227,6 +338,7 @@ def _persisted_approval(doc: Document) -> Mapping[str, Any]:
         "Payroll Entry",
         doc.name,
         [
+            "docstatus",
             "workflow_state",
             "approval_maker_user",
             "approval_reviewer_user",
@@ -245,6 +357,57 @@ def _persisted_approval(doc: Document) -> Mapping[str, Any]:
     if not row:
         frappe.throw(_("Payroll Entry approval could not be verified."))
     return cast(Mapping[str, Any], row)
+
+
+def validate_downstream_operation(
+    payroll_entry: str | Document, *, require_current_digest: bool = True
+) -> Document:
+    """Require durable approval before any native payroll side effect continues."""
+    doc = (
+        frappe.get_doc("Payroll Entry", payroll_entry, for_update=True)
+        if isinstance(payroll_entry, str)
+        else payroll_entry
+    )
+    persisted = _persisted_approval(doc)
+    if int(persisted.get("docstatus") or 0) != 1 or persisted.get("workflow_state") != ROUTE.submitted_state:
+        frappe.throw(_("Payroll processing requires an approved and submitted Payroll Entry."))
+    required = (
+        "approval_maker_user",
+        "approval_reviewer_user",
+        "approval_authorized_user",
+        "approval_critical_digest",
+        "checked_by",
+        "checked_at",
+        "checked_signature",
+        "authorized_by",
+        "authorized_at",
+        "authorized_signature",
+    )
+    if any(not persisted.get(field) for field in required):
+        frappe.throw(_("Payroll processing requires complete review and approval evidence."))
+    if require_current_digest and persisted.get("approval_critical_digest") != get_approval_digest(doc):
+        frappe.throw(_("Payroll Entry approval is stale; return it for review again."))
+    return doc
+
+
+class PayrollEntryApprovalMixin:
+    """Guard native HRMS payroll operations without replacing their implementation."""
+
+    def create_salary_slips(self: Any, *args: Any, **kwargs: Any) -> Any:
+        validate_downstream_operation(cast(Document, self))
+        return super().create_salary_slips(*args, **kwargs)
+
+    def submit_salary_slips(self: Any, *args: Any, **kwargs: Any) -> Any:
+        validate_downstream_operation(cast(Document, self))
+        return super().submit_salary_slips(*args, **kwargs)
+
+    def make_accrual_jv_entry(self: Any, *args: Any, **kwargs: Any) -> Any:
+        validate_downstream_operation(cast(Document, self), require_current_digest=False)
+        return super().make_accrual_jv_entry(*args, **kwargs)
+
+    def make_bank_entry(self: Any, *args: Any, **kwargs: Any) -> Any:
+        validate_downstream_operation(cast(Document, self), require_current_digest=False)
+        return super().make_bank_entry(*args, **kwargs)
 
 
 def validate_before_submit(doc: Document, method: str | None = None) -> None:
