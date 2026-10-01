@@ -97,6 +97,8 @@ NAMING_SERIES_PREFIXES: dict[str, tuple[str, ...]] = {
     "Stock Entry": ("SE",),
     "Stock Borrow": ("SBR",),
     "Stock Reconciliation": ("SR",),
+    "Stock Asset Conversion": ("SAC",),
+    "Material Request Fulfillment": ("MRF",),
     "Subcontracting Inward Order": ("SIO",),
     "Subcontracting Order": ("SCO",),
     "Subcontracting Receipt": ("SCR",),

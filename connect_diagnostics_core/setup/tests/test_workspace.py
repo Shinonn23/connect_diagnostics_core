@@ -240,12 +240,14 @@ class TestWorkspaceNavigation(UnitTestCase):
                 ("Short Expiry Report", "Item", 1),
                 ("Goods Receipt Report", "Purchase Receipt", 1),
                 ("Outstanding Borrowed Items", "Material Request", 1),
+                ("Equipment Model Mapping Review", "Equipment Model", 1),
             },
         )
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
         self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
         self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
         self.assertEqual(sum(row["link_to"] == "Outstanding Borrowed Items" for row in reports), 1)
+        self.assertEqual(sum(row["link_to"] == "Equipment Model Mapping Review" for row in reports), 1)
 
     def test_tds_links_are_removed_from_the_taxes_sidebar(self) -> None:
         workspaces = workspace_documents()
@@ -1073,6 +1075,8 @@ class TestWorkspaceNavigation(UnitTestCase):
                 sidebar_link("DKSH Item", child=1),
                 sidebar_link("Product Group", child=1),
                 sidebar_link("Storage Condition", child=1),
+                sidebar_link("Equipment Model", child=1),
+                sidebar_link("Material Request Fulfillment", child=1),
                 sidebar_link("Back Orders", child=1),
                 sidebar_link("Material Request"),
                 sidebar_link("Pick List"),
@@ -1108,10 +1112,25 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
-            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 4]],
-            ["DKSH Item", "Product Group", "Storage Condition"],
+            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 6]],
+            [
+                "DKSH Item",
+                "Product Group",
+                "Storage Condition",
+                "Equipment Model",
+                "Material Request Fulfillment",
+            ],
         )
-        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 4]))
+        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 6]))
+        reports_index = next(
+            index for index, row in enumerate(sidebar["items"]) if row.get("label") == "Reports"
+        )
+        report_links = [
+            row.get("link_to")
+            for row in sidebar["items"][reports_index + 1 :]
+            if row.get("type") == "Link" and row.get("child") == 1
+        ]
+        self.assertIn("Equipment Model Mapping Review", report_links)
 
     def test_existing_workspace_card_links_are_reordered_by_priority(self) -> None:
         workspace_doc = FakeDocument(

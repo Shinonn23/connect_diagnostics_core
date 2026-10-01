@@ -19,6 +19,9 @@ from connect_diagnostics_core.setup import document_naming, purchase_invoice, sa
 class TestDocumentNaming(UnitTestCase):
     def test_demo_documents_use_registered_buddhist_year_series(self) -> None:
         self.assertEqual(document_naming.NAMING_SERIES_PREFIXES["Dispatch"], ("DSP",))
+        self.assertEqual(document_naming.NAMING_SERIES_PREFIXES["Material Request Fulfillment"], ("MRF",))
+        self.assertEqual(document_naming.NAMING_SERIES_PREFIXES["Stock Asset Conversion"], ("SAC",))
+        self.assertEqual(document_naming.NAMING_SERIES_PREFIXES["Material Request Fulfillment"], ("MRF",))
         self.assertEqual(
             document_naming.NAMING_SERIES_PREFIXES["Borrowed Asset Return Inspection"], ("BARI",)
         )

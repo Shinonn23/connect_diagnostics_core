@@ -1,0 +1,132 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"autoname": "field:model_code",
+	"creation": "2026-09-27 16:04:27.503188",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"model_code",
+		"model_name",
+		"company",
+		"disabled",
+		"mapping_section",
+		"stock_item",
+		"fixed_asset_item",
+		"default_asset_category",
+		"capability_section",
+		"allow_demo",
+		"allow_stock_to_asset_conversion",
+		"description"
+	],
+	"fields": [
+		{
+			"fieldname": "model_code",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "Model Code",
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"fieldname": "model_name",
+			"fieldtype": "Data",
+			"in_list_view": 1,
+			"label": "Model Name",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company"
+		},
+		{
+			"default": "0",
+			"fieldname": "disabled",
+			"fieldtype": "Check",
+			"in_list_view": 1,
+			"label": "Disabled"
+		},
+		{
+			"fieldname": "mapping_section",
+			"fieldtype": "Section Break",
+			"label": "Item Mapping"
+		},
+		{
+			"fieldname": "stock_item",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Stock Item",
+			"options": "Item",
+			"reqd": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "fixed_asset_item",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "Fixed Asset Item",
+			"options": "Item",
+			"reqd": 1,
+			"search_index": 1
+		},
+		{
+			"fieldname": "default_asset_category",
+			"fieldtype": "Link",
+			"label": "Default Asset Category",
+			"options": "Asset Category"
+		},
+		{
+			"fieldname": "capability_section",
+			"fieldtype": "Section Break",
+			"label": "Capabilities"
+		},
+		{
+			"default": "0",
+			"fieldname": "allow_demo",
+			"fieldtype": "Check",
+			"in_list_view": 1,
+			"label": "Allow Demo"
+		},
+		{
+			"default": "0",
+			"fieldname": "allow_stock_to_asset_conversion",
+			"fieldtype": "Check",
+			"label": "Allow Stock to Asset Conversion"
+		},
+		{
+			"fieldname": "description",
+			"fieldtype": "Small Text",
+			"label": "Description"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2026-09-27 16:04:27.503188",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Stock",
+	"name": "Equipment Model",
+	"naming_rule": "By fieldname",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"search_fields": "model_name,stock_item,fixed_asset_item",
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "model_name",
+	"track_changes": 1
+}

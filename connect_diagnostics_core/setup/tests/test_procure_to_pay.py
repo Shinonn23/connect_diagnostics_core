@@ -68,6 +68,16 @@ class TestProcureToPayPropertySetters(UnitTestCase):
 
         self.assertEqual(field["label"], "Request Reason")
 
+    def test_demo_low_value_threshold_is_company_configured(self) -> None:
+        field = next(
+            field
+            for field in procure_to_pay.CUSTOM_FIELDS["Company"]
+            if field["fieldname"] == "demo_low_value_asset_threshold"
+        )
+
+        self.assertEqual(field["fieldtype"], "Currency")
+        self.assertNotIn("default", field)
+
     def test_purchase_order_item_list_columns_are_code_managed(self) -> None:
         self.assertEqual(
             procure_to_pay.PROPERTY_SETTERS["Purchase Order Item"],

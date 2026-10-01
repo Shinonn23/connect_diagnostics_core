@@ -1,0 +1,118 @@
+{
+	"actions": [],
+	"allow_rename": 0,
+	"autoname": "naming_series:",
+	"creation": "2026-09-27 17:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"naming_series",
+		"material_request",
+		"operation_id",
+		"plan_revision",
+		"company",
+		"configuration_snapshot",
+		"source_version",
+		"source_digest",
+		"status",
+		"allocations"
+	],
+	"fields": [
+		{
+			"default": "MRF.YYYY-BE.MM-DATE.####",
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Naming Series",
+			"options": "MRF.YYYY-BE.MM-DATE.####",
+			"hidden": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "material_request",
+			"fieldtype": "Link",
+			"label": "Material Request",
+			"options": "Material Request",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "operation_id",
+			"fieldtype": "Data",
+			"label": "Operation ID",
+			"reqd": 1,
+			"unique": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "plan_revision",
+			"fieldtype": "Int",
+			"label": "Plan Revision",
+			"default": "1",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "source_version",
+			"fieldtype": "Int",
+			"label": "Source Version",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "source_digest",
+			"fieldtype": "Data",
+			"label": "Source Digest",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "configuration_snapshot",
+			"fieldtype": "JSON",
+			"label": "Configuration Snapshot",
+			"read_only": 1
+		},
+		{
+			"fieldname": "status",
+			"fieldtype": "Select",
+			"label": "Status",
+			"options": "Planned\nSuperseded\nCancelled",
+			"default": "Planned",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "allocations",
+			"fieldtype": "Table",
+			"label": "Allocations",
+			"options": "Material Request Fulfillment Allocation",
+			"read_only": 1
+		}
+	],
+	"index_web_pages_for_search": 0,
+	"links": [],
+	"modified": "2026-09-27 17:38:51.921604",
+	"modified_by": "Administrator",
+	"module": "Connect Diagnostics Stock",
+	"name": "Material Request Fulfillment",
+	"permissions": [
+		{ "role": "Purchase User", "read": 1 },
+		{ "role": "Purchase Manager", "read": 1 },
+		{ "role": "Stock User", "read": 1 },
+		{ "role": "Stock Manager", "read": 1 },
+		{ "role": "Accounts User", "read": 1 },
+		{ "role": "Accounts Manager", "read": 1 },
+		{ "role": "System Manager", "read": 1 }
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

@@ -16,6 +16,33 @@ STOCK_ROUTES = frozenset({"Stock Entry", "Purchase"})
 
 
 class Dispatch(Document):
+    def on_submit(self) -> None:
+        if self.get("dispatch_type") == "Outbound":
+            for row in sorted(
+                self.get("transfers", []),
+                key=lambda value: cast(str, value.get("fulfillment_allocation") or ""),
+            ):
+                if row.get("fulfillment_allocation"):
+                    allocation = frappe.db.get_value(
+                        "Material Request Fulfillment Allocation",
+                        row.fulfillment_allocation,
+                        ["resolved_asset", "lifecycle_state"],
+                        as_dict=True,
+                        for_update=True,
+                    )
+                    if (
+                        not allocation
+                        or allocation.resolved_asset != row.get("asset")
+                        or allocation.lifecycle_state not in (None, "Ready")
+                    ):
+                        frappe.throw(_("A Demo allocation changed before Dispatch submission."))
+                    frappe.db.set_value(
+                        "Material Request Fulfillment Allocation",
+                        row.fulfillment_allocation,
+                        {"dispatch_transfer": row.name, "lifecycle_state": "Dispatched"},
+                        update_modified=False,
+                    )
+
     def validate(self) -> None:
         self._validate_header()
         self._validate_transfers()
@@ -74,6 +101,10 @@ class Dispatch(Document):
 
     def _validate_outbound_completeness(self) -> None:
         """Require one complete outbound cycle for every routed MR item."""
+        demo_rows = [row for row in self.get("transfers", []) if row.get("fulfillment_allocation")]
+        if demo_rows:
+            self._validate_demo_outbound_completeness(demo_rows)
+            return
         items = frappe.get_all(
             "Material Request Item",
             filters={"parent": self.get("material_request")},
@@ -113,6 +144,43 @@ class Dispatch(Document):
                             "Outbound Dispatch must contain the allocated Asset exactly once for Material Request row {0}."
                         ).format(item.name)
                     )
+
+    def _validate_demo_outbound_completeness(self, transfers: list[Document]) -> None:
+        if len(transfers) != len(self.get("transfers", [])):
+            frappe.throw(_("A Demo Dispatch cannot mix allocation and legacy transfer rows."))
+        allocation_names = [cast(str, row.get("fulfillment_allocation")) for row in transfers]
+        if len(allocation_names) != len(set(allocation_names)):
+            frappe.throw(_("Each Demo allocation must appear exactly once in the Dispatch."))
+        parents = {
+            frappe.db.get_value("Material Request Fulfillment Allocation", name, "parent")
+            for name in allocation_names
+        }
+        if len(parents) != 1 or None in parents:
+            frappe.throw(_("All Demo Dispatch allocations must belong to one Fulfillment."))
+        fulfillment = cast(str, next(iter(parents)))
+        plan = frappe.db.get_value(
+            "Material Request Fulfillment",
+            fulfillment,
+            ["material_request", "status"],
+            as_dict=True,
+        )
+        if not plan or plan.material_request != self.get("material_request") or plan.status != "Planned":
+            frappe.throw(_("The Demo Dispatch must use the active Fulfillment."))
+        current = frappe.db.get_value(
+            "Material Request Fulfillment",
+            {"material_request": self.get("material_request"), "status": "Planned"},
+            "name",
+            order_by="plan_revision desc",
+        )
+        expected = set(
+            frappe.get_all(
+                "Material Request Fulfillment Allocation",
+                filters={"parent": fulfillment},
+                pluck="name",
+            )
+        )
+        if current != fulfillment or set(allocation_names) != expected:
+            frappe.throw(_("The Demo Dispatch must contain every latest allocation exactly once."))
 
     def _validate_header(self) -> None:
         if not self.get("transfers"):
@@ -286,16 +354,107 @@ class Dispatch(Document):
         if not row.get("uom"):
             row.set("uom", mr_item.stock_uom)
 
-        route = mr_item.fulfillment_route
-        if route in ASSET_ROUTES:
+        if row.get("fulfillment_allocation"):
+            self._validate_demo_asset_transfer(row, mr_item)
+        elif mr_item.fulfillment_route in ASSET_ROUTES:
             self._validate_asset_transfer(row, mr_item)
-        elif route in STOCK_ROUTES:
+        elif mr_item.fulfillment_route in STOCK_ROUTES:
             self._validate_stock_transfer(row)
         else:
             frappe.throw(_("Row #{0}: Select a supported Fulfillment Route first.").format(row.idx))
 
         if self.get("dispatch_type") in {"Return", "Retry"}:
             self._validate_against_outbound(row)
+
+    def _validate_demo_asset_transfer(self, row: Document, mr_item: Any) -> None:
+        allocation = frappe.db.get_value(
+            "Material Request Fulfillment Allocation",
+            row.get("fulfillment_allocation"),
+            [
+                "parent",
+                "material_request_item",
+                "item_code",
+                "qty",
+                "resolved_asset",
+                "lifecycle_state",
+                "asset_movement",
+            ],
+            as_dict=True,
+        )
+        if (
+            not allocation
+            or allocation.material_request_item != row.get("material_request_item")
+            or allocation.item_code != row.get("item_code")
+            or allocation.resolved_asset != row.get("asset")
+            or float(allocation.qty) != 1
+            or flt(row.get("qty")) != 1
+        ):
+            frappe.throw(_("Row #{0}: Transfer does not match its Demo allocation.").format(row.idx))
+        plan = frappe.db.get_value(
+            "Material Request Fulfillment",
+            allocation.parent,
+            ["material_request", "company", "status"],
+            as_dict=True,
+        )
+        if (
+            not plan
+            or plan.material_request != self.get("material_request")
+            or plan.company != self.get("company")
+            or plan.status != "Planned"
+            or mr_item.parent != plan.material_request
+        ):
+            frappe.throw(_("Row #{0}: Demo allocation is not active for this request.").format(row.idx))
+        expected_state = "Delivered" if self.get("dispatch_type") == "Return" else "Ready"
+        if self.get("dispatch_type") == "Outbound" and allocation.lifecycle_state not in (
+            None,
+            expected_state,
+        ):
+            frappe.throw(_("Row #{0}: Demo allocation is not ready for outbound.").format(row.idx))
+        if self.get("dispatch_type") == "Return" and allocation.lifecycle_state != expected_state:
+            frappe.throw(_("Row #{0}: Demo allocation is not ready for return.").format(row.idx))
+        self._validate_demo_asset_movement(row, allocation)
+
+    def _validate_demo_asset_movement(self, row: Document, allocation: Any) -> None:
+        if row.get("reference_doctype") != "Asset Movement" or not row.get("reference_name"):
+            frappe.throw(_("Row #{0}: Demo Asset must reference an Asset Movement.").format(row.idx))
+        movement = frappe.db.get_value(
+            "Asset Movement",
+            row.get("reference_name"),
+            ["company", "material_request", "docstatus", "purpose", "reference_doctype", "reference_name"],
+            as_dict=True,
+        )
+        is_return = self.get("dispatch_type") == "Return"
+        expected_purpose = "Receipt" if is_return else "Issue"
+        expected_reference_doctype = "Dispatch" if is_return else "Material Request Fulfillment"
+        expected_reference_name = self.get("original_dispatch") if is_return else allocation.parent
+        if (
+            not movement
+            or movement.docstatus != 1
+            or movement.company != self.get("company")
+            or movement.material_request != self.get("material_request")
+            or movement.purpose != expected_purpose
+            or movement.reference_doctype != expected_reference_doctype
+            or movement.reference_name != expected_reference_name
+        ):
+            frappe.throw(_("Row #{0}: Demo Asset Movement does not match this journey.").format(row.idx))
+        movement_item = frappe.db.get_value(
+            "Asset Movement Item",
+            {"parent": row.get("reference_name"), "asset": row.get("asset")},
+            ["source_location", "target_location", "to_employee"],
+            as_dict=True,
+        )
+        if not movement_item:
+            frappe.throw(_("Row #{0}: Asset is missing from the movement.").format(row.idx))
+        if is_return:
+            qa_location = frappe.db.get_value("Company", self.get("company"), "return_qa_hold_location")
+            if movement_item.target_location != qa_location:
+                frappe.throw(_("Row #{0}: Return must receive into QA Hold.").format(row.idx))
+        else:
+            employee = frappe.db.get_value(
+                "Material Request", self.get("material_request"), "responsible_employee"
+            )
+            if movement_item.to_employee != employee:
+                frappe.throw(_("Row #{0}: Outbound must issue to the responsible Employee.").format(row.idx))
 
     def _validate_stock_transfer(self, row: Document) -> None:
         if row.get("reference_doctype") != "Stock Entry" or row.get("asset"):
@@ -438,13 +597,14 @@ class Dispatch(Document):
                 "uom",
                 "reference_doctype",
                 "reference_name",
+                "fulfillment_allocation",
                 "original_source_location",
             ],
             as_dict=True,
         )
         if not original or original.parent != self.get("original_dispatch"):
             frappe.throw(_("Row #{0}: Select a transfer from the Original Dispatch.").format(row.idx))
-        for fieldname in ("material_request_item", "item_code", "asset"):
+        for fieldname in ("material_request_item", "item_code", "asset", "fulfillment_allocation"):
             if (row.get(fieldname) or "") != (original.get(fieldname) or ""):
                 frappe.throw(_("Row #{0}: Returned or retried item must match the original.").format(row.idx))
 

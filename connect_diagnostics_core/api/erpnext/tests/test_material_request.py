@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
-from typing import cast
+import json
+import subprocess
+from pathlib import Path
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import frappe
@@ -14,6 +17,8 @@ from connect_diagnostics_core.api.erpnext import material_request
 from connect_diagnostics_core.connect_diagnostics_stock.report.outstanding_borrowed_items import (
     outstanding_borrowed_items,
 )
+
+MATERIAL_REQUEST_JS = Path(__file__).parents[3] / "public/js/custom/material_request/doctype.js"
 
 
 class FakeMaterialRequest(frappe._dict):
@@ -33,6 +38,73 @@ class FakeRow(frappe._dict):
 
 
 class TestMaterialRequest(UnitTestCase):
+    def test_client_query_preserves_every_native_purpose_result(self) -> None:
+        native_results: list[dict[str, Any]] = [
+            {"query": "erpnext.controllers.queries.item_query", "filters": {"is_stock_item": 1}},
+            {"query": "erpnext.controllers.queries.item_query", "filters": {"is_purchase_item": 1}},
+            {
+                "query": "erpnext.controllers.queries.item_query",
+                "filters": {"include_item_in_manufacturing": 1},
+            },
+            {
+                "query": "erpnext.controllers.queries.item_query",
+                "filters": {"is_stock_item": 1, "customer": "CUST-1"},
+            },
+        ]
+
+        for native_result in native_results:
+            with self.subTest(native_result=native_result):
+                result = self._run_client_query(native_result, "Employee Borrow", ["DEMO-1"])
+                self.assertEqual(result, native_result)
+
+    def test_client_query_adds_only_demo_item_constraint(self) -> None:
+        native_result: dict[str, Any] = {
+            "query": "erpnext.controllers.queries.item_query",
+            "filters": {"is_stock_item": 1},
+        }
+
+        result = self._run_client_query(native_result, "Customer Demo", ["DEMO-1", "DEMO-2"])
+
+        self.assertEqual(result["query"], native_result["query"])
+        filters = cast(dict[str, Any], result["filters"])
+        self.assertEqual(filters["is_stock_item"], 1)
+        self.assertEqual(filters["name"], ["in", ["DEMO-1", "DEMO-2"]])
+
+    def _run_client_query(
+        self,
+        native_result: dict[str, Any],
+        request_usage: str,
+        eligible_items: list[str],
+    ) -> dict[str, Any]:
+        script = """
+const vm = require("node:vm");
+const fs = require("node:fs");
+const source = fs.readFileSync(0, "utf8");
+const context = { frappe: { ui: { form: { on() {} } } } };
+vm.createContext(context);
+vm.runInContext(source, context);
+const result = vm.runInContext(
+    `build_demo_item_query(${process.argv[1]}, ${process.argv[2]}, ${process.argv[3]})`,
+    context,
+);
+process.stdout.write(JSON.stringify(result));
+"""
+        completed = subprocess.run(
+            [
+                "node",
+                "-e",
+                script,
+                json.dumps(native_result),
+                json.dumps(request_usage),
+                json.dumps(eligible_items),
+            ],
+            input=MATERIAL_REQUEST_JS.read_text(),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return cast(dict[str, Any], json.loads(completed.stdout))
+
     @patch.object(material_request, "rounded", side_effect=lambda value, precision: round(value, precision))
     @patch.object(material_request, "get_currency_precision", return_value=2)
     def test_demo_cost_boundary_uses_strictly_greater_than_ten_thousand(
@@ -256,10 +328,11 @@ class TestMaterialRequest(UnitTestCase):
             material_request._validate_downstream_lock(cast(Document, doc))
 
     @patch.object(material_request, "_validate_routes")
+    @patch.object(material_request, "_validate_demo_item_eligibility")
     @patch.object(material_request, "_validate_downstream_lock")
     @patch.object(material_request, "_validate_controlled_field_access")
     def test_validate_hook_runs_all_route_guards(
-        self, access: MagicMock, lock: MagicMock, routes: MagicMock
+        self, access: MagicMock, lock: MagicMock, demo: MagicMock, routes: MagicMock
     ) -> None:
         doc = FakeMaterialRequest()
 
@@ -267,7 +340,104 @@ class TestMaterialRequest(UnitTestCase):
 
         access.assert_called_once_with(doc)
         lock.assert_called_once_with(doc)
+        demo.assert_called_once_with(doc)
         routes.assert_called_once_with(doc)
+
+    @patch.object(material_request, "get_eligible_demo_stock_items", return_value=["DEMO-ITEM"])
+    def test_demo_item_validation_accepts_only_configured_items(self, eligible: MagicMock) -> None:
+        doc = FakeMaterialRequest(
+            request_usage="Customer Demo",
+            company="_Test Company",
+            items=[FakeRow(idx=1, item_code="DEMO-ITEM")],
+        )
+
+        material_request._validate_demo_item_eligibility(cast(Document, doc))
+
+        eligible.assert_called_once_with("_Test Company")
+
+    @patch.object(material_request, "get_eligible_demo_stock_items", return_value=[])
+    def test_demo_item_validation_rejects_an_api_bypass(self, _eligible: MagicMock) -> None:
+        doc = FakeMaterialRequest(
+            request_usage="Customer Demo",
+            company="_Test Company",
+            items=[FakeRow(idx=1, item_code="UNMAPPED")],
+        )
+
+        with self.assertRaisesRegex(frappe.ValidationError, "not enabled for Customer Demo"):
+            material_request._validate_demo_item_eligibility(cast(Document, doc))
+
+    @patch.object(material_request, "get_eligible_demo_stock_items")
+    def test_non_demo_usage_does_not_query_equipment_models(self, eligible: MagicMock) -> None:
+        doc = FakeMaterialRequest(
+            request_usage="Employee Borrow",
+            company="_Test Company",
+            items=[FakeRow(idx=1, item_code="ANY-ITEM")],
+        )
+
+        material_request._validate_demo_item_eligibility(cast(Document, doc))
+
+        eligible.assert_not_called()
+
+    @patch.object(material_request, "_validate_customer_address")
+    @patch.object(material_request, "get_eligible_demo_stock_items", return_value=[])
+    def test_approval_rechecks_stale_demo_mapping(self, _eligible: MagicMock, _address: MagicMock) -> None:
+        doc = FakeMaterialRequest(
+            request_usage="Customer Demo",
+            company="_Test Company",
+            destination_type="Customer",
+            destination_customer="_Test Customer",
+            destination_address="_Test Address",
+            responsible_employee="_Test Employee",
+            expected_return_date="2026-12-01",
+            items=[FakeRow(idx=1, item_code="NO-LONGER-ELIGIBLE")],
+        )
+
+        with self.assertRaisesRegex(frappe.ValidationError, "not enabled for Customer Demo"):
+            material_request.validate_submit_for_approval(cast(Document, doc))
+
+    @patch.object(material_request.frappe, "has_permission", side_effect=[True, False, True])
+    @patch.object(material_request.frappe, "get_doc")
+    @patch.object(material_request, "get_eligible_demo_stock_items", return_value=["DEMO-ITEM"])
+    def test_demo_eligible_endpoint_checks_company_and_returns_envelope(
+        self,
+        eligible: MagicMock,
+        get_doc: MagicMock,
+        _permission: MagicMock,
+    ) -> None:
+        get_doc.return_value = FakeMaterialRequest(name="_Test Company", is_group=0)
+
+        result = material_request.get_demo_eligible_items("_Test Company")
+
+        self.assertEqual(result["data"], ["DEMO-ITEM"])
+        self.assertTrue(result["message"])
+        eligible.assert_called_once_with("_Test Company")
+
+    @patch.object(material_request.frappe, "has_permission", side_effect=[True, False])
+    @patch.object(
+        material_request.frappe,
+        "get_doc",
+        return_value=FakeMaterialRequest(name="All Companies", is_group=1),
+    )
+    def test_demo_eligible_endpoint_rejects_group_company(
+        self, _get_doc: MagicMock, _permission: MagicMock
+    ) -> None:
+        with self.assertRaisesRegex(frappe.ValidationError, "non-group Company"):
+            material_request.get_demo_eligible_items("All Companies")
+
+    @patch.object(material_request.frappe, "has_permission", side_effect=[False, False])
+    def test_demo_eligible_endpoint_requires_material_request_access(self, _permission: MagicMock) -> None:
+        with self.assertRaises(frappe.PermissionError):
+            material_request.get_demo_eligible_items("_Test Company")
+
+    @patch.object(material_request.frappe, "has_permission", return_value=True)
+    @patch.object(material_request, "get_eligible_demo_stock_items")
+    def test_demo_eligible_endpoint_fails_closed_without_company(
+        self, eligible: MagicMock, _permission: MagicMock
+    ) -> None:
+        result = material_request.get_demo_eligible_items()
+
+        self.assertEqual(result["data"], [])
+        eligible.assert_not_called()
 
     def test_internal_permanent_use_requires_a_warehouse_or_asset_location(self) -> None:
         doc = FakeMaterialRequest(
@@ -295,6 +465,26 @@ class TestMaterialRequest(UnitTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             material_request.validate_asset_movement(cast(Document, movement))
+
+    def test_demo_asset_movement_requires_every_allocation_exactly_once(self) -> None:
+        movement = frappe._dict(
+            company="_Test Company",
+            material_request="MR-DEMO",
+            purpose="Issue",
+            reference_doctype="Material Request Fulfillment",
+            reference_name="MRF-1",
+            assets=[frappe._dict(idx=1, asset="AST-1", source_location="POOL")],
+        )
+        allocations = [
+            frappe._dict(name="ALLOC-1", resolved_asset="AST-1"),
+            frappe._dict(name="ALLOC-2", resolved_asset="AST-2"),
+        ]
+        with (
+            patch.object(material_request.frappe.db, "get_value", return_value="MRF-1"),
+            patch.object(material_request.frappe, "get_all", return_value=allocations),
+            self.assertRaisesRegex(frappe.ValidationError, "every active allocation Asset"),
+        ):
+            material_request._validate_demo_asset_movement(cast(Document, movement), "MR-DEMO")
 
     @patch.object(material_request.frappe, "get_all", return_value=["MR-1"])
     def test_quality_inspection_inherits_material_request_from_stock_entry(

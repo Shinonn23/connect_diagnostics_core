@@ -11,6 +11,41 @@ CREDIT_NOTE_REASONS = (
 CUSTOM_FIELDS = {
     "Sales Invoice": [
         {
+            "fieldname": "demo_fulfillment_allocation",
+            "label": "Demo Fulfillment Allocation",
+            "fieldtype": "Link",
+            "options": "Material Request Fulfillment Allocation",
+            "read_only": 1,
+            "no_copy": 1,
+            "insert_after": "customer",
+        },
+        {
+            "fieldname": "demo_outbound_dispatch",
+            "label": "Demo Outbound Dispatch",
+            "fieldtype": "Link",
+            "options": "Dispatch",
+            "read_only": 1,
+            "no_copy": 1,
+            "insert_after": "demo_fulfillment_allocation",
+        },
+        {
+            "fieldname": "demo_sale_attempt",
+            "label": "Demo Sale Attempt",
+            "fieldtype": "Int",
+            "read_only": 1,
+            "no_copy": 1,
+            "insert_after": "demo_outbound_dispatch",
+        },
+        {
+            "fieldname": "demo_sale_operation_id",
+            "label": "Demo Sale Operation ID",
+            "fieldtype": "Data",
+            "read_only": 1,
+            "no_copy": 1,
+            "unique": 1,
+            "insert_after": "demo_sale_attempt",
+        },
+        {
             "fieldname": "column_break_cijbv",
             "fieldtype": "Column Break",
             "insert_after": "tax_invoice_number",

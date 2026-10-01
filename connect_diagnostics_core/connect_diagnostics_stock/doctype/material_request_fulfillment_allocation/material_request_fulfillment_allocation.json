@@ -1,0 +1,163 @@
+{
+	"doctype": "DocType",
+	"name": "Material Request Fulfillment Allocation",
+	"module": "Connect Diagnostics Stock",
+	"istable": 1,
+	"creation": "2026-09-27 17:00:00.000000",
+	"modified": "2026-09-27 18:59:43.416533",
+	"modified_by": "Administrator",
+	"field_order": [
+		"material_request_item",
+		"item_code",
+		"item_name",
+		"qty",
+		"uom",
+		"equipment_model",
+		"fixed_asset_item",
+		"source_type",
+		"asset_reservation",
+		"expected_available_on",
+		"selected_source",
+		"downstream_doctype",
+		"downstream_reference",
+		"conversion_state",
+		"conversion_source_warehouse",
+		"conversion_source_bundle",
+		"resolved_asset",
+		"asset_movement",
+		"dispatch_transfer",
+		"lifecycle_state",
+		"current_sales_invoice",
+		"sale_attempt"
+	],
+	"fields": [
+		{
+			"fieldname": "downstream_doctype",
+			"fieldtype": "Link",
+			"label": "Downstream DocType",
+			"options": "DocType",
+			"read_only": 1
+		},
+		{
+			"fieldname": "material_request_item",
+			"fieldtype": "Link",
+			"label": "Material Request Item",
+			"options": "Material Request Item",
+			"read_only": 1
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Stock Item",
+			"options": "Item",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{ "fieldname": "item_name", "fieldtype": "Data", "label": "Item Name", "read_only": 1 },
+		{ "fieldname": "qty", "fieldtype": "Float", "label": "Quantity", "reqd": 1, "read_only": 1 },
+		{ "fieldname": "uom", "fieldtype": "Link", "label": "UOM", "options": "UOM", "read_only": 1 },
+		{
+			"fieldname": "equipment_model",
+			"fieldtype": "Link",
+			"label": "Equipment Model",
+			"options": "Equipment Model",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "fixed_asset_item",
+			"fieldtype": "Link",
+			"label": "Fixed Asset Item",
+			"options": "Item",
+			"reqd": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "source_type",
+			"fieldtype": "Select",
+			"label": "Source Type",
+			"options": "Unplanned\nExisting Asset\nReturning Asset\nStock Conversion",
+			"default": "Unplanned",
+			"read_only": 1
+		},
+		{ "fieldname": "selected_source", "fieldtype": "Data", "label": "Selected Source", "read_only": 1 },
+		{
+			"fieldname": "asset_reservation",
+			"fieldtype": "Link",
+			"options": "Demo Asset Reservation",
+			"label": "Asset Reservation",
+			"read_only": 1
+		},
+		{
+			"fieldname": "expected_available_on",
+			"fieldtype": "Date",
+			"label": "Expected Available On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "downstream_reference",
+			"fieldtype": "Dynamic Link",
+			"label": "Downstream Reference",
+			"options": "downstream_doctype",
+			"read_only": 1
+		},
+		{
+			"fieldname": "conversion_state",
+			"fieldtype": "Select",
+			"label": "Conversion State",
+			"options": "\nDraft\nReady\nCancelled",
+			"read_only": 1
+		},
+		{
+			"fieldname": "conversion_source_warehouse",
+			"fieldtype": "Link",
+			"label": "Conversion Source Warehouse",
+			"options": "Warehouse",
+			"read_only": 1
+		},
+		{
+			"fieldname": "conversion_source_bundle",
+			"fieldtype": "Link",
+			"label": "Conversion Source Bundle",
+			"options": "Serial and Batch Bundle",
+			"read_only": 1
+		},
+		{
+			"fieldname": "resolved_asset",
+			"fieldtype": "Link",
+			"label": "Resolved Asset",
+			"options": "Asset",
+			"read_only": 1
+		},
+		{
+			"fieldname": "asset_movement",
+			"fieldtype": "Link",
+			"label": "Asset Movement",
+			"options": "Asset Movement",
+			"read_only": 1
+		},
+		{
+			"fieldname": "dispatch_transfer",
+			"fieldtype": "Link",
+			"label": "Dispatch Transfer",
+			"options": "Dispatch Transfer",
+			"read_only": 1
+		},
+		{
+			"fieldname": "lifecycle_state",
+			"fieldtype": "Select",
+			"label": "Lifecycle State",
+			"options": "\nReady\nDispatched\nDelivered\nReturned\nSold",
+			"read_only": 1
+		},
+		{
+			"fieldname": "current_sales_invoice",
+			"fieldtype": "Link",
+			"label": "Current Sales Invoice",
+			"options": "Sales Invoice",
+			"read_only": 1
+		},
+		{ "fieldname": "sale_attempt", "fieldtype": "Int", "label": "Sale Attempt", "read_only": 1 }
+	],
+	"permissions": []
+}
