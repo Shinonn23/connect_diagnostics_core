@@ -252,6 +252,30 @@ workflow_methods = [
         "method": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.authorize_cancel_execution",
     },
     {
+        "name": "POC Payment Entry Maker",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.capture_maker",
+    },
+    {
+        "name": "POC Payment Entry Checker",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.capture_checker",
+    },
+    {
+        "name": "POC Payment Entry Approver",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.capture_approver",
+    },
+    {
+        "name": "POC Payment Entry Submit",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.authorize_submit",
+    },
+    {
+        "name": "POC Payment Entry Return",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.return_to_draft",
+    },
+    {
+        "name": "POC Payment Entry Reject",
+        "method": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.reject",
+    },
+    {
         "name": "Capture Freeze Exception Approval Scope",
         "method": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_freeze_exception_approval_scope",
     },
@@ -490,10 +514,9 @@ doc_events = {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "validate": [
             "connect_diagnostics_core.api.erpnext.payment_entry.validate",
-            "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_workflow",
+            "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.validate",
         ],
-        "before_submit": "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_before_submit",
-        "before_cancel": "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_before_cancel",
+        "before_submit": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.before_submit",
     },
     "Salary Slip": {
         "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
