@@ -6,6 +6,8 @@ tags
 node_modules
 __pycache__
 .ruff_cache
+test-results/
+playwright-report/
 
 frappe-semgrep-rules
 typings
