@@ -1,0 +1,160 @@
+{
+	"doctype": "DocType",
+	"name": "Role Scope Assignment",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"is_submittable": 1,
+	"modified": "2026-10-02 20:16:22.969380",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"autoname": "naming_series:",
+	"track_changes": 1,
+	"field_order": [
+		"naming_series",
+		"target_user",
+		"functional_role",
+		"scope_type",
+		"company",
+		"department",
+		"warehouse",
+		"workflow_state",
+		"requested_by",
+		"requested_at",
+		"scope_owner",
+		"decided_at",
+		"role_grant_created",
+		"role_grant_row",
+		"user_permission_created",
+		"user_permission_row"
+	],
+	"fields": [
+		{
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Naming Series",
+			"options": "RSA.YYYY-BE.MM-DATE.####",
+			"default": "RSA.YYYY-BE.MM-DATE.####",
+			"hidden": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "target_user",
+			"fieldtype": "Link",
+			"label": "User",
+			"options": "User",
+			"reqd": 1
+		},
+		{
+			"fieldname": "functional_role",
+			"fieldtype": "Link",
+			"label": "Functional Role",
+			"options": "Role",
+			"reqd": 1
+		},
+		{
+			"fieldname": "scope_type",
+			"fieldtype": "Select",
+			"label": "Scope Type",
+			"options": "Company\nDepartment\nWarehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "department",
+			"fieldtype": "Link",
+			"label": "Department",
+			"options": "Department"
+		},
+		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": "Warehouse",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname": "workflow_state",
+			"fieldtype": "Data",
+			"label": "Workflow State",
+			"read_only": 1
+		},
+		{
+			"fieldname": "requested_by",
+			"fieldtype": "Link",
+			"label": "Requested By",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "requested_at",
+			"fieldtype": "Datetime",
+			"label": "Requested At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "scope_owner",
+			"fieldtype": "Link",
+			"label": "Scope Owner",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "decided_at",
+			"fieldtype": "Datetime",
+			"label": "Decided At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "role_grant_created",
+			"fieldtype": "Check",
+			"label": "Role Grant Created",
+			"default": "0",
+			"read_only": 1
+		},
+		{
+			"fieldname": "role_grant_row",
+			"fieldtype": "Data",
+			"label": "Created User Role Row",
+			"read_only": 1
+		},
+		{
+			"fieldname": "user_permission_created",
+			"fieldtype": "Check",
+			"label": "User Permission Created",
+			"default": "0",
+			"read_only": 1
+		},
+		{
+			"fieldname": "user_permission_row",
+			"fieldtype": "Data",
+			"label": "Created User Permission Row",
+			"read_only": 1
+		}
+	],
+	"permissions": [
+		{
+			"role": "System Manager",
+			"read": 1,
+			"write": 1,
+			"create": 1,
+			"submit": 1,
+			"cancel": 1,
+			"delete": 0,
+			"report": 1,
+			"export": 0,
+			"print": 0,
+			"email": 0,
+			"share": 0
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"title_field": "target_user",
+	"track_seen": 1
+}
