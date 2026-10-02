@@ -242,7 +242,9 @@ def _preflight() -> None:
             or state_fingerprint != EXPECTED_STATE_FINGERPRINT
             or transition_fingerprint != EXPECTED_TRANSITION_FINGERPRINT
         ):
-            frappe.throw(_("{0} conflicts with the approved configuration fingerprint.").format(WORKFLOW_NAME))
+            frappe.throw(
+                _("{0} conflicts with the approved configuration fingerprint.").format(WORKFLOW_NAME)
+            )
     if frappe.db.exists("Workflow Action", {"reference_doctype": "Journal Entry", "status": "Open"}):
         frappe.throw(_("Journal Entry approval has open Workflow Actions"))
     populations = {status: frappe.db.count("Journal Entry", {"docstatus": status}) for status in (0, 1, 2)}

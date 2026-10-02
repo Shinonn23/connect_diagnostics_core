@@ -16,4 +16,7 @@ class TestJournalEntryApprovalPatch(UnitTestCase):
         self.assertEqual(fields[0]["fieldname"], "workflow_state")
         self.assertTrue(all(field["no_copy"] and field["read_only"] for field in fields[1:]))
         operation_field = next(field for field in fields if field["fieldname"] == "approval_operation_id")
-        self.assertEqual(operation_field["unique"], 1)
+        self.assertEqual(operation_field["fieldtype"], "Data")
+        self.assertEqual(operation_field["hidden"], 1)
+        self.assertEqual(operation_field["allow_on_submit"], 1)
+        self.assertEqual(operation_field["is_system_generated"], 1)

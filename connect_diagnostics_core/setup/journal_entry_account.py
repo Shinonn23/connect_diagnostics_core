@@ -86,15 +86,6 @@ CUSTOM_FIELDS = {
             "insert_after": "overwrite_tax_invoice",
             "is_system_generated": 1,
         },
-        {
-            "fieldname": "territory",
-            "label": "Territory",
-            "fieldtype": "Link",
-            "insert_after": "dimension_col_break",
-            "allow_on_submit": 1,
-            "is_system_generated": 1,
-            "options": "Territory",
-        },
     ],
 }
 

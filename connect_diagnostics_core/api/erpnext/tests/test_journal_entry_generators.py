@@ -40,13 +40,44 @@ class TestJournalEntryGenerators(UnitTestCase):
         self.assertNotEqual(identity, generators._operation_id(doc, context))
 
     def test_source_proof_is_bound_to_final_journal_entry_name(self) -> None:
+        original_site = generators.frappe.local.site
         with (
             patch.object(generators, "get_encryption_key", return_value="secret"),
-            patch.object(generators.frappe.local, "site", "local.test", create=True),
+            patch.object(generators.frappe.local, "site", "local.test"),
         ):
             first = generators._source_proof("Source", "SRC-1", "create", "op", "JE-1")
             copied = generators._source_proof("Source", "SRC-1", "create", "op", "JE-2")
         self.assertNotEqual(first, copied)
+        self.assertEqual(generators.frappe.local.site, original_site)
+
+    def test_public_seal_binds_inserted_name_without_save_or_commit(self) -> None:
+        values = {
+            "approval_source_doctype": "Asset Disposal Request",
+            "approval_source_name": "DISPOSAL-1",
+            "approval_source_action": "scrap",
+            "approval_operation_id": "operation-1",
+        }
+        doc = MagicMock(name="native_draft")
+        doc.name = "JE-1"
+        doc.get.side_effect = values.get
+        doc.set.side_effect = values.__setitem__
+        with (
+            patch.object(generators, "get_encryption_key", return_value="test-key"),
+            patch.object(generators.frappe.db, "commit") as commit,
+        ):
+            generators.seal_trusted_generated_draft(doc)
+            self.assertEqual(
+                generators._validate_source_provenance(doc),
+                ("Asset Disposal Request", "DISPOSAL-1", "scrap", "operation-1"),
+            )
+            doc.db_set.assert_called_once_with(
+                "approval_source_proof", values["approval_source_proof"], update_modified=False
+            )
+            doc.save.assert_not_called()
+            commit.assert_not_called()
+            doc.name = "JE-2"
+            with self.assertRaises(frappe.ValidationError):
+                generators._validate_source_provenance(doc)
 
     def test_petty_cash_requires_operation_id(self) -> None:
         with patch.object(generators.frappe, "throw", side_effect=ValueError):

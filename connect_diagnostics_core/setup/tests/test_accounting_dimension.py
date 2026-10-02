@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 import frappe
 from frappe.tests import IntegrationTestCase, UnitTestCase
 
+from connect_diagnostics_core import setup
 from connect_diagnostics_core.setup import accounting_dimension
 
 # Doctypes that already carry a hand-rolled or native `department`/`territory`
@@ -25,9 +26,26 @@ PREEXISTING_TERRITORY_FIELD_DOCTYPES = (
     "Purchase Invoice",
     "Journal Entry Account",
 )
+NATIVE_DIMENSION_FIELDS = {
+    "Journal Entry Account": ("territory",),
+    "Sales Invoice": ("department",),
+    "Purchase Invoice": ("department", "territory"),
+    "Sales Invoice Item": ("department", "territory"),
+    "Purchase Invoice Item": ("department", "territory"),
+    "Sales Order Item": ("department", "territory"),
+    "Sales Taxes and Charges": ("department", "territory"),
+    "Purchase Taxes and Charges": ("department", "territory"),
+}
 
 
 class TestEnsureConfigurationGuard(UnitTestCase):
+    def test_setup_modules_do_not_declare_native_dimension_custom_fields(self) -> None:
+        self.assertEqual(sum(map(len, NATIVE_DIMENSION_FIELDS.values())), 14)
+        for module in setup._MODULES:
+            for doctype, fields in getattr(module, "CUSTOM_FIELDS", {}).items():
+                with self.subTest(module=module.__name__, doctype=doctype):
+                    self.assertFalse({field["fieldname"] for field in fields} & {"department", "territory"})
+
     def test_skips_creation_when_every_dimension_already_exists(self) -> None:
         with (
             patch.object(accounting_dimension.frappe.db, "exists", return_value=True),
@@ -113,6 +131,29 @@ class TestRegisteredDimensions(IntegrationTestCase):
                 self._require(document_type)
                 count = frappe.db.count("Accounting Dimension", {"document_type": document_type})
                 self.assertEqual(count, 1)
+
+    def test_repeated_setup_preserves_each_existing_native_dimension_field(self) -> None:
+        fieldnames = ("name", "fieldtype", "options", "allow_on_submit", "insert_after")
+
+        def snapshot() -> dict[tuple[str, str], dict[str, object]]:
+            result = {}
+            for doctype, dimensions in NATIVE_DIMENSION_FIELDS.items():
+                for dimension in dimensions:
+                    rows = frappe.get_all(
+                        "Custom Field",
+                        filters={"dt": doctype, "fieldname": dimension},
+                        fields=list(fieldnames),
+                    )
+                    self.assertEqual(len(rows), 1, f"{doctype}.{dimension} must have one native field")
+                    self.assertEqual((rows[0].fieldtype, rows[0].options), ("Link", dimension.title()))
+                    result[(doctype, dimension)] = dict(rows[0])
+            return result
+
+        before = snapshot()
+        setup.apply_all()
+        self.assertEqual(snapshot(), before)
+        setup.apply_all()
+        self.assertEqual(snapshot(), before)
 
     def test_preexisting_department_fields_are_not_duplicated(self) -> None:
         self._require("Department")

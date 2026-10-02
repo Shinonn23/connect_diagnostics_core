@@ -275,6 +275,11 @@ def _draft_provenance(
     return doc
 
 
+def seal_trusted_generated_draft(doc: Any) -> None:
+    """Seal prepared provenance after native insertion, without saving or committing."""
+    _seal_source_provenance(doc)
+
+
 def _seal_source_provenance(doc: Any) -> None:
     proof = _source_proof(
         str(doc.get("approval_source_doctype") or ""),

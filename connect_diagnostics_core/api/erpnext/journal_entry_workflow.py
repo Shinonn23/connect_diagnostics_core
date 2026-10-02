@@ -16,6 +16,7 @@ from typing import Any, cast
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 from frappe.utils.password import get_encryption_key
 
 from connect_diagnostics_core.api.frappe.approval_controls import (
@@ -202,7 +203,7 @@ def _field_precision(doctype: str, fieldname: str) -> int:
     return int(field.precision or frappe.get_precision(doctype, fieldname) or 6) if field else 6
 
 
-def approval_payload(doc: Document) -> dict[str, Any]:
+def approval_payload(doc: Document, *, include_receivable_sources: bool = True) -> dict[str, Any]:
     """Build the deterministic v1 posting payload, preserving child row order."""
     payload: dict[str, Any] = {}
     for key, value in doc.as_dict().items():
@@ -231,7 +232,137 @@ def approval_payload(doc: Document) -> dict[str, Any]:
                     value = _decimal(value, _field_precision("Journal Entry Tax Invoice Detail", key))
                 item[key] = _plain(value)
         payload["tax_invoice_details"].append(item)
+    if include_receivable_sources and _is_ar_write_off(doc):
+        payload["receivable_sources"] = _receivable_source_facts(doc)
     return payload
+
+
+def _is_ar_write_off(doc: Document) -> bool:
+    return (
+        doc.get("voucher_type") == "Write Off Entry"
+        and doc.get("write_off_based_on") == "Accounts Receivable"
+    )
+
+
+def _selected_sales_invoice_names(doc: Document) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            {
+                str(row.get("reference_name"))
+                for row in doc.get("accounts") or []
+                if row.get("reference_type") == "Sales Invoice" and row.get("reference_name")
+            }
+        )
+    )
+
+
+def _receivable_source_facts(doc: Document, *, for_update: bool = False) -> list[dict[str, Any]]:
+    facts = []
+    fields = [
+        "docstatus",
+        "company",
+        "customer",
+        "debit_to",
+        "currency",
+        "party_account_currency",
+        "outstanding_amount",
+    ]
+    for name in _selected_sales_invoice_names(doc):
+        row = frappe.db.get_value("Sales Invoice", name, fields, as_dict=True, for_update=for_update)
+        facts.append({"name": name, **(_plain(row) if row else {field: None for field in fields})})
+    return facts
+
+
+def _validate_ar_write_off_rows(doc: Document) -> None:
+    if not _is_ar_write_off(doc):
+        return
+    # Existing trusted generators do not create AR Write Off entries. A signed
+    # source identity is not a one-use, content-bound capability, so it cannot
+    # exempt a generated Journal Entry from this user-authored transaction rule.
+    if doc.get("approval_source_proof"):
+        from connect_diagnostics_core.api.erpnext.journal_entry_generators import (
+            _validate_source_provenance,
+        )
+
+        _validate_source_provenance(doc)
+        frappe.throw(_("Generated Journal Entries cannot be used for an Accounts Receivable write-off."))
+
+    invoice_rows: dict[str, list[Document]] = {}
+    for row in doc.get("accounts") or []:
+        account = str(row.get("account") or "")
+        account_type = frappe.db.get_value("Account", account, "account_type") if account else None
+        is_receivable = account_type == "Receivable"
+        reference_type = row.get("reference_type")
+        reference_name = str(row.get("reference_name") or "")
+        if reference_type == "Sales Invoice":
+            if not reference_name:
+                frappe.throw(_("Each receivable write-off row must reference a selected Sales Invoice."))
+            invoice_rows.setdefault(reference_name, []).append(row)
+        elif is_receivable:
+            frappe.throw(_("Receivable write-off rows must reference a selected Sales Invoice."))
+
+    if not invoice_rows:
+        frappe.throw(_("Select at least one submitted Sales Invoice for this receivable write-off."))
+    for invoice_name, rows in invoice_rows.items():
+        if len(rows) != 1:
+            frappe.throw(_("Each selected Sales Invoice must have exactly one receivable write-off row."))
+        row = rows[0]
+        source = frappe.db.get_value(
+            "Sales Invoice",
+            invoice_name,
+            ["docstatus", "company", "customer", "debit_to", "party_account_currency"],
+            as_dict=True,
+        )
+        if not source or source.docstatus != 1:
+            frappe.throw(_("Sales Invoice {0} must be submitted before write-off.").format(invoice_name))
+        if (
+            source.company != doc.get("company")
+            or row.get("party_type") != "Customer"
+            or row.get("party") != source.customer
+            or row.get("account") != source.debit_to
+            or row.get("account_currency") != source.party_account_currency
+        ):
+            frappe.throw(
+                _(
+                    "Sales Invoice {0} does not match the Journal Entry company, customer, and receivable account."
+                ).format(invoice_name)
+            )
+        credit = Decimal(str(row.get("credit_in_account_currency") or 0))
+        debit = Decimal(str(row.get("debit_in_account_currency") or 0))
+        if credit <= 0 or debit != 0:
+            frappe.throw(_("Each selected Sales Invoice must have a positive credit allocation."))
+
+
+def _lock_and_validate_ar_sources(doc: Document) -> None:
+    if not _is_ar_write_off(doc):
+        return
+    _validate_ar_write_off_rows(doc)
+    names = _selected_sales_invoice_names(doc)
+    if not names:
+        frappe.throw(_("Select at least one submitted Sales Invoice for this receivable write-off."))
+    facts = _receivable_source_facts(doc, for_update=True)
+    for fact in facts:
+        if fact.get("docstatus") != 1:
+            frappe.throw(
+                _("Sales Invoice {0} must remain submitted until the write-off is posted.").format(
+                    fact["name"]
+                )
+            )
+        matching = next(
+            row
+            for row in doc.get("accounts") or []
+            if row.get("reference_type") == "Sales Invoice" and row.get("reference_name") == fact["name"]
+        )
+        currency = str(fact.get("party_account_currency") or fact.get("currency") or "")
+        precision = frappe.get_precision("Sales Invoice", "outstanding_amount", currency=currency)
+        amount = flt(str(matching.get("credit_in_account_currency") or 0), precision)
+        outstanding = flt(str(fact.get("outstanding_amount") or 0), precision)
+        if amount > outstanding:
+            frappe.throw(
+                _(
+                    "Write-off allocation for Sales Invoice {0} exceeds its current outstanding amount."
+                ).format(fact["name"])
+            )
 
 
 def _enabled_dimensions() -> frozenset[str]:
@@ -249,6 +380,11 @@ def _enabled_dimensions() -> frozenset[str]:
 def get_approval_digest(doc: Document) -> str:
     """Return the versioned digest required by Review, Approve, and Submit."""
     return "je-approval-v1:" + critical_digest(approval_payload(doc))
+
+
+def _get_posting_digest(doc: Document) -> str:
+    """Digest immutable JE posting fields, excluding source balances that posting itself changes."""
+    return "je-approval-v1:" + critical_digest(approval_payload(doc, include_receivable_sources=False))
 
 
 def approval_digest_schema(doc: Document | None = None) -> str:
@@ -331,11 +467,12 @@ def capture_checker_snapshot(doc: Document, method: str | None = None) -> None:
     maker = str(doc.get("approval_maker_user") or "")
     if not maker:
         frappe.throw(_("Journal Entry Maker evidence is required before review."))
-    require_distinct_actors(maker, frappe.session.user)
+    require_distinct_actors(maker, frappe.session.user, ())
+    _validate_ar_write_off_rows(doc)
     employee, signature = _signature(frappe.session.user)
     digest = get_approval_digest(doc)
     doc.set("approval_digest", digest)
-    doc.set("approval_critical_digest", digest)
+    doc.set("approval_critical_digest", _get_posting_digest(doc))
     doc.set("approval_digest_schema", approval_digest_schema(doc))
     doc.set("approval_checker_user", frappe.session.user)
     doc.set("approval_checker_at", frappe.utils.now_datetime())
@@ -344,6 +481,7 @@ def capture_checker_snapshot(doc: Document, method: str | None = None) -> None:
 
 
 def capture_approver_snapshot(doc: Document, method: str | None = None) -> None:
+    _validate_ar_write_off_rows(doc)
     del method
     if doc.get("approval_digest") != get_approval_digest(doc) or doc.get(
         "approval_digest_schema"
@@ -427,6 +565,7 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
     del method
     try:
         validate_workflow(doc)
+        _lock_and_validate_ar_sources(doc)
         persisted = cast(
             dict[str, Any] | None,
             frappe.db.get_value(
@@ -558,6 +697,7 @@ def authorize_transition(doc: Document, action: str) -> None:
             "workflow_state",
             "docstatus",
             "approval_digest",
+            "approval_critical_digest",
             "approval_digest_schema",
             "approval_maker_user",
             "approval_checker_user",
@@ -575,7 +715,16 @@ def authorize_transition(doc: Document, action: str) -> None:
         frappe.throw(_("Journal Entry transition has an invalid document status."))
     digest = get_approval_digest(doc)
     schema = approval_digest_schema(doc)
-    if persisted.get("approval_digest") != digest or persisted.get("approval_digest_schema") != schema:
+    critical_digest_value = (
+        str(persisted.get("approval_critical_digest") or "")
+        if action == "cancel"
+        else _get_posting_digest(doc)
+    )
+    if (
+        (persisted.get("approval_digest") != digest if action == "submit" else False)
+        or critical_digest_value != _get_posting_digest(doc)
+        or persisted.get("approval_digest_schema") != schema
+    ):
         frappe.throw(_("Journal Entry approval is missing or stale."))
     if not persisted.get("approval_checker_signature") or not persisted.get("approval_approver_signature"):
         frappe.throw(_("Current signed checker and approver evidence is required."))
@@ -596,7 +745,8 @@ def authorize_transition(doc: Document, action: str) -> None:
         validate_generated_source_cancel(doc)
     fieldname = "approval_submit_proof" if action == "submit" else "approval_cancel_proof"
     actor_field = "approval_submit_actor" if action == "submit" else "approval_cancel_actor"
-    proof = _proof(action, doc, source, target, digest, schema, actor)
+    proof_digest = str(persisted.get("approval_digest") or "") if action == "cancel" else digest
+    proof = _proof(action, doc, source, target, proof_digest, schema, actor)
     doc.set(fieldname, proof)
     doc.set(actor_field, actor)
     if hasattr(doc, "db_set"):
