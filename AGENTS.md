@@ -3,8 +3,10 @@
 This is the sole repository-wide policy file. Codex loads it for work in this repository;
 the scoped Frappe rules in [`connect_diagnostics_core/AGENTS.md`](connect_diagnostics_core/AGENTS.md)
 apply to the app package. Reusable procedures live in repository skills, GitHub Actions live in
-[`.github/workflows/`](.github/workflows/), and final accepted product behavior lives in
-[`docs/`](docs/). Read relevant final documentation before changing accepted behavior.
+[`.github/workflows/`](.github/workflows/) with the reusable change-scope action under
+[`.github/actions/change-scope/`](.github/actions/change-scope/), and final accepted product
+behavior lives in [`docs/`](docs/). Read relevant final documentation before changing accepted
+behavior.
 
 ## Rule priority
 

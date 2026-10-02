@@ -41,48 +41,7 @@ jobs:
       # pull request blocked on a pending check. Only the expensive steps are gated.
       - name: Detect change scope
         id: scope
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-          BASE_REF: ${{ github.base_ref }}
-        run: |
-          set -Eeuo pipefail
-
-          if [[ "$HEAD_REF" == release-please--* ]]; then
-            echo "run_full=false" >> "$GITHUB_OUTPUT"
-            echo "Release Please branch: skipping bench-based checks."
-            exit 0
-          fi
-
-          if [[ -z "$BASE_REF" ]]; then
-            echo "run_full=true" >> "$GITHUB_OUTPUT"
-            echo "No base ref available: running the full checks."
-            exit 0
-          fi
-
-          git fetch --no-tags origin \
-            "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}" >/dev/null 2>&1 || true
-          if ! changed=$(git diff --name-only "origin/${BASE_REF}...HEAD"); then
-            echo "run_full=true" >> "$GITHUB_OUTPUT"
-            echo "Could not resolve the diff against origin/${BASE_REF}: running the full checks."
-            exit 0
-          fi
-
-          if [[ -z "$changed" ]]; then
-            echo "run_full=true" >> "$GITHUB_OUTPUT"
-            echo "Empty diff against origin/${BASE_REF}: running the full checks."
-            exit 0
-          fi
-
-          readonly allowlist='^([^/]+\.md|(.*/)?AGENTS\.md|docs/.*|\.github/.*\.md|\.github/ISSUE_TEMPLATE/.*|\.agents/.*|\.codex/.*|\.vscode/.*|license\.txt|\.gitignore|\.editorconfig|\.release-please-manifest\.json)$'
-          if impacting=$(printf '%s\n' "$changed" | grep -Ev "$allowlist"); then
-            echo "run_full=true" >> "$GITHUB_OUTPUT"
-            echo "Files that can affect runtime behaviour:"
-            printf '%s\n' "$impacting"
-          else
-            echo "run_full=false" >> "$GITHUB_OUTPUT"
-            echo "Only documentation and agent configuration changed:"
-            printf '%s\n' "$changed"
-          fi
+        uses: ./.github/actions/change-scope
       - name: Find tests
         if: steps.scope.outputs.run_full == 'true'
         run: |
