@@ -14,13 +14,22 @@ from frappe.tests import IntegrationTestCase
 from frappe.utils import flt, nowdate
 
 from connect_diagnostics_core.api.erpnext import payment_entry_approval_poc as poc
+from connect_diagnostics_core.api.erpnext import payment_entry_workflow
 
 
 class TestPaymentEntryApprovalPOCIntegration(IntegrationTestCase):
     """Exercise the disposable route with real Workflow and Payment Entry lifecycle calls."""
 
     WORKFLOW = "_Test POC Payment Entry Approval"
-    PENDING_CHECK_STATE = "Payment Entry Pending Check"
+    WORKFLOW_STATES: ClassVar[tuple[str, ...]] = (
+        poc.DRAFT,
+        poc.PENDING_CHECK,
+        poc.PENDING_APPROVAL,
+        poc.APPROVED,
+        poc.REJECTED,
+        poc.SUBMITTED,
+        "Payment Entry Cancelled",
+    )
     ACTIONS: ClassVar[dict[str, str]] = {
         "send": "_Test POC Send Payment Entry",
         "check": "_Test POC Check Payment Entry",
@@ -108,7 +117,6 @@ class TestPaymentEntryApprovalPOCIntegration(IntegrationTestCase):
         collisions: list[str] = []
         candidates = [
             ("Workflow", cls.WORKFLOW),
-            ("Workflow State", cls.PENDING_CHECK_STATE),
             *[("Workflow Action Master", name) for name in cls.ACTIONS.values()],
             *[("Workflow Transition Tasks", name) for name, _task in cls.TASKS.values()],
         ]
@@ -171,12 +179,11 @@ class TestPaymentEntryApprovalPOCIntegration(IntegrationTestCase):
             0,
             update_modified=False,
         )
-        frappe.get_doc(
-            {
-                "doctype": "Workflow State",
-                "workflow_state_name": cls.PENDING_CHECK_STATE,
-            }
-        ).insert(ignore_permissions=True)
+        for state in cls.WORKFLOW_STATES:
+            if not frappe.db.exists("Workflow State", state):
+                frappe.get_doc({"doctype": "Workflow State", "workflow_state_name": state}).insert(
+                    ignore_permissions=True
+                )
         for action in cls.ACTIONS.values():
             frappe.get_doc(
                 {
@@ -339,40 +346,50 @@ class TestPaymentEntryApprovalPOCIntegration(IntegrationTestCase):
             with self.assertRaises(frappe.ValidationError):
                 payment_entry.submit()
 
-    def test_real_workflow_posts_once_and_preserves_native_cancel(self) -> None:
+    def test_obsolete_poc_route_cannot_bypass_current_payment_approval(self) -> None:
         with self._enabled():
             payment_entry = self._new_payment_entry()
-            payment_entry = cast(PaymentEntry, apply_workflow(payment_entry, self.ACTIONS["send"]))
-            self.assertEqual(payment_entry.get("workflow_state"), poc.PENDING_CHECK)
-            self.assertTrue(payment_entry.get("submit_by"))
-
-            frappe.set_user(self.USERS["checker"])
-            payment_entry = cast(PaymentEntry, apply_workflow(payment_entry, self.ACTIONS["check"]))
-            self.assertEqual(payment_entry.get("workflow_state"), poc.PENDING_APPROVAL)
-            self.assertTrue(payment_entry.get("checked_signature"))
-
-            frappe.set_user(self.USERS["approver"])
-            payment_entry = cast(PaymentEntry, apply_workflow(payment_entry, self.ACTIONS["approve"]))
-            self.assertEqual(payment_entry.get("workflow_state"), poc.APPROVED)
-            self.assertTrue(payment_entry.get("authorized_signature"))
-
-            frappe.set_user(self.USERS["checker"])
-            payment_entry = cast(PaymentEntry, apply_workflow(payment_entry, self.ACTIONS["post"]))
-            self.assertEqual(payment_entry.docstatus, 1)
-            self.assertEqual(payment_entry.get("workflow_state"), poc.SUBMITTED)
-            gl_count = frappe.db.count(
-                "GL Entry",
-                {"voucher_type": "Payment Entry", "voucher_no": payment_entry.name},
+            evidence_fields = tuple(
+                dict.fromkeys((*poc.SNAPSHOT_FIELDS, *payment_entry_workflow._EVIDENCE_FIELDS))
             )
-            self.assertGreater(gl_count, 0)
-            payment_entry.submit()
+            fields = ("workflow_state", "docstatus", *evidence_fields)
+            before = frappe.db.get_value("Payment Entry", payment_entry.name, fields, as_dict=True)
+            actions_before = frappe.get_all(
+                "Workflow Action",
+                filters={
+                    "reference_doctype": "Payment Entry",
+                    "reference_name": payment_entry.name,
+                    "status": "Open",
+                },
+                pluck="name",
+            )
+            self.assertEqual((before.workflow_state, before.docstatus), (poc.DRAFT, 0))
+            self.assertFalse(any(before.get(field) for field in evidence_fields))
+
+            with self.assertRaises(frappe.ValidationError):
+                apply_workflow(payment_entry, self.ACTIONS["send"])
+
+            payment_entry.reload()
             self.assertEqual(
-                frappe.db.count(
-                    "GL Entry",
-                    {"voucher_type": "Payment Entry", "voucher_no": payment_entry.name},
-                ),
-                gl_count,
+                frappe.db.get_value("Payment Entry", payment_entry.name, fields, as_dict=True), before
             )
-
-            payment_entry = cast(PaymentEntry, apply_workflow(payment_entry, self.ACTIONS["cancel"]))
-            self.assertEqual(payment_entry.docstatus, 2)
+            self.assertEqual((payment_entry.get("workflow_state"), payment_entry.docstatus), (poc.DRAFT, 0))
+            self.assertFalse(any(payment_entry.get(field) for field in evidence_fields))
+            self.assertEqual(
+                frappe.get_all(
+                    "Workflow Action",
+                    filters={
+                        "reference_doctype": "Payment Entry",
+                        "reference_name": payment_entry.name,
+                        "status": "Open",
+                    },
+                    pluck="name",
+                ),
+                actions_before,
+            )
+            for doctype in ("GL Entry", "Payment Ledger Entry"):
+                self.assertFalse(
+                    frappe.db.exists(
+                        doctype, {"voucher_type": "Payment Entry", "voucher_no": payment_entry.name}
+                    )
+                )
