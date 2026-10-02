@@ -21,19 +21,19 @@ policy in [`../AGENTS.md`](../AGENTS.md).
 - Run automated tests only against `local.test` by default, for example
   `bench --site local.test run-tests --app connect_diagnostics_core`. Do not use `local` for test
   runs unless the task explicitly requires it.
-- Use `local.test` for local Computer Use/browser acceptance as well. `local` is for ordinary
+- Use `local.test` for local Playwright UI acceptance as well. `local` is for ordinary
   development and manual inspection. Run server inspection with `bench --site <site> console` and
   `exec(open(f).read(), globals())` against the site appropriate to the task.
 - Salary Slips are submitted only through Payroll Entry. Never add a direct Salary Slip submit
   path.
-- The app may ship explicit, reviewed, filtered fixtures for native `Workflow`, `Workflow State`,
+- The app may ship explicit, filtered fixtures for native `Workflow`, `Workflow State`,
   and `Workflow Action Master` records only when every record belongs to an approved named route
   and appears in that route's configuration manifest. These are declarative configuration
   artifacts: they do not authorize a target, grant permissions, assign approvers or delegated
   authority, or perform posting effects.
 - Every Workflow fixture set requires an approved specification and revision, an exact allowlist,
   configuration owner, target and route scope, collision policy, deterministic migrate/re-run
-  behavior, recovery plan, and independent validation. Fixture sync must not silently overwrite,
+  behavior, recovery plan, and passing tests. Fixture sync must not silently overwrite,
   disable, delete, or repurpose an existing site-owned record; unresolved collisions stop the
   change for owner disposition. Do not create or modify business Workflow records through ad hoc
   setup, startup, hooks, or runtime code.
@@ -98,11 +98,11 @@ scripts minimal and delegate business logic to whitelisted Python through `frapp
 
 - A change to accepted module-wide behavior updates `docs/<module>/behavior.md` after runtime
   acceptance. A change to an accepted workflow/process updates `docs/<module>/<workflow>/`.
-- Final docs describe current shipped behavior only. Do not copy task backlog, TODOs, temporary
-  evidence, review findings, or unimplemented design from `.github/tasks/` into `docs/`.
-- Documentation is the last implementation gate: automated checks and required Computer Use
-  acceptance pass first, then `doc_writer` updates canonical docs and an independent reviewer
-  verifies them against the accepted implementation.
+- Final docs describe current shipped behavior only. Do not copy TODOs, temporary evidence,
+  implementation notes, or unimplemented design into `docs/`.
+- Documentation is the last implementation gate: automated checks and required Playwright UI
+  acceptance pass first, then `doc_writer` updates canonical docs and the primary verifies them
+  against the accepted implementation.
 
 ## Custom fields
 
@@ -165,12 +165,12 @@ deduplicating `job_id` for long work.
 Never rename or remove fields from an existing DocType without explicit instruction and a plan.
 Adding a required field needs a backfill patch. Test patches against a populated database before
 committing; if the environment cannot execute that verification, record the exact deferred
-verification evidence. All schema changes require independent agent review before merge, with
-human review deferred until the current autonomous execution window ends.
+verification evidence. Schema changes must pass the relevant migration and automated tests before
+the primary accepts them; if a site cannot run them, record the exact deferred evidence.
 
 ## Testing
 
-- New features include tests unless the task explicitly waives them. Minimum coverage is one
+- New features include tests. Minimum coverage is one
   test per hook handler and one per whitelisted API method.
 - Import test bases from `frappe.tests`: `UnitTestCase` for isolated/mocked tests and
   `IntegrationTestCase` when a site, DB, metadata, or real Documents are needed. Do not use

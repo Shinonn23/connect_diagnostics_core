@@ -1,3 +1,5 @@
+model = "gpt-6-luna"
+model_reasoning_effort = "high"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
@@ -6,10 +8,10 @@ hooks = true
 
 [agents]
 enabled = true
-# Keep at most four live threads including the primary agent.
-max_concurrent_threads_per_session = 3
+# Keep at most twelve live threads including the primary agent.
+max_concurrent_threads_per_session = 12
 default_subagent_model = "gpt-6-luna"
-default_subagent_reasoning_effort = "low"
+default_subagent_reasoning_effort = "medium"
 interrupt_message = true
 
 [agents.explorer]
@@ -20,14 +22,14 @@ config_file = "./agents/explorer.toml"
 description = "Implementation agent for one bounded, plan-ready task with exclusive write ownership."
 config_file = "./agents/worker.toml"
 
-[agents.reviewer]
-description = "Independent plan, code, test, security, lifecycle, and documentation reviewer."
-config_file = "./agents/reviewer.toml"
-
 [agents.browser_tester]
-description = "Computer Use acceptance tester for real Frappe Desk workflows."
+description = "Playwright UI acceptance tester for real Frappe Desk workflows with actor-separated recordings."
 config_file = "./agents/browser_tester.toml"
 
 [agents.doc_writer]
 description = "Final documentation writer for accepted shipped behavior."
 config_file = "./agents/doc_writer.toml"
+
+[agents.ux_tester]
+description = "Playwright visual and interaction tester who reports findings and verifies fixes."
+config_file = "./agents/ux_tester.toml"

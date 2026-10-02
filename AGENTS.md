@@ -2,11 +2,9 @@
 
 This is the sole repository-wide policy file. Codex loads it for work in this repository;
 the scoped Frappe rules in [`connect_diagnostics_core/AGENTS.md`](connect_diagnostics_core/AGENTS.md)
-apply to the app package. Procedural steps live in the repository skills, workflow narrative
-lives in [`.github/workflow.md`](.github/workflow.md), final accepted product behavior lives in
-[`docs/`](docs/), and active or paused implementation work lives in
-[`.github/tasks/`](.github/tasks/). Read the relevant final documentation and active task record
-before working in that area.
+apply to the app package. Reusable procedures live in repository skills, GitHub Actions live in
+[`.github/workflows/`](.github/workflows/), and final accepted product behavior lives in
+[`docs/`](docs/). Read relevant final documentation before changing accepted behavior.
 
 ## Rule priority
 
@@ -36,76 +34,45 @@ feature work ─PR→ developments ─PR→ user-acceptance-testing ─PR→ pro
   contains `Release-As:`.
 - **Issue ↔ PR:** one issue normally maps to one PR. A PR may reference related issues or
   none (record `None`); use `Refs #<n>`, never `Closes #<n>`.
-- **Workflow-baseline decomposition exception:** branches matching `feat/wf-tsk-*` are child
-  implementation branches of `feat/workflow-baseline-checkpoint-20260919`. Their PR target is the
-  workflow-baseline parent branch, not `developments`; after child integration and full workflow
-  validation, the parent branch is merged into `developments`. The canonical mapping is
-  [`.github/tasks/workflow-baseline-implementation/branches.md`](.github/tasks/workflow-baseline-implementation/branches.md).
-
-The complete delivery and promotion procedure is [`.github/workflow.md`](.github/workflow.md).
-
 ## Working agreement
 
 - If unsure or missing context, do not guess. Verify behavior in the repository, installed
   source, approved specification, or test evidence before proceeding.
 - For ordinary technical, implementation, configuration, permission-test, and test-environment
-  decisions, resolve uncertainty through the primary agent with explorer/reviewer support and
-  choose the smallest clean option that remains inside the approved requirement.
+  decisions, the primary resolves uncertainty with relevant agent help and chooses the smallest
+  clean option inside the approved requirement.
 - Before code that touches more than one file or changes existing logic, list every file to
   change, why it changes, and what will not change. The approved task or plan is the approval
   checkpoint; if scope grows, re-propose the complete list.
 - Do not create files or add dependencies outside the approved scope.
-- Done means the pinned pre-commit command passes, relevant tests pass (or are explicitly
-  waived in writing), and the requested change is fully implemented. State any human-only
+- Done means the pinned pre-commit command passes, relevant tests pass, and the requested change is
+  fully implemented. State any human-only
   verification that remains.
 
-## Multi-agent engineering protocol
+## Agent-assisted implementation
 
-The primary agent is the orchestrator, tech lead, integration owner, and single owner of the task
-register. It plans the work, assigns bounded ownership, integrates results, and decides when each
-gate is satisfied. The repository keeps five specialist roles under `.codex/agents/`:
+The primary agent owns the plan, scope, integration, and completion decision. For work that benefits
+from additional expertise, call the relevant specialist agents in sequence:
 
-- `explorer` — read-only source/configuration/framework investigation.
-- `worker` — one bounded implementation task with exclusive write ownership and focused tests.
-- `reviewer` — independent plan/code/test/security/lifecycle/documentation review.
-- `browser_tester` — Computer Use acceptance on the approved DEV environment.
-- `doc_writer` — final documentation after runtime acceptance.
+1. Use `explorer` to trace existing code, installed framework behavior, migrations, and tests before
+   changing existing behavior.
+2. Write a bounded plan with acceptance criteria, files and reasons, dependencies, risks,
+   migration/rollback effects, tests, UI coverage, and documentation impact.
+3. Assign implementation slices to `worker` agents with exclusive file ownership. Keep shared
+   surfaces such as `hooks.py`, `patches.txt`, setup exports, and migration ordering with one owner
+   at a time.
+4. Run focused tests after each slice. When a test fails, assign or make the fix, rerun affected
+   tests, and repeat until the relevant tests pass. Then run the final automated gates.
+5. For user-visible workflows, use `browser_tester` for the real Desk journey after automated tests
+   pass; use `ux_tester` for visual checks when they add useful coverage. Fix failures and rerun the
+   affected journey from its start.
+6. After behavior and required tests pass, use `doc_writer` for canonical documentation when
+   accepted behavior changed. The primary checks the result and completes the work.
 
-Do not create separate architect or UI-test-author roles. Architecture/decomposition belongs to the
-primary agent, supported by explorers. If automated browser/UI tests are required, a worker writes
-them from the accepted browser evidence.
+Do not delegate merely to add coordination. Specialists report findings, changes, test results,
+and blockers directly to the primary. Scope growth or a missing material security, data, billing,
+or hard-to-reverse decision returns to the primary for resolution.
 
-For substantial engineering work, use this lifecycle:
-
-```text
-PLAN
-  -> PLAN REVIEW
-  -> READY
-  -> IMPLEMENT
-  -> FOCUSED AUTOMATED TESTS
-  -> CODE REVIEW
-  -> FIX <-> RE-REVIEW
-  -> FINAL AUTOMATED GATES
-  -> COMPUTER USE ACCEPTANCE
-  -> FINAL DOCUMENTATION
-  -> DOCUMENTATION REVIEW
-  -> ACCEPTED
-```
-
-- A task is substantial when it crosses modules or changes a data model, DocType, hook, permission,
-  transaction, migration, workflow, integration, or user-visible behavior with material regression
-  risk.
-- Before implementation, the primary agent records the goal, bounded scope, acceptance criteria,
-  owned files, dependencies, risks, tests, migration/rollback impact, Computer Use coverage, and
-  documentation impact. An independent reviewer must mark the plan ready.
-- Parallel writers require exclusive file ownership. Read-only explorers/reviewers may inspect any
-  file. Serialize work that edits the same file or shared integration surfaces such as `hooks.py`,
-  `patches.txt`, setup/configuration exports, and migration ordering.
-- No self-approval. The implementing worker cannot be final reviewer. P0/P1 findings block the
-  next gate; fixes are re-reviewed.
-- Automated tests are the deterministic correctness gate. Computer Use is an end-to-end acceptance
-  layer for Desk-visible behavior, workflows, permissions, role handoffs, and visible side effects;
-  it never substitutes for automated coverage.
 - Local development has two Frappe sites with distinct responsibilities:
   - `local` is the normal interactive development site; its Desk host is
     `dev.erp.connectdiagnostics.local`.
@@ -113,22 +80,29 @@ PLAN
     `dev.erp.connectdiagnostics.test`.
   All automated test commands must target `local.test` unless the task explicitly authorizes a
   different site. Do not run automated tests against `local` by default.
-- Computer Use acceptance runs only after final automated gates pass. For local development,
-  `browser_tester` must use `local.test` through `dev.erp.connectdiagnostics.test`; use
-  `dev.erp.connectdiagnostics.local` only for ordinary interactive development/manual inspection.
-  Repository access may be local or Remote SSH, but browser/Computer Use runs from the ChatGPT
-  desktop host and does not require a GUI browser on the SSH host. If the current Codex host cannot
-  use Computer Use or the test Desk host is unreachable from the desktop, the browser tester must
-  mark the gate blocked rather than simulate or claim a pass.
-- Final documentation runs only after runtime acceptance. `doc_writer` writes current shipped
-  behavior under `docs/`; an independent reviewer checks it against accepted code and runtime
-  evidence before the task closes.
-- Agents may delegate only bounded independent work when a concurrency slot is available. The
-  project limit is configured in `.codex/config.toml`; treat it as a shared budget and avoid
-  delegation that adds more coordination cost than value.
+- Playwright UI acceptance runs only after final automated gates pass. Use isolated
+  BrowserContexts for each authenticated workflow actor on `local.test` through
+  `dev.erp.connectdiagnostics.test`. Drive document forms and native Workflow actions through
+  visible UI controls; do not mutate business state through APIs or direct database calls in the
+  UI suite. Supply test-user passwords via environment variables only. Retain actor-specific
+  recordings, screenshots, and the ordered action/state manifest with the test run. If the Desk,
+  actor credentials, or required test records are unavailable, mark the UI gate not run/blocked
+  with exact evidence; never simulate or claim a pass.
+- Final documentation describes accepted shipped behavior under `docs/`; the primary checks it
+  against accepted code and test evidence before completion.
+- Agents may delegate bounded work when a concurrency slot is available. The project limit is
+  configured in `.codex/config.toml`; avoid delegation that adds more coordination cost than value.
+- All project agents, including the primary, use `gpt-6-luna`. Select reasoning effort when
+  dispatching each task: `low` for straightforward lookup/checks, `medium` for bounded
+  implementation or testing, and `high` for complex cross-module, security, lifecycle, or visual UX
+  review. Explicitly override the role default at dispatch when task complexity differs; TOML
+  defaults do not automatically adapt during a running task. Keep the model on Luna.
+- `ux_tester` captures and inspects real Playwright screenshots for assigned routes and reports
+  findings to the primary. This supplements automated tests and workflow acceptance by
+  `browser_tester`.
 - **Agent decision protocol:** when a task, test, or blocker raises an ordinary engineering
   question, the primary agent resolves it internally. Gather only the evidence needed, use the
-  relevant explorer/worker/reviewer to challenge options, and select the smallest clean solution
+  relevant explorer/worker, and select the smallest clean solution
   that satisfies the approved requirement. Prefer native Frappe/ERPNext behavior, least privilege,
   minimal code/configuration change, reversibility, low migration risk, deterministic testability,
   and low maintenance cost. Preserve the decision rationale and rollback evidence for later review.
@@ -136,22 +110,8 @@ PLAN
   credentials, or an inaccessible external service, mark that path blocked with complete evidence
   and continue all independent work instead of waiting on that path.
 
-Every specialist reports material transitions to its parent using:
-
-```text
-TASK_UPDATE
-id: <stable task id>
-status: proposed | planning | plan_review | ready | active | blocked | completed | code_review | browser_acceptance | documentation | accepted
-owner: <agent role/name>
-scope: <bounded goal and owned files>
-evidence: <plan, commands, findings, test/browser/doc result>
-dependencies: <open or resolved ids>
-next: <next concrete action>
-blocker: <none or specific blocker>
-```
-
-The primary agent updates the task register from these reports. A child must report changed
-assumptions, ownership conflicts, or scope expansion before continuing.
+Specialists report material progress, changed assumptions, ownership conflicts, test evidence, and
+blockers directly to the primary. No repository task register is required.
 
 ## Documentation system
 
@@ -162,11 +122,10 @@ assumptions, ownership conflicts, or scope expansion before continuing.
 - Add `permissions.md`, `data-model.md`, `integration.md`, or `operations.md` only when the
   workflow is complex enough to need a separate stable reference.
 
-Final documentation describes only accepted current behavior. It must not contain TODOs, task
-status, implementation backlogs, agent findings, temporary evidence, branch/commit checkpoints,
-speculative future design, or historical working notes. Those belong in `.github/tasks/` while
-work is active and in Git/GitHub history after closure. Do not create a permanent task archive in
-`docs/`.
+Final documentation describes only accepted current behavior. It must not contain TODOs,
+implementation backlogs, agent findings, temporary evidence, branch/commit checkpoints,
+speculative future design, or historical working notes. Keep temporary work notes out of the
+repository; Git history records completed changes.
 
 ## Long-running commands
 
@@ -180,7 +139,7 @@ Before changing existing behavior, search in order: entry points and overrides; 
 and utilities; installed-source implementations; related migrations; and cross-references in
 client scripts, templates, jobs, and tests. Check hooks and scheduled events before changing an
 existing function. Reuse existing utilities. If the required behavior still cannot be verified,
-route the uncertainty to the primary agent for internal resolution and independent review.
+route the uncertainty to the primary agent for internal resolution with relevant specialist help.
 
 ## Print Format rendering
 
@@ -225,7 +184,7 @@ settings.
 ## Codex configuration
 
 Trusted project configuration lives under `.codex/`: `config.toml` for project settings and
-role registration, `agents/` for the five specialist role contracts, `hooks.json` for deterministic
+role registration, `agents/` for specialist role contracts, `hooks.json` for deterministic
 lifecycle checks, and `rules/` only for destructive-operation safety policy. Normal Git workflow
 commands such as staging and committing must not be blocked or approval-gated by repository Codex
 rules. Reusable procedures live under `.agents/skills/`. `AGENTS.md` remains the repository-wide
