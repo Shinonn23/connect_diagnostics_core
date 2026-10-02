@@ -7,8 +7,9 @@ import hashlib
 import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+from math import isfinite
 from typing import Any
 
 import frappe
@@ -76,6 +77,35 @@ def require_interactive_user(
         _fail("You do not have the role required for this Workflow action.")
     require_permission(doc, permission)
     return resolve_user(user)
+
+
+def require_native_terminal_state(doc: Document, submitted: str, cancelled: str) -> None:
+    """A terminal Workflow label must agree with the native document lifecycle."""
+    state = str(doc.get("workflow_state") or "")
+    status = int(doc.get("docstatus") or 0)
+    if (state == submitted and status != 1) or (state == cancelled and status != 2):
+        _fail("Workflow terminal state does not match the native document status.")
+
+
+def require_locked_submitted_update(doc: Document, submitted: str) -> None:
+    """Verify prior, persisted and current submitted state under the document row lock."""
+    previous = doc.get_doc_before_save()
+    if not previous or not doc.name:
+        _fail("Submitted Workflow history cannot be verified.")
+    persisted = frappe.db.get_value(
+        doc.doctype, doc.name, ["workflow_state", "docstatus"], as_dict=True, for_update=True
+    )
+    if not persisted:
+        _fail("Submitted Workflow record cannot be found.")
+    if any(
+        state != submitted or int(status or 0) != 1
+        for state, status in (
+            (persisted.get("workflow_state"), persisted.get("docstatus")),
+            (previous.get("workflow_state"), previous.get("docstatus")),
+            (doc.get("workflow_state"), doc.get("docstatus")),
+        )
+    ):
+        _fail("Submitted Workflow state cannot change through an update.")
 
 
 def _mint_approval_field_grant(doc: Document, route: str, action: str) -> None:
@@ -147,13 +177,16 @@ def _canonical_value(value: Any) -> Any:
     if value is None or isinstance(value, (bool, str, int)):
         return value
     if isinstance(value, float):
-        if value != value or value in (float("inf"), float("-inf")):
+        if not isfinite(value):
             _fail("Approval evidence contains a non-finite number.")
         return value
     if isinstance(value, (Decimal, date, datetime, time)):
         kind = type(value).__name__
         serialized = str(value) if isinstance(value, Decimal) else value.isoformat()
         return {"__approval_type__": kind, "value": serialized}
+    if isinstance(value, timedelta):
+        microseconds = (value.days * 86400 + value.seconds) * 1_000_000 + value.microseconds
+        return {"__approval_type__": "timedelta", "value": str(microseconds)}
     if isinstance(value, Document):
         _fail("Approval evidence cannot contain a document.")
     if isinstance(value, Mapping):

@@ -5,21 +5,10 @@ app_description = "Custom app for Connect Diagnostics to manage and implement co
 app_email = "siwat61719@gmail.com"
 app_license = "bsl-1.0"
 
-extend_doctype_class = {
-    "Payroll Entry": ["connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryApprovalMixin"],
-}
-
 # Apps
 # ------------------
 
 required_apps = ["erpnext", "erpnext_thailand", "hrms"]
-
-extend_doctype_class = {
-    "Asset": ["connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementNativeMixin"],
-    "Asset Movement": [
-        "connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementWorkflowMixin"
-    ],
-}
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -61,6 +50,7 @@ page_js = {
 # include js in doctype views
 doctype_js = {
     "Address": "public/js/custom/address/doctype.js",
+    "Asset Movement": "public/js/custom/asset_movement/doctype.js",
     "Company": "public/js/custom/company/doctype.js",
     "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
@@ -131,6 +121,7 @@ _normalized_workflow_methods = {
     "Connect Stock Transfer Review Snapshot": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_review_snapshot",
     "Connect Stock Transfer Approval Snapshot": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.capture_approval_snapshot",
     "Connect Stock Transfer Approval Reset": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.reset_approval",
+    "Connect Stock Transfer Reject": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.reject_approval",
     "Connect Stock Transfer Submit Execution": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.authorize_submit_execution",
     "Connect Stock Transfer Cancel Execution": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.authorize_cancel_execution",
     "Connect Stock Reconciliation Capture Maker": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.capture_maker",
@@ -215,26 +206,6 @@ workflow_methods = [
     {
         "name": "Authorize Asset Movement Cancel Transition",
         "method": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.authorize_cancel_transition",
-    },
-    {
-        "name": "Capture Sales Order Demo Maker",
-        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_maker",
-    },
-    {
-        "name": "Capture Sales Order Demo Review",
-        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_review",
-    },
-    {
-        "name": "Capture Sales Order Demo Final Approval",
-        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.capture_sales_order_demo_final_approval",
-    },
-    {
-        "name": "Clear Sales Order Demo Approval",
-        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.clear_sales_order_demo_approval",
-    },
-    {
-        "name": "Authorize Sales Order Demo Submission",
-        "method": "connect_diagnostics_core.api.erpnext.sales_order_workflow.authorize_sales_order_demo_submission",
     },
     {
         "name": "Capture Purchase Invoice Source Verification",
@@ -433,21 +404,52 @@ workflow_methods = [
 # Installation
 # ------------
 
-# before_install = "connect_diagnostics_core.install.before_install"
+before_install = [
+    "connect_diagnostics_core.patches.v1_0.normalize_workflow_baseline.preflight",
+    "connect_diagnostics_core.patches.v1_0.upgrade_workflow_baseline_v5.preflight",
+    "connect_diagnostics_core.setup.asset_disposal.preflight",
+    "connect_diagnostics_core.setup.asset_movement_item.preflight",
+    "connect_diagnostics_core.setup.asset_installation.preflight",
+    "connect_diagnostics_core.api.erpnext.repost_item_valuation_reservation.preflight",
+    "connect_diagnostics_core.setup.repost_item_valuation.preflight",
+]
 after_install = [
+    "connect_diagnostics_core.patches.v1_0.normalize_workflow_baseline.execute",
+    "connect_diagnostics_core.patches.v1_0.upgrade_workflow_baseline_v5.prepare",
+]
+after_sync = [
     "connect_diagnostics_core.setup.after_install",
+    "connect_diagnostics_core.setup.storage_location.ensure_configuration",
+    "connect_diagnostics_core.setup.repost_item_valuation.ensure_configuration",
     "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
+    "connect_diagnostics_core.setup.asset_movement_item.apply_configuration",
+    "connect_diagnostics_core.setup.asset_installation.apply_configuration",
+    "connect_diagnostics_core.setup.asset_disposal.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
+    "connect_diagnostics_core.setup.after_sync",
+    "connect_diagnostics_core.patches.v1_0.upgrade_workflow_baseline_v5.verify",
 ]
-after_sync = "connect_diagnostics_core.setup.after_sync"
-before_migrate = "connect_diagnostics_core.setup.before_migrate"
+before_migrate = [
+    "connect_diagnostics_core.patches.v1_0.upgrade_workflow_baseline_v5.preflight",
+    "connect_diagnostics_core.setup.asset_disposal.preflight",
+    "connect_diagnostics_core.setup.asset_movement_item.preflight",
+    "connect_diagnostics_core.setup.asset_installation.preflight",
+    "connect_diagnostics_core.api.erpnext.repost_item_valuation_reservation.preflight",
+    "connect_diagnostics_core.setup.repost_item_valuation.preflight",
+    "connect_diagnostics_core.setup.before_migrate",
+]
 after_migrate = [
     "connect_diagnostics_core.setup.after_migrate",
+    "connect_diagnostics_core.setup.storage_location.ensure_configuration",
+    "connect_diagnostics_core.setup.repost_item_valuation.ensure_configuration",
     "connect_diagnostics_core.setup.employee.ensure_configuration",
     "connect_diagnostics_core.setup.print_action_fields.apply_configuration",
+    "connect_diagnostics_core.setup.asset_movement_item.apply_configuration",
+    "connect_diagnostics_core.setup.asset_installation.apply_configuration",
+    "connect_diagnostics_core.setup.asset_disposal.apply_configuration",
     "connect_diagnostics_core.setup.tds.apply_configuration",
-    "connect_diagnostics_core.patches.v1_0.add_purchase_invoice_approval_controls.validate_installed_configuration",
+    "connect_diagnostics_core.patches.v1_0.upgrade_workflow_baseline_v5.verify",
 ]
 
 # Uninstallation
@@ -491,21 +493,14 @@ after_migrate = [
 # }
 
 permission_query_conditions = {
-    "Stock Borrow": "connect_diagnostics_core.api.erpnext.stock_borrow.get_permission_query_conditions",
+    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.get_permission_query_conditions",
 }
 has_permission = {
-    "Stock Borrow": "connect_diagnostics_core.api.erpnext.stock_borrow.has_permission",
+    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.has_permission",
 }
 
 naming_series_variables = {
     "YYYY-BE": "connect_diagnostics_core.api.erpnext.employee.parse_buddhist_era_naming_series_variable",
-}
-
-extend_doctype_class = {
-    "Asset": ["connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementNativeMixin"],
-    "Asset Movement": [
-        "connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementWorkflowMixin"
-    ],
 }
 
 # Document Events
@@ -550,42 +545,63 @@ doc_events = {
         "validate": [
             "connect_diagnostics_core.api.erpnext.sales_requirements.validate",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
-            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo",
+            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order",
         ],
         "before_submit": [
-            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo_before_submit",
+            "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_demo_before_cancel",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.sales_order_workflow.validate_sales_order_before_cancel",
+        "on_submit": "connect_diagnostics_core.api.erpnext.auto_invoice_generation.enqueue_sales_order_service_group",
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Sales Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
-        "validate": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_approval_fields",
+        "before_insert": "connect_diagnostics_core.api.erpnext.auto_invoice_generation.before_insert_sales_invoice_generation",
+        "validate": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_approval_fields",
+            "connect_diagnostics_core.api.erpnext.auto_invoice_generation.validate_sales_invoice_generation",
+        ],
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_disposal_sales_invoice_submit",
+            "connect_diagnostics_core.api.erpnext.auto_invoice_generation.before_submit_sales_invoice_generation",
+            "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_demo_sales_invoice",
             "connect_diagnostics_core.api.erpnext.sales_invoice.validate_tax_invoice_readiness",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
-        "on_submit": "connect_diagnostics_core.api.erpnext.sales_invoice.on_submit_demo_sales_invoice",
-        "on_cancel": "connect_diagnostics_core.api.erpnext.sales_invoice.on_cancel_demo_sales_invoice",
+        "on_submit": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice.on_submit_demo_sales_invoice",
+            "connect_diagnostics_core.api.erpnext.auto_invoice_generation.on_submit_sales_invoice_generation",
+        ],
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_disposal_sales_invoice_cancel",
+            "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_before_cancel",
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        ],
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.sales_invoice_credit_workflow.validate_after_submit_update",
+        "on_cancel": [
+            "connect_diagnostics_core.api.erpnext.sales_invoice.on_cancel_demo_sales_invoice",
+            "connect_diagnostics_core.api.erpnext.auto_invoice_generation.on_cancel_sales_invoice_generation",
+        ],
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Payment Entry": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "validate": [
             "connect_diagnostics_core.api.erpnext.payment_entry.validate",
-            "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.validate",
+            "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_workflow",
         ],
-        "before_submit": "connect_diagnostics_core.api.erpnext.payment_entry_approval_poc.before_submit",
+        "before_submit": "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_before_submit",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_before_cancel",
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.payment_entry_workflow.validate_after_submit_update",
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Salary Slip": {
         "before_insert": "connect_diagnostics_core.api.erpnext.salary_slip.validate_creation",
         "before_submit": "connect_diagnostics_core.api.erpnext.salary_slip.validate_submission",
-    },
-    "Payroll Entry": {
-        "validate": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_workflow",
-        "before_submit": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_before_submit",
     },
     "Supplier Bank Change Request": {
         "validate": "connect_diagnostics_core.api.erpnext.supplier.validate_bank_change_request",
@@ -600,17 +616,44 @@ doc_events = {
         "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel",
         "on_submit": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.on_submit",
     },
+    "Asset": {
+        "before_update_after_submit": [
+            "connect_diagnostics_core.api.erpnext.asset_installation.validate_customer_update",
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_asset_disposal_save",
+        ],
+    },
+    "Asset Depreciation Schedule": {
+        "before_save": "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_asset_depreciation_schedule_change",
+    },
     "Asset Movement": {
         "before_validate": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.lock_assets_before_submit",
         "validate": [
             "connect_diagnostics_core.api.erpnext.material_request.validate_asset_movement",
             "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_workflow",
+            "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.validate_receipt_evidence",
+            "connect_diagnostics_core.api.erpnext.asset_installation.validate_draft_evidence",
+        ],
+        "before_update_after_submit": [
+            "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_after_submit_update",
+            "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.validate_receipt_evidence",
+            "connect_diagnostics_core.api.erpnext.asset_installation.validate_draft_evidence",
         ],
         "before_submit": "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_before_submit",
         "before_cancel": [
             "connect_diagnostics_core.api.erpnext.asset_movement_workflow.validate_before_cancel",
             "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
         ],
+        "on_cancel": "connect_diagnostics_core.api.erpnext.asset_installation.restore_after_cancel",
+        "on_trash": [
+            "connect_diagnostics_core.api.erpnext.asset_installation.prevent_history_deletion",
+            "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
+        ],
+    },
+    "Asset Movement Item": {
+        "before_insert": "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.deny_standalone_row_mutation",
+        "validate": "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.deny_standalone_row_mutation",
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.deny_standalone_row_mutation",
+        "on_trash": "connect_diagnostics_core.api.erpnext.asset_movement_acceptance.deny_standalone_row_mutation",
     },
     "Quality Inspection": {
         "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_quality_inspection",
@@ -621,13 +664,14 @@ doc_events = {
         "validate": [
             "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_workflow",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
-            "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_workflow",
         ],
+        "on_update": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.complete_return_action",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
         "before_cancel": "connect_diagnostics_core.api.erpnext.purchase_order_workflow.validate_before_cancel",
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Purchase Receipt": {
         "before_submit": [
@@ -635,12 +679,14 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
     },
     "Stock Entry": {
         "validate": [
             "connect_diagnostics_core.api.erpnext.material_request.validate_stock_entry",
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_workflow",
         ],
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_after_submit_update",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.stock_borrow.before_submit",
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_submit",
@@ -648,9 +694,20 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-        "on_submit": "connect_diagnostics_core.api.erpnext.stock_borrow.on_submit",
+        "on_submit": [
+            "connect_diagnostics_core.api.erpnext.stock_borrow.on_submit",
+            "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_after_submit",
+        ],
         "on_cancel": "connect_diagnostics_core.api.erpnext.stock_borrow.on_cancel",
-        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_cancel",
+            "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        ],
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
+    },
+    "Stock Ledger Entry": {
+        "before_insert": "connect_diagnostics_core.connect_diagnostics_stock.doctype.storage_location.storage_location.validate_ledger_location",
     },
     "Delivery Note": {
         "before_submit": [
@@ -658,6 +715,8 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
+        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        "on_submit": "connect_diagnostics_core.api.erpnext.auto_invoice_generation.enqueue_delivery_note_stock_groups",
     },
     "Purchase Invoice": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -666,7 +725,11 @@ doc_events = {
             "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_before_cancel",
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.purchase_invoice_workflow.validate_before_cancel",
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        ],
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Purchase Invoice Item": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -675,26 +738,68 @@ doc_events = {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
     },
     "Journal Entry": {
+        "before_insert": "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.before_insert_generated_disposal_journal_entry",
+        "after_insert": "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.after_insert_generated_disposal_journal_entry",
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
         "validate": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_workflow",
-        "before_submit": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_submit",
-        "before_cancel": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_cancel",
-        "on_submit": "connect_diagnostics_core.api.erpnext.journal_entry_generators.complete_approved_generated_source",
+        "before_submit": [
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_disposal_journal_entry_submit",
+            "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_submit",
+        ],
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.guard_disposal_journal_entry_cancel",
+            "connect_diagnostics_core.api.erpnext.journal_entry_workflow.validate_before_cancel",
+        ],
+        "on_submit": [
+            "connect_diagnostics_core.api.erpnext.journal_entry_generators.complete_approved_generated_source",
+            "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.complete_disposal_journal_entry_submit",
+        ],
         "on_cancel": "connect_diagnostics_core.api.erpnext.journal_entry_generators.complete_generated_source_cancel",
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
     },
     "Stock Reconciliation": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.lock_reconciliation_scope_before_validate",
+        "validate": "connect_diagnostics_core.api.erpnext.stock_reconciliation_workflow.validate_workflow",
         "before_submit": [
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
         ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_before_cancel",
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_before_cancel",
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        ],
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_workflow.validate_after_submit_update",
+        "on_trash": [
+            "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.lock_reconciliation_scope_on_trash",
+            "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
+        ],
     },
     "Payroll Entry": {
         "validate": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_workflow",
         "before_submit": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.validate_before_submit",
+        "on_trash": "connect_diagnostics_core.api.frappe.workflow_action_cleanup.delete_linked_actions",
+    },
+    "Additional Salary": {
+        "before_insert": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.guard_additional_salary_employee_scope",
+        "before_save": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.guard_additional_salary_employee_scope",
+        "before_submit": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.guard_additional_salary_employee_scope",
+        "before_update_after_submit": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.guard_additional_salary_employee_scope",
+        "before_cancel": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.guard_additional_salary_employee_scope",
     },
     "Pick List": {
         "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+    },
+    "Subcontracting Receipt": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+    },
+    "Asset Capitalization": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+    },
+    "Landed Cost Voucher": {
+        "before_submit": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
     },
     "Item": {
         "before_validate": "connect_diagnostics_core.api.erpnext.tds_guard.block_tds",
@@ -720,14 +825,6 @@ doc_events = {
     "File": {
         "after_insert": "connect_diagnostics_core.api.frappe.file.mirror_file_on_upload",
     },
-}
-
-permission_query_conditions = {
-    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.get_permission_query_conditions",
-}
-
-has_permission = {
-    "Material Request Fulfillment": "connect_diagnostics_core.api.erpnext.material_request_fulfillment.has_permission",
 }
 
 # Standard link-search queries (override the default link search per doctype).
@@ -776,14 +873,43 @@ override_whitelisted_methods = {
     "erpnext_thailand.petty_cash.doctype.petty_cash_holder.petty_cash_holder.create_journal_entry": (
         "connect_diagnostics_core.api.erpnext.journal_entry_generators.create_petty_cash_journal_entry"
     ),
+    "erpnext.assets.doctype.asset.depreciation.scrap_asset": (
+        "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.scrap_asset"
+    ),
+    "erpnext.assets.doctype.asset.depreciation.restore_asset": (
+        "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.restore_asset"
+    ),
 }
 
 extend_doctype_class = {
+    "Repost Item Valuation": (
+        "connect_diagnostics_core.api.erpnext.repost_item_valuation_reservation.RepostItemValuationReservationMixin"
+    ),
+    "Warehouse": "connect_diagnostics_core.api.erpnext.repost_item_valuation_reservation.WarehouseReservationMixin",
+    "Asset": [
+        "connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementNativeMixin",
+        "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.AssetDisposalNativeMixin",
+    ],
+    "Asset Finance Book": (
+        "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.AssetDisposalFinanceBookMixin"
+    ),
+    "Sales Invoice": [
+        "connect_diagnostics_core.api.erpnext.asset_disposal_workflow.AssetDisposalSalesInvoiceMixin"
+    ],
+    "Asset Movement": [
+        "connect_diagnostics_core.api.erpnext.asset_movement_workflow.AssetMovementWorkflowMixin"
+    ],
     "Asset Value Adjustment": (
         "connect_diagnostics_core.api.erpnext.asset_value_adjustment_workflow.AssetValueAdjustmentWorkflowMixin"
     ),
     "Journal Entry": "connect_diagnostics_core.api.erpnext.journal_entry_workflow.JournalEntryWorkflowMixin",
-    "Payroll Entry": "connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryWorkflowMixin",
+    "Payment Reconciliation": (
+        "connect_diagnostics_core.api.erpnext.payment_reconciliation.PaymentReconciliationWorkflowMixin"
+    ),
+    "Payroll Entry": [
+        "connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryWorkflowMixin",
+        "connect_diagnostics_core.api.hrms.payroll_entry_workflow.PayrollEntryApprovalMixin",
+    ],
     "Process Deferred Accounting": (
         "connect_diagnostics_core.api.erpnext.process_deferred_accounting_workflow.ProcessDeferredAccountingWorkflowMixin"
     ),
@@ -874,18 +1000,16 @@ fixtures = [
                 "name",
                 "in",
                 [
-                    "Connect Asset Movement Approval",
-                    "Connect Journal Entry Approval",
-                    "Connect Payment Entry Approval",
                     "Connect Stock Transfer Approval",
                     "Connect Stock Reconciliation Blueprint",
+                    "Connect Asset Movement Approval",
+                    "Connect Journal Entry Approval",
                     "Connect Sales Order Blueprint",
                     "Connect Sales Invoice Credit Blueprint",
                     "Connect Purchase Order Blueprint",
                     "Connect Purchase Invoice Blueprint",
+                    "Connect Payment Entry Approval",
                     "Connect Payroll Entry Blueprint",
-                    "Connect Asset Disposal Blueprint",
-                    "Connect Journal Entry Approval",
                 ],
             ]
         ],
@@ -900,7 +1024,6 @@ fixtures = [
                     "Asset Movement Approved",
                     "Asset Movement Cancelled",
                     "Asset Movement Draft",
-                    "Asset Movement Pending Review",
                     "Asset Movement Pending Approval",
                     "Asset Movement Pending Review",
                     "Asset Movement Rejected",
@@ -915,77 +1038,68 @@ fixtures = [
                     "Journal Entry Submitted",
                     "Payment Entry Approved",
                     "Payment Entry Cancelled",
-                    "Stock Transfer Draft",
-                    "Stock Transfer Pending Approval",
-                    "Stock Transfer Approved",
-                    "Stock Transfer Rejected",
-                    "Stock Transfer Submitted",
-                    "Stock Transfer Cancelled",
-                    "Stock Reconciliation Draft",
-                    "Stock Reconciliation Pending Review",
-                    "Stock Reconciliation Approved",
-                    "Stock Reconciliation Rejected",
-                    "Stock Reconciliation Submitted",
-                    "Stock Reconciliation Cancelled",
-                    "Sales Order Draft",
-                    "Sales Order Pending Review",
-                    "Sales Order Approved",
-                    "Sales Order Rejected",
-                    "Sales Order Submitted",
-                    "Sales Order Cancelled",
-                    "Sales Invoice Draft",
-                    "Sales Invoice Credit Pending Review",
-                    "Sales Invoice Credit Reviewed",
-                    "Sales Invoice Credit Returned",
-                    "Sales Invoice Credit Approved",
-                    "Sales Invoice Credit Rejected",
-                    "Sales Invoice Credit Submitted",
-                    "Sales Invoice Credit Cancelled",
-                    "Purchase Order Draft",
-                    "Purchase Order Pending Review",
-                    "Purchase Order Pending Approval",
-                    "Purchase Order Approved",
-                    "Purchase Order Rejected",
-                    "Purchase Order Submitted",
-                    "Purchase Order Cancelled",
-                    "Purchase Invoice Draft",
-                    "Purchase Invoice Pending Source Verification",
-                    "Purchase Invoice Pending Accounting Approval",
-                    "Purchase Invoice Returned",
-                    "Purchase Invoice Approved",
-                    "Purchase Invoice Rejected",
-                    "Purchase Invoice Submitted",
-                    "Purchase Invoice Cancelled",
+                    "Payment Entry Draft",
+                    "Payment Entry Pending Review",
+                    "Payment Entry Rejected",
+                    "Payment Entry Returned",
+                    "Payment Entry Reviewed",
+                    "Payment Entry Submitted",
+                    "Payroll Entry Approved",
+                    "Payroll Entry Cancelled",
                     "Payroll Entry Draft",
                     "Payroll Entry Pending Review",
-                    "Payroll Entry Reviewed",
-                    "Payroll Entry Returned",
-                    "Payroll Entry Approved",
                     "Payroll Entry Rejected",
                     "Payroll Entry Returned",
                     "Payroll Entry Reviewed",
                     "Payroll Entry Submitted",
-                    "Payroll Entry Cancelled",
-                    "Emergency Stock Movement Draft",
-                    "Emergency Stock Movement Pending Review",
-                    "Emergency Stock Movement Approved",
-                    "Emergency Stock Movement Rejected",
-                    "Emergency Stock Movement Submitted",
-                    "Emergency Stock Movement Cancelled",
-                    "Asset Disposal Draft",
-                    "Asset Disposal Pending Review",
-                    "Asset Disposal Approved",
-                    "Asset Disposal Rejected",
-                    "Asset Disposal Submitted",
-                    "Asset Disposal Cancelled",
-                    "Journal Entry Draft",
-                    "Journal Entry Pending Review",
-                    "Journal Entry Reviewed",
-                    "Journal Entry Approved",
-                    "Journal Entry Returned",
-                    "Journal Entry Rejected",
-                    "Journal Entry Submitted",
-                    "Journal Entry Cancelled",
+                    "Purchase Invoice Approved",
+                    "Purchase Invoice Cancelled",
+                    "Purchase Invoice Draft",
+                    "Purchase Invoice Pending Accounting Approval",
+                    "Purchase Invoice Pending Source Verification",
+                    "Purchase Invoice Rejected",
+                    "Purchase Invoice Returned",
+                    "Purchase Invoice Submitted",
+                    "Purchase Order Approved",
+                    "Purchase Order Cancelled",
+                    "Purchase Order Draft",
+                    "Purchase Order Pending Approval",
+                    "Purchase Order Pending Review",
+                    "Purchase Order Rejected",
+                    "Purchase Order Submitted",
+                    "Sales Invoice Cancelled",
+                    "Sales Invoice Credit Approved",
+                    "Sales Invoice Credit Pending Review",
+                    "Sales Invoice Credit Returned",
+                    "Sales Invoice Credit Reviewed",
+                    "Sales Invoice Draft",
+                    "Sales Invoice Submitted",
+                    "Sales Order Approved",
+                    "Sales Order Cancelled",
+                    "Sales Order Draft",
+                    "Sales Order Pending Review",
+                    "Sales Order Rejected",
+                    "Sales Order Returned",
+                    "Sales Order Reviewed",
+                    "Sales Order Submitted",
+                    "Stock Entry Cancelled",
+                    "Stock Entry Draft",
+                    "Stock Entry Submitted",
+                    "Stock Reconciliation Approved",
+                    "Stock Reconciliation Cancelled",
+                    "Stock Reconciliation Draft",
+                    "Stock Reconciliation Pending Review",
+                    "Stock Reconciliation Rejected",
+                    "Stock Reconciliation Returned",
+                    "Stock Reconciliation Reviewed",
+                    "Stock Reconciliation Submitted",
+                    "Stock Transfer Approved",
+                    "Stock Transfer Cancelled",
+                    "Stock Transfer Pending Review",
+                    "Stock Transfer Rejected",
+                    "Stock Transfer Returned",
+                    "Stock Transfer Reviewed",
+                    "Stock Transfer Submitted",
                 ],
             ]
         ],
@@ -997,84 +1111,90 @@ fixtures = [
                 "name",
                 "in",
                 [
-                    "Send Asset Movement for Review",
-                    "Review Asset Movement",
-                    "Return Asset Movement",
                     "Approve Asset Movement",
-                    "Reject Asset Movement",
-                    "Resubmit Asset Movement",
-                    "Submit Asset Movement",
-                    "Cancel Asset Movement",
-                    "Submit Payment Entry for Approval",
-                    "Approve Payment Entry",
-                    "Reject Payment Entry",
-                    "Post Payment Entry",
-                    "Cancel Payment Entry",
-                    "Submit Stock Transfer for Approval",
-                    "Approve Stock Transfer",
-                    "Reject Stock Transfer",
-                    "Post Stock Transfer",
-                    "Cancel Stock Transfer",
-                    "Submit Stock Reconciliation for Review",
-                    "Approve Stock Reconciliation",
-                    "Reject Stock Reconciliation",
-                    "Post Stock Reconciliation",
-                    "Cancel Stock Reconciliation",
-                    "Submit Sales Order for Review",
-                    "Approve Sales Order",
-                    "Reject Sales Order",
-                    "Post Sales Order",
-                    "Cancel Sales Order",
-                    "Send Sales Invoice Credit for Review",
-                    "Resubmit Sales Invoice Credit for Review",
-                    "Review Sales Invoice Credit",
-                    "Return Sales Invoice Credit",
-                    "Approve Sales Invoice Credit",
-                    "Reject Sales Invoice Credit",
-                    "Post Sales Invoice Credit",
-                    "Cancel Sales Invoice Credit",
-                    "Submit Purchase Order for Review",
-                    "Review Purchase Order",
-                    "Return Purchase Order",
-                    "Resubmit Purchase Order",
-                    "Approve Purchase Order",
-                    "Reject Purchase Order",
-                    "Post Purchase Order",
-                    "Cancel Purchase Order",
-                    "Submit Purchase Invoice for Review",
-                    "Verify Purchase Invoice Source",
-                    "Return Purchase Invoice",
-                    "Resubmit Purchase Invoice",
-                    "Approve Purchase Invoice",
-                    "Reject Purchase Invoice",
-                    "Post Purchase Invoice",
-                    "Cancel Purchase Invoice",
-                    "Send Payroll Entry for Review",
-                    "Resubmit Payroll Entry for Review",
-                    "Review Payroll Entry",
-                    "Return Payroll Entry",
-                    "Approve Payroll Entry",
-                    "Reject Payroll Entry",
-                    "Submit Payroll Entry",
-                    "Cancel Payroll Entry",
-                    "Submit Emergency Stock Movement for Review",
-                    "Approve Emergency Stock Movement",
-                    "Reject Emergency Stock Movement",
-                    "Post Emergency Stock Movement",
-                    "Cancel Emergency Stock Movement",
-                    "Submit Asset Disposal for Review",
-                    "Approve Asset Disposal",
-                    "Reject Asset Disposal",
-                    "Post Asset Disposal",
-                    "Cancel Asset Disposal",
-                    "Send Journal Entry for Review",
-                    "Review Journal Entry",
-                    "Return Journal Entry",
                     "Approve Journal Entry",
-                    "Reject Journal Entry",
-                    "Resubmit Journal Entry for Review",
-                    "Submit Journal Entry",
+                    "Approve Payment Entry",
+                    "Approve Payroll Entry",
+                    "Approve Purchase Invoice",
+                    "Approve Purchase Order",
+                    "Approve Sales Invoice Credit",
+                    "Approve Sales Order",
+                    "Approve Stock Reconciliation",
+                    "Approve Stock Transfer",
+                    "Cancel Asset Movement",
                     "Cancel Journal Entry",
+                    "Cancel Payment Entry",
+                    "Cancel Payroll Entry",
+                    "Cancel Purchase Invoice",
+                    "Cancel Purchase Order",
+                    "Cancel Sales Invoice",
+                    "Cancel Sales Invoice Credit",
+                    "Cancel Sales Order",
+                    "Cancel Stock Entry",
+                    "Cancel Stock Reconciliation",
+                    "Cancel Stock Transfer",
+                    "Post Purchase Invoice",
+                    "Post Purchase Order",
+                    "Post Sales Invoice Credit",
+                    "Post Stock Reconciliation",
+                    "Reject Asset Movement",
+                    "Reject Journal Entry",
+                    "Reject Payment Entry",
+                    "Reject Payroll Entry",
+                    "Reject Purchase Invoice",
+                    "Reject Purchase Order",
+                    "Reject Sales Invoice Credit",
+                    "Reject Sales Order",
+                    "Reject Stock Reconciliation",
+                    "Reject Stock Transfer",
+                    "Resubmit Asset Movement",
+                    "Resubmit Journal Entry for Review",
+                    "Resubmit Payment Entry for Review",
+                    "Resubmit Payroll Entry for Review",
+                    "Resubmit Purchase Invoice",
+                    "Resubmit Purchase Order",
+                    "Resubmit Sales Invoice Credit for Review",
+                    "Resubmit Sales Order for Review",
+                    "Resubmit Stock Reconciliation for Review",
+                    "Resubmit Stock Transfer for Review",
+                    "Return Asset Movement",
+                    "Return Journal Entry",
+                    "Return Payment Entry",
+                    "Return Payroll Entry",
+                    "Return Purchase Invoice",
+                    "Return Purchase Order",
+                    "Return Sales Invoice Credit",
+                    "Return Sales Order",
+                    "Return Stock Reconciliation",
+                    "Return Stock Transfer",
+                    "Review Asset Movement",
+                    "Review Journal Entry",
+                    "Review Payment Entry",
+                    "Review Payroll Entry",
+                    "Review Purchase Order",
+                    "Review Sales Invoice Credit",
+                    "Review Sales Order",
+                    "Review Stock Reconciliation",
+                    "Review Stock Transfer",
+                    "Send Asset Movement for Review",
+                    "Send Journal Entry for Review",
+                    "Send Payment Entry for Review",
+                    "Send Payroll Entry for Review",
+                    "Send Sales Invoice Credit for Review",
+                    "Send Sales Order for Review",
+                    "Send Stock Reconciliation for Review",
+                    "Send Stock Transfer for Review",
+                    "Submit Asset Movement",
+                    "Submit Journal Entry",
+                    "Submit Payment Entry",
+                    "Submit Payroll Entry",
+                    "Submit Purchase Invoice for Review",
+                    "Submit Purchase Order for Review",
+                    "Submit Sales Invoice",
+                    "Submit Sales Order",
+                    "Submit Stock Entry",
+                    "Submit Stock Transfer",
+                    "Verify Purchase Invoice Source",
                 ],
             ]
         ],

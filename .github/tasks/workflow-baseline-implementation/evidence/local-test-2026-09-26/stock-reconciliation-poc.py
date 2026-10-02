@@ -4,13 +4,12 @@ import json
 from typing import Any, cast
 
 import frappe
+from erpnext.stock.utils import get_stock_balance
+from frappe import _
 from frappe.model.workflow import apply_workflow
 from frappe.utils import now_datetime
 
-from erpnext.stock.utils import get_stock_balance
-
 from connect_diagnostics_core.api.erpnext import stock_reconciliation_freeze
-
 
 MAKER = "_test_stock_recon_maker@example.com"
 SENDER = "_test_stock_recon_sender@example.com"
@@ -43,21 +42,25 @@ def _ensure_demo_user(user: str, roles: set[str], first_name: str) -> None:
 
     current_roles = set(frappe.get_roles(user))
     if not frappe.db.get_value("User", user, "enabled"):
-        frappe.throw(f"Demo user {user} must be enabled.")
+        frappe.throw(_("Demo user {0} must be enabled.").format(user))
     if "Administrator" in current_roles or "System Manager" in current_roles:
-        frappe.throw(f"Demo user {user} must not be privileged.")
+        frappe.throw(_("Demo user {0} must not be privileged.").format(user))
     if not roles.issubset(current_roles):
-        frappe.throw(f"Demo user {user} is missing roles {sorted(roles - current_roles)}.")
+        frappe.throw(_("Demo user {0} is missing roles {1}.").format(user, sorted(roles - current_roles)))
     unexpected_business_roles = current_roles.intersection({"Stock User", "Stock Manager"}) - roles
     if unexpected_business_roles:
-        frappe.throw(f"Demo user {user} has conflicting stock roles: {sorted(unexpected_business_roles)}")
+        frappe.throw(
+            _("Demo user {0} has conflicting stock roles: {1}").format(
+                user, sorted(unexpected_business_roles)
+            )
+        )
 
 
 def _ensure_demo_thai_tax_settings() -> dict[str, Any]:
     settings = frappe.get_single("Thai Tax Settings")
     matching_rows = [row for row in settings.company_accounts if row.company == COMPANY]
     if len(matching_rows) > 1:
-        frappe.throw(f"Thai Tax Settings has duplicate rows for demo company {COMPANY}.")
+        frappe.throw(_("Thai Tax Settings has duplicate rows for demo company {0}.").format(COMPANY))
     if matching_rows:
         return {"company": COMPANY, "created": False, "row_name": matching_rows[0].name}
 
@@ -91,14 +94,14 @@ def _remove_demo_thai_tax_settings_row(row_name: str) -> dict[str, Any]:
         as_dict=True,
     )
     if not row:
-        frappe.throw(f"Demo Thai Tax Settings row {row_name} is missing during cleanup.")
+        frappe.throw(_("Demo Thai Tax Settings row {0} is missing during cleanup.").format(row_name))
     if (
         row.parent != "Thai Tax Settings"
         or row.parenttype != "Thai Tax Settings"
         or row.parentfield != "company_accounts"
         or row.company != COMPANY
     ):
-        frappe.throw(f"Refusing to remove unexpected Thai Tax Settings row {row_name}: {row}")
+        frappe.throw(_("Refusing to remove unexpected Thai Tax Settings row {0}: {1}").format(row_name, row))
     business_fields = (
         "sales_tax_account",
         "sales_tax_account_undue",
@@ -109,16 +112,18 @@ def _remove_demo_thai_tax_settings_row(row_name: str) -> dict[str, Any]:
         "manual_keyin_sales_taxinv_on_zero_tax",
     )
     if any(row.get(fieldname) for fieldname in business_fields):
-        frappe.throw(f"Refusing to remove modified Thai Tax Settings row {row_name}: {row}")
+        frappe.throw(_("Refusing to remove modified Thai Tax Settings row {0}: {1}").format(row_name, row))
 
     settings = frappe.get_single("Thai Tax Settings")
     matching_rows = [child for child in settings.company_accounts if child.name == row_name]
     if len(matching_rows) != 1:
-        frappe.throw(f"Expected one demo Thai Tax Settings row {row_name}, found {len(matching_rows)}.")
+        frappe.throw(
+            _("Expected one demo Thai Tax Settings row {0}, found {1}.").format(row_name, len(matching_rows))
+        )
     settings.remove(matching_rows[0])
     settings.save(ignore_permissions=True)
     if frappe.db.exists("Thai Tax Settings Company", row_name):
-        frappe.throw(f"Demo Thai Tax Settings row {row_name} still exists after cleanup.")
+        frappe.throw(_("Demo Thai Tax Settings row {0} still exists after cleanup.").format(row_name))
     return {"row_name": row_name, "removed": True}
 
 
@@ -129,7 +134,7 @@ def _preflight() -> dict[str, Any]:
         pluck="name",
     )
     if active != [EXPECTED_WORKFLOW]:
-        frappe.throw(f"Unexpected active Stock Reconciliation Workflow: {active}")
+        frappe.throw(_("Unexpected active Stock Reconciliation Workflow: {0}").format(active))
 
     workflow = frappe.get_doc("Workflow", EXPECTED_WORKFLOW)
     transitions = [
@@ -152,18 +157,18 @@ def _preflight() -> dict[str, Any]:
     ]
     actual = [(row["action"], row["allowed"]) for row in transitions]
     if actual != expected:
-        frappe.throw(f"Unexpected Stock Reconciliation transitions: {actual}")
+        frappe.throw(_("Unexpected Stock Reconciliation transitions: {0}").format(actual))
     if any(row["allow_self_approval"] for row in transitions):
-        frappe.throw("The demo Workflow must prohibit self approval.")
+        frappe.throw(_("The demo Workflow must prohibit self approval."))
     if any(row["transition_tasks"] for row in transitions):
-        frappe.throw("The POC expects the baseline Workflow without transition tasks.")
+        frappe.throw(_("The POC expects the baseline Workflow without transition tasks."))
 
     stock_reconciliation_meta = frappe.get_meta("Stock Reconciliation")
     workflow_field = stock_reconciliation_meta.get_field("workflow_state")
     if not workflow_field or workflow_field.options != "Workflow State":
-        frappe.throw("Stock Reconciliation workflow_state field is missing or incompatible.")
+        frappe.throw(_("Stock Reconciliation workflow_state field is missing or incompatible."))
     if stock_reconciliation_meta.queue_in_background:
-        frappe.throw("The POC requires synchronous Stock Reconciliation submission.")
+        frappe.throw(_("The POC requires synchronous Stock Reconciliation submission."))
 
     required = {
         ("Company", COMPANY),
@@ -176,11 +181,11 @@ def _preflight() -> dict[str, Any]:
     }
     missing = [(doctype, name) for doctype, name in required if not frappe.db.exists(doctype, name)]
     if missing:
-        frappe.throw(f"Missing POC master data: {missing}")
+        frappe.throw(_("Missing POC master data: {0}").format(missing))
     if not frappe.db.get_value("Company", COMPANY, "enable_perpetual_inventory"):
-        frappe.throw("POC Company must use perpetual inventory.")
+        frappe.throw(_("POC Company must use perpetual inventory."))
     if frappe.db.exists("Stock Reconciliation", {"owner": MAKER, "company": COMPANY}):
-        frappe.throw("A POC reconciliation owned by the demo maker already exists; inspect it first.")
+        frappe.throw(_("A POC reconciliation owned by the demo maker already exists; inspect it first."))
 
     return {
         "workflow": EXPECTED_WORKFLOW,
@@ -231,8 +236,13 @@ def _new_reconciliation(target_qty: float, valuation_rate: float) -> str:
     return cast(str, doc.name)
 
 
+def _set_acceptance_actor(user: str) -> None:
+    """Switch this isolated bench-console probe to one named test actor."""
+    frappe.set_user(user)  # nosemgrep: frappe-setuser - Isolated acceptance actor only.
+
+
 def _transition(name: str, action: str, user: str) -> dict[str, Any]:
-    frappe.set_user(user)
+    _set_acceptance_actor(user)
     doc = frappe.get_doc("Stock Reconciliation", name)
     result = apply_workflow(doc, action)
     return {
@@ -292,13 +302,13 @@ def _recover_positive(name: str, baseline_qty: float) -> dict[str, Any]:
         return {"name": name, "required": False, "status": status}
 
     step = _transition(name, "Cancel Stock Reconciliation", APPROVER)
-    frappe.db.commit()
+    frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist this acceptance step before testing its native effects.
     cancelled = frappe.get_doc("Stock Reconciliation", name)
     restored_qty, restored_rate = _balance()
     if cancelled.docstatus != 2 or cancelled.workflow_state != "Stock Reconciliation Cancelled":
-        frappe.throw("Recovery did not reach the native cancelled state.")
+        frappe.throw(_("Recovery did not reach the native cancelled state."))
     if restored_qty != baseline_qty:
-        frappe.throw(f"Recovery did not restore baseline quantity: {restored_qty}")
+        frappe.throw(_("Recovery did not restore baseline quantity: {0}").format(restored_qty))
     return {
         "name": name,
         "required": True,
@@ -315,7 +325,7 @@ def execute() -> None:
     baseline_qty: float | None = None
     demo_thai_tax_row: str | None = None
     try:
-        frappe.set_user("Administrator")
+        _set_acceptance_actor("Administrator")
         evidence["preflight"] = _preflight()
         _ensure_demo_user(MAKER, {"Stock User", "Stock Manager"}, "_Test Stock Recon Maker")
         _ensure_demo_user(SENDER, {"Stock User", "Stock Manager"}, "_Test Stock Recon Sender")
@@ -323,7 +333,7 @@ def execute() -> None:
         evidence["demo_thai_tax_settings"] = _ensure_demo_thai_tax_settings()
         if evidence["demo_thai_tax_settings"]["created"]:
             demo_thai_tax_row = cast(str, evidence["demo_thai_tax_settings"]["row_name"])
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist isolated setup before changing workflow actors.
 
         evidence["users"] = {
             MAKER: sorted(frappe.get_roles(MAKER)),
@@ -331,28 +341,27 @@ def execute() -> None:
             APPROVER: sorted(frappe.get_roles(APPROVER)),
         }
         evidence["limitations"] = [
-            "The dual-role sender could approve/post under the current configuration; "
-            "this POC does not prove sender-versus-approver SoD.",
+            "The dual-role sender could approve/post under the current configuration; this POC does not prove sender-versus-approver SoD.",
             "The POC proves backend Workflow and native SLE/GL mechanics only, not production permissions or policy.",
         ]
         baseline_qty, baseline_rate = _balance()
         valuation_rate = baseline_rate or 100.0
         evidence["baseline"] = {"qty": baseline_qty, "valuation_rate": baseline_rate}
 
-        frappe.set_user(MAKER)
+        frappe.set_user(MAKER)  # nosemgrep: frappe-setuser - Run the rejection path as the named test maker.
         rejected_name = _new_reconciliation(baseline_qty + 1, valuation_rate)
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist the draft before testing its next actor transition.
         reject_steps = [
             _transition(rejected_name, "Submit Stock Reconciliation for Review", SENDER),
             _transition(rejected_name, "Reject Stock Reconciliation", APPROVER),
         ]
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist these actor transitions before asserting workflow state.
         rejected = frappe.get_doc("Stock Reconciliation", rejected_name)
         rejected_effects = _effects(rejected_name)
         if rejected.docstatus != 0 or rejected.workflow_state != "Stock Reconciliation Rejected":
-            frappe.throw("Rejected POC document has an unexpected terminal state.")
+            frappe.throw(_("Rejected POC document has an unexpected terminal state."))
         if rejected_effects["sle"] or rejected_effects["gl"]:
-            frappe.throw("Rejected POC document created ledger effects.")
+            frappe.throw(_("Rejected POC document created ledger effects."))
         evidence["rejected"] = {
             "name": rejected_name,
             "owner": rejected.owner,
@@ -362,11 +371,11 @@ def execute() -> None:
             "history": _history(rejected_name),
         }
 
-        frappe.set_user(MAKER)
+        frappe.set_user(MAKER)  # nosemgrep: frappe-setuser - Run the positive path as the named test maker.
         positive_name = _new_reconciliation(baseline_qty + 3, valuation_rate)
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist the draft before testing its next actor transition.
         positive_steps = [_transition(positive_name, "Submit Stock Reconciliation for Review", SENDER)]
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist sender review before switching to the approver.
 
         maker_denial: dict[str, Any]
         try:
@@ -380,7 +389,7 @@ def execute() -> None:
                 denied_doc.docstatus != 0
                 or denied_doc.workflow_state != "Stock Reconciliation Pending Review"
             ):
-                frappe.throw("Denied maker action changed the Stock Reconciliation state.")
+                frappe.throw(_("Denied maker action changed the Stock Reconciliation state."))
             maker_denial = {
                 "type": type(exc).__name__,
                 "message": str(exc),
@@ -388,30 +397,30 @@ def execute() -> None:
                 "docstatus": int(denied_doc.docstatus),
             }
         else:
-            frappe.throw("Maker unexpectedly approved the Stock Reconciliation.")
+            frappe.throw(_("Maker unexpectedly approved the Stock Reconciliation."))
 
         positive_steps.append(_transition(positive_name, "Approve Stock Reconciliation", APPROVER))
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist this accepted workflow transition before checking the next one.
         positive_steps.append(_transition(positive_name, "Post Stock Reconciliation", APPROVER))
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist this accepted workflow transition before checking the next one.
 
         submitted = frappe.get_doc("Stock Reconciliation", positive_name)
         submitted_effects = _effects(positive_name)
         submitted_qty, submitted_rate = _balance()
         if submitted.docstatus != 1 or submitted.workflow_state != "Stock Reconciliation Submitted":
-            frappe.throw("Positive POC document did not reach submitted state.")
+            frappe.throw(_("Positive POC document did not reach submitted state."))
         if submitted_qty != baseline_qty + 3:
-            frappe.throw(f"Unexpected submitted stock balance: {submitted_qty}")
+            frappe.throw(_("Unexpected submitted stock balance: {0}").format(submitted_qty))
         active_sle = [row for row in submitted_effects["sle"] if not row.is_cancelled]
         active_gl = [row for row in submitted_effects["gl"] if not row.is_cancelled]
         if len(active_sle) != 1:
-            frappe.throw(f"Expected one active SLE, found {len(active_sle)}")
+            frappe.throw(_("Expected one active SLE, found {0}").format(len(active_sle)))
         if len(active_gl) != 2:
-            frappe.throw(f"Expected two active GL entries, found {len(active_gl)}")
+            frappe.throw(_("Expected two active GL entries, found {0}").format(len(active_gl)))
         if round(sum(float(row.debit or 0) for row in active_gl), 2) != round(
             sum(float(row.credit or 0) for row in active_gl), 2
         ):
-            frappe.throw("POC GL entries are not balanced.")
+            frappe.throw(_("POC GL entries are not balanced."))
         evidence["submitted"] = {
             "name": positive_name,
             "owner": submitted.owner,
@@ -424,18 +433,19 @@ def execute() -> None:
         }
 
         cancel_step = _transition(positive_name, "Cancel Stock Reconciliation", APPROVER)
-        frappe.db.commit()
+        frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist native posting before checking SLE and GL effects.
         cancelled = frappe.get_doc("Stock Reconciliation", positive_name)
         cancelled_effects = _effects(positive_name)
         restored_qty, restored_rate = _balance()
         if cancelled.docstatus != 2 or cancelled.workflow_state != "Stock Reconciliation Cancelled":
-            frappe.throw("POC document did not reach the native cancelled state.")
+            frappe.throw(_("POC document did not reach the native cancelled state."))
         if restored_qty != baseline_qty:
-            frappe.throw(f"Cancellation did not restore baseline quantity: {restored_qty}")
-        if round(
-            sum(float(row.debit or 0) - float(row.credit or 0) for row in cancelled_effects["gl"]), 2
-        ) != 0:
-            frappe.throw("Cancelled POC GL entries do not net to zero.")
+            frappe.throw(_("Cancellation did not restore baseline quantity: {0}").format(restored_qty))
+        if (
+            round(sum(float(row.debit or 0) - float(row.credit or 0) for row in cancelled_effects["gl"]), 2)
+            != 0
+        ):
+            frappe.throw(_("Cancelled POC GL entries do not net to zero."))
         evidence["cancelled"] = {
             "step": cancel_step,
             "balance": {"qty": restored_qty, "valuation_rate": restored_rate},
@@ -447,7 +457,7 @@ def execute() -> None:
             evidence["demo_thai_tax_settings"]["cleanup"] = _remove_demo_thai_tax_settings_row(
                 demo_thai_tax_row
             )
-            frappe.db.commit()
+            frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist the verified isolated configuration cleanup.
 
         print("POC_RESULT=" + json.dumps(evidence, default=str, sort_keys=True))
     except Exception as original_error:
@@ -457,10 +467,8 @@ def execute() -> None:
             if positive_name and baseline_qty is not None:
                 recovery = _recover_positive(positive_name, baseline_qty)
             if demo_thai_tax_row:
-                recovery["demo_thai_tax_settings"] = _remove_demo_thai_tax_settings_row(
-                    demo_thai_tax_row
-                )
-                frappe.db.commit()
+                recovery["demo_thai_tax_settings"] = _remove_demo_thai_tax_settings_row(demo_thai_tax_row)
+                frappe.db.commit()  # nosemgrep: frappe-manual-commit - Persist cleanup after recovering the isolated test site.
             print("POC_RECOVERY=" + json.dumps(recovery, default=str, sort_keys=True))
         except Exception as recovery_error:
             frappe.db.rollback()
@@ -478,7 +486,7 @@ def execute() -> None:
             raise recovery_error from original_error
         raise
     finally:
-        frappe.set_user(original_user)
+        _set_acceptance_actor(original_user)
 
 
 execute()
