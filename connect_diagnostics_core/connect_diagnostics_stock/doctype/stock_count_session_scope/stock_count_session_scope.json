@@ -1,0 +1,90 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Session Scope",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 10:47:21.084604",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"scope_kind",
+		"warehouse",
+		"item_code",
+		"company",
+		"snapshot_revision",
+		"cutoff_datetime",
+		"freeze_active",
+		"lease_state",
+		"activated_at",
+		"released_at"
+	],
+	"fields": [
+		{
+			"fieldname": "scope_kind",
+			"fieldtype": "Select",
+			"label": "Scope Kind",
+			"options": "Warehouse\nItem/Warehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": "Warehouse",
+			"options": "Warehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item Code",
+			"options": "Item"
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "snapshot_revision",
+			"fieldtype": "Int",
+			"label": "Snapshot Revision",
+			"read_only": 1
+		},
+		{
+			"fieldname": "cutoff_datetime",
+			"fieldtype": "Datetime",
+			"label": "Cutoff Datetime",
+			"read_only": 1
+		},
+		{
+			"fieldname": "freeze_active",
+			"fieldtype": "Check",
+			"label": "Freeze Active",
+			"read_only": 1
+		},
+		{
+			"fieldname": "lease_state",
+			"fieldtype": "Select",
+			"label": "Lease State",
+			"options": "Draft\nActive\nReleased",
+			"read_only": 1
+		},
+		{
+			"fieldname": "activated_at",
+			"fieldtype": "Datetime",
+			"label": "Activated At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "released_at",
+			"fieldtype": "Datetime",
+			"label": "Released At",
+			"read_only": 1
+		}
+	],
+	"permissions": [],
+	"istable": 1,
+	"is_submittable": 0
+}

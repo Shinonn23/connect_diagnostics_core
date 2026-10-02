@@ -1,0 +1,164 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Observation",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 11:01:49.372446",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"session",
+		"line_key",
+		"evidence_revision",
+		"pass_type",
+		"item_code",
+		"company",
+		"warehouse",
+		"storage_location",
+		"stock_uom",
+		"batch_no",
+		"serial_no",
+		"counted_qty",
+		"count_uom",
+		"observer_user",
+		"observer_employee",
+		"observed_at",
+		"note",
+		"signature_digest"
+	],
+	"fields": [
+		{
+			"fieldname": "session",
+			"fieldtype": "Link",
+			"label": "Session",
+			"options": "Stock Count Session",
+			"reqd": 1
+		},
+		{
+			"fieldname": "line_key",
+			"fieldtype": "Data",
+			"label": "Line Key",
+			"reqd": 1
+		},
+		{
+			"fieldname": "evidence_revision",
+			"fieldtype": "Int",
+			"label": "Evidence Revision",
+			"reqd": 1
+		},
+		{
+			"fieldname": "pass_type",
+			"fieldtype": "Select",
+			"label": "Pass Type",
+			"options": "Initial\nRecount",
+			"reqd": 1
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item Code",
+			"options": "Item",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": "Warehouse",
+			"options": "Warehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "storage_location",
+			"fieldtype": "Link",
+			"label": "Storage Location",
+			"options": "Storage Location",
+			"reqd": 1
+		},
+		{
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"label": "Stock Uom",
+			"options": "UOM",
+			"reqd": 1
+		},
+		{
+			"fieldname": "batch_no",
+			"fieldtype": "Data",
+			"label": "Batch No",
+			"length": 140
+		},
+		{
+			"fieldname": "serial_no",
+			"fieldtype": "Data",
+			"label": "Serial No",
+			"length": 140
+		},
+		{
+			"fieldname": "counted_qty",
+			"fieldtype": "Float",
+			"label": "Counted Qty",
+			"reqd": 1
+		},
+		{
+			"fieldname": "count_uom",
+			"fieldtype": "Link",
+			"label": "Count Uom",
+			"options": "UOM",
+			"reqd": 1
+		},
+		{
+			"fieldname": "observer_user",
+			"fieldtype": "Link",
+			"label": "Observer User",
+			"options": "User",
+			"reqd": 1
+		},
+		{
+			"fieldname": "observer_employee",
+			"fieldtype": "Link",
+			"label": "Observer Employee",
+			"options": "Employee"
+		},
+		{
+			"fieldname": "observed_at",
+			"fieldtype": "Datetime",
+			"label": "Observed At",
+			"reqd": 1
+		},
+		{
+			"fieldname": "note",
+			"fieldtype": "Small Text",
+			"label": "Note"
+		},
+		{
+			"fieldname": "signature_digest",
+			"fieldtype": "Data",
+			"label": "Signature Digest",
+			"reqd": 1
+		}
+	],
+	"permissions": [
+		{
+			"role": "Stock User",
+			"read": 1
+		},
+		{
+			"role": "Stock Manager",
+			"read": 1
+		},
+		{
+			"role": "Accounts Manager",
+			"read": 1
+		}
+	],
+	"istable": 0,
+	"is_submittable": 0,
+	"autoname": "hash"
+}

@@ -1,0 +1,68 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Notification Receipt",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 10:47:21.084604",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"dedupe_key",
+		"session",
+		"evidence_revision",
+		"recipient_user",
+		"notification_log",
+		"created_at"
+	],
+	"fields": [
+		{
+			"fieldname": "dedupe_key",
+			"fieldtype": "Data",
+			"label": "Dedupe Key",
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"fieldname": "session",
+			"fieldtype": "Link",
+			"label": "Session",
+			"options": "Stock Count Session",
+			"reqd": 1
+		},
+		{
+			"fieldname": "evidence_revision",
+			"fieldtype": "Int",
+			"label": "Evidence Revision",
+			"reqd": 1
+		},
+		{
+			"fieldname": "recipient_user",
+			"fieldtype": "Link",
+			"label": "Recipient User",
+			"options": "User",
+			"reqd": 1
+		},
+		{
+			"fieldname": "notification_log",
+			"fieldtype": "Link",
+			"label": "Notification Log",
+			"options": "Notification Log",
+			"reqd": 1
+		},
+		{
+			"fieldname": "created_at",
+			"fieldtype": "Datetime",
+			"label": "Created At",
+			"reqd": 1
+		}
+	],
+	"permissions": [
+		{
+			"role": "Stock Manager",
+			"read": 1
+		}
+	],
+	"istable": 0,
+	"is_submittable": 0,
+	"autoname": "hash"
+}

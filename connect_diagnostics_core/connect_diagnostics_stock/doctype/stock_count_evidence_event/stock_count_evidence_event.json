@@ -1,0 +1,111 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Evidence Event",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 10:47:21.084604",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"session",
+		"event_type",
+		"source_action",
+		"from_revision",
+		"to_revision",
+		"source_stock_entry",
+		"reason",
+		"actor_user",
+		"event_at",
+		"prior_snapshot_digest",
+		"new_snapshot_digest"
+	],
+	"fields": [
+		{
+			"fieldname": "session",
+			"fieldtype": "Link",
+			"label": "Session",
+			"options": "Stock Count Session",
+			"reqd": 1
+		},
+		{
+			"fieldname": "event_type",
+			"fieldtype": "Select",
+			"label": "Event Type",
+			"options": "Emergency Invalidated\nEmergency Cancel Invalidated\nRevision Recaptured\nRestart Requested\nReturned\nRejected\nAbandoned",
+			"reqd": 1
+		},
+		{
+			"fieldname": "source_action",
+			"fieldtype": "Data",
+			"label": "Source Action",
+			"reqd": 1
+		},
+		{
+			"fieldname": "from_revision",
+			"fieldtype": "Int",
+			"label": "From Revision",
+			"reqd": 1
+		},
+		{
+			"fieldname": "to_revision",
+			"fieldtype": "Int",
+			"label": "To Revision"
+		},
+		{
+			"fieldname": "source_stock_entry",
+			"fieldtype": "Link",
+			"label": "Source Stock Entry",
+			"options": "Stock Entry"
+		},
+		{
+			"fieldname": "reason",
+			"fieldtype": "Small Text",
+			"label": "Reason"
+		},
+		{
+			"fieldname": "actor_user",
+			"fieldtype": "Link",
+			"label": "Actor User",
+			"options": "User",
+			"reqd": 1
+		},
+		{
+			"fieldname": "event_at",
+			"fieldtype": "Datetime",
+			"label": "Event At",
+			"reqd": 1
+		},
+		{
+			"fieldname": "prior_snapshot_digest",
+			"fieldtype": "Data",
+			"label": "Prior Snapshot Digest",
+			"reqd": 1
+		},
+		{
+			"fieldname": "new_snapshot_digest",
+			"fieldtype": "Data",
+			"label": "New Snapshot Digest"
+		}
+	],
+	"permissions": [
+		{
+			"role": "Stock User",
+			"read": 1
+		},
+		{
+			"role": "Stock Manager",
+			"read": 1
+		},
+		{
+			"role": "Accounts Manager",
+			"read": 1
+		},
+		{
+			"role": "C-Level Approver",
+			"read": 1
+		}
+	],
+	"istable": 0,
+	"is_submittable": 0,
+	"autoname": "hash"
+}

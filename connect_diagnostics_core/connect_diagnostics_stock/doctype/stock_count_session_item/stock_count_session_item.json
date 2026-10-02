@@ -1,0 +1,186 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Session Item",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 11:01:49.372243",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"line_key",
+		"item_code",
+		"company",
+		"warehouse",
+		"storage_location",
+		"stock_uom",
+		"batch_no",
+		"serial_no",
+		"evidence_revision",
+		"system_qty",
+		"current_valuation_rate",
+		"snapshot_at",
+		"snapshot_digest",
+		"baseline_source",
+		"latest_observation",
+		"counted_qty",
+		"variance_qty",
+		"recount_required",
+		"recount_complete",
+		"line_state",
+		"native_stock_entry",
+		"native_stock_entry_detail",
+		"native_effect_qty"
+	],
+	"fields": [
+		{
+			"fieldname": "line_key",
+			"fieldtype": "Data",
+			"label": "Line Key",
+			"reqd": 1
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item Code",
+			"options": "Item",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": "Warehouse",
+			"options": "Warehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "storage_location",
+			"fieldtype": "Link",
+			"label": "Storage Location",
+			"options": "Storage Location",
+			"reqd": 1
+		},
+		{
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"label": "Stock Uom",
+			"options": "UOM",
+			"reqd": 1
+		},
+		{
+			"fieldname": "batch_no",
+			"fieldtype": "Data",
+			"label": "Batch No",
+			"length": 140
+		},
+		{
+			"fieldname": "serial_no",
+			"fieldtype": "Data",
+			"label": "Serial No",
+			"length": 140
+		},
+		{
+			"fieldname": "evidence_revision",
+			"fieldtype": "Int",
+			"label": "Evidence Revision",
+			"reqd": 1
+		},
+		{
+			"fieldname": "system_qty",
+			"fieldtype": "Float",
+			"label": "System Qty",
+			"read_only": 1
+		},
+		{
+			"fieldname": "current_valuation_rate",
+			"fieldtype": "Currency",
+			"label": "Current Valuation Rate",
+			"read_only": 1
+		},
+		{
+			"fieldname": "snapshot_at",
+			"fieldtype": "Datetime",
+			"label": "Snapshot At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "snapshot_digest",
+			"fieldtype": "Data",
+			"label": "Snapshot Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "baseline_source",
+			"fieldtype": "Data",
+			"label": "Baseline Source",
+			"read_only": 1
+		},
+		{
+			"fieldname": "latest_observation",
+			"fieldtype": "Link",
+			"label": "Latest Observation",
+			"options": "Stock Count Observation",
+			"read_only": 1
+		},
+		{
+			"fieldname": "counted_qty",
+			"fieldtype": "Float",
+			"label": "Counted Qty",
+			"read_only": 1
+		},
+		{
+			"fieldname": "variance_qty",
+			"fieldtype": "Float",
+			"label": "Variance Qty",
+			"read_only": 1
+		},
+		{
+			"fieldname": "recount_required",
+			"fieldtype": "Check",
+			"label": "Recount Required",
+			"read_only": 1
+		},
+		{
+			"fieldname": "recount_complete",
+			"fieldtype": "Check",
+			"label": "Recount Complete",
+			"read_only": 1
+		},
+		{
+			"fieldname": "line_state",
+			"fieldtype": "Select",
+			"label": "Line State",
+			"options": "Pending\nCounted\nRecounted\nInvalidated",
+			"read_only": 1
+		},
+		{
+			"fieldname": "native_stock_entry",
+			"fieldtype": "Link",
+			"label": "Native Stock Entry",
+			"options": "Stock Entry",
+			"read_only": 1
+		},
+		{
+			"fieldname": "native_stock_entry_detail",
+			"fieldtype": "Link",
+			"label": "Native Stock Entry Detail",
+			"options": "Stock Entry Detail",
+			"read_only": 1
+		},
+		{
+			"fieldname": "native_effect_qty",
+			"fieldtype": "Float",
+			"label": "Native Effect Qty",
+			"read_only": 1
+		}
+	],
+	"permissions": [],
+	"istable": 1,
+	"is_submittable": 0
+}

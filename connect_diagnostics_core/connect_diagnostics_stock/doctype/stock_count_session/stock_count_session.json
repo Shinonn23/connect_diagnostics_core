@@ -1,0 +1,540 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Session",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 19:51:46.000000",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"naming_series",
+		"company",
+		"scope_type",
+		"workflow_state",
+		"description",
+		"reason",
+		"linked_recount_of",
+		"source_emergency_stock_entry",
+		"cutoff_datetime",
+		"frozen_at",
+		"evidence_revision",
+		"snapshot_digest",
+		"approved_digest",
+		"count_complete",
+		"has_variance",
+		"evidence_invalidated",
+		"invalidation_reason",
+		"invalidation_stock_entry",
+		"invalidation_at",
+		"posting_policy",
+		"posting_date",
+		"posting_time",
+		"posted_at",
+		"closed_at",
+		"cancelled_at",
+		"accounting_review_required",
+		"accounting_predicate_revision",
+		"accounting_settings_digest",
+		"accounting_candidate_digest",
+		"accounting_reviewed_digest",
+		"cancel_accounting_required",
+		"cancel_request_user",
+		"cancel_request_at",
+		"cancel_reason",
+		"cancel_gl_digest",
+		"cancel_accounts_user",
+		"cancel_accounts_employee",
+		"cancel_accounts_at",
+		"cancel_accounts_digest",
+		"maker_user",
+		"maker_employee",
+		"maker_at",
+		"checker_user",
+		"checker_employee",
+		"checker_at",
+		"stock_approver_user",
+		"stock_approver_employee",
+		"stock_approver_at",
+		"accounts_approver_user",
+		"accounts_approver_employee",
+		"accounts_approver_at",
+		"decision_reason",
+		"decision_actor",
+		"decision_at",
+		"pending_reason_action",
+		"pending_reason_actor",
+		"pending_reason_state",
+		"pending_reason_revision",
+		"pending_reason_digest",
+		"pending_reason_text",
+		"pending_reason_at",
+		"scope",
+		"locations",
+		"items",
+		"terminal_reason"
+	],
+	"fields": [
+		{
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Naming Series",
+			"options": "SCS.YYYY-BE.MM-DATE.####",
+			"default": "SCS.YYYY-BE.MM-DATE.####",
+			"hidden": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "scope_type",
+			"fieldtype": "Select",
+			"label": "Scope Type",
+			"options": "Full\nCycle",
+			"reqd": 1
+		},
+		{
+			"fieldname": "workflow_state",
+			"fieldtype": "Data",
+			"label": "Workflow State",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "description",
+			"fieldtype": "Small Text",
+			"label": "Description"
+		},
+		{
+			"fieldname": "reason",
+			"fieldtype": "Small Text",
+			"label": "Reason"
+		},
+		{
+			"fieldname": "linked_recount_of",
+			"fieldtype": "Link",
+			"label": "Linked Recount Of",
+			"options": "Stock Count Session"
+		},
+		{
+			"fieldname": "source_emergency_stock_entry",
+			"fieldtype": "Link",
+			"label": "Source Emergency Stock Entry",
+			"options": "Stock Entry"
+		},
+		{
+			"fieldname": "cutoff_datetime",
+			"fieldtype": "Datetime",
+			"label": "Cutoff Datetime",
+			"read_only": 1
+		},
+		{
+			"fieldname": "frozen_at",
+			"fieldtype": "Datetime",
+			"label": "Frozen At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "evidence_revision",
+			"fieldtype": "Int",
+			"label": "Evidence Revision",
+			"read_only": 1
+		},
+		{
+			"fieldname": "snapshot_digest",
+			"fieldtype": "Data",
+			"label": "Snapshot Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approved_digest",
+			"fieldtype": "Data",
+			"label": "Approved Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "count_complete",
+			"fieldtype": "Check",
+			"label": "Count Complete",
+			"read_only": 1
+		},
+		{
+			"fieldname": "has_variance",
+			"fieldtype": "Check",
+			"label": "Has Variance",
+			"read_only": 1
+		},
+		{
+			"fieldname": "evidence_invalidated",
+			"fieldtype": "Check",
+			"label": "Evidence Invalidated",
+			"read_only": 1
+		},
+		{
+			"fieldname": "invalidation_reason",
+			"fieldtype": "Small Text",
+			"label": "Invalidation Reason",
+			"read_only": 1
+		},
+		{
+			"fieldname": "invalidation_stock_entry",
+			"fieldtype": "Link",
+			"label": "Invalidation Stock Entry",
+			"options": "Stock Entry",
+			"read_only": 1
+		},
+		{
+			"fieldname": "invalidation_at",
+			"fieldtype": "Datetime",
+			"label": "Invalidation At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "posting_policy",
+			"fieldtype": "Select",
+			"label": "Posting Policy",
+			"options": "Scope Freeze Time",
+			"default": "Scope Freeze Time",
+			"read_only": 1
+		},
+		{
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"label": "Posting Date",
+			"read_only": 1
+		},
+		{
+			"fieldname": "posting_time",
+			"fieldtype": "Time",
+			"label": "Posting Time",
+			"read_only": 1
+		},
+		{
+			"fieldname": "posted_at",
+			"fieldtype": "Datetime",
+			"label": "Posted At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "closed_at",
+			"fieldtype": "Datetime",
+			"label": "Closed At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "cancelled_at",
+			"fieldtype": "Datetime",
+			"label": "Cancelled At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounting_review_required",
+			"fieldtype": "Check",
+			"label": "Accounting Review Required",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounting_predicate_revision",
+			"fieldtype": "Int",
+			"label": "Accounting Predicate Revision",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounting_settings_digest",
+			"fieldtype": "Data",
+			"label": "Accounting Settings Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounting_reviewed_digest",
+			"fieldtype": "Data",
+			"label": "Accounting Reviewed Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounting_candidate_digest",
+			"fieldtype": "Data",
+			"label": "Accounting Candidate Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "cancel_accounting_required",
+			"fieldtype": "Check",
+			"label": "Cancellation Accounting Required",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_request_user",
+			"fieldtype": "Link",
+			"label": "Cancellation Request User",
+			"options": "User",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_request_at",
+			"fieldtype": "Datetime",
+			"label": "Cancellation Request At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_reason",
+			"fieldtype": "Small Text",
+			"label": "Cancellation Reason",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_gl_digest",
+			"fieldtype": "Data",
+			"label": "Cancellation GL Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_accounts_user",
+			"fieldtype": "Link",
+			"label": "Cancellation Accounts User",
+			"options": "User",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_accounts_employee",
+			"fieldtype": "Link",
+			"label": "Cancellation Accounts Employee",
+			"options": "Employee",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_accounts_at",
+			"fieldtype": "Datetime",
+			"label": "Cancellation Accounts At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "cancel_accounts_digest",
+			"fieldtype": "Data",
+			"label": "Cancellation Accounts Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "maker_user",
+			"fieldtype": "Link",
+			"label": "Maker User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "maker_employee",
+			"fieldtype": "Link",
+			"label": "Maker Employee",
+			"options": "Employee",
+			"read_only": 1
+		},
+		{
+			"fieldname": "maker_at",
+			"fieldtype": "Datetime",
+			"label": "Maker At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "checker_user",
+			"fieldtype": "Link",
+			"label": "Checker User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "checker_employee",
+			"fieldtype": "Link",
+			"label": "Checker Employee",
+			"options": "Employee",
+			"read_only": 1
+		},
+		{
+			"fieldname": "checker_at",
+			"fieldtype": "Datetime",
+			"label": "Checker At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "stock_approver_user",
+			"fieldtype": "Link",
+			"label": "Stock Approver User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "stock_approver_employee",
+			"fieldtype": "Link",
+			"label": "Stock Approver Employee",
+			"options": "Employee",
+			"read_only": 1
+		},
+		{
+			"fieldname": "stock_approver_at",
+			"fieldtype": "Datetime",
+			"label": "Stock Approver At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounts_approver_user",
+			"fieldtype": "Link",
+			"label": "Accounts Approver User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounts_approver_employee",
+			"fieldtype": "Link",
+			"label": "Accounts Approver Employee",
+			"options": "Employee",
+			"read_only": 1
+		},
+		{
+			"fieldname": "accounts_approver_at",
+			"fieldtype": "Datetime",
+			"label": "Accounts Approver At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "decision_reason",
+			"fieldtype": "Small Text",
+			"label": "Decision Reason",
+			"read_only": 1
+		},
+		{
+			"fieldname": "decision_actor",
+			"fieldtype": "Link",
+			"label": "Decision Actor",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "decision_at",
+			"fieldtype": "Datetime",
+			"label": "Decision At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "pending_reason_action",
+			"fieldtype": "Data",
+			"label": "Pending Reason Action",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_actor",
+			"fieldtype": "Link",
+			"label": "Pending Reason Actor",
+			"read_only": 1,
+			"options": "User",
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_state",
+			"fieldtype": "Data",
+			"label": "Pending Reason State",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_revision",
+			"fieldtype": "Int",
+			"label": "Pending Reason Revision",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_digest",
+			"fieldtype": "Data",
+			"label": "Pending Reason Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_text",
+			"fieldtype": "Small Text",
+			"label": "Pending Reason Text",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "pending_reason_at",
+			"fieldtype": "Datetime",
+			"label": "Pending Reason At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "scope",
+			"fieldtype": "Table",
+			"label": "Scope",
+			"options": "Stock Count Session Scope",
+			"reqd": 1
+		},
+		{
+			"fieldname": "locations",
+			"fieldtype": "Table",
+			"label": "Locations",
+			"options": "Stock Count Session Location",
+			"read_only": 1
+		},
+		{
+			"fieldname": "items",
+			"fieldtype": "Table",
+			"label": "Items",
+			"options": "Stock Count Session Item",
+			"read_only": 1
+		},
+		{
+			"fieldname": "terminal_reason",
+			"fieldtype": "Small Text",
+			"label": "Terminal Reason",
+			"read_only": 1
+		}
+	],
+	"permissions": [
+		{
+			"role": "Stock User",
+			"read": 1,
+			"write": 1,
+			"create": 1
+		},
+		{
+			"role": "Stock Manager",
+			"read": 1,
+			"write": 1,
+			"create": 1,
+			"submit": 1,
+			"cancel": 1
+		},
+		{
+			"role": "Accounts Manager",
+			"read": 1,
+			"write": 1,
+			"submit": 1
+		},
+		{
+			"role": "C-Level Approver",
+			"read": 1
+		},
+		{
+			"role": "System Manager",
+			"read": 1
+		}
+	],
+	"istable": 0,
+	"is_submittable": 1,
+	"autoname": "naming_series:"
+}

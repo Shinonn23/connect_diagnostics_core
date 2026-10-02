@@ -1,0 +1,85 @@
+{
+	"doctype": "DocType",
+	"name": "Stock Count Session Location",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 10:47:21.084604",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"scope_row",
+		"company",
+		"warehouse",
+		"storage_location",
+		"evidence_revision",
+		"coverage_state",
+		"counter_user",
+		"counted_at",
+		"completed_at"
+	],
+	"fields": [
+		{
+			"fieldname": "scope_row",
+			"fieldtype": "Link",
+			"label": "Scope Row",
+			"options": "Stock Count Session Scope",
+			"reqd": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"label": "Warehouse",
+			"options": "Warehouse",
+			"reqd": 1
+		},
+		{
+			"fieldname": "storage_location",
+			"fieldtype": "Link",
+			"label": "Storage Location",
+			"options": "Storage Location",
+			"reqd": 1
+		},
+		{
+			"fieldname": "evidence_revision",
+			"fieldtype": "Int",
+			"label": "Evidence Revision",
+			"reqd": 1
+		},
+		{
+			"fieldname": "coverage_state",
+			"fieldtype": "Select",
+			"label": "Coverage State",
+			"options": "Not Started\nCounted\nInvalidated",
+			"default": "Not Started"
+		},
+		{
+			"fieldname": "counter_user",
+			"fieldtype": "Link",
+			"label": "Counter User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "counted_at",
+			"fieldtype": "Datetime",
+			"label": "Counted At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "completed_at",
+			"fieldtype": "Datetime",
+			"label": "Completed At",
+			"read_only": 1
+		}
+	],
+	"permissions": [],
+	"istable": 1,
+	"is_submittable": 0
+}
