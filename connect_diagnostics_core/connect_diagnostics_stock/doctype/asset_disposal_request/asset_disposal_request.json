@@ -1,0 +1,508 @@
+{
+	"doctype": "DocType",
+	"name": "Asset Disposal Request",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 12:05:17.082728",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"naming_series",
+		"purpose",
+		"reason",
+		"asset",
+		"company",
+		"asset_quantity",
+		"request_date",
+		"disposal_date",
+		"workflow_state",
+		"sale_section",
+		"customer",
+		"posting_date",
+		"item_code",
+		"sell_qty",
+		"rate",
+		"currency",
+		"taxes_template",
+		"approval_section",
+		"maker_user",
+		"maker_at",
+		"reviewer_user",
+		"reviewer_at",
+		"approver_user",
+		"approver_at",
+		"approval_digest_schema",
+		"approval_digest",
+		"approved_intent_json",
+		"asset_baseline_json",
+		"sale_candidate_projection",
+		"disposal_gl_projection",
+		"return_reason",
+		"rejection_reason",
+		"reset_section",
+		"reset_maker_user",
+		"reset_maker_at",
+		"reset_reviewer_user",
+		"reset_reviewer_at",
+		"reset_approver_user",
+		"reset_approver_at",
+		"reset_reason",
+		"reset_digest",
+		"reset_return_reason",
+		"effect_section",
+		"disposal_status",
+		"sales_invoice",
+		"disposal_journal_entry",
+		"generated_journal_entries",
+		"execution_id",
+		"execution_phase",
+		"execute_started_at",
+		"execute_completed_at",
+		"stage1_schedule_snapshot_json",
+		"stage1_schedule_snapshot_digest",
+		"stage1_operation_id",
+		"final_schedule_snapshot_json",
+		"final_schedule_snapshot_digest",
+		"reset_completed_at"
+	],
+	"fields": [
+		{
+			"fieldname": "naming_series",
+			"fieldtype": "Select",
+			"label": "Naming Series",
+			"options": "ADR.YYYY-BE.MM-DATE.####",
+			"default": "ADR.YYYY-BE.MM-DATE.####",
+			"hidden": 1,
+			"read_only": 1
+		},
+		{
+			"fieldname": "purpose",
+			"fieldtype": "Select",
+			"label": "Purpose",
+			"options": "Sale\nScrap\nWrite-off",
+			"reqd": 1
+		},
+		{
+			"fieldname": "reason",
+			"fieldtype": "Small Text",
+			"label": "Reason",
+			"reqd": 1
+		},
+		{
+			"fieldname": "asset",
+			"fieldtype": "Link",
+			"label": "Asset",
+			"options": "Asset",
+			"reqd": 1,
+			"in_standard_filter": 1
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"read_only": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "asset_quantity",
+			"fieldtype": "Float",
+			"label": "Asset Quantity",
+			"read_only": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "request_date",
+			"fieldtype": "Date",
+			"label": "Request Date",
+			"default": "Today",
+			"reqd": 1
+		},
+		{
+			"fieldname": "disposal_date",
+			"fieldtype": "Date",
+			"label": "Disposal Date",
+			"reqd": 1
+		},
+		{
+			"fieldname": "workflow_state",
+			"fieldtype": "Data",
+			"label": "Workflow State",
+			"read_only": 1,
+			"allow_on_submit": 1,
+			"in_standard_filter": 1
+		},
+		{
+			"fieldname": "sale_section",
+			"fieldtype": "Section Break",
+			"label": "Sale Section",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"label": "Customer",
+			"options": "Customer",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"label": "Posting Date",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item Code",
+			"options": "Item",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "sell_qty",
+			"fieldtype": "Float",
+			"label": "Sell Qty",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "rate",
+			"fieldtype": "Currency",
+			"label": "Rate",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"label": "Currency",
+			"options": "Currency",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "taxes_template",
+			"fieldtype": "Link",
+			"label": "Taxes Template",
+			"options": "Sales Taxes and Charges Template",
+			"depends_on": "eval:doc.purpose==\"Sale\""
+		},
+		{
+			"fieldname": "approval_section",
+			"fieldtype": "Section Break",
+			"label": "Approval Section"
+		},
+		{
+			"fieldname": "maker_user",
+			"fieldtype": "Link",
+			"label": "Maker User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "maker_at",
+			"fieldtype": "Datetime",
+			"label": "Maker At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "reviewer_user",
+			"fieldtype": "Link",
+			"label": "Reviewer User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "reviewer_at",
+			"fieldtype": "Datetime",
+			"label": "Reviewer At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approver_user",
+			"fieldtype": "Link",
+			"label": "Approver User",
+			"options": "User",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approver_at",
+			"fieldtype": "Datetime",
+			"label": "Approver At",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approval_digest_schema",
+			"fieldtype": "Data",
+			"label": "Approval Digest Schema",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approval_digest",
+			"fieldtype": "Data",
+			"label": "Approval Digest",
+			"read_only": 1
+		},
+		{
+			"fieldname": "approved_intent_json",
+			"fieldtype": "Long Text",
+			"label": "Approved Intent Json",
+			"read_only": 1
+		},
+		{
+			"fieldname": "asset_baseline_json",
+			"fieldtype": "Long Text",
+			"label": "Asset Baseline Json",
+			"read_only": 1
+		},
+		{
+			"fieldname": "sale_candidate_projection",
+			"fieldtype": "Long Text",
+			"label": "Sale Candidate Projection",
+			"read_only": 1
+		},
+		{
+			"fieldname": "disposal_gl_projection",
+			"fieldtype": "Long Text",
+			"label": "Disposal Gl Projection",
+			"read_only": 1
+		},
+		{
+			"fieldname": "return_reason",
+			"fieldtype": "Small Text",
+			"label": "Return Reason",
+			"read_only": 1
+		},
+		{
+			"fieldname": "rejection_reason",
+			"fieldtype": "Small Text",
+			"label": "Rejection Reason",
+			"read_only": 1
+		},
+		{
+			"fieldname": "reset_section",
+			"fieldtype": "Section Break",
+			"label": "Reset Section"
+		},
+		{
+			"fieldname": "reset_maker_user",
+			"fieldtype": "Link",
+			"label": "Reset Maker User",
+			"options": "User",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_maker_at",
+			"fieldtype": "Datetime",
+			"label": "Reset Maker At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_reviewer_user",
+			"fieldtype": "Link",
+			"label": "Reset Reviewer User",
+			"options": "User",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_reviewer_at",
+			"fieldtype": "Datetime",
+			"label": "Reset Reviewer At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_approver_user",
+			"fieldtype": "Link",
+			"label": "Reset Approver User",
+			"options": "User",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_approver_at",
+			"fieldtype": "Datetime",
+			"label": "Reset Approver At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_reason",
+			"fieldtype": "Small Text",
+			"label": "Reset Reason",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_digest",
+			"fieldtype": "Data",
+			"label": "Reset Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_return_reason",
+			"fieldtype": "Small Text",
+			"label": "Reset Return Reason",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "effect_section",
+			"fieldtype": "Section Break",
+			"label": "Effect Section"
+		},
+		{
+			"fieldname": "disposal_status",
+			"fieldtype": "Select",
+			"label": "Disposal Status",
+			"options": "Not Executed\nDepreciation Pending\nReady to Dispose\nDisposal Accounting Pending\nClosed\nAbandoned/Released",
+			"default": "Not Executed",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "sales_invoice",
+			"fieldtype": "Link",
+			"label": "Sales Invoice",
+			"options": "Sales Invoice",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "disposal_journal_entry",
+			"fieldtype": "Link",
+			"label": "Disposal Journal Entry",
+			"options": "Journal Entry",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "generated_journal_entries",
+			"fieldtype": "Table",
+			"label": "Generated Journal Entries",
+			"options": "Asset Disposal Journal Entry",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "execution_id",
+			"fieldtype": "Data",
+			"label": "Execution Id",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "execution_phase",
+			"fieldtype": "Data",
+			"label": "Execution Phase",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "execute_started_at",
+			"fieldtype": "Datetime",
+			"label": "Execute Started At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "execute_completed_at",
+			"fieldtype": "Datetime",
+			"label": "Execute Completed At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "stage1_schedule_snapshot_json",
+			"fieldtype": "Long Text",
+			"label": "Stage1 Schedule Snapshot Json",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "stage1_schedule_snapshot_digest",
+			"fieldtype": "Data",
+			"label": "Stage1 Schedule Snapshot Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "stage1_operation_id",
+			"fieldtype": "Data",
+			"label": "Stage1 Operation Id",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "final_schedule_snapshot_json",
+			"fieldtype": "Long Text",
+			"label": "Final Schedule Snapshot Json",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "final_schedule_snapshot_digest",
+			"fieldtype": "Data",
+			"label": "Final Schedule Snapshot Digest",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "reset_completed_at",
+			"fieldtype": "Datetime",
+			"label": "Reset Completed At",
+			"read_only": 1,
+			"allow_on_submit": 1
+		}
+	],
+	"permissions": [
+		{
+			"role": "Asset Administrator",
+			"read": 1,
+			"report": 1,
+			"export": 0,
+			"print": 1,
+			"email": 0,
+			"share": 0,
+			"create": 1,
+			"write": 1,
+			"delete": 0,
+			"submit": 0,
+			"cancel": 0
+		},
+		{
+			"role": "Accounts User",
+			"read": 1,
+			"report": 1,
+			"export": 0,
+			"print": 1,
+			"email": 0,
+			"share": 0,
+			"create": 0,
+			"write": 1,
+			"delete": 0,
+			"submit": 1,
+			"cancel": 0
+		},
+		{
+			"role": "C-Level Approver",
+			"read": 1,
+			"report": 1,
+			"export": 0,
+			"print": 1,
+			"email": 0,
+			"share": 0,
+			"create": 0,
+			"write": 1,
+			"delete": 0,
+			"submit": 0,
+			"cancel": 0
+		}
+	],
+	"custom": 0,
+	"istable": 0,
+	"is_submittable": 1,
+	"autoname": "naming_series:",
+	"track_changes": 1
+}

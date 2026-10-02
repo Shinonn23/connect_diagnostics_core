@@ -1,0 +1,94 @@
+{
+	"doctype": "DocType",
+	"name": "Asset Disposal Journal Entry",
+	"module": "Connect Diagnostics Stock",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 12:47:14.286689",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"field_order": [
+		"journal_entry",
+		"operation_id",
+		"kind",
+		"stage",
+		"finance_book",
+		"posting_date",
+		"source_proof",
+		"draft_payload_digest"
+	],
+	"fields": [
+		{
+			"fieldname": "journal_entry",
+			"fieldtype": "Link",
+			"label": "Journal Entry",
+			"options": "Journal Entry",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "operation_id",
+			"fieldtype": "Data",
+			"label": "Operation Id",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "kind",
+			"fieldtype": "Select",
+			"label": "Kind",
+			"options": "depreciation\nasset_disposal",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "stage",
+			"fieldtype": "Select",
+			"label": "Stage",
+			"options": "pre_disposal_depreciation\nfinal_disposal",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "finance_book",
+			"fieldtype": "Link",
+			"label": "Finance Book",
+			"options": "Finance Book",
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"label": "Posting Date",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "source_proof",
+			"fieldtype": "Data",
+			"label": "Source Proof",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		},
+		{
+			"fieldname": "draft_payload_digest",
+			"fieldtype": "Data",
+			"label": "Native Draft Financial Digest",
+			"reqd": 1,
+			"read_only": 1,
+			"allow_on_submit": 1
+		}
+	],
+	"permissions": [],
+	"custom": 0,
+	"istable": 1,
+	"is_submittable": 0,
+	"autoname": "",
+	"track_changes": 1
+}

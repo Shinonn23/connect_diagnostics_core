@@ -11,7 +11,9 @@ from typing import Any, cast
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_datetime, getdate
 
+from connect_diagnostics_core.api.erpnext import asset_installation
 from connect_diagnostics_core.api.frappe import approval_controls
 
 _CAPABILITY_STACK = "_connect_diagnostics_asset_movement_capabilities"
@@ -48,7 +50,9 @@ _CRITICAL_ROW_FIELDS = (
     "target_location",
     "from_employee",
     "to_employee",
+    "receiver_user",
 )
+_INSTALLATION_ROW_FIELDS = ("installation_customer", "installation_previous_customer")
 
 
 @dataclass
@@ -208,7 +212,10 @@ def _consume_transition_marker(doc: Document, fieldname: str, marker: object) ->
 
 
 def _critical_row(row: Any) -> tuple[Any, ...]:
-    return tuple(_row_value(row, field) for field in _CRITICAL_ROW_FIELDS)
+    custody = tuple(_row_value(row, field) for field in _CRITICAL_ROW_FIELDS)
+    if _row_value(row, "installation_customer"):
+        return (*custody, *(_row_value(row, field) for field in _INSTALLATION_ROW_FIELDS))
+    return custody
 
 
 def critical_payload(doc: Document) -> dict[str, Any]:
@@ -231,6 +238,10 @@ def _set_snapshot(doc: Document, prefix: str, snapshot: approval_controls.Signed
 def capture_maker(doc: Document) -> None:
     """Record the server-resolved maker when the document enters review."""
     _require_role(MAKER_ROLE)
+    from connect_diagnostics_core.api.erpnext.asset_movement_acceptance import validate_receivers
+
+    validate_receivers(doc)
+    asset_installation.capture_maker_customer(doc)
     reset_approval(doc)
     maker = approval_controls.resolve_user(frappe.session.user)
     _set_value(doc, "approval_maker_user", maker)
@@ -239,6 +250,7 @@ def capture_maker(doc: Document) -> None:
 
 def capture_review(doc: Document) -> None:
     _require_role(REVIEWER_ROLE)
+    asset_installation.validate_current_installation(doc)
     maker = _text(doc.get("approval_maker_user"))
     if not maker:
         frappe.throw(_("Asset Movement must have a maker before review."))
@@ -250,6 +262,7 @@ def capture_review(doc: Document) -> None:
 
 def capture_approval(doc: Document) -> None:
     _require_role(APPROVER_ROLE)
+    asset_installation.validate_current_installation(doc)
     maker = _text(doc.get("approval_maker_user"))
     reviewer = _text(doc.get("approval_reviewer_user"))
     if not maker or not reviewer:
@@ -315,9 +328,11 @@ def validate_critical_unchanged(doc: Document) -> None:
 
 def validate_workflow(doc: Document, method: str | None = None) -> None:
     del method
+    approval_controls.require_native_terminal_state(doc, STATE_SUBMITTED, STATE_CANCELLED)
     validate_critical_unchanged(doc)
     state = _text(doc.get("workflow_state"))
     if state in {STATE_PENDING_REVIEW, STATE_PENDING_APPROVAL, STATE_APPROVED}:
+        asset_installation.validate_current_installation(doc)
         if not _text(doc.get("approval_maker_user")) or not _text(doc.get("approval_critical_digest")):
             frappe.throw(_("Asset Movement approval evidence is incomplete."))
         if doc.get("approval_critical_digest") != critical_digest(doc):
@@ -337,6 +352,17 @@ def validate_workflow(doc: Document, method: str | None = None) -> None:
             )
 
 
+def validate_after_submit_update(doc: Document, method: str | None = None) -> None:
+    """Keep canonical submitted Asset Movements on their native lifecycle state."""
+    del method
+    previous = doc.get_doc_before_save()
+    current_state = _text(doc.get("workflow_state"))
+    previous_state = _text(previous.get("workflow_state")) if previous else ""
+    if not (current_state.startswith("Asset Movement ") or previous_state.startswith("Asset Movement ")):
+        return
+    approval_controls.require_locked_submitted_update(doc, STATE_SUBMITTED)
+
+
 def lock_assets_before_submit(doc: Document, method: str | None = None) -> None:
     del method
     if getattr(doc, "_action", None) == "submit":
@@ -349,10 +375,14 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
     if capability is not None:
         asset = frappe.get_doc("Asset", capability.asset_name)
         validate_native_asset_receipt(doc, asset)
+        # A fresh direct submit checks Create and Submit natively; retain the
+        # Write check that the former draft-save step also required.
+        doc.check_permission("write")
         _set_value(doc, "workflow_state", STATE_SUBMITTED)
         return
     if doc.get("workflow_state") != STATE_SUBMITTED:
         frappe.throw(_("Asset Movement must be approved before submission."))
+    asset_installation.validate_current_installation(doc, lock_current=True)
     _consume_transition_marker(doc, _SUBMIT_MARKER_FIELD, _SUBMIT_TRANSITION_MARKER)
     _require_role(REVIEWER_ROLE)
     approval_controls.require_permission(doc, "submit")
@@ -388,15 +418,43 @@ def validate_before_cancel(doc: Document, method: str | None = None) -> None:
     persisted = _persisted_state(doc)
     if not persisted or persisted.get("workflow_state") != STATE_SUBMITTED:
         frappe.throw(_("Asset Movement cancellation is not current."))
+    lock_asset_rows([_row_value(row, "asset") for row in _movement_assets(doc)])
 
 
 class AssetMovementNativeMixin:
     """Inactive extension preserving ERPNext's native Asset movement lifecycle."""
 
-    def make_asset_movement(self: Document) -> Any:
+    def make_asset_movement(self: Document) -> None:
         asset_name = str(self.get("name"))
+        reference_doctype = "Purchase Receipt" if self.get("purchase_receipt") else "Purchase Invoice"
+        reference_name = self.get("purchase_receipt") or self.get("purchase_invoice")
+        transaction_date = getdate(self.get("purchase_date"))
+        if reference_name:
+            posting_date, posting_time = frappe.db.get_value(
+                reference_doctype, reference_name, ["posting_date", "posting_time"]
+            )
+            transaction_date = get_datetime(f"{posting_date} {posting_time}")
+        movement = frappe.get_doc(
+            {
+                "doctype": "Asset Movement",
+                "assets": [
+                    {
+                        "asset": asset_name,
+                        "asset_name": self.get("asset_name"),
+                        "target_location": self.get("location"),
+                        "to_employee": self.get("custodian"),
+                        "company": self.get("company"),
+                    }
+                ],
+                "purpose": "Receipt",
+                "company": self.get("company"),
+                "transaction_date": transaction_date,
+                "reference_doctype": reference_doctype,
+                "reference_name": reference_name,
+            }
+        )
         with native_asset_movement_capability(asset_name, "submit"):
-            return cast(Any, super()).make_asset_movement()  # ty: ignore[invalid-super-argument] - Frappe injects the runtime controller superclass
+            movement.submit()
 
     def cancel_movement_entries(self: Document) -> Any:
         asset_name = str(self.get("name"))
@@ -406,6 +464,22 @@ class AssetMovementNativeMixin:
 
 class AssetMovementWorkflowMixin:
     """Preserve core Workflow validation except inside an authenticated native Asset operation."""
+
+    def get_latest_location_and_custodian(self: Document, asset: str) -> tuple[Any, Any]:
+        """Use native replay ordering with a current read after the Asset lock."""
+        rows = frappe.db.sql(
+            """
+            SELECT asm_item.target_location, asm_item.to_employee
+            FROM `tabAsset Movement Item` asm_item
+            JOIN `tabAsset Movement` asm ON asm_item.parent = asm.name
+            WHERE asm_item.asset = %(asset)s AND asm.company = %(company)s
+              AND asm.docstatus = 1
+            ORDER BY asm.transaction_date DESC
+            LIMIT 1 FOR UPDATE NOWAIT
+            """,
+            {"asset": asset, "company": self.get("company")},
+        )
+        return (rows[0][0], rows[0][1]) if rows else ("", "")
 
     def validate_workflow(self: Document) -> Any:
         action = getattr(self, "_action", None)

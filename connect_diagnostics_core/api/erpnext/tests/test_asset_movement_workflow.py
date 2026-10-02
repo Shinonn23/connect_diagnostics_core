@@ -3,13 +3,21 @@
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from typing import Any, cast
+from unittest.mock import Mock, patch
 
 import frappe
+from erpnext.assets.doctype.asset.asset import Asset as NativeAsset
+from erpnext.assets.doctype.asset_movement.asset_movement import AssetMovement
+from frappe.model.document import Document
 from frappe.model.workflow import apply_workflow
 from frappe.tests import IntegrationTestCase, UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import asset_movement_workflow as workflow
+
+
+def _movement(**fields: Any) -> AssetMovement:
+    return AssetMovement({"doctype": "Asset Movement", **fields})
 
 
 class TestAssetMovementWorkflow(UnitTestCase):
@@ -21,7 +29,9 @@ class TestAssetMovementWorkflow(UnitTestCase):
     def test_capability_is_request_local_and_exception_safe(self) -> None:
         with self.assertRaises(RuntimeError):
             with workflow.native_asset_movement_capability("AST-1", "submit"):
-                self.assertEqual(workflow._top_capability("submit").asset_name, "AST-1")
+                capability = workflow._top_capability("submit")
+                assert capability is not None
+                self.assertEqual(capability.asset_name, "AST-1")
                 raise RuntimeError("cleanup")
         self.assertIsNone(workflow._top_capability("submit"))
 
@@ -35,7 +45,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
 
     def test_native_receipt_accepts_nullable_purchase_invoice_reference(self) -> None:
         asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
-        movement = frappe._dict(
+        movement = _movement(
             company="C",
             purpose="Receipt",
             reference_doctype="Purchase Invoice",
@@ -49,7 +59,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
         asset = frappe._dict(
             name="AST-1", company="C", location="L", custodian="EMP-1", purchase_receipt="PR-1"
         )
-        movement = frappe._dict(
+        movement = _movement(
             company="C",
             purpose="Receipt",
             reference_doctype="Purchase Receipt",
@@ -63,7 +73,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
 
     def test_capability_is_not_exposed_and_cannot_be_replayed(self) -> None:
         asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
-        movement = frappe._dict(
+        movement = _movement(
             company="C",
             purpose="Receipt",
             reference_doctype="Purchase Invoice",
@@ -80,7 +90,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
         asset = frappe._dict(
             name="AST-1", company="C", location="L", custodian="EMP-1", purchase_receipt="PR-1"
         )
-        base = frappe._dict(
+        base = _movement(
             company="C",
             purpose="Receipt",
             reference_doctype="Purchase Receipt",
@@ -108,7 +118,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
         )
         for label, changes in variants:
             with self.subTest(label=label):
-                candidate = frappe._dict(base)
+                candidate = _movement(**base.as_dict())
                 candidate.update(changes)
                 with workflow.native_asset_movement_capability("AST-1", "submit"):
                     with self.assertRaises(frappe.ValidationError):
@@ -129,7 +139,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                     purchase_receipt=purchase_receipt,
                     purchase_invoice=purchase_invoice,
                 )
-                movement = frappe._dict(
+                movement = _movement(
                     company="C",
                     purpose="Receipt",
                     reference_doctype=reference_doctype,
@@ -140,14 +150,14 @@ class TestAssetMovementWorkflow(UnitTestCase):
                     workflow.validate_native_asset_receipt(movement, asset)
 
     def test_cancel_requires_matching_asset(self) -> None:
-        movement = frappe._dict(assets=[frappe._dict(asset="AST-1")])
+        movement = _movement(assets=[frappe._dict(asset="AST-1")])
         with workflow.native_asset_movement_capability("AST-1", "cancel"):
             workflow.validate_native_asset_cancel(movement, "AST-1")
             with self.assertRaises(frappe.ValidationError):
                 workflow.validate_native_asset_cancel(frappe._dict(assets=[]), "AST-1")
 
     def test_cancel_rejects_absent_or_wrong_capability_and_mixed_rows(self) -> None:
-        movement = frappe._dict(assets=[frappe._dict(asset="AST-1"), frappe._dict(asset="AST-2")])
+        movement = _movement(assets=[frappe._dict(asset="AST-1"), frappe._dict(asset="AST-2")])
         with self.assertRaises(frappe.ValidationError):
             workflow.validate_native_asset_cancel(movement, "AST-1")
         with workflow.native_asset_movement_capability("AST-2", "cancel"):
@@ -165,11 +175,10 @@ class TestAssetMovementWorkflow(UnitTestCase):
             ],
         )
 
-    def test_mixin_delegates_native_methods_inside_capability(self) -> None:
-        class Parent:
+    def test_native_receipt_factory_directly_submits_native_payload_in_capability(self) -> None:
+        class Parent(Document):
             def make_asset_movement(self) -> str:
-                self.submit_capability = workflow._top_capability("submit")
-                return "submitted"
+                raise AssertionError("Draft-first native factory must not run")
 
             def cancel_movement_entries(self) -> str:
                 self.cancel_capability = workflow._top_capability("cancel")
@@ -177,48 +186,118 @@ class TestAssetMovementWorkflow(UnitTestCase):
 
         class Asset(workflow.AssetMovementNativeMixin, Parent):
             def __init__(self) -> None:
-                self.name = "AST-1"
-
-            def get(self, fieldname: str) -> str:
-                return getattr(self, fieldname)
+                super().__init__(
+                    {
+                        "doctype": "Asset",
+                        "name": "AST-1",
+                        "asset_name": "Asset One",
+                        "company": "C",
+                        "purchase_date": "2026-09-26",
+                        "location": "L",
+                        "custodian": "EMP-1",
+                    }
+                )
 
         asset = Asset()
-        self.assertEqual(asset.make_asset_movement(), "submitted")
+        movement = Mock()
+        movement.submit.side_effect = lambda: setattr(
+            movement, "submit_capability", workflow._top_capability("submit")
+        )
+        with patch.object(workflow.frappe, "get_doc", return_value=movement) as get_doc:
+            self.assertIsNone(asset.make_asset_movement())
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["purpose"], "Receipt")
+        self.assertEqual(payload["company"], "C")
+        self.assertEqual(payload["reference_doctype"], "Purchase Invoice")
+        self.assertIsNone(payload["reference_name"])
+        self.assertEqual(str(payload["transaction_date"]), "2026-09-26")
+        self.assertEqual(
+            payload["assets"],
+            [
+                {
+                    "asset": "AST-1",
+                    "asset_name": "Asset One",
+                    "target_location": "L",
+                    "to_employee": "EMP-1",
+                    "company": "C",
+                }
+            ],
+        )
+        movement.submit.assert_called_once_with()
+        self.assertEqual(movement.submit_capability.asset_name, "AST-1")
         self.assertEqual(asset.cancel_movement_entries(), "cancelled")
         self.assertIsNone(workflow._top_capability("submit"))
         self.assertIsNone(workflow._top_capability("cancel"))
-        self.assertEqual(asset.submit_capability.asset_name, "AST-1")
+        assert asset.cancel_capability is not None
         self.assertEqual(asset.cancel_capability.asset_name, "AST-1")
 
+    def test_native_receipt_factory_preserves_reference_posting_time_and_error_cleanup(self) -> None:
+        class Asset(workflow.AssetMovementNativeMixin, Document):
+            def __init__(self) -> None:
+                super().__init__(
+                    {
+                        "doctype": "Asset",
+                        "name": "AST-1",
+                        "company": "C",
+                        "purchase_date": "2026-09-26",
+                        "purchase_receipt": "PR-1",
+                    }
+                )
+
+        movement = Mock()
+        movement.submit.side_effect = RuntimeError("native submit failed")
+        with (
+            patch.object(workflow.frappe.db, "get_value", return_value=("2026-09-27", "14:25:30")),
+            patch.object(workflow.frappe, "get_doc", return_value=movement) as get_doc,
+            self.assertRaisesRegex(RuntimeError, "native submit failed"),
+        ):
+            Asset().make_asset_movement()
+        self.assertEqual(str(get_doc.call_args.args[0]["transaction_date"]), "2026-09-27 14:25:30")
+        self.assertEqual(get_doc.call_args.args[0]["reference_doctype"], "Purchase Receipt")
+        self.assertEqual(get_doc.call_args.args[0]["reference_name"], "PR-1")
+        self.assertIsNone(workflow._top_capability("submit"))
+
     def test_workflow_mixin_only_bypasses_core_validation_for_native_capability(self) -> None:
-        class Parent:
-            def validate_workflow(self) -> str:
+        class Parent(Document):
+            def validate_workflow(self) -> Any:
                 return "validated"
 
         class Movement(workflow.AssetMovementWorkflowMixin, Parent):
             def __init__(self, action: str | None = None) -> None:
+                super().__init__({"doctype": "Asset Movement", "workflow_state": workflow.STATE_DRAFT})
                 self._action = action
-                self.workflow_state = workflow.STATE_DRAFT
-
-            def set(self, fieldname: str, value: str) -> None:
-                setattr(self, fieldname, value)
 
         ordinary = Movement("submit")
         self.assertEqual(ordinary.validate_workflow(), "validated")
-        self.assertEqual(ordinary.workflow_state, workflow.STATE_DRAFT)
+        self.assertEqual(ordinary.get("workflow_state"), workflow.STATE_DRAFT)
 
         native_submit = Movement("submit")
         with workflow.native_asset_movement_capability("AST-1", "submit"):
             self.assertIsNone(native_submit.validate_workflow())
-        self.assertEqual(native_submit.workflow_state, workflow.STATE_SUBMITTED)
+        self.assertEqual(native_submit.get("workflow_state"), workflow.STATE_SUBMITTED)
 
         wrong_action = Movement("save")
         with workflow.native_asset_movement_capability("AST-1", "submit"):
             self.assertEqual(wrong_action.validate_workflow(), "validated")
-        self.assertEqual(wrong_action.workflow_state, workflow.STATE_DRAFT)
+        self.assertEqual(wrong_action.get("workflow_state"), workflow.STATE_DRAFT)
+
+    def test_native_location_replay_uses_current_read_and_empty_baseline(self) -> None:
+        movement = Document({"doctype": "Asset Movement", "company": "C"})
+        with patch.object(workflow.frappe.db, "sql", return_value=[("Location", "Employee")]) as query:
+            self.assertEqual(
+                workflow.AssetMovementWorkflowMixin.get_latest_location_and_custodian(movement, "AST"),
+                ("Location", "Employee"),
+            )
+        self.assertEqual(query.call_args.args[1], {"asset": "AST", "company": "C"})
+        self.assertIn("FOR UPDATE NOWAIT", query.call_args.args[0])
+        with patch.object(workflow.frappe.db, "sql", return_value=[]):
+            self.assertEqual(
+                workflow.AssetMovementWorkflowMixin.get_latest_location_and_custodian(movement, "AST"),
+                ("", ""),
+            )
 
     def test_critical_payload_preserves_server_values_and_row_order(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             company="C",
             purpose="Transfer",
             transaction_date="2026-09-26",
@@ -235,8 +314,21 @@ class TestAssetMovementWorkflow(UnitTestCase):
         self.assertEqual(payload["assets"][0][0], "AST-2")
         self.assertNotIn("workflow_state", payload)
         original_digest = workflow.critical_digest(doc)
-        doc.assets[0].company = "OTHER"
+        doc.assets[0].set("company", "OTHER")
         self.assertNotEqual(original_digest, workflow.critical_digest(doc))
+
+    def test_installation_digest_is_conditional_and_binds_customer_history(self) -> None:
+        doc = _movement(assets=[frappe._dict(asset="AST", receiver_user="receiver")])
+        legacy = workflow._critical_row(doc.assets[0])
+        self.assertEqual(len(legacy), len(workflow._CRITICAL_ROW_FIELDS))
+        before = workflow.critical_digest(doc)
+        doc.assets[0].set("installation_customer", "Customer A")
+        doc.assets[0].set("installation_previous_customer", "Original")
+        self.assertEqual(len(workflow._critical_row(doc.assets[0])), len(legacy) + 2)
+        self.assertNotEqual(workflow.critical_digest(doc), before)
+        approved = workflow.critical_digest(doc)
+        doc.assets[0].set("installation_previous_customer", "Forged")
+        self.assertNotEqual(workflow.critical_digest(doc), approved)
 
     def test_workflow_states_match_approved_fixture_names(self) -> None:
         self.assertEqual(
@@ -260,8 +352,34 @@ class TestAssetMovementWorkflow(UnitTestCase):
             ),
         )
 
+    def test_terminal_state_requires_native_docstatus(self) -> None:
+        doc = _movement(name="AM-1", workflow_state=workflow.STATE_SUBMITTED, docstatus=0)
+        with self.assertRaises(frappe.ValidationError):
+            workflow.validate_workflow(doc)
+        doc.docstatus = 1
+        workflow.validate_workflow(doc)
+        doc.set("workflow_state", workflow.STATE_CANCELLED)
+        with self.assertRaises(frappe.ValidationError):
+            workflow.validate_workflow(doc)
+
+    def test_submitted_state_update_guard_preserves_historical_noncanonical_state(self) -> None:
+        doc = _movement(name="AM-1", workflow_state="Legacy Submitted", docstatus=1)
+        previous = _movement(name="AM-1", workflow_state="Legacy Submitted", docstatus=1)
+        with (
+            patch.object(doc, "get_doc_before_save", return_value=previous),
+            patch.object(workflow.approval_controls, "require_locked_submitted_update") as locked,
+        ):
+            workflow.validate_after_submit_update(doc)
+            locked.assert_not_called()
+            previous.set("workflow_state", workflow.STATE_SUBMITTED)
+            workflow.validate_after_submit_update(doc)
+            locked.assert_called_once_with(doc, workflow.STATE_SUBMITTED)
+            doc.set("workflow_state", workflow.STATE_SUBMITTED)
+            workflow.validate_after_submit_update(doc)
+            self.assertEqual(locked.call_count, 2)
+
     def test_direct_submit_requires_approved_persisted_state(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_SUBMITTED)
+        doc = _movement(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_SUBMITTED)
         with (
             patch.object(workflow, "_roles", return_value={workflow.REVIEWER_ROLE}),
             patch.object(workflow.approval_controls, "require_permission"),
@@ -275,7 +393,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                 workflow.validate_before_submit(doc)
 
     def test_submit_requires_and_consumes_workflow_object_marker(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             name="AM-1",
             workflow_state=workflow.STATE_SUBMITTED,
@@ -303,7 +421,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                 workflow.validate_before_submit(doc)
 
     def test_submit_rejects_stale_critical_digest(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             name="AM-1",
             workflow_state=workflow.STATE_SUBMITTED,
@@ -326,7 +444,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                 workflow.validate_before_submit(doc)
 
     def test_capture_review_requires_maker_and_uses_shared_signed_capture(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             name="AM-1",
             approval_maker_user="maker@example.com",
@@ -349,18 +467,18 @@ class TestAssetMovementWorkflow(UnitTestCase):
         ):
             workflow.capture_review(doc)
         capture.assert_called_once_with(doc, "maker@example.com")
-        self.assertEqual(doc.approval_reviewer_user, "reviewer@example.com")
-        self.assertEqual(doc.checked_by, "EMP-1")
-        self.assertEqual(doc.checked_signature, "sig")
+        self.assertEqual(doc.get("approval_reviewer_user"), "reviewer@example.com")
+        self.assertEqual(doc.get("checked_by"), "EMP-1")
+        self.assertEqual(doc.get("checked_signature"), "sig")
 
     def test_capture_review_without_maker_fails_closed(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", assets=[])
+        doc = _movement(doctype="Asset Movement", name="AM-1", assets=[])
         with patch.object(workflow, "_roles", return_value={workflow.REVIEWER_ROLE}):
             with self.assertRaises(frappe.ValidationError):
                 workflow.capture_review(doc)
 
     def test_capture_approval_requires_distinct_prior_actor(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             name="AM-1",
             approval_maker_user="maker@example.com",
@@ -384,34 +502,38 @@ class TestAssetMovementWorkflow(UnitTestCase):
         ):
             workflow.capture_approval(doc)
         capture.assert_called_once_with(doc, "maker@example.com", ("reviewer@example.com",))
-        self.assertEqual(doc.approval_approver_user, "approver@example.com")
-        self.assertEqual(doc.authorized_by, "EMP-2")
+        self.assertEqual(doc.get("approval_approver_user"), "approver@example.com")
+        self.assertEqual(doc.get("authorized_by"), "EMP-2")
 
     def test_validate_workflow_requires_evidence_and_rejects_critical_mutation(self) -> None:
-        incomplete = frappe._dict(
+        incomplete = _movement(
             doctype="Asset Movement",
             name="AM-1",
             workflow_state=workflow.STATE_PENDING_REVIEW,
             assets=[],
         )
-        incomplete.get_doc_before_save = lambda: None
-        with self.assertRaises(frappe.ValidationError):
+        with (
+            patch.object(incomplete, "get_doc_before_save", return_value=None),
+            self.assertRaises(frappe.ValidationError),
+        ):
             workflow.validate_workflow(incomplete)
 
-        previous = frappe._dict(
+        previous = _movement(
             workflow_state=workflow.STATE_PENDING_REVIEW,
             company="C",
             assets=[frappe._dict(asset="AST-1", company="C")],
         )
-        changed = frappe._dict(
+        changed = _movement(
             workflow_state=workflow.STATE_PENDING_APPROVAL,
             approval_maker_user="maker@example.com",
             approval_critical_digest="digest",
             company="C",
             assets=[frappe._dict(asset="AST-2", company="C")],
         )
-        changed.get_doc_before_save = lambda: previous
-        with self.assertRaises(frappe.ValidationError):
+        with (
+            patch.object(changed, "get_doc_before_save", return_value=previous),
+            self.assertRaises(frappe.ValidationError),
+        ):
             workflow.validate_workflow(changed)
 
     def test_capability_helper_is_not_whitelisted(self) -> None:
@@ -419,7 +541,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
 
     def test_native_before_submit_validates_and_consumes_exact_receipt(self) -> None:
         asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
-        movement = frappe._dict(
+        movement = _movement(
             doctype="Asset Movement",
             name="AM-1",
             workflow_state=workflow.STATE_DRAFT,
@@ -429,16 +551,42 @@ class TestAssetMovementWorkflow(UnitTestCase):
             reference_name=None,
             assets=[frappe._dict(asset="AST-1", target_location="L", to_employee=None)],
         )
-        with patch.object(workflow.frappe, "get_doc", return_value=asset):
+        with (
+            patch.object(workflow.frappe, "get_doc", return_value=asset),
+            patch.object(movement, "check_permission") as check_permission,
+        ):
             with workflow.native_asset_movement_capability("AST-1", "submit"):
                 workflow.validate_before_submit(movement)
-                self.assertEqual(movement.workflow_state, workflow.STATE_SUBMITTED)
+                self.assertEqual(movement.get("workflow_state"), workflow.STATE_SUBMITTED)
                 with self.assertRaises(frappe.ValidationError):
                     workflow.validate_before_submit(movement)
+        check_permission.assert_called_once_with("write")
+
+    def test_native_before_submit_requires_effective_write_permission(self) -> None:
+        asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
+        movement = _movement(
+            doctype="Asset Movement",
+            name="AM-1",
+            workflow_state=workflow.STATE_DRAFT,
+            company="C",
+            purpose="Receipt",
+            reference_doctype="Purchase Invoice",
+            reference_name=None,
+            assets=[frappe._dict(asset="AST-1", target_location="L", to_employee=None)],
+        )
+        with (
+            patch.object(workflow.frappe, "get_doc", return_value=asset),
+            patch.object(movement, "check_permission", side_effect=frappe.PermissionError),
+            workflow.native_asset_movement_capability("AST-1", "submit"),
+            self.assertRaises(frappe.PermissionError),
+        ):
+            workflow.validate_before_submit(movement)
+        self.assertEqual(movement.get("workflow_state"), workflow.STATE_DRAFT)
+        self.assertIsNone(workflow._top_capability("submit"))
 
     def test_native_before_submit_rejects_wrong_receipt_shape(self) -> None:
         asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
-        movement = frappe._dict(
+        movement = _movement(
             doctype="Asset Movement",
             name="AM-1",
             company="OTHER",
@@ -453,12 +601,12 @@ class TestAssetMovementWorkflow(UnitTestCase):
                     workflow.validate_before_submit(movement)
 
     def test_direct_cancel_requires_submitted_state(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_SUBMITTED)
+        doc = _movement(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_SUBMITTED)
         with self.assertRaises(frappe.ValidationError):
             workflow.validate_before_cancel(doc)
 
     def test_workflow_cancel_requires_cancelled_state_and_persisted_submission(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
+        doc = _movement(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
         with (
             patch.object(workflow, "_roles", return_value={workflow.REVIEWER_ROLE}),
             patch.object(workflow.approval_controls, "require_permission"),
@@ -472,7 +620,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                 workflow.validate_before_cancel(doc)
 
     def test_direct_cancel_without_object_marker_is_denied(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
+        doc = _movement(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
         with (
             patch.object(workflow, "_roles", return_value={workflow.REVIEWER_ROLE}),
             patch.object(workflow.approval_controls, "require_permission"),
@@ -484,28 +632,26 @@ class TestAssetMovementWorkflow(UnitTestCase):
                 workflow.validate_before_cancel(doc)
 
     def test_reset_approval_clears_all_protected_evidence(self) -> None:
-        doc = frappe._dict(
-            **{
-                field: "value"
-                for field in (
-                    "approval_maker_user",
-                    "approval_reviewer_user",
-                    "approval_approver_user",
-                    "approval_critical_digest",
-                    "checked_by",
-                    "checked_at",
-                    "checked_signature",
-                    "authorized_by",
-                    "authorized_at",
-                    "authorized_signature",
-                )
-            }
+        fields = (
+            "approval_maker_user",
+            "approval_reviewer_user",
+            "approval_approver_user",
+            "approval_critical_digest",
+            "checked_by",
+            "checked_at",
+            "checked_signature",
+            "authorized_by",
+            "authorized_at",
+            "authorized_signature",
         )
+        doc = _movement(**dict.fromkeys(fields, "value"))
         workflow.reset_approval(doc)
-        self.assertTrue(all(doc.get(field) is None for field in doc))
+        for field in fields:
+            with self.subTest(field=field):
+                self.assertIsNone(doc.get(field))
 
     def test_capture_maker_resets_previous_approval_cycle(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             company="C",
             workflow_state=workflow.STATE_REJECTED,
@@ -513,21 +659,24 @@ class TestAssetMovementWorkflow(UnitTestCase):
             approval_approver_user="approver@example.com",
             checked_signature="old-check",
             authorized_signature="old-approval",
-            assets=[],
+            assets=[frappe._dict(asset="AST-1", receiver_user="receiver@example.com")],
         )
         with (
             patch.object(workflow, "_roles", return_value={workflow.MAKER_ROLE}),
             patch.object(workflow.approval_controls, "resolve_user", return_value="maker@example.com"),
+            patch.object(
+                frappe.db, "get_value", return_value=frappe._dict(enabled=1, user_type="System User")
+            ),
         ):
             workflow.capture_maker(doc)
-        self.assertEqual(doc.approval_maker_user, "maker@example.com")
-        self.assertIsNone(doc.approval_reviewer_user)
-        self.assertIsNone(doc.approval_approver_user)
-        self.assertIsNone(doc.checked_signature)
-        self.assertIsNone(doc.authorized_signature)
+        self.assertEqual(doc.get("approval_maker_user"), "maker@example.com")
+        self.assertIsNone(doc.get("approval_reviewer_user"))
+        self.assertIsNone(doc.get("approval_approver_user"))
+        self.assertIsNone(doc.get("checked_signature"))
+        self.assertIsNone(doc.get("authorized_signature"))
 
     def test_linked_material_request_is_approval_critical_and_cannot_be_rewritten(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             company="C",
             purpose="Transfer",
             transaction_date="2026-09-26",
@@ -537,13 +686,13 @@ class TestAssetMovementWorkflow(UnitTestCase):
             assets=[frappe._dict(asset="AST-1", company="C", source_location="L1", target_location="L2")],
         )
         digest = workflow.critical_digest(doc)
-        doc.material_request = "MAT-2"
+        doc.set("material_request", "MAT-2")
         self.assertNotEqual(digest, workflow.critical_digest(doc))
 
     def test_return_and_reject_are_not_receipt_capability_paths(self) -> None:
         for purpose in ("Return", "Reject"):
             with self.subTest(purpose=purpose):
-                movement = frappe._dict(
+                movement = _movement(
                     company="C",
                     purpose=purpose,
                     reference_doctype="Material Request",
@@ -556,7 +705,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
                         workflow.validate_native_asset_receipt(movement, asset)
 
     def test_wrong_role_and_self_approval_fail_closed(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", assets=[])
+        doc = _movement(doctype="Asset Movement", name="AM-1", assets=[])
         with patch.object(workflow, "_roles", return_value={workflow.MAKER_ROLE}):
             with self.assertRaises(frappe.ValidationError):
                 workflow.capture_review(doc)
@@ -565,7 +714,9 @@ class TestAssetMovementWorkflow(UnitTestCase):
             patch.object(workflow.approval_controls, "capture_signed_approval_actor") as capture,
         ):
             capture.side_effect = frappe.ValidationError("same actor")
-            doc.update(approval_maker_user="maker@example.com", approval_reviewer_user="reviewer@example.com")
+            doc.update(
+                {"approval_maker_user": "maker@example.com", "approval_reviewer_user": "reviewer@example.com"}
+            )
             with self.assertRaises(frappe.ValidationError):
                 workflow.capture_approval(doc)
 
@@ -575,15 +726,20 @@ class TestAssetMovementWorkflow(UnitTestCase):
             frappe._dict(asset="AST-1", company="C"),
         ]
         with patch.object(workflow.frappe.db, "get_value") as get_value:
-            self.assertEqual(workflow.lock_asset_rows([row.asset for row in rows]), ("AST-1", "AST-2"))
+            names = [row.get("asset") for row in rows]
+            assert all(isinstance(name, str) for name in names)
+            self.assertEqual(
+                workflow.lock_asset_rows([name for name in names if isinstance(name, str)]),
+                ("AST-1", "AST-2"),
+            )
         self.assertEqual(get_value.call_count, 2)
-        doc = frappe._dict(company="C", purpose="Transfer", assets=rows)
+        doc = _movement(company="C", purpose="Transfer", assets=rows)
         first = workflow.critical_digest(doc)
         doc.assets.reverse()
         self.assertNotEqual(first, workflow.critical_digest(doc))
 
     def test_failed_submit_does_not_leave_transition_marker_consumed(self) -> None:
-        doc = frappe._dict(
+        doc = _movement(
             doctype="Asset Movement",
             name="AM-1",
             workflow_state=workflow.STATE_SUBMITTED,
@@ -601,7 +757,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
             self.assertIsNone(getattr(doc, workflow._SUBMIT_MARKER_FIELD, None))
 
     def test_retry_after_successful_transition_is_rejected(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
+        doc = _movement(doctype="Asset Movement", name="AM-1", workflow_state=workflow.STATE_CANCELLED)
         with (
             patch.object(workflow, "_roles", return_value={workflow.REVIEWER_ROLE}),
             patch.object(workflow.approval_controls, "require_permission"),
@@ -616,7 +772,7 @@ class TestAssetMovementWorkflow(UnitTestCase):
 
     def test_non_receipt_native_asset_movement_is_not_bypassed(self) -> None:
         asset = frappe._dict(name="AST-1", company="C", location="L", custodian=None)
-        movement = frappe._dict(
+        movement = _movement(
             company="C",
             purpose="Transfer",
             reference_doctype="Asset Movement",
@@ -672,7 +828,7 @@ class TestAssetMovementWorkflowIntegration(IntegrationTestCase):
         location.db_insert()
         return name
 
-    def _asset(self, source_location: str) -> frappe.model.document.Document:
+    def _asset(self, source_location: str) -> NativeAsset:
         name = f"_TEST-ASSET-{frappe.generate_hash(length=8)}"
         asset = frappe.get_doc(
             {
@@ -687,7 +843,7 @@ class TestAssetMovementWorkflowIntegration(IntegrationTestCase):
             }
         )
         asset.db_insert()
-        return frappe.get_doc("Asset", name)
+        return cast(NativeAsset, frappe.get_doc("Asset", name))
 
     def _material_request(self, allocated_asset: str | None) -> str:
         name = f"_TEST-MR-ASSET-{frappe.generate_hash(length=8)}"
@@ -812,12 +968,14 @@ class TestAssetMovementWorkflowIntegration(IntegrationTestCase):
                             "company": asset.company,
                             "source_location": source_location,
                             "target_location": target_location,
+                            "receiver_user": reviewer,
                         },
                         {
                             "asset": second_asset.name,
                             "company": second_asset.company,
                             "source_location": source_location,
                             "target_location": target_location,
+                            "receiver_user": approver,
                         },
                     ],
                 }
@@ -879,7 +1037,7 @@ class TestAssetMovementWorkflowIntegration(IntegrationTestCase):
 
             movement = apply_workflow(movement, "Submit Asset Movement")
             self.assertEqual(movement.docstatus, 1)
-            self.assertEqual(movement.workflow_state, workflow.STATE_SUBMITTED)
+            self.assertEqual(movement.get("workflow_state"), workflow.STATE_SUBMITTED)
             self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), target_location)
             self.assertEqual(frappe.db.get_value("Asset", second_asset.name, "location"), target_location)
             self.assertTrue(frappe.db.exists("Asset Activity", {"asset": asset.name}))
