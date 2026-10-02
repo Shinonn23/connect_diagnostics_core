@@ -1,0 +1,44 @@
+{
+	"id": "payment-entry-approval-example",
+	"title": "Maker to checker to approver on a disposable test Payment Entry",
+	"doctype": "Payment Entry",
+	"document": "REPLACE_WITH_DISPOSABLE_LOCAL_TEST_DOCUMENT",
+	"initialState": "Payment Entry Draft",
+	"actors": {
+		"maker": {
+			"email": "maker@example.test",
+			"roles": ["Accounts User", "C-Level Approver"]
+		},
+		"checker": {
+			"email": "checker@example.test",
+			"role": "Accounts Manager"
+		},
+		"approver": {
+			"email": "approver@example.test",
+			"role": "C-Level Approver"
+		}
+	},
+	"steps": [
+		{
+			"actor": "maker",
+			"action": "Send Payment Entry for Review",
+			"expectedState": "Payment Entry Pending Review"
+		},
+		{
+			"actor": "checker",
+			"action": "Review Payment Entry",
+			"expectedState": "Payment Entry Reviewed"
+		},
+		{
+			"actor": "maker",
+			"kind": "assert-unavailable",
+			"action": "Approve Payment Entry",
+			"expectedBefore": "Payment Entry Reviewed"
+		},
+		{
+			"actor": "approver",
+			"action": "Approve Payment Entry",
+			"expectedState": "Payment Entry Approved"
+		}
+	]
+}

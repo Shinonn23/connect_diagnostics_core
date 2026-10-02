@@ -1,7 +1,11 @@
 {
 	"type": "module",
+	"scripts": {
+		"test:ui": "playwright test --config tests/ui/playwright.config.js"
+	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
+		"@playwright/test": "^1.63.0",
 		"eslint": "^10.0.0",
 		"prettier": "^3.8.5",
 		"prettier-eslint-cli": "^9.2.1"
