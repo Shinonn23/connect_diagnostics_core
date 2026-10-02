@@ -15,6 +15,7 @@ from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import setup_custom_perms
 
+from connect_diagnostics_core.patches.v1_0 import normalize_workflow_baseline as baseline
 from connect_diagnostics_core.setup.print_action_fields import CUSTOM_FIELDS as PRINT_FIELDS
 from connect_diagnostics_core.setup.workflow_fields import CUSTOM_FIELDS as WORKFLOW_FIELDS
 
@@ -42,9 +43,12 @@ PERMISSION_FIELDS = (
     "amend",
     "report",
     "export",
+    "import",
     "share",
     "print",
     "email",
+    "select",
+    "mask",
 )
 PAYROLL_ENTRY_PERMISSIONS = {
     "HR User": {"read": 1, "write": 1, "create": 1},
@@ -395,6 +399,53 @@ def _ensure_permissions() -> None:
             }
         ).insert(ignore_permissions=True)
     frappe.clear_cache(doctype=DOCTYPE)
+
+
+def _hr_manager_permissions() -> tuple[tuple[int, ...], ...]:
+    fields = ("permlevel", "if_owner", *PERMISSION_FIELDS)
+    rows = [
+        tuple(int(row.get(fieldname) or 0) for fieldname in fields)
+        for row in frappe.get_meta(DOCTYPE).permissions
+        if row.role == "HR Manager"
+    ]
+    return tuple(sorted(rows))
+
+
+def ensure_canonical_permissions() -> None:
+    """Install only the minimal payroll actor grants for the exact canonical route."""
+    active = frappe.get_all("Workflow", filters={"document_type": DOCTYPE, "is_active": 1}, pluck="name")
+    if active != [WORKFLOW] or not frappe.db.exists("Workflow", WORKFLOW):
+        frappe.throw(_("Payroll Entry permissions require the exact active canonical Workflow."))
+    if baseline.workflow_shape(frappe.get_doc("Workflow", WORKFLOW)) != baseline.workflow_shape(
+        _desired_workflow()
+    ):
+        frappe.throw(_("Payroll Entry Workflow differs from the reviewed fixture."))
+
+    for role in PAYROLL_ENTRY_PERMISSIONS:
+        for permission_doctype in ("DocPerm", "Custom DocPerm"):
+            rows = frappe.get_all(
+                permission_doctype,
+                filters={"parent": DOCTYPE, "role": role},
+                fields=["permlevel", "if_owner", *PERMISSION_FIELDS],
+            )
+            if len(rows) > 1 or any(
+                int(row.get("permlevel") or 0) != 0
+                or int(row.get("if_owner") or 0) != 0
+                or any(
+                    _flag(row, fieldname) != value for fieldname, value in _permission_values(role).items()
+                )
+                for row in rows
+            ):
+                frappe.throw(
+                    _("Payroll Entry permission for {0} conflicts with the approved route.").format(role)
+                )
+
+    manager_before = _hr_manager_permissions()
+    if not manager_before:
+        frappe.throw(_("Payroll Entry native HR Manager permission is missing."))
+    _ensure_permissions()
+    if _hr_manager_permissions() != manager_before:
+        frappe.throw(_("Payroll Entry native HR Manager permission changed during setup."))
 
 
 def _remove_permissions() -> None:

@@ -16,6 +16,18 @@ FORMULA_GLOBALS = {"min": min, "max": max}
 
 
 class TestPayrollComponents(UnitTestCase):
+    def test_permissions_are_installed_before_no_company_return(self) -> None:
+        with (
+            patch.object(payroll, "ensure_canonical_permissions") as permissions,
+            patch.object(payroll, "ensure_salary_components") as components,
+            patch.object(payroll, "_default_company", return_value=None),
+            patch.object(payroll, "ensure_income_tax_slab") as slab,
+        ):
+            payroll.ensure_configuration()
+        permissions.assert_called_once_with()
+        components.assert_called_once_with()
+        slab.assert_not_called()
+
     def test_component_names_are_unique(self) -> None:
         names = [name for name, _type, _flags in payroll.SALARY_COMPONENTS]
 

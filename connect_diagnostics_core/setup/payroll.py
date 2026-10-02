@@ -20,6 +20,10 @@ import frappe.defaults
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
+from connect_diagnostics_core.patches.v1_0.add_payroll_entry_approval_controls import (
+    ensure_canonical_permissions,
+)
+
 # --- SSO (Social Security) ---------------------------------------------------
 # Company policy caps the SSO contribution base at 17,500 (5% -> 875/month),
 # above the current statutory 15,000/750 ceiling. See docs/domains/thai-payroll.md.
@@ -82,6 +86,7 @@ STRUCTURE_DEDUCTIONS = ("Social Security", "Provident Fund", "Withholding Tax")
 
 
 def ensure_configuration() -> None:
+    ensure_canonical_permissions()
     ensure_salary_components()
     company = _default_company()
     if not company:

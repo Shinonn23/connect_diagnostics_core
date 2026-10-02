@@ -21,6 +21,143 @@ def _doc(value: dict[str, Any]) -> Any:
 
 
 class TestPayrollEntryApprovalMigration(UnitTestCase):
+    def test_canonical_permission_install_preserves_workflow_and_native_manager(self) -> None:
+        workflow = _doc(migration._desired_workflow())
+
+        def get_all(doctype: str, **kwargs: Any) -> list[Any]:
+            if doctype == "Workflow":
+                return [migration.WORKFLOW]
+            return []
+
+        manager = ((0, 0, 0, 1, 1, 1, 1, 1),)
+        with (
+            patch.object(migration.frappe, "get_all", side_effect=get_all),
+            patch.object(migration.frappe.db, "exists", return_value=True),
+            patch.object(migration.frappe, "get_doc", return_value=workflow) as get_doc,
+            patch.object(migration, "_hr_manager_permissions", return_value=manager) as manager_permissions,
+            patch.object(migration, "_ensure_permissions") as ensure_permissions,
+        ):
+            migration.ensure_canonical_permissions()
+
+        get_doc.assert_called_once_with("Workflow", migration.WORKFLOW)
+        self.assertEqual(manager_permissions.call_count, 2)
+        ensure_permissions.assert_called_once_with()
+
+    def test_canonical_permission_install_rejects_collisions_before_writes(self) -> None:
+        workflow = _doc(migration._desired_workflow())
+        exact = frappe._dict(
+            permlevel=0,
+            if_owner=0,
+            **migration._permission_values("HR User"),
+        )
+        wrong_level = frappe._dict(exact)
+        wrong_level.permlevel = 1
+        wrong_right = frappe._dict(exact)
+        wrong_right.submit = 1
+        for active, current, rows in (
+            (["Other Workflow"], workflow, []),
+            ([migration.WORKFLOW, "Other Workflow"], workflow, []),
+            ([migration.WORKFLOW], _doc(migration.LEGACY_WORKFLOW), []),
+            ([migration.WORKFLOW], workflow, [exact, exact]),
+            ([migration.WORKFLOW], workflow, [wrong_level]),
+            ([migration.WORKFLOW], workflow, [wrong_right]),
+        ):
+            with (
+                self.subTest(active=active, rows=rows),
+                patch.object(
+                    migration.frappe,
+                    "get_all",
+                    side_effect=lambda dt, **kwargs: active if dt == "Workflow" else rows,
+                ),
+                patch.object(migration.frappe.db, "exists", return_value=True),
+                patch.object(migration.frappe, "get_doc", return_value=current),
+                patch.object(migration, "_ensure_permissions") as ensure_permissions,
+                self.assertRaises(frappe.ValidationError),
+            ):
+                migration.ensure_canonical_permissions()
+            ensure_permissions.assert_not_called()
+
+    def test_canonical_permission_install_requires_native_manager(self) -> None:
+        with (
+            patch.object(
+                migration.frappe,
+                "get_all",
+                side_effect=lambda dt, **kwargs: [migration.WORKFLOW] if dt == "Workflow" else [],
+            ),
+            patch.object(migration.frappe.db, "exists", return_value=True),
+            patch.object(migration.frappe, "get_doc", return_value=_doc(migration._desired_workflow())),
+            patch.object(migration, "_hr_manager_permissions", return_value=()),
+            patch.object(migration, "_ensure_permissions") as ensure_permissions,
+            self.assertRaises(frappe.ValidationError),
+        ):
+            migration.ensure_canonical_permissions()
+        ensure_permissions.assert_not_called()
+
+    def test_canonical_permission_install_rejects_broad_native_target_before_copy(self) -> None:
+        for right in ("submit", "import", "select", "mask"):
+            native_broad = frappe._dict(
+                permlevel=0,
+                if_owner=0,
+                **{**migration._permission_values("HR User"), right: 1},
+            )
+
+            def get_all(doctype: str, **kwargs: Any) -> list[Any]:
+                if doctype == "Workflow":
+                    return [migration.WORKFLOW]
+                if doctype == "DocPerm" and kwargs["filters"]["role"] == "HR User":
+                    return [native_broad]
+                return []
+
+            with (
+                self.subTest(right=right),
+                patch.object(migration.frappe, "get_all", side_effect=get_all),
+                patch.object(migration.frappe.db, "exists", return_value=True),
+                patch.object(migration.frappe, "get_doc", return_value=_doc(migration._desired_workflow())),
+                patch.object(migration, "setup_custom_perms") as copy_native,
+                patch.object(migration, "_ensure_permissions") as ensure_permissions,
+                self.assertRaises(frappe.ValidationError),
+            ):
+                migration.ensure_canonical_permissions()
+            copy_native.assert_not_called()
+            ensure_permissions.assert_not_called()
+
+    def test_permission_install_copies_native_before_adding_only_target_rows(self) -> None:
+        inserted = MagicMock()
+        with (
+            patch.object(migration, "setup_custom_perms") as copy_native,
+            patch.object(migration, "_permission_rows", return_value=[]),
+            patch.object(migration.frappe, "get_doc", return_value=inserted) as get_doc,
+            patch.object(migration.frappe, "clear_cache") as clear_cache,
+        ):
+            migration._ensure_permissions()
+        copy_native.assert_called_once_with(migration.DOCTYPE)
+        self.assertEqual(get_doc.call_count, len(migration.PAYROLL_ENTRY_PERMISSIONS))
+        for call_args in get_doc.call_args_list:
+            row = call_args.args[0]
+            self.assertIn(row["role"], migration.PAYROLL_ENTRY_PERMISSIONS)
+            self.assertEqual(
+                {field: row[field] for field in migration.PERMISSION_FIELDS},
+                migration._permission_values(row["role"]),
+            )
+        self.assertEqual(inserted.insert.call_count, len(migration.PAYROLL_ENTRY_PERMISSIONS))
+        clear_cache.assert_called_once_with(doctype=migration.DOCTYPE)
+
+    def test_permission_install_reuses_exact_existing_target_rows(self) -> None:
+        with (
+            patch.object(migration, "setup_custom_perms") as copy_native,
+            patch.object(
+                migration,
+                "_permission_rows",
+                side_effect=lambda role: [frappe._dict(name="EXACT", **migration._permission_values(role))],
+            ),
+            patch.object(migration.frappe, "get_doc") as get_doc,
+            patch.object(migration.frappe, "clear_cache") as clear_cache,
+        ):
+            migration._ensure_permissions()
+        copy_native.assert_called_once_with(migration.DOCTYPE)
+        get_doc.assert_not_called()
+        clear_cache.assert_called_once_with(doctype=migration.DOCTYPE)
+
     def test_workflow_mode_accepts_absent_legacy_and_desired_only(self) -> None:
         with patch.object(migration.frappe.db, "exists", return_value=False):
             self.assertEqual(migration._workflow_mode(), "absent")
