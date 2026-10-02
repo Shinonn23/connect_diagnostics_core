@@ -79,7 +79,6 @@ RETIRED_SIDEBAR_LINKS = {
     "Payroll": frozenset({("DocType", "Accounting Department")}),
     "Stock": frozenset(
         {
-            ("DocType", "Storage Location"),
             ("DocType", "Regulation Class"),
             ("DocType", "Demo Return Inspection"),
             ("DocType", "Item Request"),
@@ -115,7 +114,6 @@ RETIRED_CARD_LINKS: dict[str, frozenset[tuple[str, str]]] = {
     "Payroll": frozenset({("DocType", "Accounting Department")}),
     "Stock": frozenset(
         {
-            ("DocType", "Storage Location"),
             ("DocType", "Regulation Class"),
             ("DocType", "Demo Return Inspection"),
             ("DocType", "Item Request"),
@@ -278,6 +276,7 @@ NAVIGATION_GROUPS = (
             NavigationLink("DKSH Item", "DKSH Item", "DocType"),
             NavigationLink("Product Group", "Product Group", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
+            NavigationLink("Storage Location", "Storage Location", "DocType"),
             NavigationLink(
                 "ของที่ยังไม่คืน",
                 "Outstanding Borrowed Items",
@@ -337,7 +336,8 @@ SIDEBAR_PLACEMENTS = {
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
         SidebarPlacement("Storage Condition", after_link_to="Product Group", section="Setup"),
-        SidebarPlacement("Equipment Model", after_link_to="Storage Condition", section="Setup"),
+        SidebarPlacement("Storage Location", after_link_to="Storage Condition", section="Setup"),
+        SidebarPlacement("Equipment Model", after_link_to="Storage Location", section="Setup"),
         SidebarPlacement("Material Request Fulfillment", after_link_to="Equipment Model", section="Setup"),
     ),
     "Buying": (

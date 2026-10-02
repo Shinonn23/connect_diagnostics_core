@@ -1112,16 +1112,17 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
-            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 6]],
+            [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 7]],
             [
                 "DKSH Item",
                 "Product Group",
                 "Storage Condition",
+                "Storage Location",
                 "Equipment Model",
                 "Material Request Fulfillment",
             ],
         )
-        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 6]))
+        self.assertTrue(all(row["child"] == 1 for row in sidebar["items"][item_index + 1 : item_index + 7]))
         reports_index = next(
             index for index, row in enumerate(sidebar["items"]) if row.get("label") == "Reports"
         )
