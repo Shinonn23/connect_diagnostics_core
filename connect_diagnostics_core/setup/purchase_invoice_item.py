@@ -3,14 +3,6 @@
 CUSTOM_FIELDS = {
     "Purchase Invoice Item": [
         {
-            "fieldname": "department",
-            "label": "Department",
-            "fieldtype": "Link",
-            "insert_after": "accounting_dimensions_section",
-            "is_system_generated": 1,
-            "options": "Department",
-        },
-        {
             "fieldname": "is_deposit_item",
             "label": "Is Deposit Item",
             "fieldtype": "Check",
@@ -18,14 +10,6 @@ CUSTOM_FIELDS = {
             "fetch_from": "item_code.is_deposit_item",
             "is_system_generated": 1,
             "read_only": 1,
-        },
-        {
-            "fieldname": "territory",
-            "label": "Territory",
-            "fieldtype": "Link",
-            "insert_after": "dimension_col_break",
-            "is_system_generated": 1,
-            "options": "Territory",
         },
         {
             "fieldname": "withholding_tax_type",

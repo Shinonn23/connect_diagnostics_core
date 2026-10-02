@@ -6,10 +6,13 @@ from __future__ import annotations
 from typing import cast
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.permissions import setup_custom_perms
+from frappe.permissions import setup_custom_perms, std_rights
 
 SUPPLIER = "Supplier"
+ITEM = "Item"
+ACCOUNT = "Account"
 BANK_ACCOUNT = "Bank Account"
 BANK_CHANGE_REQUEST = "Supplier Bank Change Request"
 MATERIAL_REQUEST = "Material Request"
@@ -30,6 +33,8 @@ QUALITY_MANAGER_ROLE = "Quality Manager"
 
 CACHE_CLEAR_DOCTYPES = (
     SUPPLIER,
+    ITEM,
+    ACCOUNT,
     BANK_CHANGE_REQUEST,
     MATERIAL_REQUEST,
     MATERIAL_REQUEST_ITEM,
@@ -349,6 +354,20 @@ CUSTOM_FIELDS = {
             "insert_after": "status",
             "no_copy": 1,
         },
+        {
+            "fieldname": "supplier_selection_reason",
+            "label": "Supplier Selection Reason",
+            "fieldtype": "Small Text",
+            "insert_after": "p2p_exception_reason",
+            "no_copy": 1,
+        },
+        {
+            "fieldname": "supplier_selection_evidence",
+            "label": "Supplier Selection Evidence",
+            "fieldtype": "Attach",
+            "insert_after": "supplier_selection_reason",
+            "no_copy": 1,
+        },
     ],
     PURCHASE_INVOICE: [
         {
@@ -368,11 +387,11 @@ PROPERTY_SETTERS = {
 }
 
 _ROLES = (PURCHASE_REQUESTER_ROLE, C_LEVEL_APPROVER_ROLE)
+_RETURN_MASTER_RIGHTS = {SUPPLIER: "read", ITEM: "read", ACCOUNT: "select"}
 
 
 def ensure_configuration() -> None:
     ensure_roles()
-    assign_role_holders()
     activate_standard_permissions()
     for doctype in CACHE_CLEAR_DOCTYPES:
         frappe.clear_cache(doctype=doctype)
@@ -410,6 +429,7 @@ def _assign_role(user_name: str, role_name: str) -> None:
 
 def activate_standard_permissions() -> None:
     """Material Request requires a custom permission table for Employee requesters."""
+    _preflight_master_read_permissions()
     if setup_custom_perms(MATERIAL_REQUEST):
         frappe.get_doc(
             {
@@ -462,10 +482,22 @@ def activate_standard_permissions() -> None:
     # Preserve the native permissions before adding app-specific roles. Frappe
     # switches a DocType to its Custom DocPerm table once the first custom row
     # exists; copying first keeps the native operational roles intact.
-    for doctype in (ASSET_MOVEMENT, STOCK_ENTRY, PAYMENT_ENTRY, PURCHASE_ORDER):
+    for doctype in (
+        ASSET_MOVEMENT,
+        STOCK_ENTRY,
+        PAYMENT_ENTRY,
+        PURCHASE_ORDER,
+        "Sales Order",
+        *_RETURN_MASTER_RIGHTS,
+    ):
         setup_custom_perms(doctype)
+    _ensure_permission("Sales Order", "Accounts Manager", read=1, write=1)
     _ensure_permission(PAYMENT_ENTRY, C_LEVEL_APPROVER_ROLE, read=1, write=1)
     _ensure_permission(PURCHASE_ORDER, C_LEVEL_APPROVER_ROLE, read=1, write=1)
+    for doctype, right in _RETURN_MASTER_RIGHTS.items():
+        rights = {permission: 0 for permission in std_rights}
+        rights[right] = 1  # Custom DocPerm has nonzero defaults, including export.
+        _ensure_permission(doctype, C_LEVEL_APPROVER_ROLE, **rights)
     for doctype in (ASSET_MOVEMENT, STOCK_ENTRY):
         _ensure_permission(doctype, "Stock User", read=1, write=1, create=1, submit=1, report=1, print=1)
         _ensure_permission(
@@ -481,6 +513,28 @@ def activate_standard_permissions() -> None:
         )
         _ensure_permission(doctype, QUALITY_MANAGER_ROLE, read=1, write=1, create=1, report=1, print=1)
         _ensure_permission(doctype, C_LEVEL_APPROVER_ROLE, read=1, write=1)
+
+
+def _preflight_master_read_permissions() -> None:
+    """Refuse pre-existing master-data grants broader than the Return actor needs."""
+    fields = ["permlevel", "if_owner", *std_rights]
+    for doctype, allowed_right in _RETURN_MASTER_RIGHTS.items():
+        for table in ("DocPerm", "Custom DocPerm"):
+            rows = frappe.get_all(
+                table,
+                filters={"parent": doctype, "role": C_LEVEL_APPROVER_ROLE},
+                fields=fields,
+            )
+            if len(rows) > 1:
+                frappe.throw(_("Master-data C-Level Approver permissions contain duplicate rows."))
+            for row in rows:
+                if (
+                    int(row.permlevel or 0) != 0
+                    or int(row.if_owner or 0) != 0
+                    or int(row.get(allowed_right) or 0) != 1
+                    or any(int(row.get(right) or 0) for right in std_rights if right != allowed_right)
+                ):
+                    frappe.throw(_("Master-data C-Level Approver permissions exceed the reviewed access."))
 
 
 def _ensure_material_request_permission(role: str, permlevel: int, **rights: int) -> None:

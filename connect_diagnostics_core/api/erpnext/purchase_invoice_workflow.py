@@ -17,6 +17,7 @@ from connect_diagnostics_core.api.frappe.approval_controls import (
     critical_digest,
     require_distinct_actors,
     require_permission,
+    resolve_user,
 )
 
 APPROVED_STATE = "Purchase Invoice Approved"
@@ -90,23 +91,114 @@ def get_approval_digest(doc: Document) -> str:
 def _require_sources(doc: Document) -> None:
     if doc.get("is_paid"):
         frappe.throw(_("Purchase Invoice approval does not permit paid invoices. Use Payment Entry."))
-    for row in doc.get("items") or []:
-        if not row.get("purchase_order") or not row.get("purchase_receipt"):
-            frappe.throw(
-                _(
-                    "Every Purchase Invoice item must reference a submitted Purchase Order and Purchase Receipt."
-                )
+    rows = doc.get("items") or []
+    item_codes = sorted({str(row.get("item_code")) for row in rows if row.get("item_code")})
+    if len(item_codes) != len({str(row.get("item_code") or "") for row in rows}):
+        frappe.throw(_("Every Purchase Invoice row requires an Item."))
+    try:
+        items = (
+            frappe.db.get_values(
+                "Item",
+                filters={"name": ("in", item_codes)},
+                fieldname=["name", "is_stock_item", "is_fixed_asset"],
+                as_dict=True,
+                for_update=True,
+                wait=False,
+                order_by="name",
             )
-        if not frappe.db.exists("Purchase Order", {"name": row.purchase_order, "docstatus": 1}):
-            frappe.throw(_("Purchase Order references must be submitted."))
-        if not frappe.db.exists("Purchase Receipt", {"name": row.purchase_receipt, "docstatus": 1}):
-            frappe.throw(_("Purchase Receipt references must be submitted."))
+            if item_codes
+            else []
+        )
+        classified = {str(item.name): bool(item.is_stock_item or item.is_fixed_asset) for item in items}
+        if len(classified) != len(item_codes):
+            frappe.throw(_("Purchase Invoice references an Item that no longer exists."))
+
+        sources: set[tuple[str, str]] = set()
+        for row in rows:
+            po = str(row.get("purchase_order") or "")
+            po_detail = str(row.get("po_detail") or "")
+            pr = str(row.get("purchase_receipt") or "")
+            pr_detail = str(row.get("pr_detail") or "")
+            if not po or not po_detail:
+                frappe.throw(_("Every Purchase Invoice row requires a Purchase Order and its exact item."))
+            if classified[str(row.get("item_code"))] and (not pr or not pr_detail):
+                frappe.throw(
+                    _("Stock and fixed-asset Purchase Invoice rows require a Purchase Receipt item.")
+                )
+            if bool(pr) != bool(pr_detail):
+                frappe.throw(_("Purchase Receipt references must include both header and item."))
+            sources.add(("Purchase Order", po))
+            if pr:
+                sources.add(("Purchase Receipt", pr))
+
+        children: dict[tuple[str, str], dict[str, Any]] = {}
+        for doctype, name in sorted(sources):
+            header = frappe.db.get_value(
+                doctype, name, ["name", "docstatus"], as_dict=True, for_update=True, wait=False
+            )
+            if not header or header.docstatus != 1:
+                frappe.throw(_("Purchase Order and Purchase Receipt sources must remain submitted."))
+        for doctype, name in sorted(sources):
+            childtype = f"{doctype} Item"
+            fields = ["name", "parent", "item_code"]
+            if doctype == "Purchase Receipt":
+                fields.extend(("purchase_order", "purchase_order_item"))
+            current = frappe.db.get_values(
+                childtype,
+                filters={"parent": name, "parenttype": doctype, "parentfield": "items"},
+                fieldname=fields,
+                as_dict=True,
+                for_update=True,
+                wait=False,
+                order_by="name",
+            )
+            loaded = cast(Document, frappe.get_doc(doctype, name))
+            locked_rows = {str(row.name): {field: row.get(field) for field in fields} for row in current}
+            loaded_rows = {
+                str(row.name): {field: row.get(field) for field in fields} for row in loaded.get("items", [])
+            }
+            if locked_rows != loaded_rows:
+                frappe.throw(_("A Purchase Order or Receipt item changed while being checked. Please retry."))
+            children[(doctype, name)] = locked_rows
+        for row in rows:
+            item_code = str(row.get("item_code"))
+            po = str(row.get("purchase_order"))
+            po_detail = str(row.get("po_detail"))
+            po_row = children[("Purchase Order", po)].get(po_detail)
+            if not po_row or po_row["parent"] != po or po_row["item_code"] != item_code:
+                frappe.throw(_("Purchase Order item must belong to the selected order and Item."))
+            if pr := str(row.get("purchase_receipt") or ""):
+                pr_detail = str(row.get("pr_detail"))
+                pr_row = children[("Purchase Receipt", pr)].get(pr_detail)
+                if (
+                    not pr_row
+                    or pr_row["parent"] != pr
+                    or pr_row["item_code"] != item_code
+                    or pr_row["purchase_order"] != po
+                    or pr_row["purchase_order_item"] != po_detail
+                ):
+                    frappe.throw(
+                        _("Purchase Receipt item must match the selected Item and Purchase Order item.")
+                    )
+    except (frappe.QueryTimeoutError, frappe.QueryDeadlockError):
+        frappe.throw(_("Purchase Invoice source is being updated. Please retry."))
+
+
+def capture_maker_snapshot(doc: Document, method: str | None = None) -> None:
+    """Record the active owner as the unsigned maker of the native review route."""
+    del method
+    require_permission(doc, "write")
+    owner = resolve_user(str(doc.get("owner") or ""))
+    actor = resolve_user(str(frappe.session.user or ""))
+    if owner != actor:
+        frappe.throw(_("Only the Purchase Invoice owner can send it for review."))
+    doc.set("approval_maker_user", actor)
 
 
 def capture_source_verification_snapshot(doc: Document, method: str | None = None) -> None:
     del method
     _require_sources(doc)
-    require_distinct_actors(str(doc.get("owner") or ""), frappe.session.user)
+    require_distinct_actors(str(doc.get("owner") or ""), frappe.session.user, ())
     doc.set("approval_critical_digest", get_approval_digest(doc))
     doc.set("approval_reviewer_user", frappe.session.user)
     from connect_diagnostics_core.api.erpnext.print_actions import capture_checked_action
@@ -237,10 +329,9 @@ def validate_before_submit(doc: Document, method: str | None = None) -> None:
         if persisted is None:
             frappe.throw(_("Purchase Invoice approval is missing or stale."))
             return
-        if (
-            persisted.get("workflow_state") != APPROVED_STATE
-            or persisted.get("approval_critical_digest") != get_approval_digest(doc)
-        ):
+        if persisted.get("workflow_state") != APPROVED_STATE or persisted.get(
+            "approval_critical_digest"
+        ) != get_approval_digest(doc):
             frappe.throw(_("Purchase Invoice approval is missing or stale."))
         if not persisted.get("checked_signature") or not persisted.get("authorized_signature"):
             frappe.throw(_("Signed source verification and accounting approval are required."))

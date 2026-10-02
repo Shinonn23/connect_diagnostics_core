@@ -10,14 +10,6 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
         },
         {
-            "fieldname": "department",
-            "label": "Department",
-            "fieldtype": "Link",
-            "insert_after": "accounting_dimensions_section",
-            "is_system_generated": 1,
-            "options": "Department",
-        },
-        {
             "fieldname": "deposit_deductions",
             "label": "Deposit Deductions",
             "fieldtype": "Section Break",
@@ -109,14 +101,6 @@ CUSTOM_FIELDS = {
             "is_system_generated": 1,
             "no_copy": 1,
             "read_only_depends_on": "eval:doc.docstatus!=0",
-        },
-        {
-            "fieldname": "territory",
-            "label": "Territory",
-            "fieldtype": "Link",
-            "insert_after": "dimension_col_break",
-            "is_system_generated": 1,
-            "options": "Territory",
         },
         {
             "fieldname": "use_untied_deposit",

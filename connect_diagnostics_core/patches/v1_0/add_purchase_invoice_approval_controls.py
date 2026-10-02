@@ -87,7 +87,9 @@ def _ensure_task(name: str, task_name: str) -> None:
         doc = frappe.get_doc("Workflow Transition Tasks", name)
         actual = [(row.task, int(row.enabled), int(row.asynchronous)) for row in doc.tasks]
         if actual != expected:
-            frappe.throw(_("Workflow Transition Tasks {0} conflicts with the approved configuration.").format(name))
+            frappe.throw(
+                _("Workflow Transition Tasks {0} conflicts with the approved configuration.").format(name)
+            )
         return
     frappe.get_doc(
         {
@@ -146,7 +148,9 @@ def execute() -> None:
         frappe.throw(_("Purchase Invoice trial migration requires the approved accounting roles."))
     workflow = frappe.get_doc("Workflow", "Connect Purchase Invoice Blueprint")
     if not workflow:
-        frappe.throw(_("Purchase Invoice trial migration requires the inventoried Purchase Invoice workflow."))
+        frappe.throw(
+            _("Purchase Invoice trial migration requires the inventoried Purchase Invoice workflow.")
+        )
     fingerprint = _workflow_fingerprint(json.loads(frappe.as_json(workflow.as_dict())))
     if fingerprint != EXPECTED_FINGERPRINT:
         frappe.throw(_("Purchase Invoice trial migration fingerprint contract is invalid."))
@@ -176,4 +180,6 @@ def validate_installed_configuration() -> None:
         task = frappe.get_doc("Workflow Transition Tasks", name)
         actual_tasks = [(row.task, int(row.enabled), int(row.asynchronous)) for row in task.tasks]
         if actual_tasks != [(task_name, 1, 0)]:
-            frappe.throw(_("Workflow Transition Tasks {0} is not the reviewed synchronous task.").format(name))
+            frappe.throw(
+                _("Workflow Transition Tasks {0} is not the reviewed synchronous task.").format(name)
+            )

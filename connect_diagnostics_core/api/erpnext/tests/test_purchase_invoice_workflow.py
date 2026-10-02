@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.api.erpnext import purchase_invoice_workflow
+from connect_diagnostics_core.api.frappe import approval_controls
 
 
 class TestPurchaseInvoiceWorkflow(UnitTestCase):
@@ -27,7 +28,9 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
                 "items": [
                     {
                         "purchase_order": "PO-1",
+                        "po_detail": "POI-1",
                         "purchase_receipt": "PR-1",
+                        "pr_detail": "PRI-1",
                         "item_code": "ITEM-1",
                         "qty": 1,
                         "rate": 100,
@@ -46,6 +49,49 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
             self.assertRaises(frappe.ValidationError),
         ):
             purchase_invoice_workflow.validate_before_submit(self._doc())
+
+    def test_maker_capture_requires_canonical_owner_and_write_permission(self) -> None:
+        doc = self._doc()
+        doc.set("owner", "EMP-MAKER")
+
+        def canonical(identity: str) -> str:
+            return "maker@example.com" if identity == "EMP-MAKER" else identity
+
+        with (
+            patch.object(purchase_invoice_workflow, "require_permission") as permission,
+            patch.object(purchase_invoice_workflow, "resolve_user", side_effect=canonical),
+            patch.dict(purchase_invoice_workflow.frappe.session, {"user": "maker@example.com"}),
+        ):
+            purchase_invoice_workflow.capture_maker_snapshot(doc)
+        permission.assert_called_once_with(doc, "write")
+        self.assertEqual(doc.get("approval_maker_user"), "maker@example.com")
+
+        doc.set("approval_maker_user", None)
+        with (
+            patch.object(purchase_invoice_workflow, "require_permission"),
+            patch.object(purchase_invoice_workflow, "resolve_user", side_effect=canonical),
+            patch.dict(purchase_invoice_workflow.frappe.session, {"user": "other@example.com"}),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.capture_maker_snapshot(doc)
+        self.assertFalse(doc.get("approval_maker_user"))
+
+        with (
+            patch.object(purchase_invoice_workflow, "require_permission", side_effect=frappe.PermissionError),
+            patch.object(purchase_invoice_workflow, "resolve_user") as resolve,
+            self.assertRaises(frappe.PermissionError),
+        ):
+            purchase_invoice_workflow.capture_maker_snapshot(doc)
+        resolve.assert_not_called()
+
+        doc.set("owner", "")
+        with (
+            patch.object(purchase_invoice_workflow, "require_permission"),
+            patch.object(purchase_invoice_workflow, "resolve_user", wraps=approval_controls.resolve_user),
+            self.assertRaises(frappe.ValidationError),
+        ):
+            purchase_invoice_workflow.capture_maker_snapshot(doc)
+        self.assertFalse(doc.get("approval_maker_user"))
 
     def test_paid_invoice_is_denied(self) -> None:
         doc = self._doc()
@@ -126,20 +172,175 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
         doc.set("posting_date", "2026-09-24")
         self.assertNotEqual(baseline, purchase_invoice_workflow.get_approval_digest(doc))
 
-    def test_source_policy_requires_po_and_purchase_receipt_on_every_item(self) -> None:
+    def test_source_policy_requires_receipt_for_goods_even_with_supplier_bypass(self) -> None:
         doc = self._doc()
         self._first_item(doc).set("purchase_receipt", None)
-        with self.assertRaises(frappe.ValidationError):
-            purchase_invoice_workflow._require_sources(doc)
-
-        self._first_item(doc).set("purchase_receipt", "PR-1")
+        self._first_item(doc).set("pr_detail", None)
+        doc.set("supplier", "Supplier with native Receipt bypass")
         with (
             patch.object(
                 purchase_invoice_workflow.frappe.db,
-                "exists",
-                side_effect=(True, False),
+                "get_values",
+                return_value=[frappe._dict(name="ITEM-1", is_stock_item=1, is_fixed_asset=0)],
             ),
-            self.assertRaises(frappe.ValidationError),
+            self.assertRaisesRegex(frappe.ValidationError, "require a Purchase Receipt"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+    def test_service_without_receipt_keeps_exact_purchase_order_item(self) -> None:
+        doc = self._doc()
+        row = self._first_item(doc)
+        row.set("purchase_receipt", None)
+        row.set("pr_detail", None)
+        item = frappe._dict(name="ITEM-1", is_stock_item=0, is_fixed_asset=0)
+        po_child = frappe._dict(name="POI-1", parent="PO-1", item_code="ITEM-1")
+        po = Document({"doctype": "Purchase Order", "name": "PO-1", "items": [dict(po_child)]})
+
+        def values(doctype: str, **kwargs: object) -> list[frappe._dict]:
+            return [item] if doctype == "Item" else [po_child]
+
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values) as reads,
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_value",
+                return_value=frappe._dict(name="PO-1", docstatus=1),
+            ),
+            patch.object(purchase_invoice_workflow.frappe, "get_doc", return_value=po),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+        self.assertEqual(reads.call_args_list[0].args[0], "Item")
+        self.assertTrue(
+            all(call.kwargs["for_update"] and not call.kwargs["wait"] for call in reads.call_args_list)
+        )
+
+        row.set("po_detail", "POI-OTHER")
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values),
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_value",
+                return_value=frappe._dict(name="PO-1", docstatus=1),
+            ),
+            patch.object(purchase_invoice_workflow.frappe, "get_doc", return_value=po),
+            self.assertRaisesRegex(frappe.ValidationError, "selected order"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+        # A real row belonging to another order is no better than an unknown row.
+        row.set("po_detail", "POI-1")
+        po_child.parent = "PO-OTHER"
+        po.get("items")[0].parent = "PO-OTHER"
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values),
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_value",
+                return_value=frappe._dict(name="PO-1", docstatus=1),
+            ),
+            patch.object(purchase_invoice_workflow.frappe, "get_doc", return_value=po),
+            self.assertRaisesRegex(frappe.ValidationError, "selected order"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+    def test_optional_service_receipt_must_match_same_po_item(self) -> None:
+        doc = self._doc()
+        item = frappe._dict(name="ITEM-1", is_stock_item=0, is_fixed_asset=0)
+        po_child = frappe._dict(name="POI-1", parent="PO-1", item_code="ITEM-1")
+        pr_child = frappe._dict(
+            name="PRI-1",
+            parent="PR-1",
+            item_code="ITEM-1",
+            purchase_order="PO-OTHER",
+            purchase_order_item="POI-1",
+        )
+        sources = {
+            "Purchase Order": Document(
+                {"doctype": "Purchase Order", "name": "PO-1", "items": [dict(po_child)]}
+            ),
+            "Purchase Receipt": Document(
+                {"doctype": "Purchase Receipt", "name": "PR-1", "items": [dict(pr_child)]}
+            ),
+        }
+
+        def values(doctype: str, **kwargs: object) -> list[frappe._dict]:
+            return {"Item": [item], "Purchase Order Item": [po_child], "Purchase Receipt Item": [pr_child]}[
+                doctype
+            ]
+
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values),
+            patch.object(
+                purchase_invoice_workflow.frappe.db, "get_value", return_value=frappe._dict(docstatus=1)
+            ),
+            patch.object(
+                purchase_invoice_workflow.frappe,
+                "get_doc",
+                side_effect=lambda doctype, _name: sources[doctype],
+            ),
+            self.assertRaisesRegex(frappe.ValidationError, "must match"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+        pr_child.parent = "PR-OTHER"
+        sources["Purchase Receipt"].get("items")[0].parent = "PR-OTHER"
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values),
+            patch.object(
+                purchase_invoice_workflow.frappe.db, "get_value", return_value=frappe._dict(docstatus=1)
+            ),
+            patch.object(
+                purchase_invoice_workflow.frappe,
+                "get_doc",
+                side_effect=lambda doctype, _name: sources[doctype],
+            ),
+            self.assertRaisesRegex(frappe.ValidationError, "must match"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+        pr_child.parent = "PR-1"
+        sources["Purchase Receipt"].get("items")[0].parent = "PR-1"
+        pr_child.purchase_order = "PO-1"
+        sources["Purchase Receipt"].get("items")[0].purchase_order = "PO-1"
+        with (
+            patch.object(purchase_invoice_workflow.frappe.db, "get_values", side_effect=values),
+            patch.object(
+                purchase_invoice_workflow.frappe.db, "get_value", return_value=frappe._dict(docstatus=1)
+            ),
+            patch.object(
+                purchase_invoice_workflow.frappe,
+                "get_doc",
+                side_effect=lambda doctype, _name: sources[doctype],
+            ),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+    def test_draft_or_cancelled_source_fails_closed(self) -> None:
+        doc = self._doc()
+        self._first_item(doc).set("purchase_receipt", None)
+        self._first_item(doc).set("pr_detail", None)
+        with (
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_values",
+                return_value=[frappe._dict(name="ITEM-1", is_stock_item=0, is_fixed_asset=0)],
+            ),
+            patch.object(
+                purchase_invoice_workflow.frappe.db, "get_value", return_value=frappe._dict(docstatus=0)
+            ),
+            self.assertRaisesRegex(frappe.ValidationError, "remain submitted"),
+        ):
+            purchase_invoice_workflow._require_sources(doc)
+
+    def test_item_current_read_conflict_cannot_reuse_stale_service_classification(self) -> None:
+        doc = self._doc()
+        self._first_item(doc).set("purchase_receipt", None)
+        self._first_item(doc).set("pr_detail", None)
+        with (
+            patch.object(
+                purchase_invoice_workflow.frappe.db,
+                "get_values",
+                side_effect=frappe.QueryDeadlockError("Item changed"),
+            ),
+            self.assertRaisesRegex(frappe.ValidationError, "retry"),
         ):
             purchase_invoice_workflow._require_sources(doc)
 
@@ -147,6 +348,10 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
         doc = self._doc()
         with (
             patch.object(purchase_invoice_workflow, "_require_sources"),
+            patch(
+                "connect_diagnostics_core.api.frappe.approval_controls.resolve_user",
+                side_effect=lambda identity: identity,
+            ),
             patch.dict(purchase_invoice_workflow.frappe.session, {"user": doc.owner}),
             self.assertRaises(frappe.ValidationError),
         ):
@@ -171,7 +376,15 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
 
         with (
             patch.object(purchase_invoice_workflow, "_require_sources"),
-            patch.object(purchase_invoice_workflow, "require_distinct_actors"),
+            patch(
+                "connect_diagnostics_core.api.frappe.approval_controls.resolve_user",
+                side_effect=lambda identity: identity,
+            ),
+            patch.object(
+                purchase_invoice_workflow,
+                "require_distinct_actors",
+                wraps=purchase_invoice_workflow.require_distinct_actors,
+            ) as distinct,
             patch.dict(
                 purchase_invoice_workflow.frappe.session,
                 {"user": "reviewer@example.com"},
@@ -183,6 +396,7 @@ class TestPurchaseInvoiceWorkflow(UnitTestCase):
         ):
             purchase_invoice_workflow.capture_source_verification_snapshot(doc)
 
+        distinct.assert_called_once_with(doc.owner, "reviewer@example.com", ())
         self.assertEqual(doc.get("approval_reviewer_user"), "reviewer@example.com")
         self.assertEqual(doc.get("checked_by"), "EMP-REVIEWER")
 

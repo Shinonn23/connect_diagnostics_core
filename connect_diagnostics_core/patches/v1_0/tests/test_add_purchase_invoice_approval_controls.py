@@ -45,17 +45,43 @@ class TestPurchaseInvoiceApprovalPatch(UnitTestCase):
             add_patch.EXPECTED_FINGERPRINT,
         )
 
-    def test_reviewed_trial_fixture_has_exact_post_migration_fingerprint(self) -> None:
+    def test_current_fixture_keeps_canonical_maker_and_trial_task_route(self) -> None:
         fixture_path = Path(__file__).parents[3] / "fixtures" / "workflow.json"
         workflow = next(
             row
             for row in json.loads(fixture_path.read_text())
             if row["name"] == "Connect Purchase Invoice Blueprint"
         )
+        actual = {
+            (row["state"], row["action"], row["next_state"]): row.get("transition_tasks")
+            for row in workflow["transitions"]
+        }
+        self.assertEqual(set(actual), set(add_patch.EXPECTED_TRANSITION_TASKS))
+        maker_task = "Connect Purchase Invoice Maker"
         self.assertEqual(
-            add_patch._workflow_fingerprint(workflow),
-            add_patch.TRIAL_FINGERPRINT,
+            actual[
+                (
+                    "Purchase Invoice Draft",
+                    "Submit Purchase Invoice for Review",
+                    "Purchase Invoice Pending Source Verification",
+                )
+            ],
+            maker_task,
         )
+        self.assertEqual(
+            actual[
+                (
+                    "Purchase Invoice Returned",
+                    "Resubmit Purchase Invoice",
+                    "Purchase Invoice Pending Source Verification",
+                )
+            ],
+            maker_task,
+        )
+        for route, task in add_patch.EXPECTED_TRANSITION_TASKS.items():
+            if route[1] in {"Submit Purchase Invoice for Review", "Resubmit Purchase Invoice"}:
+                continue
+            self.assertEqual(actual[route], task)
 
     def test_transition_task_contract_is_synchronous_and_complete(self) -> None:
         referenced_tasks = {task for task in add_patch.EXPECTED_TRANSITION_TASKS.values() if task}

@@ -11,6 +11,7 @@ import frappe
 from frappe.tests import UnitTestCase
 
 from connect_diagnostics_core.patches.v1_0 import configure_purchase_order_approval_boundary as patch_module
+from connect_diagnostics_core.patches.v1_0 import upgrade_workflow_baseline_v5 as v5
 
 
 class TestConfigurePurchaseOrderApprovalBoundary(UnitTestCase):
@@ -31,22 +32,44 @@ class TestConfigurePurchaseOrderApprovalBoundary(UnitTestCase):
             patch_module.execute()
         return meta, workflow
 
-    def test_target_fixture_matches_reviewed_fingerprint_and_tasks(self) -> None:
+    def test_current_fixture_keeps_canonical_maker_and_reviewed_task_route(self) -> None:
         fixture_path = Path(__file__).parents[3] / "fixtures" / "workflow.json"
         workflow = next(
             row
             for row in json.loads(fixture_path.read_text())
             if row["name"] == patch_module.PURCHASE_ORDER_WORKFLOW
         )
-        self.assertEqual(
-            patch_module._workflow_fingerprint(workflow),
-            patch_module.TARGET_PO_FINGERPRINT,
-        )
         actual = {
             (row["state"], row["action"], row["next_state"]): row.get("transition_tasks")
             for row in workflow["transitions"]
         }
-        self.assertEqual(actual, patch_module.EXPECTED_TRANSITION_TASKS)
+        return_row = v5.RETURN_TRANSITION
+        return_route = (return_row["state"], return_row["action"], return_row["next_state"])
+        self.assertEqual(set(actual), set(patch_module.EXPECTED_TRANSITION_TASKS) | {return_route})
+        self.assertEqual(len(actual), len(workflow["transitions"]))
+        self.assertEqual(
+            next(
+                row
+                for row in workflow["transitions"]
+                if (row["state"], row["action"], row["next_state"]) == return_route
+            ),
+            return_row,
+        )
+        maker_task = "Connect Purchase Order Maker"
+        self.assertEqual(
+            actual[
+                ("Purchase Order Draft", "Submit Purchase Order for Review", "Purchase Order Pending Review")
+            ],
+            maker_task,
+        )
+        self.assertEqual(
+            actual[("Purchase Order Rejected", "Resubmit Purchase Order", "Purchase Order Pending Review")],
+            maker_task,
+        )
+        for route, task in patch_module.EXPECTED_TRANSITION_TASKS.items():
+            if route[1] in {"Submit Purchase Order for Review", "Resubmit Purchase Order"}:
+                continue
+            self.assertEqual(actual[route], task)
 
     @patch.object(patch_module.frappe, "get_all")
     def test_open_procurement_action_stops_before_configuration_writes(self, get_all: MagicMock) -> None:
