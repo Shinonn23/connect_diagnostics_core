@@ -43,3 +43,30 @@ class TestSalesInvoiceCustomFields(UnitTestCase):
             self.assertEqual(field["read_only"], 1)
             self.assertEqual(field["no_copy"], 1)
         self.assertEqual(self._field("demo_sale_operation_id")["unique"], 1)
+
+    def test_auto_invoice_provenance_is_server_owned_and_locked_after_submit(self) -> None:
+        expected = {
+            "connect_invoice_generation_run": ("Link", "Sales Invoice Generation"),
+            "connect_invoice_source_doctype": ("Data", None),
+            "connect_invoice_source_name": ("Data", None),
+            "connect_billing_authority_digest": ("Data", None),
+            "connect_source_group_digest": ("Data", None),
+            "connect_generated_by_actor": ("Link", "User"),
+            "connect_generated_at": ("Datetime", None),
+            "connect_generation_payload_digest": ("Data", None),
+        }
+        actual = {
+            str(field["fieldname"])
+            for field in sales_invoice.CUSTOM_FIELDS["Sales Invoice"]
+            if str(field["fieldname"]).startswith("connect_")
+        }
+        self.assertEqual(actual, set(expected))
+        for name, (fieldtype, options) in expected.items():
+            field = self._field(name)
+            self.assertEqual(field["fieldtype"], fieldtype)
+            self.assertEqual(field.get("options"), options)
+            for key in ("hidden", "read_only", "no_copy"):
+                self.assertEqual(field[key], 1)
+            self.assertFalse(field.get("allow_on_submit"))
+            self.assertFalse(field.get("default"))
+            self.assertFalse(field.get("reqd"))

@@ -1,0 +1,183 @@
+{
+	"doctype": "DocType",
+	"name": "Sales Invoice Generation",
+	"module": "Connect Diagnostics Core",
+	"engine": "InnoDB",
+	"modified": "2026-10-02 13:33:00.031773",
+	"modified_by": "Administrator",
+	"owner": "Administrator",
+	"autoname": "hash",
+	"allow_rename": 0,
+	"allow_import": 0,
+	"allow_bulk_edit": 0,
+	"is_submittable": 0,
+	"field_order": [
+		"source_doctype",
+		"source_name",
+		"sales_order",
+		"billing_authority_revision",
+		"group_kind",
+		"group_key",
+		"source_rows_json",
+		"source_digest",
+		"billing_authority_digest",
+		"expected_invoice_payload_digest",
+		"generation_status",
+		"failure_code",
+		"attempt_count",
+		"last_error",
+		"initiated_by",
+		"target_sales_invoice",
+		"generated_at"
+	],
+	"fields": [
+		{
+			"fieldname": "source_doctype",
+			"fieldtype": "Select",
+			"label": "Source Doctype",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "Sales Order\nDelivery Note",
+			"reqd": 1
+		},
+		{
+			"fieldname": "source_name",
+			"fieldtype": "Dynamic Link",
+			"label": "Source Name",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "source_doctype",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "sales_order",
+			"fieldtype": "Link",
+			"label": "Sales Order",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "Sales Order",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "billing_authority_revision",
+			"fieldtype": "Data",
+			"label": "Billing Authority Revision",
+			"read_only": 1,
+			"no_copy": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "group_kind",
+			"fieldtype": "Select",
+			"label": "Group Kind",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "SO Service\nDN Stock",
+			"reqd": 1
+		},
+		{
+			"fieldname": "group_key",
+			"fieldtype": "Data",
+			"label": "Group Key",
+			"read_only": 1,
+			"no_copy": 1,
+			"reqd": 1,
+			"unique": 1
+		},
+		{
+			"fieldname": "source_rows_json",
+			"fieldtype": "Long Text",
+			"label": "Source Rows Json",
+			"read_only": 1,
+			"no_copy": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "source_digest",
+			"fieldtype": "Data",
+			"label": "Source Digest",
+			"read_only": 1,
+			"no_copy": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "billing_authority_digest",
+			"fieldtype": "Data",
+			"label": "Billing Authority Digest",
+			"read_only": 1,
+			"no_copy": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname": "expected_invoice_payload_digest",
+			"fieldtype": "Data",
+			"label": "Expected Invoice Payload Digest",
+			"read_only": 1,
+			"no_copy": 1
+		},
+		{
+			"fieldname": "generation_status",
+			"fieldtype": "Select",
+			"label": "Generation Status",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "Queued\nPending Permission\nFailed\nLegacy Authority Hold\nGenerated\nGenerated SI Cancelled",
+			"default": "Queued",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "failure_code",
+			"fieldtype": "Select",
+			"label": "Failure Code",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "\nAllocation Required\nSource Authority Mismatch\nCross-route Fixed Pool Unsupported\nLegacy Authority Hold"
+		},
+		{
+			"fieldname": "attempt_count",
+			"fieldtype": "Int",
+			"label": "Attempt Count",
+			"read_only": 1,
+			"no_copy": 1,
+			"default": "0"
+		},
+		{
+			"fieldname": "last_error",
+			"fieldtype": "Small Text",
+			"label": "Last Error",
+			"read_only": 1,
+			"no_copy": 1
+		},
+		{
+			"fieldname": "initiated_by",
+			"fieldtype": "Link",
+			"label": "Initiated By",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "User",
+			"reqd": 1
+		},
+		{
+			"fieldname": "target_sales_invoice",
+			"fieldtype": "Link",
+			"label": "Target Sales Invoice",
+			"read_only": 1,
+			"no_copy": 1,
+			"options": "Sales Invoice",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "generated_at",
+			"fieldtype": "Datetime",
+			"label": "Generated At",
+			"read_only": 1,
+			"no_copy": 1
+		}
+	],
+	"permissions": [],
+	"links": [],
+	"states": [],
+	"actions": []
+}
