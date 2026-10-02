@@ -11,6 +11,11 @@ from connect_diagnostics_core.patches.v1_0 import add_stock_transfer_approval_co
 
 
 class TestAddStockTransferApprovalControls(UnitTestCase):
+    @staticmethod
+    def _owned_fields() -> list[dict]:
+        names = {"approval_critical_digest", "approval_reviewer_user", "approval_authorized_user"}
+        return [field for field in patch_module.CUSTOM_FIELDS["Stock Entry"] if field["fieldname"] in names]
+
     def test_collision_stops_only_the_owned_route(self) -> None:
         with (
             patch.object(
@@ -46,6 +51,7 @@ class TestAddStockTransferApprovalControls(UnitTestCase):
             patch_module.execute()
 
         create_custom_fields.assert_called_once()
+        self.assertEqual(len(self._owned_fields()), 3)
         self.assertEqual(
             [row["name"] for row in inserted],
             list(patch_module.TASKS),
@@ -55,14 +61,16 @@ class TestAddStockTransferApprovalControls(UnitTestCase):
             list(patch_module.TASKS.values()),
         )
         create_custom_fields.assert_called_once_with(
-            {"Stock Entry": patch_module.CUSTOM_FIELDS["Stock Entry"][-3:]},
+            {"Stock Entry": self._owned_fields()},
             update=False,
             ignore_validate=True,
         )
 
     def test_incompatible_existing_custom_field_stops_migration(self) -> None:
-        field = patch_module.CUSTOM_FIELDS["Stock Entry"][-3]
-        existing = {property_name: field.get(property_name) for property_name in patch_module.FIELD_PROPERTIES}
+        field = self._owned_fields()[0]
+        existing = {
+            property_name: field.get(property_name) for property_name in patch_module.FIELD_PROPERTIES
+        }
         existing["fieldtype"] = "Long Text"
         with (
             patch.object(patch_module.frappe.db, "get_value", return_value=existing),

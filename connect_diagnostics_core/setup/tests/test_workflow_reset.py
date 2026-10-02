@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib
 import json
+from collections import Counter
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -67,6 +68,8 @@ class TestWorkflowReset(UnitTestCase):
         expected_names.update(
             workflow for route in manifest["routes"] for workflow in route.get("workflow_names", [])
         )
+        expected_names.add(manifest["accounting_dependency"]["workflow"])
+        expected_names.add(manifest["stock_reconciliation_dependency"]["workflow"])
         self.assertEqual(
             {workflow["workflow_name"] for workflow in workflow_fixture},
             expected_names,
@@ -107,7 +110,9 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if transition["action"].startswith(("Approve ", "Reject ", "Review ", "Post "))
+                        if transition["action"].startswith(
+                            ("Approve ", "Reject ", "Review ", "Return ", "Verify ")
+                        )
                     )
                 )
 
@@ -131,7 +136,9 @@ class TestWorkflowReset(UnitTestCase):
                     all(
                         transition["allow_self_approval"] == 0
                         for transition in workflow["transitions"]
-                        if not transition["action"].startswith(("Submit ", "Send ", "Resubmit "))
+                        if transition["action"].startswith(
+                            ("Approve ", "Reject ", "Review ", "Return ", "Verify ")
+                        )
                     )
                 )
 
@@ -171,10 +178,64 @@ class TestWorkflowReset(UnitTestCase):
                     self.assertEqual(pending.get("send_email", 0), 1)
                     self.assertEqual(approved.get("send_email", 0), 1)
 
-    def test_rejection_is_terminal_except_for_approved_purchase_order_resubmit(self) -> None:
+    def test_return_and_rejection_resubmit_routes_are_explicit(self) -> None:
         workflow_fixture = json.loads(
             Path(hooks.__file__).with_name("fixtures").joinpath("workflow.json").read_text()
         )
+        expected_resubmits = {
+            ("Stock Entry", "Stock Transfer Returned"): (
+                ("Resubmit Stock Transfer for Review", "Stock Transfer Pending Review", "Stock User", 1),
+            ),
+            ("Stock Reconciliation", "Stock Reconciliation Returned"): (
+                (
+                    "Resubmit Stock Reconciliation for Review",
+                    "Stock Reconciliation Pending Review",
+                    "Stock User",
+                    1,
+                ),
+            ),
+            ("Asset Movement", "Asset Movement Rejected"): (
+                ("Resubmit Asset Movement", "Asset Movement Pending Review", "Stock User", 1),
+            ),
+            ("Journal Entry", "Journal Entry Returned"): (
+                ("Resubmit Journal Entry for Review", "Journal Entry Pending Review", "Accounts User", 1),
+            ),
+            ("Sales Order", "Sales Order Returned"): (
+                ("Resubmit Sales Order for Review", "Sales Order Pending Review", "Sales User", 1),
+            ),
+            ("Sales Invoice", "Sales Invoice Credit Returned"): (
+                (
+                    "Resubmit Sales Invoice Credit for Review",
+                    "Sales Invoice Credit Pending Review",
+                    "Sales User",
+                    1,
+                ),
+                (
+                    "Resubmit Sales Invoice Credit for Review",
+                    "Sales Invoice Credit Pending Review",
+                    "Accounts User",
+                    1,
+                ),
+            ),
+            ("Purchase Order", "Purchase Order Rejected"): (
+                ("Resubmit Purchase Order", "Purchase Order Pending Review", "Purchase User", 1),
+            ),
+            ("Purchase Invoice", "Purchase Invoice Returned"): (
+                (
+                    "Resubmit Purchase Invoice",
+                    "Purchase Invoice Pending Source Verification",
+                    "Accounts User",
+                    1,
+                ),
+            ),
+            ("Payment Entry", "Payment Entry Returned"): (
+                ("Resubmit Payment Entry for Review", "Payment Entry Pending Review", "Accounts User", 1),
+            ),
+            ("Payroll Entry", "Payroll Entry Returned"): (
+                ("Resubmit Payroll Entry for Review", "Payroll Entry Pending Review", "HR User", 1),
+            ),
+        }
+        seen: set[tuple[str, str]] = set()
         for workflow in workflow_fixture:
             rejected_states = [
                 state for state in workflow["states"] if state["state"].endswith((" Rejected", " Returned"))
@@ -182,19 +243,27 @@ class TestWorkflowReset(UnitTestCase):
             self.assertGreaterEqual(len(rejected_states), 1)
             for rejected in rejected_states:
                 with self.subTest(state=rejected["state"]):
+                    key = (workflow["document_type"], rejected["state"])
+                    seen.add(key)
                     outgoing = [
                         transition
                         for transition in workflow["transitions"]
                         if transition["state"] == rejected["state"]
                     ]
-                    if workflow["document_type"] == "Purchase Order":
-                        self.assertEqual(
-                            [(row["action"], row["next_state"]) for row in outgoing],
-                            [("Resubmit Purchase Order", "Purchase Order Pending Review")],
-                        )
-                    else:
-                        self.assertFalse(outgoing)
-                    self.assertIn(rejected["allow_edit"], self.FLOW_ROLES | {"System Manager"})
+                    self.assertEqual(
+                        Counter(
+                            (
+                                row["action"],
+                                row["next_state"],
+                                row["allowed"],
+                                row["allow_self_approval"],
+                            )
+                            for row in outgoing
+                        ),
+                        Counter(expected_resubmits.get(key, ())),
+                    )
+                    self.assertIn(rejected["allow_edit"], self.FLOW_ROLES | {"System Manager", "All"})
+        self.assertTrue(expected_resubmits.keys() <= seen)
 
     def test_revise_actions_and_transitions_are_removed(self) -> None:
         workflow_fixture = json.loads(

@@ -21,14 +21,18 @@ def _doc(value: dict) -> frappe._dict:
 
 class TestAssetMovementApprovalMigration(UnitTestCase):
     def test_declared_legacy_shape_is_exact(self) -> None:
-        self.assertEqual(len(migration.LEGACY_WORKFLOW["states"]), 6)
-        self.assertEqual(len(migration.LEGACY_WORKFLOW["transitions"]), 7)
+        states = migration.LEGACY_WORKFLOW["states"]
+        transitions = migration.LEGACY_WORKFLOW["transitions"]
+        assert isinstance(states, list)
+        assert isinstance(transitions, list)
+        self.assertEqual(len(states), 6)
+        self.assertEqual(len(transitions), 7)
         self.assertEqual(
             (
-                migration.LEGACY_WORKFLOW["transitions"][-2][0],
-                migration.LEGACY_WORKFLOW["transitions"][-2][2],
-                migration.LEGACY_WORKFLOW["transitions"][-2][4],
-                migration.LEGACY_WORKFLOW["transitions"][-2][6],
+                transitions[-2][0],
+                transitions[-2][2],
+                transitions[-2][4],
+                transitions[-2][6],
             ),
             (
                 "Post Asset Movement",
@@ -40,16 +44,16 @@ class TestAssetMovementApprovalMigration(UnitTestCase):
 
     def test_workflow_mode_accepts_absent_legacy_and_desired_only(self) -> None:
         desired = migration._desired_workflow()
+        states = migration.LEGACY_WORKFLOW["states"]
+        transitions = migration.LEGACY_WORKFLOW["transitions"]
+        assert isinstance(states, list)
+        assert isinstance(transitions, list)
         legacy = _doc(
             {
                 **migration.LEGACY_WORKFLOW,
-                "states": [
-                    dict(zip(migration._STATE_KEYS, row, strict=True))
-                    for row in migration.LEGACY_WORKFLOW["states"]
-                ],
+                "states": [dict(zip(migration._STATE_KEYS, row, strict=True)) for row in states],
                 "transitions": [
-                    dict(zip(migration._TRANSITION_KEYS, row, strict=True))
-                    for row in migration.LEGACY_WORKFLOW["transitions"]
+                    dict(zip(migration._TRANSITION_KEYS, row, strict=True)) for row in transitions
                 ],
             }
         )
@@ -64,7 +68,9 @@ class TestAssetMovementApprovalMigration(UnitTestCase):
                 self.assertEqual(migration._workflow_mode(), expected_mode)
 
         third = _doc(desired)
-        third.states[0].allow_edit = "System Manager"
+        third_states = third.get("states")
+        assert isinstance(third_states, list)
+        third_states[0].allow_edit = "System Manager"
         with (
             patch.object(migration.frappe.db, "exists", return_value=True),
             patch.object(migration.frappe, "get_doc", return_value=third),

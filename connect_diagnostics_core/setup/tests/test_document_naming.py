@@ -25,6 +25,11 @@ class TestDocumentNaming(UnitTestCase):
         self.assertEqual(
             document_naming.NAMING_SERIES_PREFIXES["Borrowed Asset Return Inspection"], ("BARI",)
         )
+        self.assertEqual(document_naming.NAMING_SERIES_PREFIXES["Role Scope Assignment"], ("RSA",))
+        self.assertEqual(
+            document_naming.series_options(document_naming.NAMING_SERIES_PREFIXES["Role Scope Assignment"]),
+            "RSA.YYYY-BE.MM-DATE.####",
+        )
 
     def test_property_setters_are_not_synced_as_fixtures(self) -> None:
         fixture_doctypes = {

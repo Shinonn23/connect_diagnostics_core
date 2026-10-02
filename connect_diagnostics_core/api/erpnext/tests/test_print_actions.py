@@ -167,8 +167,10 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
 
         self.assertEqual(doc["checked_by"], "EMP-REVIEWER")
         self.assertEqual(doc["checked_signature"], "data:image/png;base64,reviewer")
-        require_permission.assert_called_once_with(doc)
-        require_distinct_actors.assert_called_once()
+        require_permission.assert_called_once_with(doc, "write")
+        require_distinct_actors.assert_called_once_with(
+            "maker@example.com", print_actions.frappe.session.user, ()
+        )
         capture_review_snapshot.assert_called_once_with(doc)
 
     @patch.object(print_actions, "require_distinct_actors")
@@ -184,6 +186,21 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             print_actions.capture_checked_action(cast(Document, doc))
+
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
+    @patch.object(print_actions.frappe.db, "get_value", return_value=None)
+    def test_protected_authorization_without_employee_fails_closed(
+        self,
+        _get_value: MagicMock,
+        _require_permission: MagicMock,
+        _require_distinct_actors: MagicMock,
+    ) -> None:
+        doc = FakeDocument({"doctype": "Payment Entry", "owner": "maker@example.com"})
+
+        with self.assertRaises(frappe.ValidationError):
+            print_actions.capture_authorized_action(cast(Document, doc))
+        self.assertNotIn("authorized_by", doc)
 
     @patch.object(print_actions, "require_distinct_actors")
     @patch.object(print_actions, "require_permission")
@@ -218,11 +235,18 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
             "approval_signature": "data:image/png;base64,signature",
         },
     )
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
     def test_material_request_and_capitalization_use_authorized_snapshot_writer(
-        self, _get_value: MagicMock, _msgprint: MagicMock, _now_datetime: MagicMock
+        self,
+        _require_permission: MagicMock,
+        _require_distinct_actors: MagicMock,
+        _get_value: MagicMock,
+        _msgprint: MagicMock,
+        _now_datetime: MagicMock,
     ) -> None:
         for doctype in ("Material Request", "Asset Capitalization"):
-            doc = FakeDocument({"doctype": doctype})
+            doc = FakeDocument({"doctype": doctype, "owner": "maker@example.com"})
 
             print_actions.capture_authorized_action(cast(Document, doc))
 
@@ -232,20 +256,20 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
                 self.assertEqual(doc["authorized_signature"], "data:image/png;base64,signature")
                 self.assertNotIn("submit_by", doc)
 
-    @patch.object(print_actions, "now_datetime", return_value=datetime(2026, 9, 5, 10, 30, 0))
-    @patch.object(print_actions, "require_distinct_actors")
+    @patch(
+        "connect_diagnostics_core.api.frappe.approval_controls.resolve_user", side_effect=lambda user: user
+    )
     @patch.object(print_actions, "require_permission")
     @patch.object(
         print_actions.frappe.db,
         "get_value",
         return_value={"name": "EMP-0001", "employee_name": "Approver", "approval_signature": "signed"},
     )
-    def test_non_stock_approval_does_not_apply_stock_separation_of_duties(
+    def test_non_stock_approval_applies_separation_of_duties(
         self,
         _get_value: MagicMock,
         require_permission: MagicMock,
-        require_distinct_actors: MagicMock,
-        _now_datetime: MagicMock,
+        _resolve_user: MagicMock,
     ) -> None:
         doc = FakeDocument(
             {
@@ -255,19 +279,59 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
                 "authorized_signature": "fake",
             }
         )
+        with self.assertRaises(frappe.ValidationError):
+            print_actions.capture_authorized_action(cast(Document, doc))
+        require_permission.assert_called_once_with(doc, "write")
+        self.assertEqual(doc["authorized_by"], "client")
+        self.assertEqual(doc["authorized_signature"], "fake")
+
+    @patch.object(print_actions, "require_permission", side_effect=frappe.PermissionError)
+    @patch.object(print_actions.frappe.db, "get_value")
+    def test_protected_approval_requires_write_permission(
+        self, get_value: MagicMock, require_permission: MagicMock
+    ) -> None:
+        doc = FakeDocument({"doctype": "Payment Entry", "owner": "maker@example.com"})
+        with self.assertRaises(frappe.PermissionError):
+            print_actions.capture_authorized_action(cast(Document, doc))
+        require_permission.assert_called_once_with(doc, "write")
+        get_value.assert_not_called()
+
+    @patch.object(print_actions, "now_datetime", return_value=datetime(2026, 9, 5, 10, 30, 0))
+    @patch.object(print_actions, "require_distinct_actors")
+    @patch.object(print_actions, "require_permission")
+    @patch.object(
+        print_actions.frappe.db,
+        "get_value",
+        return_value={"name": "EMP-APPROVER", "employee_name": "Approver", "approval_signature": "signed"},
+    )
+    def test_authorization_checks_nonempty_previous_reviewer(
+        self,
+        _get_value: MagicMock,
+        _require_permission: MagicMock,
+        require_distinct_actors: MagicMock,
+        _now_datetime: MagicMock,
+    ) -> None:
+        doc = FakeDocument(
+            {
+                "doctype": "Payment Entry",
+                "owner": "maker@example.com",
+                "approval_reviewer_user": "reviewer@example.com",
+            }
+        )
         print_actions.capture_authorized_action(cast(Document, doc))
-        require_permission.assert_called_once_with(doc)
-        require_distinct_actors.assert_not_called()
-        self.assertEqual(doc["authorized_by"], "EMP-0001")
-        self.assertEqual(doc["authorized_signature"], "signed")
+        require_distinct_actors.assert_called_once_with(
+            "maker@example.com", print_actions.frappe.session.user, ("reviewer@example.com",)
+        )
 
     @patch.object(print_actions, "require_permission")
+    @patch.object(print_actions, "require_distinct_actors")
     @patch.object(print_actions, "now_datetime")
     @patch.object(print_actions.frappe.db, "get_value")
     def test_reapproval_replaces_only_the_current_snapshot(
         self,
         get_value: MagicMock,
         now_datetime: MagicMock,
+        _require_distinct_actors: MagicMock,
         _require_permission: MagicMock,
     ) -> None:
         get_value.side_effect = [
@@ -278,7 +342,7 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
             datetime(2026, 9, 5, 10, 30, 0),
             datetime(2026, 9, 6, 11, 45, 0),
         ]
-        doc = FakeDocument({"doctype": "Sales Order"})
+        doc = FakeDocument({"doctype": "Sales Order", "owner": "maker@example.com"})
 
         print_actions.capture_authorized_action(cast(Document, doc))
         first_snapshot = (doc["authorized_by"], doc["authorized_at"], doc["authorized_signature"])

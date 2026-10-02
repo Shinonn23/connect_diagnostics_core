@@ -91,6 +91,7 @@ def _skip_auto_test_records_for_app_doctypes() -> None:
     for doctype in (
         "Stock Borrow",
         "Stock Borrow Item",
+        "Stock Asset Conversion",
         "Stock Count",
         "Stock Count Item",
         "Stock Count Adjustment",

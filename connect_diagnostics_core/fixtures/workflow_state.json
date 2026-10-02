@@ -4,27 +4,18 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Pending Source Verification",
+		"name": "Asset Movement Approved",
 		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Pending Source Verification"
+		"workflow_state_name": "Asset Movement Approved"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Pending Accounting Approval",
+		"name": "Asset Movement Cancelled",
 		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Pending Accounting Approval"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Returned",
-		"style": "Warning",
-		"workflow_state_name": "Purchase Invoice Returned"
+		"workflow_state_name": "Asset Movement Cancelled"
 	},
 	{
 		"docstatus": 0,
@@ -49,9 +40,9 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Approved",
+		"name": "Asset Movement Pending Review",
 		"style": "Info",
-		"workflow_state_name": "Asset Movement Approved"
+		"workflow_state_name": "Asset Movement Pending Review"
 	},
 	{
 		"docstatus": 0,
@@ -75,19 +66,19 @@
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Movement Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Asset Movement Cancelled"
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Journal Entry Approved",
+		"style": "Success",
+		"workflow_state_name": "Journal Entry Approved"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Payment Entry Draft",
-		"style": "Info",
-		"workflow_state_name": "Payment Entry Draft"
+		"modified": "2026-09-26 00:00:00.000000",
+		"name": "Journal Entry Cancelled",
+		"style": "Danger",
+		"workflow_state_name": "Journal Entry Cancelled"
 	},
 	{
 		"docstatus": 0,
@@ -231,304 +222,7 @@
 		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Payroll Entry Cancelled",
 		"style": "Info",
-		"workflow_state_name": "Stock Transfer Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Transfer Approved",
-		"style": "Info",
-		"workflow_state_name": "Stock Transfer Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Transfer Rejected",
-		"style": "Info",
-		"workflow_state_name": "Stock Transfer Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Transfer Submitted",
-		"style": "Info",
-		"workflow_state_name": "Stock Transfer Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Transfer Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Stock Transfer Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Draft",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Approved",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Rejected",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Submitted",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Stock Reconciliation Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Stock Reconciliation Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Draft",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Approved",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Rejected",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Submitted",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Order Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Sales Order Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Invoice Credit Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Sales Invoice Credit Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Invoice Credit Approved",
-		"style": "Info",
-		"workflow_state_name": "Sales Invoice Credit Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Invoice Credit Rejected",
-		"style": "Info",
-		"workflow_state_name": "Sales Invoice Credit Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Invoice Credit Submitted",
-		"style": "Info",
-		"workflow_state_name": "Sales Invoice Credit Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Sales Invoice Credit Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Sales Invoice Credit Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Draft",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Pending Review",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 15:12:00.469564",
-		"name": "Purchase Order Pending Approval",
-		"style": "Warning",
-		"workflow_state_name": "Purchase Order Pending Approval"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Approved",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Rejected",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Submitted",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Order Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Purchase Order Cancelled"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Draft",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Draft"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Approved",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Approved"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Rejected",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Submitted",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Submitted"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Purchase Invoice Cancelled",
-		"style": "Info",
-		"workflow_state_name": "Purchase Invoice Cancelled"
+		"workflow_state_name": "Payroll Entry Cancelled"
 	},
 	{
 		"docstatus": 0,
@@ -553,9 +247,9 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-27 15:00:12.067930",
-		"name": "Payroll Entry Reviewed",
+		"name": "Payroll Entry Rejected",
 		"style": "Info",
-		"workflow_state_name": "Payroll Entry Reviewed"
+		"workflow_state_name": "Payroll Entry Rejected"
 	},
 	{
 		"docstatus": 0,
@@ -571,18 +265,9 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-27 15:00:12.067930",
-		"name": "Payroll Entry Approved",
+		"name": "Payroll Entry Reviewed",
 		"style": "Info",
-		"workflow_state_name": "Payroll Entry Rejected"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-27 15:00:12.067930",
-		"name": "Payroll Entry Rejected",
-		"style": "Info",
-		"workflow_state_name": "Payroll Entry Rejected"
+		"workflow_state_name": "Payroll Entry Reviewed"
 	},
 	{
 		"docstatus": 0,
@@ -598,7 +283,7 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-27 15:00:12.067930",
-		"name": "Payroll Entry Cancelled",
+		"name": "Purchase Invoice Approved",
 		"style": "Info",
 		"workflow_state_name": "Purchase Invoice Approved"
 	},
@@ -607,7 +292,61 @@
 		"doctype": "Workflow State",
 		"icon": null,
 		"modified": "2026-09-17 00:00:00.000000",
-		"name": "Asset Disposal Draft",
+		"name": "Purchase Invoice Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Draft",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Accounting Approval",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Accounting Approval"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Pending Source Verification",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Pending Source Verification"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Rejected",
+		"style": "Info",
+		"workflow_state_name": "Purchase Invoice Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Returned",
+		"style": "Warning",
+		"workflow_state_name": "Purchase Invoice Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Invoice Submitted",
 		"style": "Info",
 		"workflow_state_name": "Purchase Invoice Submitted"
 	},
@@ -663,78 +402,312 @@
 		"modified": "2026-09-17 00:00:00.000000",
 		"name": "Purchase Order Rejected",
 		"style": "Info",
-		"workflow_state_name": "Asset Disposal Cancelled"
+		"workflow_state_name": "Purchase Order Rejected"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Draft",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Purchase Order Submitted",
 		"style": "Info",
-		"workflow_state_name": "Journal Entry Draft"
+		"workflow_state_name": "Purchase Order Submitted"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Pending Review",
-		"style": "Warning",
-		"workflow_state_name": "Journal Entry Pending Review"
-	},
-	{
-		"docstatus": 0,
-		"doctype": "Workflow State",
-		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Reviewed",
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Cancelled",
 		"style": "Info",
-		"workflow_state_name": "Journal Entry Reviewed"
+		"workflow_state_name": "Sales Invoice Cancelled"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Approved",
-		"style": "Success",
-		"workflow_state_name": "Journal Entry Approved"
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Credit Approved",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Credit Approved"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Returned",
-		"style": "Warning",
-		"workflow_state_name": "Journal Entry Returned"
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Credit Pending Review",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Credit Pending Review"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Rejected",
-		"style": "Danger",
-		"workflow_state_name": "Journal Entry Rejected"
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Credit Returned",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Credit Returned"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Submitted",
-		"style": "Success",
-		"workflow_state_name": "Journal Entry Submitted"
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Credit Reviewed",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Credit Reviewed"
 	},
 	{
 		"docstatus": 0,
 		"doctype": "Workflow State",
 		"icon": null,
-		"modified": "2026-09-26 00:00:00.000000",
-		"name": "Journal Entry Cancelled",
-		"style": "Danger",
-		"workflow_state_name": "Journal Entry Cancelled"
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Draft",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Invoice Submitted",
+		"style": "Info",
+		"workflow_state_name": "Sales Invoice Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Approved",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Approved"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Draft",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Pending Review",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Pending Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Rejected",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Returned",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Reviewed",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Reviewed"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Sales Order Submitted",
+		"style": "Info",
+		"workflow_state_name": "Sales Order Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Entry Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Stock Entry Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Entry Draft",
+		"style": "Info",
+		"workflow_state_name": "Stock Entry Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Entry Submitted",
+		"style": "Info",
+		"workflow_state_name": "Stock Entry Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Approved",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Approved"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Draft",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Draft"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Pending Review",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Pending Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Rejected",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Returned",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Reviewed",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Reviewed"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Reconciliation Submitted",
+		"style": "Info",
+		"workflow_state_name": "Stock Reconciliation Submitted"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Approved",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Approved"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Cancelled",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Cancelled"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Pending Review",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Pending Review"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Rejected",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Rejected"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Returned",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Returned"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Reviewed",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Reviewed"
+	},
+	{
+		"docstatus": 0,
+		"doctype": "Workflow State",
+		"icon": null,
+		"modified": "2026-09-17 00:00:00.000000",
+		"name": "Stock Transfer Submitted",
+		"style": "Info",
+		"workflow_state_name": "Stock Transfer Submitted"
 	}
 ]

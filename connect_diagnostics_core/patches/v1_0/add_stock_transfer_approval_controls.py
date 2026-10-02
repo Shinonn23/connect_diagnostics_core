@@ -56,9 +56,7 @@ def _validate_workflow_collision() -> None:
     unexpected = [name for name in active if name != CANONICAL_WORKFLOW]
     if unexpected:
         frappe.throw(
-            _("Stock Entry Workflow collision requires owner disposition: {0}").format(
-                ", ".join(unexpected)
-            )
+            _("Stock Entry Workflow collision requires owner disposition: {0}").format(", ".join(unexpected))
         )
     if not frappe.db.exists("Workflow", CANONICAL_WORKFLOW):
         return
@@ -134,7 +132,8 @@ def execute() -> None:
     fields = [
         field
         for field in CUSTOM_FIELDS["Stock Entry"]
-        if field["fieldname"] in {"approval_critical_digest", "approval_reviewer_user", "approval_authorized_user"}
+        if field["fieldname"]
+        in {"approval_critical_digest", "approval_reviewer_user", "approval_authorized_user"}
     ]
     _validate_custom_field_collisions(fields)
     create_custom_fields({"Stock Entry": fields}, update=False, ignore_validate=True)

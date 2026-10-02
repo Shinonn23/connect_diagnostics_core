@@ -23,5 +23,7 @@ def execute() -> None:
     doc = frappe.get_doc("Workflow Transition Tasks", NAME)
     actual = [(row.task, int(row.enabled), int(row.asynchronous)) for row in doc.tasks]
     if actual != EXPECTED:
-        frappe.throw(_("Workflow Transition Tasks {0} conflicts with the approved configuration.").format(NAME))
+        frappe.throw(
+            _("Workflow Transition Tasks {0} conflicts with the approved configuration.").format(NAME)
+        )
     frappe.delete_doc("Workflow Transition Tasks", NAME, ignore_permissions=True)

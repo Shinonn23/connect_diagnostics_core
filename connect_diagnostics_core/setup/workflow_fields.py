@@ -3,6 +3,8 @@
 
 """Code-managed fields for the normalized native Workflow baseline."""
 
+from typing import Any
+
 TARGET_DOCTYPES = (
     "Stock Entry",
     "Stock Reconciliation",
@@ -35,7 +37,16 @@ _SHARED_APPROVAL_FIELDS = (
     ("approval_critical_digest", "Approval Critical Digest", "Data", None),
 )
 
-CUSTOM_FIELDS = {
+_PAYROLL_OUTPUT_FIELDS = (
+    ("output_reviewed_by", "Output Reviewed By", "Link", "User"),
+    ("output_reviewed_at", "Output Reviewed At", "Datetime", None),
+    ("output_review_signature", "Output Review Signature", "Data", None),
+    ("output_review_digest", "Output Review Digest", "Data", None),
+    ("output_review_version", "Output Review Version", "Data", None),
+    ("output_review_revision", "Output Review Revision", "Int", None),
+)
+
+CUSTOM_FIELDS: dict[str, list[dict[str, Any]]] = {
     "Journal Entry": [
         {
             "fieldname": "workflow_state",
@@ -148,7 +159,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "checked_by",
-            "label": "Checked By",
+            "label": "Print Action: Checked By",
             "fieldtype": "Link",
             "options": "Employee",
             "hidden": 1,
@@ -160,7 +171,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "checked_at",
-            "label": "Checked At",
+            "label": "Print Action: Checked At",
             "fieldtype": "Datetime",
             "hidden": 1,
             "read_only": 1,
@@ -170,7 +181,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "checked_signature",
-            "label": "Checked Signature",
+            "label": "Print Action: Checked Signature",
             "fieldtype": "Signature",
             "hidden": 1,
             "read_only": 1,
@@ -180,7 +191,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "authorized_by",
-            "label": "Authorized By",
+            "label": "Print Action: Authorized By",
             "fieldtype": "Link",
             "options": "Employee",
             "hidden": 1,
@@ -192,7 +203,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "authorized_at",
-            "label": "Authorized At",
+            "label": "Print Action: Authorized At",
             "fieldtype": "Datetime",
             "hidden": 1,
             "read_only": 1,
@@ -202,7 +213,7 @@ CUSTOM_FIELDS = {
         },
         {
             "fieldname": "authorized_signature",
-            "label": "Authorized Signature",
+            "label": "Print Action: Authorized Signature",
             "fieldtype": "Signature",
             "hidden": 1,
             "read_only": 1,
@@ -210,6 +221,22 @@ CUSTOM_FIELDS = {
             "no_copy": 1,
             "is_system_generated": 1,
         },
+    ],
+    "Sales Order": [
+        {
+            "fieldname": fieldname,
+            "label": label,
+            "fieldtype": fieldtype,
+            **({"options": "User"} if fieldtype == "Link" else {}),
+        }
+        for fieldname, label, fieldtype in (
+            ("approval_revision", "Approval Revision", "Data"),
+            ("approval_digest", "Approval Digest", "Data"),
+            ("approval_maker_at", "Approval Maker At", "Datetime"),
+            ("approval_reviewer_at", "Approval Reviewer At", "Datetime"),
+            ("approval_approver_user", "Approval Approver User", "Link"),
+            ("approval_approver_at", "Approval Approver At", "Datetime"),
+        )
     ],
     "Payment Entry": [
         {
@@ -222,6 +249,24 @@ CUSTOM_FIELDS = {
             "no_copy": 1,
             "is_system_generated": 1,
         },
+        *[
+            {
+                "fieldname": fieldname,
+                "label": label,
+                "fieldtype": fieldtype,
+                "options": "User" if fieldtype == "Link" else None,
+            }
+            for fieldname, label, fieldtype in (
+                ("approval_digest", "Approval Digest", "Data"),
+                ("approval_maker_at", "Approval Maker At", "Datetime"),
+                ("approval_checker_user", "Approval Checker User", "Link"),
+                ("approval_checker_at", "Approval Checker At", "Datetime"),
+                ("approval_approver_user", "Approval Approver User", "Link"),
+                ("approval_approver_at", "Approval Approver At", "Datetime"),
+                ("approval_submit_actor", "Approval Submit Actor", "Link"),
+                ("approval_cancel_actor", "Approval Cancel Actor", "Link"),
+            )
+        ],
     ],
     "Purchase Order": [
         {
@@ -440,6 +485,8 @@ for _doctype in (
     "Payment Entry",
     "Payroll Entry",
 ):
+    if not any(field["fieldname"] == "workflow_state" for field in CUSTOM_FIELDS.get(_doctype, [])):
+        CUSTOM_FIELDS.setdefault(_doctype, []).insert(0, dict(_WORKFLOW_STATE))
     existing = {str(field["fieldname"]) for field in CUSTOM_FIELDS.get(_doctype, [])}
     CUSTOM_FIELDS.setdefault(_doctype, []).extend(
         {
@@ -453,3 +500,59 @@ for _doctype in (
         for field in _APPROVAL_FIELDS
         if str(field["fieldname"]) not in existing
     )
+
+CUSTOM_FIELDS["Payroll Entry"].extend(
+    {
+        "fieldname": fieldname,
+        "label": label,
+        "fieldtype": fieldtype,
+        "options": options,
+        "hidden": 1,
+        "read_only": 1,
+        "allow_on_submit": 1,
+        "no_copy": 1,
+        "is_system_generated": 1,
+    }
+    for fieldname, label, fieldtype, options in _PAYROLL_OUTPUT_FIELDS
+)
+
+CUSTOM_FIELDS["Sales Order"].extend(
+    {
+        "fieldname": fieldname,
+        "label": label,
+        "fieldtype": fieldtype,
+        **({"options": options} if options else {}),
+        "hidden": int(fieldname != "billing_receivable_account"),
+        "read_only": 1,
+        "no_copy": 1,
+        "is_system_generated": 1,
+        "insert_after": "customer",
+    }
+    for fieldname, label, fieldtype, options in (
+        ("billing_authority_revision", "Billing Authority Revision", "Data", None),
+        ("billing_authority_digest", "Billing Authority Digest", "Data", None),
+        ("billing_authorized_by", "Billing Authorized By", "Link", "User"),
+        ("billing_authorized_at", "Billing Authorized At", "Datetime", None),
+        ("billing_authorized_signature", "Billing Authorized Signature", "Signature", None),
+        ("billing_authority_source_state", "Billing Authority Source State", "Data", None),
+        ("billing_receivable_account", "Billing Receivable Account", "Link", "Account"),
+    )
+)
+
+for _rows in CUSTOM_FIELDS.values():
+    for _field in _rows:
+        _fieldname = str(_field["fieldname"])
+        if _fieldname == "workflow_state" or _fieldname.startswith("approval_"):
+            _field.update(
+                hidden=1,
+                read_only=1,
+                allow_on_submit=1,
+                no_copy=1,
+                is_system_generated=1,
+            )
+        if _field.get("fieldtype") == "Link" and _field.get("options") in {
+            "User",
+            "Employee",
+            "Workflow State",
+        }:
+            _field["ignore_user_permissions"] = 1

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from math import inf, nan
 from unittest.mock import patch
@@ -16,6 +16,21 @@ from connect_diagnostics_core.api.frappe import approval_controls
 
 
 class TestCriticalDigest(UnitTestCase):
+    def test_nonfinite_floats_fail_closed_at_any_depth(self) -> None:
+        for value in (nan, inf, -inf):
+            for payload in ({"value": value}, {"nested": [value]}):
+                with self.subTest(value=value, payload=payload), self.assertRaises(frappe.ValidationError):
+                    approval_controls.critical_digest(payload)
+
+    def test_finite_floats_keep_their_canonical_values(self) -> None:
+        for value in (0.0, -0.0, 5e-324, -5e-324, 1.7976931348623157e308, -1.7976931348623157e308):
+            with self.subTest(value=value):
+                self.assertIs(approval_controls._canonical_value(value), value)
+        self.assertNotEqual(
+            approval_controls.critical_digest({"value": 0.0}),
+            approval_controls.critical_digest({"value": -0.0}),
+        )
+
     def test_mapping_order_and_nested_sequences_are_stable(self) -> None:
         first = {"b": [1, "สอง"], "a": {"x": True}}
         second = {"a": {"x": True}, "b": (1, "สอง")}
@@ -54,6 +69,29 @@ class TestCriticalDigest(UnitTestCase):
 
 
 class TestApprovalControls(UnitTestCase):
+    def test_native_time_intervals_are_lossless_and_deterministic(self) -> None:
+        for value, exact in (
+            (timedelta(), "0"),
+            (timedelta(hours=1, microseconds=1), "3600000001"),
+            (timedelta(microseconds=-1), "-1"),
+            (timedelta(days=999999999, microseconds=999999), "86399999913600999999"),
+        ):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    approval_controls._canonical_value(value),
+                    {"__approval_type__": "timedelta", "value": exact},
+                )
+        self.assertEqual(
+            approval_controls.critical_digest({"value": timedelta(days=1, seconds=-1)}),
+            approval_controls.critical_digest({"value": timedelta(seconds=86399)}),
+        )
+
+    def test_time_interval_digest_preserves_type_and_microsecond_differences(self) -> None:
+        values = (timedelta(hours=1), timedelta(hours=1, microseconds=1), time(1), "3600000000", 3600000000)
+        self.assertEqual(
+            len({approval_controls.critical_digest({"value": value}) for value in values}), len(values)
+        )
+
     def tearDown(self) -> None:
         if hasattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY):
             delattr(frappe.local, approval_controls._APPROVAL_GRANTS_KEY)
@@ -99,7 +137,7 @@ class TestApprovalControls(UnitTestCase):
     def test_digest_rejects_invalid_root_and_values(self) -> None:
         for payload in ([1], {1: "bad"}, {"value": nan}, {"value": inf}, {"value": object()}):
             with self.subTest(payload=payload), self.assertRaises(frappe.ValidationError):
-                approval_controls.critical_digest(payload)  # type: ignore[arg-type]
+                approval_controls.critical_digest(payload)  # ty: ignore[invalid-argument-type] - intentionally invalid root input
 
     def test_distinct_actors_accepts_mixed_aliases(self) -> None:
         with self._identity_mocks()[0], self._identity_mocks()[1]:
@@ -199,7 +237,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.require_distinct_actors("maker@example.com", "maker@example.com", ())
 
     def test_capture_rechecks_permission_and_returns_frozen_snapshot(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         now = datetime(2026, 9, 26, 10, 30, 0)
         with (
             self._identity_mocks()[0],
@@ -214,10 +252,10 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.acted_at, now)
         self.assertEqual(snapshot.signature, "sig")
         with self.assertRaises(AttributeError):
-            snapshot.signature = "changed"  # type: ignore[misc]
+            snapshot.signature = "changed"  # ty: ignore[invalid-assignment] - prove frozen snapshot rejects mutation
 
     def test_capture_stops_before_employee_data_when_permission_denied(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             patch.object(frappe, "has_permission", return_value=False) as permission,
             patch("frappe.get_all", side_effect=AssertionError("Employee query must not run")),
@@ -228,7 +266,7 @@ class TestApprovalControls(UnitTestCase):
         permission.assert_called_once_with("Asset Movement", ptype="write", doc=doc, user="actor@example.com")
 
     def test_capture_preserves_nonempty_signature_verbatim(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -249,7 +287,7 @@ class TestApprovalControls(UnitTestCase):
         self.assertEqual(snapshot.signature, "  signed exactly  ")
 
     def test_capture_rejects_whitespace_only_signature(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         with (
             self._identity_mocks()[0],
             patch.object(frappe, "has_permission", return_value=True),
@@ -270,7 +308,7 @@ class TestApprovalControls(UnitTestCase):
                 approval_controls.capture_signed_approval_actor(doc, "maker@example.com")
 
     def test_capture_rejects_missing_duplicate_and_unsigned_employees(self) -> None:
-        doc = frappe._dict(doctype="Asset Movement")
+        doc = Document({"doctype": "Asset Movement"})
         employee = {"name": "EMP-001", "employee_name": "Actor", "user_id": "actor@example.com"}
         for rows in ([], [employee, employee], [{**employee, "approval_signature": ""}]):
             with (
@@ -446,3 +484,47 @@ class TestApprovalControls(UnitTestCase):
                     "Send Asset Movement for Review",
                     ("Stock User",),
                 )
+
+    def test_terminal_labels_require_native_status(self) -> None:
+        doc = Document({"doctype": "Stock Entry", "name": "STE-1"})
+        for state, status in (("Stock Transfer Submitted", 0), ("Stock Transfer Cancelled", 1)):
+            doc.set("workflow_state", state)
+            doc.docstatus = status
+            with self.subTest(state=state), self.assertRaises(frappe.ValidationError):
+                approval_controls.require_native_terminal_state(
+                    doc, "Stock Transfer Submitted", "Stock Transfer Cancelled"
+                )
+        for state, status in (("Stock Transfer Submitted", 1), ("Stock Transfer Cancelled", 2)):
+            doc.set("workflow_state", state)
+            doc.docstatus = status
+            approval_controls.require_native_terminal_state(
+                doc, "Stock Transfer Submitted", "Stock Transfer Cancelled"
+            )
+
+    def test_submitted_update_requires_locked_persisted_previous_and_current_state(self) -> None:
+        state = "Stock Transfer Submitted"
+        doc = Document({"doctype": "Stock Entry", "name": "STE-1", "workflow_state": state, "docstatus": 1})
+        previous = Document(
+            {"doctype": "Stock Entry", "name": "STE-1", "workflow_state": state, "docstatus": 1}
+        )
+        row = frappe._dict(workflow_state=state, docstatus=1)
+        with (
+            patch.object(doc, "get_doc_before_save", return_value=previous),
+            patch.object(frappe.db, "get_value", return_value=row) as get_value,
+        ):
+            approval_controls.require_locked_submitted_update(doc, state)
+            self.assertEqual(get_value.call_args.kwargs["for_update"], True)
+            for changed in (doc, previous, row):
+                if isinstance(changed, Document):
+                    changed.set("workflow_state", "Stock Transfer Cancelled")
+                else:
+                    changed["workflow_state"] = "Stock Transfer Cancelled"
+                with self.subTest(changed=type(changed).__name__), self.assertRaises(frappe.ValidationError):
+                    approval_controls.require_locked_submitted_update(doc, state)
+                if isinstance(changed, Document):
+                    changed.set("workflow_state", state)
+                else:
+                    changed["workflow_state"] = state
+            with patch.object(doc, "get_doc_before_save", return_value=None):
+                with self.assertRaises(frappe.ValidationError):
+                    approval_controls.require_locked_submitted_update(doc, state)

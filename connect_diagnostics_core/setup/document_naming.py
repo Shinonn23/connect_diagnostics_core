@@ -88,6 +88,7 @@ NAMING_SERIES_PREFIXES: dict[str, tuple[str, ...]] = {
     "Material Request": ("MR",),
     "Dispatch": ("DSP",),
     "Borrowed Asset Return Inspection": ("BARI",),
+    "Role Scope Assignment": ("RSA",),
     "Borrowed Item Resolution": ("BIR",),
     "Packing Slip": ("PS",),
     "Pick List": ("PL",),

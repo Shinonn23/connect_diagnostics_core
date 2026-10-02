@@ -85,9 +85,18 @@ def _warehouse() -> str:
 def _price_list() -> str:
     price_list = frappe.db.get_value("Price List", {"selling": 1}, "name")
     if not price_list:
-        price_list = frappe.get_doc(
-            {"doctype": "Price List", "price_list_name": "_Test TSK-600 Selling", "selling": 1, "buying": 0}
-        ).insert(ignore_permissions=True).name
+        price_list = (
+            frappe.get_doc(
+                {
+                    "doctype": "Price List",
+                    "price_list_name": "_Test TSK-600 Selling",
+                    "selling": 1,
+                    "buying": 0,
+                }
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
     return str(price_list)
 
 
@@ -98,15 +107,19 @@ def _customer() -> str:
         territory = frappe.db.get_value("Territory", {"is_group": 0}, "name")
         if not group or not territory:
             raise AssertionError("Customer Group and Territory prerequisites are unavailable")
-        customer = frappe.get_doc(
-            {
-                "doctype": "Customer",
-                "customer_name": "_Test TSK-600 Customer",
-                "customer_code": "TSK600CUST",
-                "customer_group": group,
-                "territory": territory,
-            }
-        ).insert(ignore_permissions=True).name
+        customer = (
+            frappe.get_doc(
+                {
+                    "doctype": "Customer",
+                    "customer_name": "_Test TSK-600 Customer",
+                    "customer_code": "TSK600CUST",
+                    "customer_group": group,
+                    "territory": territory,
+                }
+            )
+            .insert(ignore_permissions=True)
+            .name
+        )
     return str(customer)
 
 
@@ -180,7 +193,9 @@ class TestSignedApprovalWorkflowIntegration(IntegrationTestCase):
         self._approve(sales_order, MAKER, SALES_APPROVER, "Approve Sales Order")
         sales_order.reload()
         self.assertEqual(sales_order.workflow_state, "Sales Order Approved")
-        self.assertEqual(sales_order.authorized_by, frappe.db.get_value("Employee", {"user_id": SALES_APPROVER}, "name"))
+        self.assertEqual(
+            sales_order.authorized_by, frappe.db.get_value("Employee", {"user_id": SALES_APPROVER}, "name")
+        )
         self.assertEqual(sales_order.authorized_signature, SIGNATURE)
 
         frappe.set_user("Administrator")
@@ -189,7 +204,10 @@ class TestSignedApprovalWorkflowIntegration(IntegrationTestCase):
         self._approve(material_request, MAKER, PURCHASE_APPROVER, "Approve Material Request")
         material_request.reload()
         self.assertEqual(material_request.workflow_state, "Material Request Approved")
-        self.assertEqual(material_request.authorized_by, frappe.db.get_value("Employee", {"user_id": PURCHASE_APPROVER}, "name"))
+        self.assertEqual(
+            material_request.authorized_by,
+            frappe.db.get_value("Employee", {"user_id": PURCHASE_APPROVER}, "name"),
+        )
         self.assertEqual(material_request.authorized_signature, SIGNATURE)
 
     @patch("frappe.workflow.doctype.workflow_action.workflow_action.send_workflow_action_email")
@@ -201,11 +219,15 @@ class TestSignedApprovalWorkflowIntegration(IntegrationTestCase):
         sales_order = _sales_order()
         frappe.set_user(MAKER)
         apply_workflow(sales_order, "Submit Sales Order for Review")
-        before = frappe.db.get_value("Sales Order", sales_order.name, ["workflow_state", "authorized_signature"], as_dict=True)
+        before = frappe.db.get_value(
+            "Sales Order", sales_order.name, ["workflow_state", "authorized_signature"], as_dict=True
+        )
         frappe.set_user(SALES_APPROVER)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(sales_order.reload(), "Approve Sales Order")
-        after = frappe.db.get_value("Sales Order", sales_order.name, ["workflow_state", "authorized_signature"], as_dict=True)
+        after = frappe.db.get_value(
+            "Sales Order", sales_order.name, ["workflow_state", "authorized_signature"], as_dict=True
+        )
         self.assertEqual(after, before)
 
         employee = frappe.get_doc("Employee", {"user_id": SALES_APPROVER})
@@ -213,7 +235,9 @@ class TestSignedApprovalWorkflowIntegration(IntegrationTestCase):
         employee.save(ignore_permissions=True)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(sales_order.reload(), "Approve Sales Order")
-        self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "workflow_state"), before.workflow_state)
+        self.assertEqual(
+            frappe.db.get_value("Sales Order", sales_order.name, "workflow_state"), before.workflow_state
+        )
 
     def test_snapshot_remains_immutable_when_employee_signature_changes(self) -> None:
         _ensure_user_and_employee(SALES_APPROVER, "Sales Manager")

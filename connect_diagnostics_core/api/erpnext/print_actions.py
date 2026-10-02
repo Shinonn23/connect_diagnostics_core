@@ -40,11 +40,11 @@ def capture_print_action(doc: Document, action_key: str) -> None:
 
     if action.protected:
         previous_actor = doc.get("approval_reviewer_user") if action.key == "authorized" else None
-        require_permission(doc)
+        require_permission(doc, "write")
         require_distinct_actors(
             _text(doc.get("owner")),
             frappe.session.user,
-            (_text(previous_actor),),
+            (_text(previous_actor),) if previous_actor else (),
         )
 
     employee = cast(

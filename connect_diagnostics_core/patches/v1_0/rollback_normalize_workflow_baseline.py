@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Siwat Sroisuwan and contributors
 # For license information, please see license.txt
 
-"""Operator-run, fingerprint-guarded recovery for the normalized baseline."""
+"""Strict recovery for the fresh-only native Workflow fixture preparation."""
 
 from __future__ import annotations
 
@@ -14,218 +14,164 @@ from frappe import _
 from connect_diagnostics_core.patches.v1_0.normalize_workflow_baseline import (
     CANONICAL_WORKFLOWS,
     RECOVERY_FILE,
-    RETIRED_WORKFLOWS,
-    _desired_workflows,
-    _has_open_actions,
+    SNAPSHOT_VERSION,
+    _action_rows,
+    _blueprint,
+    _business_rows,
+    _companion_hash,
+    _history_fingerprint,
+    _master_shape,
+    _task_blueprints,
+    _task_rows,
     workflow_fingerprint,
+    workflow_shape,
 )
-from connect_diagnostics_core.setup.workflow_fields import CUSTOM_FIELDS
 
 
 def _snapshot() -> dict[str, Any]:
     file_name = frappe.db.exists("File", {"file_name": RECOVERY_FILE, "is_private": 1})
     if not file_name:
         frappe.throw(_("Workflow recovery snapshot does not exist."))
-    data = json.loads(frappe.get_doc("File", file_name).get_content())
-    if data.get("schema_version") not in {1, 2}:
+    data: dict[str, Any] = json.loads(frappe.get_doc("File", file_name).get_content())
+    if data.get("schema_version") != SNAPSHOT_VERSION:
         frappe.throw(_("Workflow recovery snapshot schema is unsupported."))
     return data
 
 
-def _post_retirement_fingerprint(record: dict[str, Any]) -> str:
-    normalized = dict(record)
-    normalized["is_active"] = 0
-    return workflow_fingerprint(normalized)
+def _check_histories(snapshot: dict[str, Any]) -> None:
+    for doctype in CANONICAL_WORKFLOWS.values():
+        if _history_fingerprint(_business_rows(doctype)) != snapshot["business_history"][doctype]:
+            frappe.throw(_("Business history for {0} changed after the Workflow snapshot.").format(doctype))
+        if _history_fingerprint(_action_rows(doctype)) != snapshot["action_history"][doctype]:
+            frappe.throw(_("Workflow Actions for {0} changed after the Workflow snapshot.").format(doctype))
 
 
-def _preflight(snapshot: dict[str, Any]) -> None:
-    desired = _desired_workflows()
-    predecessors = {str(record["name"]): record for record in snapshot["workflows"]}
-    for name, doctype in CANONICAL_WORKFLOWS.items():
-        if _has_open_actions(doctype):
-            frappe.throw(_("Workflow {0} has open actions and cannot be rolled back.").format(name))
-        if not frappe.db.exists("Workflow", name):
-            frappe.throw(_("Canonical Workflow {0} is missing.").format(name))
-        if workflow_fingerprint(frappe.get_doc("Workflow", name)) != workflow_fingerprint(desired[name]):
-            frappe.throw(_("Canonical Workflow {0} no longer matches the normalized fixture.").format(name))
-        predecessor = predecessors.get(name)
-        if predecessor and workflow_fingerprint(predecessor) != workflow_fingerprint(desired[name]):
-            if frappe.db.has_column(doctype, "workflow_state") and frappe.db.exists(
-                doctype, {"workflow_state": ["is", "set"]}
-            ):
-                frappe.throw(
-                    _("Workflow {0} has documents and cannot be restored to its predecessor.").format(name)
-                )
-        if name in snapshot.get("missing", []) and frappe.db.has_column(doctype, "workflow_state"):
-            if frappe.db.exists(doctype, {"workflow_state": ["is", "set"]}):
-                frappe.throw(_("Workflow {0} has documents and cannot be removed.").format(name))
+def _check_removal_references(snapshot: dict[str, Any]) -> None:
+    missing_workflows = snapshot["missing_workflows"]
 
-    for name, (doctype, _expected_hash) in RETIRED_WORKFLOWS.items():
-        if _has_open_actions(doctype):
-            frappe.throw(_("Retired Workflow {0} has open actions and cannot be restored.").format(name))
-        if name not in predecessors or not frappe.db.exists("Workflow", name):
-            continue
-        current = frappe.get_doc("Workflow", name)
-        if workflow_fingerprint(current) != _post_retirement_fingerprint(predecessors[name]):
-            frappe.throw(_("Retired Workflow {0} changed after normalization.").format(name))
+    def foreign_reference(doctype: str, filters: dict[str, Any]) -> bool:
+        if missing_workflows:
+            filters["parent"] = ["not in", missing_workflows]
+        return bool(frappe.db.exists(doctype, filters))
 
-
-def _restore(record: dict[str, Any]) -> None:
-    name = str(record["name"])
-    if frappe.db.exists("Workflow", name):
-        workflow = frappe.get_doc("Workflow", name)
-        for key in (
-            "document_type",
-            "is_active",
-            "override_status",
-            "send_email_alert",
-            "enable_action_confirmation",
+    for name in snapshot["missing_groups"]:
+        if foreign_reference("Workflow Transition", {"transition_tasks": name}):
+            frappe.throw(_("Workflow task group {0} has another reference.").format(name))
+    for name in snapshot["missing_states"]:
+        for child, field in (
+            ("Workflow Document State", "state"),
+            ("Workflow Transition", "state"),
+            ("Workflow Transition", "next_state"),
         ):
-            workflow.set(key, record.get(key))
-        workflow.set("states", record.get("states", []))
-        workflow.set("transitions", record.get("transitions", []))
-        workflow.save(ignore_permissions=True)
-        return
-    payload = dict(record)
-    payload["doctype"] = "Workflow"
-    frappe.get_doc(payload).insert(ignore_permissions=True)
+            if foreign_reference(child, {field: name}):
+                frappe.throw(_("Workflow State {0} has another reference.").format(name))
+    for name in snapshot["missing_actions"]:
+        if foreign_reference("Workflow Transition", {"action": name}):
+            frappe.throw(_("Workflow Action Master {0} has another reference.").format(name))
 
 
-def _restore_transition_tasks(snapshot: dict[str, Any]) -> None:
-    for record in snapshot.get("transition_tasks", []):
-        name = str(record["name"])
-        if frappe.db.exists("Workflow Transition Tasks", name):
-            task_doc = frappe.get_doc("Workflow Transition Tasks", name)
-            if _task_rows(task_doc) == record.get("tasks", []):
+def _preflight(snapshot: dict[str, Any], *, incomplete: bool) -> None:
+    desired, states, actions = _blueprint()
+    groups = _task_blueprints(desired)
+    if snapshot["desired_hashes"] != {name: workflow_fingerprint(record) for name, record in desired.items()}:
+        frappe.throw(_("Workflow fixture changed after the recovery snapshot."))
+    if snapshot["companion_hash"] != _companion_hash(states, actions, groups):
+        frappe.throw(_("Workflow companion fixtures changed after the recovery snapshot."))
+    _check_histories(snapshot)
+    for name, record in desired.items():
+        exists = frappe.db.exists("Workflow", name)
+        if incomplete and name in snapshot["missing_workflows"] and exists:
+            frappe.throw(_("Workflow {0} appeared after incomplete preparation.").format(name))
+        if not exists:
+            if not incomplete or name not in snapshot["missing_workflows"]:
+                frappe.throw(_("Workflow {0} is missing after preparation.").format(name))
+            continue
+        if workflow_shape(frappe.get_doc("Workflow", name)) != workflow_shape(record):
+            frappe.throw(_("Workflow {0} changed after preparation.").format(name))
+    for doctype, records, missing in (
+        ("Workflow State", states, snapshot["missing_states"]),
+        ("Workflow Action Master", actions, snapshot["missing_actions"]),
+    ):
+        for name, record in records.items():
+            exists = frappe.db.exists(doctype, name)
+            if incomplete and name in missing and exists:
+                frappe.throw(_("Workflow companion {0} appeared after incomplete preparation.").format(name))
+            if not exists:
+                if not incomplete or name not in missing:
+                    frappe.throw(_("Workflow companion {0} is missing after preparation.").format(name))
                 continue
-            task_doc.set("tasks", record.get("tasks", []))
-            task_doc.save(ignore_permissions=True)
-        else:
-            frappe.get_doc(
-                {
-                    "doctype": "Workflow Transition Tasks",
-                    "name": name,
-                    "tasks": record.get("tasks", []),
-                }
-            ).insert(ignore_permissions=True)
-
-    for name in snapshot.get("missing_transition_tasks", []):
-        if not frappe.db.exists("Workflow Transition Tasks", name):
+            if _master_shape(frappe.get_doc(doctype, name), doctype) != _master_shape(record, doctype):
+                frappe.throw(_("Workflow companion {0} changed after preparation.").format(name))
+    for name, rows in groups.items():
+        exists = frappe.db.exists("Workflow Transition Tasks", name)
+        if not exists:
+            if not incomplete or name not in snapshot["missing_groups"]:
+                frappe.throw(_("Workflow task group {0} is missing after preparation.").format(name))
             continue
-        if frappe.db.exists("Workflow Transition", {"transition_tasks": name}):
-            frappe.throw(_("Workflow Transition Tasks {0} is still referenced after recovery.").format(name))
-        frappe.delete_doc("Workflow Transition Tasks", name, ignore_permissions=True)
+        if _task_rows(frappe.get_doc("Workflow Transition Tasks", name)) != rows:
+            frappe.throw(_("Workflow task group {0} changed after preparation.").format(name))
+    _check_removal_references(snapshot)
 
 
-def _task_rows(task_doc: Any) -> list[dict[str, Any]]:
-    return [
-        {
-            "task": row.task,
-            "link": row.link or None,
-            "enabled": int(row.enabled or 0),
-            "asynchronous": int(row.asynchronous or 0),
-        }
-        for row in task_doc.tasks
-    ]
-
-
-def _remove_custom_fields(records: list[dict[str, str]]) -> None:
-    for record in records:
-        doctype = str(record["dt"])
-        fieldname = str(record["fieldname"])
-        custom_field = frappe.db.exists("Custom Field", {"dt": doctype, "fieldname": fieldname})
-        if not custom_field:
-            continue
-        if frappe.db.has_column(doctype, fieldname) and frappe.db.exists(doctype, {fieldname: ["is", "set"]}):
-            frappe.throw(
-                _("Custom Field {0}.{1} contains data and cannot be removed.").format(doctype, fieldname)
-            )
-        frappe.delete_doc("Custom Field", custom_field, ignore_permissions=True)
-
-
-def _assert_recovered(snapshot: dict[str, Any]) -> None:
-    expected = {str(record["name"]): record for record in snapshot["workflows"]}
-    for name, record in expected.items():
-        if not frappe.db.exists("Workflow", name):
-            frappe.throw(_("Recovered Workflow {0} is missing.").format(name))
-        if workflow_fingerprint(frappe.get_doc("Workflow", name)) != workflow_fingerprint(record):
-            frappe.throw(_("Recovered Workflow {0} does not match its snapshot.").format(name))
-    for name in snapshot.get("missing", []):
-        if frappe.db.exists("Workflow", name):
-            frappe.throw(_("Workflow {0} should be absent after recovery.").format(name))
-
-    expected_tasks = {str(record["name"]): record for record in snapshot.get("transition_tasks", [])}
-    for name, record in expected_tasks.items():
-        if not frappe.db.exists("Workflow Transition Tasks", name):
-            frappe.throw(_("Recovered Workflow Transition Tasks {0} is missing.").format(name))
-        actual = frappe.get_doc("Workflow Transition Tasks", name)
-        actual_rows = _task_rows(actual)
-        if actual_rows != record.get("tasks", []):
-            frappe.throw(_("Recovered Workflow Transition Tasks {0} differs from its snapshot.").format(name))
-    for name in snapshot.get("missing_transition_tasks", []):
+def _remove_created(snapshot: dict[str, Any], *, incomplete: bool) -> None:
+    if not incomplete:
+        for name in snapshot["missing_workflows"]:
+            frappe.delete_doc("Workflow", name, ignore_permissions=True)
+        for name in snapshot["missing_states"]:
+            frappe.delete_doc("Workflow State", name, ignore_permissions=True)
+        for name in snapshot["missing_actions"]:
+            frappe.delete_doc("Workflow Action Master", name, ignore_permissions=True)
+    for name in snapshot["missing_groups"]:
         if frappe.db.exists("Workflow Transition Tasks", name):
-            frappe.throw(_("Workflow Transition Tasks {0} should be absent after recovery.").format(name))
-    for record in snapshot.get("missing_custom_fields", []):
-        if frappe.db.exists(
-            "Custom Field",
-            {"dt": record["dt"], "fieldname": record["fieldname"]},
+            frappe.delete_doc("Workflow Transition Tasks", name, ignore_permissions=True)
+
+
+def _assert_recovered(snapshot: dict[str, Any], *, incomplete: bool) -> None:
+    _check_histories(snapshot)
+    desired, states, actions = _blueprint()
+    groups = _task_blueprints(desired)
+    for name, record in desired.items():
+        if name not in snapshot["missing_workflows"] and workflow_shape(
+            frappe.get_doc("Workflow", name)
+        ) != workflow_shape(record):
+            frappe.throw(_("Existing Workflow {0} changed during recovery.").format(name))
+    for doctype, records, missing in (
+        ("Workflow State", states, snapshot["missing_states"]),
+        ("Workflow Action Master", actions, snapshot["missing_actions"]),
+    ):
+        for name, record in records.items():
+            if name not in missing and _master_shape(frappe.get_doc(doctype, name), doctype) != _master_shape(
+                record, doctype
+            ):
+                frappe.throw(_("Existing Workflow companion {0} changed during recovery.").format(name))
+    for name, rows in groups.items():
+        if (
+            name not in snapshot["missing_groups"]
+            and _task_rows(frappe.get_doc("Workflow Transition Tasks", name)) != rows
         ):
-            frappe.throw(
-                _("Custom Field {0}.{1} should be absent after recovery.").format(
-                    record["dt"], record["fieldname"]
-                )
-            )
+            frappe.throw(_("Existing Workflow task group {0} changed during recovery.").format(name))
+    for doctype, names in (
+        ("Workflow", snapshot["missing_workflows"]),
+        ("Workflow State", snapshot["missing_states"]),
+        ("Workflow Action Master", snapshot["missing_actions"]),
+        ("Workflow Transition Tasks", snapshot["missing_groups"]),
+    ):
+        for name in names:
+            if frappe.db.exists(doctype, name):
+                frappe.throw(_("Recovered configuration {0} should be absent.").format(name))
 
 
 def recover_incomplete_apply() -> None:
-    """Recover a failed patch that stopped before Workflow fixture synchronization."""
-    file_name = frappe.db.exists("File", {"file_name": RECOVERY_FILE, "is_private": 1})
-    if not file_name:
-        frappe.throw(_("Workflow recovery snapshot does not exist."))
-    if frappe.db.exists(
-        "Patch Log",
-        {"patch": "connect_diagnostics_core.patches.v1_0.normalize_workflow_baseline"},
-    ):
-        frappe.throw(_("The normalization patch completed; use the full rollback instead."))
-    file_doc = frappe.get_doc("File", file_name)
+    """Remove only groups created by a failed prepare before fixture sync."""
     snapshot = _snapshot()
-    predecessors = {str(record["name"]): record for record in snapshot["workflows"]}
-    for name, record in predecessors.items():
-        if not frappe.db.exists("Workflow", name) or workflow_fingerprint(
-            frappe.get_doc("Workflow", name)
-        ) != workflow_fingerprint(record):
-            frappe.throw(_("Workflow {0} changed after the incomplete migration attempt.").format(name))
-    _restore_transition_tasks(snapshot)
-    defined_fields = {
-        (doctype, str(definition["fieldname"]))
-        for doctype, definitions in CUSTOM_FIELDS.items()
-        for definition in definitions
-    }
-    created_after_snapshot = [
-        {"dt": str(row.dt), "fieldname": str(row.fieldname)}
-        for row in frappe.get_all(
-            "Custom Field",
-            filters={"creation": [">=", file_doc.creation]},
-            fields=["dt", "fieldname"],
-        )
-        if (str(row.dt), str(row.fieldname)) in defined_fields
-    ]
-    _remove_custom_fields(created_after_snapshot)
-    _assert_recovered(snapshot)
-    frappe.delete_doc("File", file_name, ignore_permissions=True)
+    _preflight(snapshot, incomplete=True)
+    _remove_created(snapshot, incomplete=True)
+    _assert_recovered(snapshot, incomplete=True)
 
 
 def execute() -> None:
+    """Rollback only exact fresh additions with unchanged business history."""
     snapshot = _snapshot()
-    _preflight(snapshot)
-    predecessors = {str(record["name"]): record for record in snapshot["workflows"]}
-    for record in predecessors.values():
-        _restore(record)
-
-    for name in snapshot.get("missing", []):
-        if name not in CANONICAL_WORKFLOWS or not frappe.db.exists("Workflow", name):
-            continue
-        frappe.delete_doc("Workflow", name, ignore_permissions=True)
-    _restore_transition_tasks(snapshot)
-    _remove_custom_fields(snapshot.get("missing_custom_fields", []))
-    _assert_recovered(snapshot)
+    _preflight(snapshot, incomplete=False)
+    _remove_created(snapshot, incomplete=False)
+    _assert_recovered(snapshot, incomplete=False)

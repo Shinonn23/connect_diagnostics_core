@@ -9,10 +9,12 @@ import threading
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
+from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.model.delete_doc import delete_dynamic_links
 from frappe.model.document import Document
 from frappe.tests import IntegrationTestCase, UnitTestCase
 from frappe.utils import today
@@ -102,7 +104,7 @@ class TestMaterialRequestFulfillment(UnitTestCase):
         self.assertEqual(params["item_codes"], ("FA-1",))
 
 
-ASSET_CATEGORY = "_Test TSK512 Equipment Category"
+ASSET_CATEGORY = "Computers"
 COMPANY = "_Test Company"
 NO_POSTING_DOCTYPES = (
     "Asset",
@@ -213,12 +215,52 @@ def _invoke_conversion_handoff_in_separate_transaction(
 
 
 class TestMaterialRequestFulfillmentIntegration(IntegrationTestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
+    def setUp(self) -> None:
+        super().setUp()
+        # Other tests in this class publish their own concurrency fixtures.
+        # Keep ordinary fixtures out of those later transaction commits.
+        frappe.db.rollback()
+        self.addCleanup(frappe.db.rollback)
         _ensure_test_master_data()
 
-    def _make_submitted_demo_request(self, qty: int = 2) -> tuple[Document, str, str, str]:
+    def test_native_asset_fixture_rollback_removes_receipt_and_actions(self) -> None:
+        assets_before = set(
+            frappe.get_all(
+                "Asset", filters={"asset_name": ("like", "_Test TSK512 Pool Asset %")}, pluck="name"
+            )
+        )
+        company_fields = ["demo_asset_pool_location", "demo_return_reuse_window_days"]
+        settings_before = frappe.db.get_value("Company", COMPANY, company_fields, as_dict=True)
+
+        self.test_available_asset_then_stock_now_appends_revisions_without_posting()
+        assets_after = set(
+            frappe.get_all(
+                "Asset", filters={"asset_name": ("like", "_Test TSK512 Pool Asset %")}, pluck="name"
+            )
+        )
+        owned_assets = assets_after - assets_before
+        self.assertEqual(len(owned_assets), 1)
+        asset = owned_assets.pop()
+        movements = frappe.get_all("Asset Movement Item", filters={"asset": asset}, pluck="parent")
+        self.assertEqual(len(movements), 1)
+        actions = frappe.get_all(
+            "Workflow Action",
+            filters={"reference_doctype": "Asset Movement", "reference_name": movements[0]},
+            pluck="name",
+        )
+        self.assertTrue(actions)
+
+        self.assertTrue(self.doCleanups())
+        self.assertFalse(frappe.db.exists("Asset", asset))
+        for movement in movements:
+            self.assertFalse(frappe.db.exists("Asset Movement", movement))
+        for action in actions:
+            self.assertFalse(frappe.db.exists("Workflow Action", action))
+        self.assertEqual(
+            frappe.db.get_value("Company", COMPANY, company_fields, as_dict=True), settings_before
+        )
+
+    def _make_demo_request(self, qty: int = 2) -> tuple[Document, str, str, str]:
         suffix = frappe.generate_hash(length=8)
         stock_item = f"_Test TSK512 MRF Stock {suffix}"
         asset_item = f"_Test TSK512 MRF Asset {suffix}"
@@ -278,6 +320,10 @@ class TestMaterialRequestFulfillmentIntegration(IntegrationTestCase):
                 ],
             }
         ).insert()
+        return request, stock_item, asset_item, model_code
+
+    def _make_submitted_demo_request(self, qty: int = 2) -> tuple[Document, str, str, str]:
+        request, stock_item, asset_item, model_code = self._make_demo_request(qty)
         with _inactive_material_request_workflows():
             request.submit()
         return request, stock_item, asset_item, model_code
@@ -981,47 +1027,496 @@ class TestMaterialRequestFulfillmentIntegration(IntegrationTestCase):
             frappe.db.set_value("Company", COMPANY, previous_settings)
             frappe.db.commit()  # nosemgrep - remove fixtures committed for concurrent workers
 
-    def test_concurrent_handoffs_return_one_plan(self) -> None:
-        request, stock_item, asset_item, model_code = self._make_submitted_demo_request()
-        existing_plans = frappe.get_all(
-            "Material Request Fulfillment", filters={"material_request": request.name}, pluck="name"
+    def _handoff_deleted_feed(self, doctype: str, name: str) -> list[frappe._dict]:
+        return frappe.get_all(
+            "Comment",
+            filters={
+                "comment_type": "Deleted",
+                "reference_doctype": doctype,
+                "subject": f"{frappe._(doctype)} {name}",
+            },
+            fields=["name", "owner", "reference_name", "subject"],
         )
-        frappe.db.delete("Material Request Fulfillment Allocation", {"parent": ["in", existing_plans]})
-        frappe.db.delete("Material Request Fulfillment", {"name": ["in", existing_plans]})
+
+    def _assert_handoff_external_targets_absent(self, targets: tuple[tuple[str, str], ...]) -> None:
+        deferred_links = (
+            ("ToDo", "reference_type", "reference_name"),
+            ("Email Unsubscribe", "reference_doctype", "reference_name"),
+            ("DocShare", "share_doctype", "share_name"),
+            ("View Log", "reference_doctype", "reference_name"),
+            ("Document Follow", "ref_doctype", "ref_docname"),
+            ("Notification Log", "document_type", "document_name"),
+            ("Communication", "reference_doctype", "reference_name"),
+            ("Communication Link", "link_doctype", "link_name"),
+            ("Activity Log", "reference_doctype", "reference_name"),
+            ("Activity Log", "timeline_doctype", "timeline_name"),
+        )
+        for doctype, name in targets:
+            self.assertEqual(
+                frappe.db.count("File", {"attached_to_doctype": doctype, "attached_to_name": name}),
+                0,
+                (doctype, name, "File"),
+            )
+            for linked_doctype, type_field, name_field in deferred_links:
+                self.assertEqual(
+                    frappe.db.count(linked_doctype, {type_field: doctype, name_field: name}),
+                    0,
+                    (doctype, name, linked_doctype),
+                )
+
+    def _assert_handoff_no_posting_effects(self, fixture: SimpleNamespace) -> None:
+        for plan_name in (fixture.initial_plan, fixture.plan_name):
+            if plan_name:
+                self.assertEqual(frappe.db.count("Demo Asset Reservation", {"fulfillment": plan_name}), 0)
+        self.assertEqual(frappe.db.count("Dispatch", {"material_request": fixture.request_name}), 0)
+        self.assertEqual(frappe.db.count("Asset Movement", {"material_request": fixture.request_name}), 0)
+        self.assertEqual(frappe.db.count("Stock Borrow", {"material_request": fixture.request_name}), 0)
+        self.assertEqual(
+            frappe.db.count("Borrowed Item Resolution", {"material_request": fixture.request_name}), 0
+        )
+        self.assertEqual(frappe.db.count("Stock Entry Detail", {"material_request": fixture.request_name}), 0)
+        self.assertEqual(
+            frappe.db.count("Stock Entry Detail", {"material_request_item": fixture.request_item}), 0
+        )
+        self.assertEqual(
+            frappe.db.count("Dispatch Transfer", {"material_request_item": fixture.request_item}), 0
+        )
+        self.assertEqual(frappe.db.count("Asset", {"item_code": fixture.asset_item}), 0)
+        for plan_name in (fixture.initial_plan, fixture.plan_name):
+            if plan_name:
+                self.assertEqual(
+                    frappe.db.count("Stock Asset Conversion", {"material_request_fulfillment": plan_name}),
+                    0,
+                )
+        for allocation in fixture.initial_allocations | fixture.allocations:
+            for doctype, field in (
+                ("Demo Asset Reservation", "fulfillment_allocation"),
+                ("Dispatch Transfer", "fulfillment_allocation"),
+                ("Sales Invoice", "demo_fulfillment_allocation"),
+                ("Stock Asset Conversion", "fulfillment_allocation"),
+            ):
+                self.assertEqual(frappe.db.count(doctype, {field: allocation}), 0)
+        for item in (fixture.stock_item, fixture.asset_item):
+            self.assertEqual(frappe.db.count("Stock Ledger Entry", {"item_code": item}), 0)
+        self.assertEqual(
+            frappe.db.count(
+                "GL Entry", {"voucher_type": "Material Request", "voucher_no": fixture.request_name}
+            ),
+            0,
+        )
+
+    def _cleanup_concurrent_handoff(self, fixture: SimpleNamespace) -> None:
+        if not fixture.commit_attempted:
+            frappe.db.rollback()
+            return
+        # An after-commit callback may raise after the source transaction is durable.
+        frappe.db.rollback()
+        if not frappe.db.exists("Material Request", fixture.request_name):
+            for doctype, name in fixture.precommit_targets:
+                self.assertFalse(frappe.db.exists(doctype, name), (doctype, name))
+            self.assertFalse(frappe.db.exists("Material Request Item", {"parent": fixture.request_name}))
+            for item in (fixture.stock_item, fixture.asset_item):
+                self.assertFalse(frappe.db.exists("Bin", {"item_code": item}))
+            return
+        try:
+            self.assertTrue(all(future.done() for future in fixture.futures), fixture.request_name)
+            self.assertEqual(fixture.worker_count, len(fixture.futures))
+            plans = frappe.get_all(
+                "Material Request Fulfillment",
+                filters={"material_request": fixture.request_name},
+                pluck="name",
+            )
+            self.assertLessEqual(len(plans), 1, fixture.request_name)
+            fixture.plan_name = plans[0] if plans else None
+            if fixture.plan_name:
+                fixture.allocations = set(
+                    frappe.get_all(
+                        "Material Request Fulfillment Allocation",
+                        filters={"parent": fixture.plan_name},
+                        pluck="name",
+                    )
+                )
+                fixture.targets = (("Material Request Fulfillment", fixture.plan_name), *fixture.base_targets)
+                target = ("Material Request Fulfillment", fixture.plan_name)
+                self.assertTrue(fixture.allocations.isdisjoint(fixture.initial_allocations))
+                self.assertEqual(
+                    frappe.db.count("Version", {"ref_doctype": target[0], "docname": target[1]}), 0
+                )
+                self.assertEqual(
+                    frappe.db.count(
+                        "Comment", filters={"reference_doctype": target[0], "reference_name": target[1]}
+                    ),
+                    0,
+                )
+                current_feed = {row.name for row in self._handoff_deleted_feed(*target)}
+                if target in fixture.deleted_feed_before:
+                    self.assertEqual(
+                        current_feed,
+                        fixture.deleted_feed_before[target] | {fixture.initial_feed_id},
+                    )
+                else:
+                    self.assertFalse(current_feed)
+                    fixture.deleted_feed_before[target] = set()
+                fixture.lifecycle_before[target] = {"Version": set(), "Comment": set()}
+            else:
+                fixture.targets = fixture.base_targets
+            all_targets = tuple(
+                dict.fromkeys((*fixture.targets, ("Material Request Fulfillment", fixture.initial_plan)))
+            )
+            self._assert_handoff_external_targets_absent(all_targets)
+            initial_feed = self._handoff_deleted_feed("Material Request Fulfillment", fixture.initial_plan)
+            self.assertEqual(
+                {row.name for row in initial_feed}
+                - fixture.deleted_feed_before[("Material Request Fulfillment", fixture.initial_plan)],
+                {fixture.initial_feed_id},
+            )
+            self.assertEqual(
+                frappe.db.get_value(
+                    "Material Request",
+                    fixture.request_name,
+                    ["docstatus", "company", "request_usage"],
+                ),
+                (1, COMPANY, "Customer Demo"),
+            )
+            self.assertEqual(
+                frappe.get_all(
+                    "Material Request Item", filters={"parent": fixture.request_name}, pluck="name"
+                ),
+                [fixture.request_item],
+            )
+            self.assertEqual(
+                frappe.db.get_value("Material Request Item", fixture.request_item, "item_code"),
+                fixture.stock_item,
+            )
+            if fixture.plan_name:
+                self.assertEqual(
+                    frappe.db.get_value(
+                        "Material Request Fulfillment",
+                        fixture.plan_name,
+                        ["operation_id", "status", "docstatus", "company", "owner"],
+                    ),
+                    (fixture.operation_id, "Planned", 0, COMPANY, "Administrator"),
+                )
+                self.assertEqual(len(fixture.allocations), 1)
+                for row in frappe.get_all(
+                    "Material Request Fulfillment Allocation",
+                    filters={"parent": fixture.plan_name},
+                    fields=[
+                        "material_request_item",
+                        "item_code",
+                        "equipment_model",
+                        "source_type",
+                        "downstream_reference",
+                        "asset_reservation",
+                    ],
+                ):
+                    self.assertEqual(row.material_request_item, fixture.request_item)
+                    self.assertEqual(row.item_code, fixture.stock_item)
+                    self.assertEqual(row.equipment_model, fixture.model_code)
+                    self.assertEqual(row.source_type, "Unplanned")
+                    self.assertFalse(row.downstream_reference)
+                    self.assertFalse(row.asset_reservation)
+            self.assertEqual(
+                frappe.db.get_value(
+                    "Equipment Model",
+                    fixture.model_code,
+                    ["stock_item", "fixed_asset_item", "company"],
+                ),
+                (fixture.stock_item, fixture.asset_item, COMPANY),
+            )
+            for item in (fixture.stock_item, fixture.asset_item):
+                self.assertTrue(item.startswith("_Test TSK512 MRF "))
+                self.assertTrue(frappe.db.exists("Item", item))
+            for doctype, name in all_targets:
+                self.assertEqual(
+                    frappe.db.count(
+                        "Workflow Action", {"reference_doctype": doctype, "reference_name": name}
+                    ),
+                    0,
+                )
+                self.assertEqual(
+                    set(
+                        frappe.get_all(
+                            "Version", filters={"ref_doctype": doctype, "docname": name}, pluck="name"
+                        )
+                    ),
+                    fixture.lifecycle_before[(doctype, name)]["Version"],
+                )
+                self.assertEqual(
+                    set(
+                        frappe.get_all(
+                            "Comment",
+                            filters={"reference_doctype": doctype, "reference_name": name},
+                            pluck="name",
+                        )
+                    ),
+                    fixture.lifecycle_before[(doctype, name)]["Comment"],
+                )
+            self._assert_handoff_no_posting_effects(fixture)
+            if fixture.plan_name:
+                frappe.get_doc("Material Request Fulfillment", fixture.plan_name).delete(
+                    delete_permanently=True
+                )
+                self.assertFalse(
+                    frappe.db.exists("Material Request Fulfillment Allocation", {"parent": fixture.plan_name})
+                )
+            with _inactive_material_request_workflows():
+                frappe.get_doc("Material Request", fixture.request_name).cancel()
+            frappe.get_doc("Material Request", fixture.request_name).delete(delete_permanently=True)
+            frappe.get_doc("Equipment Model", fixture.model_code).delete(delete_permanently=True)
+
+            quantity_fields = (
+                "actual_qty",
+                "reserved_qty",
+                "ordered_qty",
+                "indented_qty",
+                "planned_qty",
+                "projected_qty",
+                "reserved_qty_for_production",
+                "reserved_qty_for_sub_contract",
+                "reserved_qty_for_production_plan",
+            )
+            bins_before_delete = set(
+                tuple(row.get(field) for field in ("name", "item_code", "warehouse"))
+                for row in frappe.get_all(
+                    "Bin",
+                    filters={"item_code": ("in", [fixture.stock_item, fixture.asset_item])},
+                    fields=["name", "item_code", "warehouse"],
+                )
+            )
+            self.assertEqual(bins_before_delete, fixture.created_bins)
+            bin_ids = set()
+            for item in (fixture.stock_item, fixture.asset_item):
+                for row in frappe.get_all(
+                    "Bin", filters={"item_code": item}, fields=["name", *quantity_fields]
+                ):
+                    bin_ids.add(row.name)
+                    self.assertTrue(all(not row.get(field) for field in quantity_fields), (item, row.name))
+                frappe.get_doc("Item", item).delete(delete_permanently=True)
+            self.assertEqual(bin_ids, {row[0] for row in fixture.created_bins})
+            for doctype, name in all_targets:
+                delete_dynamic_links(doctype, name)
+            for doctype, name in all_targets:
+                self.assertFalse(frappe.db.exists(doctype, name), (doctype, name))
+                self.assertFalse(
+                    frappe.db.exists("Deleted Document", {"deleted_doctype": doctype, "deleted_name": name})
+                )
+                self.assertEqual(
+                    frappe.db.count(
+                        "Workflow Action", {"reference_doctype": doctype, "reference_name": name}
+                    ),
+                    0,
+                )
+                self.assertEqual(frappe.db.count("Version", {"ref_doctype": doctype, "docname": name}), 0)
+                self.assertEqual(
+                    frappe.db.count(
+                        "Comment", filters={"reference_doctype": doctype, "reference_name": name}
+                    ),
+                    0,
+                )
+                baseline = fixture.deleted_feed_before[(doctype, name)]
+                new_feed = [
+                    row for row in self._handoff_deleted_feed(doctype, name) if row.name not in baseline
+                ]
+                expected_count = (
+                    2
+                    if doctype == "Material Request Fulfillment"
+                    and name == fixture.initial_plan
+                    and fixture.plan_name == fixture.initial_plan
+                    else 1
+                )
+                self.assertEqual(len(new_feed), expected_count, (doctype, name))
+                if doctype == "Material Request Fulfillment" and name == fixture.initial_plan:
+                    self.assertIn(fixture.initial_feed_id, {row.name for row in new_feed})
+                for row in new_feed:
+                    self.assertEqual(row.owner, frappe.session.user)
+                    self.assertFalse(row.reference_name)
+                    self.assertEqual(row.subject, f"{frappe._(doctype)} {name}")
+            self.assertFalse(frappe.db.exists("Material Request Item", {"parent": fixture.request_name}))
+            for plan_name in (fixture.initial_plan, fixture.plan_name):
+                if plan_name:
+                    self.assertFalse(
+                        frappe.db.exists("Material Request Fulfillment Allocation", {"parent": plan_name})
+                    )
+            for item in (fixture.stock_item, fixture.asset_item):
+                self.assertFalse(frappe.db.exists("Bin", {"item_code": item}))
+            for name in bin_ids:
+                self.assertFalse(frappe.db.exists("Bin", name))
+            self._assert_handoff_external_targets_absent(all_targets)
+            self._assert_handoff_no_posting_effects(fixture)
+            self.assertEqual(
+                frappe.db.get_value("Company", COMPANY, fixture.company_fields, as_dict=True),
+                fixture.company_before,
+            )
+            frappe.db.commit()  # nosemgrep - exact native teardown of worker-published fixtures
+        except Exception as exc:
+            frappe.db.rollback()
+            raise AssertionError(
+                f"Concurrent handoff fixture cleanup failed for {fixture.request_name}, "
+                f"{fixture.plan_name}, {fixture.stock_item}, {fixture.asset_item}, {fixture.model_code}"
+            ) from exc
+
+    def test_concurrent_handoffs_return_one_plan(self) -> None:
+        request, stock_item, asset_item, model_code = self._make_demo_request()
+        self.assertEqual(frappe.db.count("Bin", {"item_code": ("in", [stock_item, asset_item])}), 0)
+        with _inactive_material_request_workflows():
+            request.submit()
+        request_name = cast(str, request.name)
+        plans = frappe.get_all(
+            "Material Request Fulfillment", filters={"material_request": request_name}, pluck="name"
+        )
+        self.assertEqual(len(plans), 1)
+        plan_name = plans[0]
+        request_items = frappe.get_all(
+            "Material Request Item", filters={"parent": request_name}, pluck="name"
+        )
+        self.assertEqual(len(request_items), 1)
+        self.assertEqual(request.get("purchase_reason"), "_Test TSK512 Demo")
+        self.assertEqual(request.get("request_usage"), "Customer Demo")
+        self.assertEqual(request.docstatus, 1)
+        created_bins = set(
+            tuple(row.get(field) for field in ("name", "item_code", "warehouse"))
+            for row in frappe.get_all(
+                "Bin",
+                filters={"item_code": ("in", [stock_item, asset_item])},
+                fields=["name", "item_code", "warehouse"],
+            )
+        )
+        self.assertEqual(len(created_bins), 1)
+        self.assertEqual(
+            {(item_code, warehouse) for _name, item_code, warehouse in created_bins},
+            {(stock_item, "_Test Warehouse - _TC")},
+        )
+        company_fields = [
+            "demo_asset_pool_location",
+            "demo_return_reuse_window_days",
+            "demo_low_value_asset_threshold",
+        ]
+        base_targets = (
+            ("Material Request", request_name),
+            ("Equipment Model", model_code),
+            ("Item", stock_item),
+            ("Item", asset_item),
+        )
+        targets = (("Material Request Fulfillment", plan_name), *base_targets)
+        self._assert_handoff_external_targets_absent(targets)
+        for doctype, name in targets:
+            self.assertEqual(
+                frappe.db.count("Workflow Action", {"reference_doctype": doctype, "reference_name": name}),
+                0,
+            )
+        fixture = SimpleNamespace(
+            request_name=request_name,
+            request_item=request_items[0],
+            stock_item=stock_item,
+            asset_item=asset_item,
+            model_code=model_code,
+            initial_plan=plan_name,
+            plan_name=None,
+            created_bins=created_bins,
+            operation_id=f"material-request:{request_name}:submitted",
+            initial_allocations=set(
+                frappe.get_all(
+                    "Material Request Fulfillment Allocation", filters={"parent": plan_name}, pluck="name"
+                )
+            ),
+            allocations=set(),
+            company_fields=company_fields,
+            company_before=frappe.db.get_value("Company", COMPANY, company_fields, as_dict=True),
+            base_targets=base_targets,
+            targets=base_targets,
+            precommit_targets=targets,
+            deleted_feed_before={
+                (doctype, name): {row.name for row in self._handoff_deleted_feed(doctype, name)}
+                for doctype, name in targets
+            },
+            lifecycle_before={
+                (doctype, name): {
+                    "Version": set(
+                        frappe.get_all(
+                            "Version", filters={"ref_doctype": doctype, "docname": name}, pluck="name"
+                        )
+                    ),
+                    "Comment": set(
+                        frappe.get_all(
+                            "Comment",
+                            filters={"reference_doctype": doctype, "reference_name": name},
+                            pluck="name",
+                        )
+                    ),
+                }
+                for doctype, name in targets
+            },
+            futures=[],
+            worker_count=0,
+            commit_attempted=False,
+        )
+        self.assertEqual(len(fixture.initial_allocations), 1)
+        self.assertEqual(
+            frappe.db.get_value(
+                "Material Request Fulfillment",
+                plan_name,
+                ["operation_id", "status", "docstatus", "company"],
+            ),
+            (fixture.operation_id, "Planned", 0, COMPANY),
+        )
+        initial_allocation = frappe.db.get_value(
+            "Material Request Fulfillment Allocation",
+            next(iter(fixture.initial_allocations)),
+            ["material_request_item", "item_code", "equipment_model", "source_type"],
+        )
+        self.assertEqual(
+            initial_allocation,
+            (fixture.request_item, stock_item, model_code, "Unplanned"),
+        )
+        self.assertFalse(fixture.lifecycle_before[("Material Request Fulfillment", plan_name)]["Version"])
+        self.assertFalse(fixture.lifecycle_before[("Material Request Fulfillment", plan_name)]["Comment"])
+        frappe.get_doc("Material Request Fulfillment", plan_name).delete(delete_permanently=True)
+        self.assertFalse(frappe.db.exists("Material Request Fulfillment", plan_name))
+        for allocation in fixture.initial_allocations:
+            self.assertFalse(frappe.db.exists("Material Request Fulfillment Allocation", allocation))
+        initial_feed = [
+            row
+            for row in self._handoff_deleted_feed("Material Request Fulfillment", plan_name)
+            if row.name not in fixture.deleted_feed_before[("Material Request Fulfillment", plan_name)]
+        ]
+        self.assertEqual(len(initial_feed), 1)
+        self.assertEqual(initial_feed[0].owner, frappe.session.user)
+        self.assertFalse(initial_feed[0].reference_name)
+        self.assertEqual(initial_feed[0].subject, f"{frappe._('Material Request Fulfillment')} {plan_name}")
+        fixture.initial_feed_id = initial_feed[0].name
+        self.addCleanup(self._cleanup_concurrent_handoff, fixture)
+        fixture.commit_attempted = True
         frappe.db.commit()  # nosemgrep - worker connections require committed submitted fixtures
 
         site = str(frappe.local.site)
         sites_path = str(frappe.local.sites_path)
-        request_name = cast(str, request.name)
         barrier = threading.Barrier(2)
-        try:
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                futures = [
-                    executor.submit(
-                        _invoke_handoff_in_separate_transaction,
-                        site,
-                        sites_path,
-                        barrier,
-                        request_name,
-                    )
-                    for _ in range(2)
-                ]
-                results = [future.result(timeout=20) for future in futures]
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            fixture.futures = [
+                executor.submit(
+                    _invoke_handoff_in_separate_transaction,
+                    site,
+                    sites_path,
+                    barrier,
+                    request_name,
+                )
+                for _ in range(2)
+            ]
+            fixture.worker_count = len(fixture.futures)
+            results = [future.result(timeout=20) for future in fixture.futures]
 
-            frappe.db.rollback()
-            self.assertEqual(results[0], results[1])
-            self.assertEqual(
-                frappe.db.count("Material Request Fulfillment", {"material_request": request.name}),
-                1,
+        frappe.db.rollback()
+        self.assertEqual(results[0], results[1])
+        self.assertTrue(frappe.db.exists("Material Request Fulfillment", results[0]))
+        winner_allocations = set(
+            frappe.get_all(
+                "Material Request Fulfillment Allocation", filters={"parent": results[0]}, pluck="name"
             )
-        finally:
-            plans = frappe.get_all(
-                "Material Request Fulfillment", filters={"material_request": request.name}, pluck="name"
-            )
-            frappe.db.delete("Material Request Fulfillment Allocation", {"parent": ["in", plans]})
-            frappe.db.delete("Material Request Fulfillment", {"name": ["in", plans]})
-            frappe.db.delete("Material Request Item", {"parent": request.name})
-            frappe.db.delete("Material Request", {"name": request.name})
-            frappe.db.delete("Equipment Model", {"name": model_code})
-            frappe.db.delete("Item", {"name": ["in", [stock_item, asset_item]]})
-            frappe.db.commit()  # nosemgrep - remove fixtures committed for concurrent workers
+        )
+        self.assertEqual(len(winner_allocations), 1)
+        self.assertTrue(winner_allocations.isdisjoint(fixture.initial_allocations))
+        self.assertEqual(
+            frappe.db.count("Material Request Fulfillment", {"operation_id": fixture.operation_id}), 1
+        )
+        self.assertTrue(self.doCleanups())

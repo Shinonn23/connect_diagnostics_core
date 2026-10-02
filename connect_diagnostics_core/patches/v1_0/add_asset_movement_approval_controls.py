@@ -291,7 +291,7 @@ def _workflow_mode() -> str:
         return "legacy"
     if current == _workflow_shape(_desired_workflow()):
         return "desired"
-        frappe.throw(_("Asset Movement approval workflow conflicts with the approved configuration."))
+    frappe.throw(_("Asset Movement approval workflow conflicts with the approved configuration."))
     raise AssertionError("frappe.throw must raise")
 
 
