@@ -1,0 +1,48 @@
+{
+	"actions": [],
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"istable": 1,
+	"field_order": [
+		"alert_rule_section",
+		"days_before_expiry",
+		"severity",
+		"action",
+		"recipient_section",
+		"recipient_role",
+		"recipient_user"
+	],
+	"fields": [
+		{
+			"fieldname": "alert_rule_section",
+			"fieldtype": "Section Break",
+			"label": "Alert Rule"
+		},
+		{
+			"fieldname": "days_before_expiry",
+			"fieldtype": "Int",
+			"label": "Days Before Expiry",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "severity",
+			"fieldtype": "Select",
+			"label": "Severity",
+			"options": "Info\nWarning\nCritical\nExpired",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{ "fieldname": "action", "fieldtype": "Data", "label": "Action", "reqd": 1, "in_list_view": 1 },
+		{
+			"fieldname": "recipient_section",
+			"fieldtype": "Section Break",
+			"label": "Recipients"
+		},
+		{ "fieldname": "recipient_role", "fieldtype": "Link", "label": "Recipient Role", "options": "Role" },
+		{ "fieldname": "recipient_user", "fieldtype": "Link", "label": "Recipient User", "options": "User" }
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Regulatory Expiry Alert Rule"
+}

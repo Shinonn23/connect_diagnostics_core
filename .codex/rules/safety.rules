@@ -1,0 +1,35 @@
+# Destructive repository and filesystem operations are forbidden by default.
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Do not discard repository changes; inspect the diff and use a recoverable edit.",
+    match = ["git reset --hard HEAD"],
+)
+
+prefix_rule(
+    pattern = ["git", "clean", "-fd"],
+    decision = "forbidden",
+    justification = "Do not delete untracked files; identify exact targets and use a recoverable operation.",
+    match = ["git clean -fd"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "--"],
+    decision = "forbidden",
+    justification = "Do not overwrite working files; use a scoped patch or recoverable copy.",
+    match = ["git checkout -- README.md"],
+)
+
+prefix_rule(
+    pattern = ["git", "restore", "--source"],
+    decision = "forbidden",
+    justification = "Do not overwrite working files from another Git object without explicit review.",
+    match = ["git restore --source HEAD -- README.md"],
+)
+
+prefix_rule(
+    pattern = ["rm", "-rf"],
+    decision = "forbidden",
+    justification = "Recursive deletion is not allowed; use an exact recoverable target instead.",
+    match = ["rm -rf /tmp/example"],
+)

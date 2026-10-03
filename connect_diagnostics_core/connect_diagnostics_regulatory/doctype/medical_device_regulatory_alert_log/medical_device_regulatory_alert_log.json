@@ -1,0 +1,110 @@
+{
+	"actions": [],
+	"autoname": "format:REG-ALERT-.#####",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"alert_section",
+		"registration",
+		"alert_column",
+		"regulatory_document",
+		"alert_kind",
+		"threshold_days",
+		"severity",
+		"result_section",
+		"alerted_on",
+		"recipient_summary",
+		"status"
+	],
+	"fields": [
+		{
+			"fieldname": "alert_section",
+			"fieldtype": "Section Break",
+			"label": "Alert"
+		},
+		{
+			"fieldname": "registration",
+			"fieldtype": "Link",
+			"label": "Registration",
+			"options": "Medical Device Product Registration",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "alert_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "regulatory_document",
+			"fieldtype": "Link",
+			"label": "Regulatory Document",
+			"options": "Medical Device Regulatory Document",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "alert_kind",
+			"fieldtype": "Select",
+			"label": "Alert Kind",
+			"options": "Registration Expiry\nSupporting Document Expiry",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "threshold_days",
+			"fieldtype": "Int",
+			"label": "Threshold Days",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "severity",
+			"fieldtype": "Select",
+			"label": "Severity",
+			"options": "Info\nWarning\nCritical\nExpired",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "result_section",
+			"fieldtype": "Section Break",
+			"label": "Notification Result"
+		},
+		{
+			"fieldname": "alerted_on",
+			"fieldtype": "Datetime",
+			"label": "Alerted On",
+			"read_only": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "recipient_summary",
+			"fieldtype": "Small Text",
+			"label": "Recipients",
+			"read_only": 1
+		},
+		{
+			"fieldname": "status",
+			"fieldtype": "Select",
+			"label": "Status",
+			"options": "Queued\nSent\nNo Recipients\nFailed",
+			"read_only": 1,
+			"in_list_view": 1
+		}
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Regulatory Alert Log",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
+}

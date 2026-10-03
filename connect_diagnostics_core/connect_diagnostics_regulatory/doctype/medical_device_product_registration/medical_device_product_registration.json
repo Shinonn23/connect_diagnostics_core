@@ -1,0 +1,231 @@
+{
+	"actions": [],
+	"allow_import": 1,
+	"allow_rename": 1,
+	"autoname": "field:registration_number",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"registration_tab",
+		"identity_section",
+		"registration_number",
+		"identity_column",
+		"registration_number_normalized",
+		"official_status",
+		"certificate_type",
+		"activity_type",
+		"classification_section",
+		"device_category",
+		"classification_column",
+		"risk_class",
+		"grouping_type",
+		"product_family_name",
+		"device_description",
+		"intended_use",
+		"parties_section",
+		"establishment_registration",
+		"parties_column",
+		"registration_holder",
+		"product_owner",
+		"manufacturer_country",
+		"validity_section",
+		"issue_date",
+		"validity_column",
+		"expiry_date",
+		"days_to_expiry",
+		"renewal_status",
+		"lifecycle_section",
+		"previous_registration",
+		"lifecycle_column",
+		"superseded_by",
+		"last_verified_on",
+		"responsible_user",
+		"products_tab",
+		"registered_products"
+	],
+	"fields": [
+		{
+			"fieldname": "registration_tab",
+			"fieldtype": "Tab Break",
+			"label": "Registration"
+		},
+		{
+			"fieldname": "identity_section",
+			"fieldtype": "Section Break",
+			"label": "Registration Identity"
+		},
+		{
+			"fieldname": "registration_number",
+			"fieldtype": "Data",
+			"label": "Registration Number",
+			"reqd": 1,
+			"unique": 1,
+			"in_list_view": 1,
+			"in_global_search": 1
+		},
+		{
+			"fieldname": "identity_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "registration_number_normalized",
+			"fieldtype": "Data",
+			"label": "Normalized Registration Number",
+			"read_only": 1,
+			"unique": 1,
+			"hidden": 1
+		},
+		{
+			"fieldname": "official_status",
+			"fieldtype": "Select",
+			"label": "Official Status",
+			"options": "Draft\nActive\nSuspended\nRevoked\nCancelled\nExpired\nSuperseded",
+			"default": "Draft",
+			"read_only": 1,
+			"in_list_view": 1
+		},
+		{ "fieldname": "certificate_type", "fieldtype": "Data", "label": "Certificate Type" },
+		{
+			"fieldname": "activity_type",
+			"fieldtype": "Select",
+			"label": "Activity Type",
+			"options": "\nImport\nManufacture"
+		},
+		{
+			"fieldname": "classification_section",
+			"fieldtype": "Section Break",
+			"label": "Device Classification"
+		},
+		{
+			"fieldname": "device_category",
+			"fieldtype": "Select",
+			"label": "Device Category",
+			"options": "\nIVD\nNon-IVD\nOther"
+		},
+		{
+			"fieldname": "classification_column",
+			"fieldtype": "Column Break"
+		},
+		{ "fieldname": "risk_class", "fieldtype": "Data", "label": "Risk Class" },
+		{ "fieldname": "grouping_type", "fieldtype": "Data", "label": "Grouping Type" },
+		{
+			"fieldname": "product_family_name",
+			"fieldtype": "Data",
+			"label": "Product Family Name",
+			"in_list_view": 1
+		},
+		{ "fieldname": "device_description", "fieldtype": "Text Editor", "label": "Device Description" },
+		{ "fieldname": "intended_use", "fieldtype": "Text Editor", "label": "Intended Use" },
+		{
+			"fieldname": "parties_section",
+			"fieldtype": "Section Break",
+			"label": "Parties and Establishment"
+		},
+		{
+			"fieldname": "establishment_registration",
+			"fieldtype": "Link",
+			"label": "Establishment Registration",
+			"options": "Medical Device Establishment Registration"
+		},
+		{
+			"fieldname": "parties_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "registration_holder",
+			"fieldtype": "Link",
+			"label": "Registration Holder",
+			"options": "Company"
+		},
+		{
+			"fieldname": "product_owner",
+			"fieldtype": "Link",
+			"label": "Product Owner / Manufacturer",
+			"options": "Manufacturer"
+		},
+		{
+			"fieldname": "manufacturer_country",
+			"fieldtype": "Link",
+			"label": "Manufacturer Country",
+			"options": "Country"
+		},
+		{
+			"fieldname": "validity_section",
+			"fieldtype": "Section Break",
+			"label": "Validity and Renewal"
+		},
+		{ "fieldname": "issue_date", "fieldtype": "Date", "label": "Issue Date", "in_list_view": 1 },
+		{
+			"fieldname": "validity_column",
+			"fieldtype": "Column Break"
+		},
+		{ "fieldname": "expiry_date", "fieldtype": "Date", "label": "Expiry Date", "in_list_view": 1 },
+		{ "fieldname": "days_to_expiry", "fieldtype": "Int", "label": "Days to Expiry", "read_only": 1 },
+		{
+			"fieldname": "renewal_status",
+			"fieldtype": "Select",
+			"label": "Renewal Status",
+			"options": "Not Started\nPreparing\nInternal Review\nSubmitted\nFDA Query\nApproved\nNot Renewing",
+			"default": "Not Started"
+		},
+		{
+			"fieldname": "lifecycle_section",
+			"fieldtype": "Section Break",
+			"label": "Lifecycle"
+		},
+		{
+			"fieldname": "previous_registration",
+			"fieldtype": "Link",
+			"label": "Previous Registration",
+			"options": "Medical Device Product Registration"
+		},
+		{
+			"fieldname": "lifecycle_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "superseded_by",
+			"fieldtype": "Link",
+			"label": "Superseded By",
+			"options": "Medical Device Product Registration",
+			"read_only": 1
+		},
+		{ "fieldname": "last_verified_on", "fieldtype": "Date", "label": "Last Verified On" },
+		{
+			"fieldname": "responsible_user",
+			"fieldtype": "Link",
+			"label": "Responsible User",
+			"options": "User"
+		},
+		{
+			"fieldname": "products_tab",
+			"fieldtype": "Tab Break",
+			"label": "Registered Products / NEWCODE"
+		},
+		{
+			"fieldname": "registered_products",
+			"fieldtype": "Table",
+			"label": "Registered Products / NEWCODE",
+			"options": "Medical Device Registered Product"
+		}
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Product Registration",
+	"naming_rule": "By fieldname",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
+}

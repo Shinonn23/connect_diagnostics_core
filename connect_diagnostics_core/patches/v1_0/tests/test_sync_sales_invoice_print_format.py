@@ -16,8 +16,8 @@ class TestSyncSalesInvoicePrintFormat(UnitTestCase):
         sync_sales_invoice_print_format.execute()
 
         mocked_reload_doc.assert_called_once_with(
-            "Connect Diagnostics Core",
+            "Connect Diagnostics Print",
             "print_format",
-            "tax_invoice_delivery_note_and_invoice",
+            "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ",
             force=True,
         )

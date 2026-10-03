@@ -46,10 +46,10 @@ frappe.query_reports["Back Orders"] = {
 			options: "Warehouse",
 		},
 		{
-			fieldname: "accounting_department",
-			label: __("Accounting Department"),
+			fieldname: "department",
+			label: __("Department"),
 			fieldtype: "Link",
-			options: "Accounting Department",
+			options: "Department",
 			get_query() {
 				return {
 					filters: {

@@ -1,69 +1,46 @@
 ---
 name: review
-description: Review a file, local change set, or pull request for defects, security risks, regressions, and missing tests. Use when the user asks for a code review.
+description: Independently review a plan, local change set, pull request, or final documentation for correctness, security, regressions, lifecycle risks, and missing evidence.
 ---
 
-# Code Review Skill
+# Independent Review Skill
 
-Perform comprehensive code reviews with structured feedback.
+Review against the original requirement and the repository policy. Do not approve work you implemented yourself.
 
-## Usage
+## Plan review
 
-```
-$review [file or PR]
-```
+Verify:
 
-## Behavior
+- bounded goal and acceptance criteria;
+- file ownership and dependencies;
+- real Frappe/ERPNext execution path;
+- tests and final automated gates;
+- migration/rollback impact;
+- Computer Use coverage when user-visible behavior changes;
+- final documentation impact.
 
-1. Analyze code changes
-2. Check for:
-   - Logic errors and bugs
-   - Security vulnerabilities
-   - Performance issues
-   - Code style violations
-   - Missing tests
-3. Provide actionable feedback
+Require decomposition when the scope cannot be owned or verified independently.
 
-## Review Categories
+## Implementation review
 
-### Critical
+Prioritize real defects over style:
 
-Issues that must be fixed:
+- correctness and regression risk;
+- permissions and security;
+- Frappe document lifecycle and transaction semantics;
+- data integrity, locking, idempotency, and concurrency;
+- migration/backward-compatibility behavior;
+- missing or weak tests.
 
-- Security vulnerabilities
-- Data loss risks
-- Breaking changes
+## Documentation review
 
-### Important
+Compare final docs with accepted code, automated evidence, and Computer Use results. Reject stale, duplicate, speculative, future, task-status, or implementation-history content from `docs/`.
 
-Issues that should be addressed:
+## Finding severity
 
-- Performance problems
-- Logic errors
-- Missing error handling
+- **P0** — catastrophic security, data-loss, or integrity defect.
+- **P1** — must fix before acceptance/merge.
+- **P2** — significant correctness or maintainability issue that needs explicit disposition.
+- **P3** — minor issue.
 
-### Suggestions
-
-Nice-to-have improvements:
-
-- Code style
-- Better naming
-- Refactoring opportunities
-
-## Output Format
-
-```
-## Code Review Summary
-
-### Critical Issues
-- [file:line] Description
-
-### Important Issues
-- [file:line] Description
-
-### Suggestions
-- [file:line] Description
-
-### What's Good
-- Positive feedback
-```
+For each finding include location, evidence, impact, and expected behavior. State explicitly when no meaningful findings remain.

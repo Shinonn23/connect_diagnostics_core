@@ -9,29 +9,21 @@
  * The default ID filter is hidden (hide_name_filter) — the box covers it.
  * Typing in it searches ACROSS several fields at once — the same set the
  * Customer link search uses (see api/erpnext/customer.py):
- *     name (= Customer Code), customer_name, and every Customer Alternative
- *     Name (child table).
+ *     name (= Customer Code) and customer_name.
  *
  * Implemented server-side by injecting `or_filters` into the list query via
- * get_args(), so paging/counting stay correct. `distinct` collapses the
- * duplicate parent rows the child-table join would otherwise produce.
+ * get_args(), so paging/counting stay correct. `distinct` collapses any
+ * duplicate parent rows an or_filters join would otherwise produce.
  */
 
 const SEARCH_TARGETS = [
 	["Customer", "name"],
 	["Customer", "customer_code"],
 	["Customer", "customer_name"],
-	["Customer Alternative Name", "name_value"],
 ];
 
 frappe.listview_settings["Customer"] = {
-	add_fields: [
-		"customer_name",
-		"customer_group",
-		"customer_onboarding_state",
-		"tax_invoice_readiness",
-		"delivery_readiness",
-	],
+	add_fields: ["customer_name", "customer_group"],
 
 	hide_name_filter: true, // replaced by the single search box below
 
@@ -46,7 +38,7 @@ frappe.listview_settings["Customer"] = {
 			fieldtype: "Data",
 			fieldname: "cd_customer_search",
 			label: __("Search"),
-			placeholder: __("Customer Code, name, alternative name…"),
+			placeholder: __("Customer Code, name…"),
 			onchange() {
 				apply_search(this.get_value());
 			},

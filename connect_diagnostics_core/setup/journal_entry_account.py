@@ -31,7 +31,7 @@ CUSTOM_FIELDS = {
             "label": "Overwrite Tax Invoice",
             "fieldtype": "Section Break",
             "insert_after": "credit",
-            "collapsible": 1,
+            "collapsible": 0,
             "depends_on": "eval:doc.account_type == 'Tax'",
             "is_system_generated": 1,
         },

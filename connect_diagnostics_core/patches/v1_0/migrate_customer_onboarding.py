@@ -12,6 +12,9 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from connect_diagnostics_core.api.erpnext.customer import build_readiness_values
 from connect_diagnostics_core.setup import customer, customer_onboarding
 
+ACTIVE_STATE = "Customer Active"
+REQUEST_STATE = "Customer Request"
+
 
 def execute() -> None:
     """Backfill the retained CD-only Customer onboarding fields."""
@@ -56,10 +59,10 @@ def _backfill_customers() -> None:
         )
         updates[customer_name] = {
             "customer_code": customer_name,
+            # State names are inlined: this patch predates the retirement of the
+            # Customer Onboarding workflow, and must keep replaying as it did.
             "customer_onboarding_state": (
-                customer_onboarding.CUSTOMER_ACTIVE_STATE
-                if not int(customer_row.get("disabled") or 0)
-                else customer_onboarding.CUSTOMER_REQUEST_STATE
+                ACTIVE_STATE if not int(customer_row.get("disabled") or 0) else REQUEST_STATE
             ),
             **readiness,
         }

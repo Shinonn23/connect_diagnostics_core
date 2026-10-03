@@ -1,0 +1,129 @@
+{
+	"actions": [],
+	"autoname": "format:REG-OVR-.#####",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"transaction_section",
+		"transaction_doctype",
+		"transaction_column",
+		"transaction_name",
+		"item_code",
+		"decision_section",
+		"status",
+		"decision_column",
+		"reason",
+		"approval_section",
+		"supporting_evidence",
+		"approval_column",
+		"requested_by",
+		"requested_on",
+		"approved_by",
+		"approved_on",
+		"remarks_section",
+		"remarks"
+	],
+	"fields": [
+		{
+			"fieldname": "transaction_section",
+			"fieldtype": "Section Break",
+			"label": "Transaction"
+		},
+		{
+			"fieldname": "transaction_doctype",
+			"fieldtype": "Link",
+			"label": "Transaction DocType",
+			"options": "DocType",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "transaction_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "transaction_name",
+			"fieldtype": "Dynamic Link",
+			"label": "Transaction",
+			"options": "transaction_doctype",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"label": "Item",
+			"options": "Item",
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "decision_section",
+			"fieldtype": "Section Break",
+			"label": "Decision and Reason"
+		},
+		{
+			"fieldname": "status",
+			"fieldtype": "Select",
+			"label": "Status",
+			"options": "Requested\nApproved\nRejected\nCancelled",
+			"default": "Requested",
+			"reqd": 1,
+			"in_list_view": 1
+		},
+		{
+			"fieldname": "decision_column",
+			"fieldtype": "Column Break"
+		},
+		{ "fieldname": "reason", "fieldtype": "Small Text", "label": "Reason", "reqd": 1 },
+		{
+			"fieldname": "approval_section",
+			"fieldtype": "Section Break",
+			"label": "Approval and Evidence"
+		},
+		{ "fieldname": "supporting_evidence", "fieldtype": "Attach", "label": "Supporting Evidence" },
+		{
+			"fieldname": "approval_column",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "requested_by",
+			"fieldtype": "Link",
+			"label": "Requested By",
+			"options": "User",
+			"read_only": 1
+		},
+		{ "fieldname": "requested_on", "fieldtype": "Date", "label": "Requested On", "read_only": 1 },
+		{
+			"fieldname": "approved_by",
+			"fieldtype": "Link",
+			"label": "Approved By",
+			"options": "User",
+			"read_only": 1
+		},
+		{ "fieldname": "approved_on", "fieldtype": "Date", "label": "Approved On", "read_only": 1 },
+		{
+			"fieldname": "remarks_section",
+			"fieldtype": "Section Break",
+			"label": "Remarks"
+		},
+		{ "fieldname": "remarks", "fieldtype": "Small Text", "label": "Remarks" }
+	],
+	"module": "Connect Diagnostics Regulatory",
+	"name": "Medical Device Regulatory Override",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"track_changes": 1
+}

@@ -310,8 +310,12 @@ def export_doctype_rows(doctype: str, *, client: FrappeClient | None = None) -> 
     )
     try:
         exporter.build_response()
-    except Exception:
-        pass
+    except Exception as exc:
+        # build_response() targets an HTTP request: for an empty DocType it raises the
+        # "No Data" web-page response, and it also sets frappe.response at the end. Both
+        # are expected here — the CSV has already been written to exporter.writer — so we
+        # log at debug rather than discard silently, then read the rows back below.
+        frappe.logger(__name__).debug(f"build_response raised while exporting {doctype}: {exc}")
     return list(csv.reader(io.StringIO(exporter.writer.getvalue())))
 
 

@@ -8,7 +8,7 @@ CUSTOM_FIELDS = {
             "fieldtype": "Link",
             "insert_after": "accounting_dimensions_section",
             "is_system_generated": 1,
-            "options": "Accounting Department",
+            "options": "Department",
         },
         {
             "fieldname": "is_deposit_item",

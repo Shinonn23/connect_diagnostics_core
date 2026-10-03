@@ -11,6 +11,9 @@ def execute():
     if not frappe.db.has_column("Customer", "customer_name_th"):
         return
 
+    if not frappe.db.table_exists("Customer Alternative Name", cached=False):
+        return
+
     frappe.db.sql(
         """
         INSERT INTO `tabCustomer Alternative Name`

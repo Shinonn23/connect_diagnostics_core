@@ -2,6 +2,9 @@ import frappe
 
 
 def execute():
+    if not frappe.db.table_exists("Item Alternative Name", cached=False):
+        return
+
     frappe.db.sql(
         """
         INSERT INTO `tabItem Alternative Name`

@@ -3,31 +3,90 @@
 
 from __future__ import annotations
 
-from typing import Any
+import re
+from typing import Any, cast
 
+import frappe
+from erpnext_thailand.custom.naming import (
+    parse_naming_series_variable as parse_thailand_naming_series_variable,
+)
+from frappe import _
+from frappe.model.document import Document
 from frappe.utils import getdate
 
 BUDDHIST_ERA_YEAR_OFFSET = 543
+NATIONAL_ID_LENGTH = 13
+_NON_DIGIT_RE = re.compile(r"\D")
+_NATIONAL_ID_CHECKSUM_WEIGHTS = range(13, 1, -1)
 
 
 def _get_series_date(doc: Any):
     if doc:
-        for fieldname in ("posting_date", "transaction_date", "date", "date_of_joining"):
-            value = doc.get(fieldname) if hasattr(doc, "get") else getattr(doc, fieldname, None)
-            if value:
-                return getdate(value)
+        from connect_diagnostics_core.setup.document_naming import _document_date
+
+        return _document_date(doc)
 
     return getdate()
 
 
 def parse_buddhist_era_naming_series_variable(doc: Any, variable: str) -> str | None:
+    if variable == "YYYY-BE":
+        gregorian_year = parse_thailand_naming_series_variable(doc, "YYYY-DATE")
+        return str(int(gregorian_year) + BUDDHIST_ERA_YEAR_OFFSET) if gregorian_year else None
+
+    # Retained for old Employee series and the historical broken-autoname backfill.
     series_date = _get_series_date(doc)
     buddhist_year = series_date.year + BUDDHIST_ERA_YEAR_OFFSET
 
-    if variable == "YYYY-BE":
-        return str(buddhist_year)
-
-    if variable == "YY-BE":
+    if variable in ("YY-BE", "YYBE"):
         return f"{buddhist_year % 100:02d}"
 
     return None
+
+
+def clean_national_id(value: str) -> str:
+    """Strip everything but digits from a national ID (e.g. dashes, spaces)."""
+    return _NON_DIGIT_RE.sub("", value or "")
+
+
+def format_national_id_display(digits: str) -> str:
+    """Format a 13-digit Thai national ID as X-XXXX-XXXXX-XX-X."""
+    return f"{digits[0]}-{digits[1:5]}-{digits[5:10]}-{digits[10:12]}-{digits[12]}"
+
+
+def has_valid_national_id_checksum(digits: str) -> bool:
+    """Verify a 13-digit Thai national ID's check digit (digit 13, mod-11 over digits 1-12)."""
+    weighted_sum = sum(
+        int(digit) * weight for digit, weight in zip(digits[:12], _NATIONAL_ID_CHECKSUM_WEIGHTS, strict=True)
+    )
+    check_digit = (11 - weighted_sum % 11) % 10
+    return check_digit == int(digits[12])
+
+
+def normalize_national_id(doc: Document, method: str | None = None) -> None:
+    raw: str = cast(str, doc.get("national_id") or "")
+
+    if not raw:
+        doc.set("national_id_display", "")
+        return
+
+    cleaned = clean_national_id(raw)
+    if len(cleaned) != NATIONAL_ID_LENGTH:
+        frappe.throw(_("National ID must be a 13-digit number."))
+    if not has_valid_national_id_checksum(cleaned):
+        frappe.throw(_("National ID checksum is invalid."))
+
+    doc.set("national_id", cleaned)
+    doc.set("national_id_display", format_national_id_display(cleaned))
+
+
+def validate_borrow_warehouse(doc: Document, _method: str | None = None) -> None:
+    """Ensure an employee's borrowed-stock warehouse is an active leaf in its company."""
+    warehouse = doc.get("borrow_warehouse")
+    if not warehouse:
+        return
+    details = frappe.db.get_value("Warehouse", warehouse, ["company", "is_group", "disabled"], as_dict=True)
+    if not details or details.company != doc.get("company"):
+        frappe.throw(_("Borrow Warehouse must belong to the Employee's Company."))
+    if details.disabled or details.is_group:
+        frappe.throw(_("Borrow Warehouse must be an active leaf Warehouse."))

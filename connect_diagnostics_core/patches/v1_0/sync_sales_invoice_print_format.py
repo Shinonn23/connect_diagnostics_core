@@ -11,8 +11,8 @@ import frappe
 def execute() -> None:
     """Load the current source Print Format, including traceability rendering."""
     frappe.reload_doc(
-        "Connect Diagnostics Core",
+        "Connect Diagnostics Print",
         "print_format",
-        "tax_invoice_delivery_note_and_invoice",
+        "ใบกำกับภาษี_ใบแจ้งหนี้_ใบส่งของ",
         force=True,
     )
