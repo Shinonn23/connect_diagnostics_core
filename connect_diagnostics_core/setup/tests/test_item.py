@@ -3,97 +3,50 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+import json
+from pathlib import Path
 
 from frappe.tests import UnitTestCase
 
-from connect_diagnostics_core.setup import item
+ITEM_CUSTOMIZATION = Path(__file__).resolve().parents[2] / "connect_diagnostics_core" / "custom" / "item.json"
 
 
-class TestRelocatedAfterAnchor(UnitTestCase):
-    def test_moves_the_fields_directly_after_the_anchor(self) -> None:
-        current_order = [
-            "has_serial_no",
-            "min_remaining_shelf_life",
-            "serial_no_series",
-            "shelf_life_section",
-            "max_storage_days",
-            "variants_section",
+class TestItemCustomizationExport(UnitTestCase):
+    def test_item_custom_fields_and_layout_are_exported_together(self) -> None:
+        data = json.loads(ITEM_CUSTOMIZATION.read_text())
+        fields = {field["fieldname"]: field for field in data["custom_fields"]}
+        field_order_setters = [
+            setter
+            for setter in data["property_setters"]
+            if setter["doctype_or_field"] == "DocType" and setter["property"] == "field_order"
         ]
 
-        reordered = item._relocated_after_anchor(
-            current_order, item._SHELF_LIFE_FIELDS, item._SHELF_LIFE_ANCHOR
+        self.assertEqual(data["doctype"], "Item")
+        self.assertEqual(len(field_order_setters), 1)
+        field_order = json.loads(field_order_setters[0]["value"])
+        self.assertIn("demo_conversion_section", field_order)
+        self.assertIn("demo_stock_item", field_order)
+        self.assertLess(field_order.index("demo_conversion_section"), field_order.index("demo_stock_item"))
+        self.assertEqual(fields["demo_stock_item"]["fieldtype"], "Link")
+        self.assertEqual(fields["demo_stock_item"]["options"], "Item")
+        self.assertFalse(
+            any(fieldname.startswith("demo_") and "warehouse" in fieldname for fieldname in fields),
+            "Customer Demo source Warehouse belongs to the Material Request item row, not Item.",
         )
 
-        self.assertEqual(
-            reordered,
-            [
-                "has_serial_no",
-                "serial_no_series",
+    def test_existing_item_fields_remain_in_the_single_export(self) -> None:
+        data = json.loads(ITEM_CUSTOMIZATION.read_text())
+        fieldnames = {field["fieldname"] for field in data["custom_fields"]}
+
+        self.assertTrue(
+            {
+                "dksh_tab",
+                "is_medical_device",
+                "medical_device_regulatory_section",
+                "current_medical_device_registration",
                 "shelf_life_section",
-                "min_remaining_shelf_life",
-                "max_storage_days",
-                "variants_section",
-            ],
-        )
-
-    def test_is_idempotent_once_already_ordered(self) -> None:
-        already_ordered = [
-            "has_serial_no",
-            "serial_no_series",
-            "shelf_life_section",
-            "min_remaining_shelf_life",
-            "max_storage_days",
-            "variants_section",
-        ]
-
-        self.assertEqual(
-            item._relocated_after_anchor(already_ordered, item._SHELF_LIFE_FIELDS, item._SHELF_LIFE_ANCHOR),
-            already_ordered,
-        )
-
-
-class TestEnsureConfigurationShelfLifeReorder(UnitTestCase):
-    def _meta_with(self, fieldnames: list[str]) -> MagicMock:
-        meta = MagicMock()
-        meta.fields = [MagicMock(fieldname=fieldname) for fieldname in fieldnames]
-        return meta
-
-    def test_skips_reorder_when_a_shelf_life_field_is_missing(self) -> None:
-        meta = self._meta_with(["has_serial_no", "serial_no_series", "variants_section"])
-        with (
-            patch.object(item.frappe, "get_meta", return_value=meta),
-            patch.object(item, "_set_field_order") as mocked_set_field_order,
-        ):
-            item.ensure_configuration()
-
-        mocked_set_field_order.assert_not_called()
-
-    def test_relocates_shelf_life_fields_when_nested_in_serial_nos_batches(self) -> None:
-        meta = self._meta_with(
-            [
-                "has_serial_no",
-                "min_remaining_shelf_life",
-                "serial_no_series",
-                "shelf_life_section",
-                "max_storage_days",
-                "variants_section",
-            ]
-        )
-        with (
-            patch.object(item.frappe, "get_meta", return_value=meta),
-            patch.object(item, "_set_field_order") as mocked_set_field_order,
-        ):
-            item.ensure_configuration()
-
-        mocked_set_field_order.assert_called_once_with(
-            "Item",
-            [
-                "has_serial_no",
-                "serial_no_series",
-                "shelf_life_section",
-                "min_remaining_shelf_life",
-                "max_storage_days",
-                "variants_section",
-            ],
+                "withholding_tax_type",
+                "withholding_tax_type_pay_supplier",
+                "withholding_tax_type_pay_individual",
+            }.issubset(fieldnames)
         )

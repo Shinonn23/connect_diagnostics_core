@@ -13,9 +13,9 @@ from connect_diagnostics_core.patches.v1_0 import (
 )
 
 
-class TestMaterialDocumentPrintSignatureSnapshots(UnitTestCase):
+class TestStockEntryPrintSignatureSnapshots(UnitTestCase):
     @patch.object(add_material_request_stock_entry_print_signature_snapshots, "create_custom_fields")
-    def test_forward_patch_creates_both_document_field_sets(
+    def test_forward_patch_creates_stock_entry_field_set(
         self, mocked_create_custom_fields: MagicMock
     ) -> None:
         add_material_request_stock_entry_print_signature_snapshots.execute()

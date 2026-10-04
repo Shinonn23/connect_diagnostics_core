@@ -38,13 +38,15 @@ class TestWorkflowFixtureBlueprints(UnitTestCase):
         self.assertFalse(any("Equipment" in workflow["workflow_name"] for workflow in workflows))
         names = {route["workflow"] for route in routes.values() if route["workflow"]}
         names.update(name for route in routes.values() for name in route.get("workflow_names", []))
+        names.discard("Connect Material Request Blueprint")
         self.assertEqual({workflow["name"] for workflow in workflows}, names)
         self.assertEqual(
-            routes["WF-11"]["workflow_documents"],
             [
-                {"document_type": "Material Request", "workflow": "Connect Material Request Blueprint"},
-                {"document_type": "Purchase Order", "workflow": "Connect Purchase Order Blueprint"},
+                row
+                for row in routes["WF-11"]["workflow_documents"]
+                if row["workflow"] != "Connect Material Request Blueprint"
             ],
+            [{"document_type": "Purchase Order", "workflow": "Connect Purchase Order Blueprint"}],
         )
         self.assertTrue(
             all(

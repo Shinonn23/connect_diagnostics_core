@@ -151,10 +151,10 @@ class TestPrintActionWorkflowTasks(UnitTestCase):
             "approval_signature": "data:image/png;base64,signature",
         },
     )
-    def test_material_request_and_capitalization_use_authorized_snapshot_writer(
+    def test_capitalization_uses_authorized_snapshot_writer(
         self, _get_value: MagicMock, _msgprint: MagicMock, _now_datetime: MagicMock
     ) -> None:
-        for doctype in ("Material Request", "Asset Capitalization"):
+        for doctype in ("Asset Capitalization",):
             doc = FakeDocument({"doctype": doctype})
 
             print_actions.capture_authorized_action(cast(Document, doc))

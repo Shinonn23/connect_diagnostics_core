@@ -33,7 +33,6 @@ TDS_DOCTYPES = (
     "Sales Invoice Item",
     "Payment Entry",
     "Journal Entry",
-    "Item",
 )
 
 TDS_MASTER_DOCTYPES = (
@@ -107,7 +106,6 @@ TDS_FIELDS: dict[str, tuple[str, ...]] = {
         "tax_withholding_entries",
         "tax_withholding_tab",
     ),
-    "Item": ("purchase_tax_withholding_category", "sales_tax_withholding_category"),
     "Lower Deduction Certificate": ("tax_withholding_category",),
 }
 

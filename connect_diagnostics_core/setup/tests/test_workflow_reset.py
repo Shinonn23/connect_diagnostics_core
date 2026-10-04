@@ -67,6 +67,7 @@ class TestWorkflowReset(UnitTestCase):
         expected_names.update(
             workflow for route in manifest["routes"] for workflow in route.get("workflow_names", [])
         )
+        expected_names.discard("Connect Material Request Blueprint")
         self.assertEqual(
             {workflow["workflow_name"] for workflow in workflow_fixture},
             expected_names,
@@ -86,10 +87,6 @@ class TestWorkflowReset(UnitTestCase):
             "Stock Count Adjustment",
             "Stock Count Item",
             "Stock Count Warehouse",
-            "Borrowed Asset Return Inspection",
-            "Borrowed Item Resolution",
-            "Dispatch",
-            "Dispatch Transfer",
             "Supplier Bank Change Request",
         }
         self.assertFalse(app_doctypes & {workflow["document_type"] for workflow in workflow_fixture})

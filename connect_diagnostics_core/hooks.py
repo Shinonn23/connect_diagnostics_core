@@ -53,7 +53,12 @@ doctype_js = {
     "Company": "public/js/custom/company/doctype.js",
     "DKSH Customer": "public/js/custom/dksh_customer/doctype.js",
     "Delivery Note": "public/js/custom/delivery_note/doctype.js",
-    "Material Request": "public/js/custom/material_request/doctype.js",
+    "Asset Movement": "public/js/custom/asset_movement/reference_document.js",
+    "Material Request": [
+        "public/js/custom/material_request/asset_transfer.js",
+        "public/js/custom/material_request/customer_borrow.js",
+    ],
+    "Stock Entry": "public/js/custom/stock_entry/customer_borrow.js",
     "Payment Entry": "public/js/custom/payment_entry/doctype.js",
     "Purchase Order": "public/js/custom/purchase_order/doctype.js",
     "Quotation": "public/js/custom/quotation/doctype.js",
@@ -105,7 +110,6 @@ jinja = {
         "connect_diagnostics_core.api.erpnext.print_pagination.get_print_page_metrics",
         "connect_diagnostics_core.api.erpnext.sales_invoice.get_sales_invoice_print_context",
         "connect_diagnostics_core.api.erpnext.quotation.get_quotation_print_context",
-        "connect_diagnostics_core.api.erpnext.dispatch.get_dispatch_label_rows",
         "connect_diagnostics_core.utils.qr.get_qr_svg_code",
         "connect_diagnostics_core.api.frappe.print_log.register_print",
     ],
@@ -167,14 +171,6 @@ workflow_methods = [
     {
         "name": "Capture Print Action: Signed",
         "method": "connect_diagnostics_core.api.erpnext.print_actions.capture_signed_action",
-    },
-    {
-        "name": "Validate Material Request: Submit for Approval",
-        "method": "connect_diagnostics_core.api.erpnext.material_request.validate_submit_for_approval",
-    },
-    {
-        "name": "Validate Material Request: Close",
-        "method": "connect_diagnostics_core.api.erpnext.material_request.validate_close",
     },
 ]
 
@@ -267,11 +263,38 @@ doc_events = {
         "validate": "connect_diagnostics_core.api.erpnext.customer_credit_request.validate",
         "on_submit": "connect_diagnostics_core.api.erpnext.customer_credit_request.on_submit",
     },
-    "Company": {
+    "Material Request": {
+        "before_validate": "connect_diagnostics_core.api.erpnext.customer_borrow.before_validate_material_request",
         "validate": [
-            "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
-            "connect_diagnostics_core.api.erpnext.company.validate_borrow_configuration",
+            "connect_diagnostics_core.api.erpnext.material_request_asset_transfer.validate_material_request",
+            "connect_diagnostics_core.api.erpnext.customer_demo.validate_material_request",
+            "connect_diagnostics_core.api.erpnext.customer_borrow.validate_material_request",
         ],
+        "on_submit": [
+            "connect_diagnostics_core.api.erpnext.customer_demo.after_submit_material_request",
+            "connect_diagnostics_core.api.erpnext.customer_borrow.on_submit_material_request",
+        ],
+        "before_cancel": [
+            "connect_diagnostics_core.api.erpnext.customer_demo.before_cancel_material_request",
+            "connect_diagnostics_core.api.erpnext.customer_borrow.before_cancel_material_request",
+        ],
+        "before_update_after_submit": "connect_diagnostics_core.api.erpnext.customer_borrow.before_update_after_submit_material_request",
+    },
+    "Asset Movement": {
+        "validate": "connect_diagnostics_core.api.erpnext.material_request_asset_transfer.validate_asset_movement_reference",
+        "before_submit": "connect_diagnostics_core.api.erpnext.customer_demo.guard_claimed_asset_movement",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.customer_demo.lock_customer_demo_movement_before_cancel",
+        "on_submit": "connect_diagnostics_core.api.erpnext.customer_demo.on_asset_movement_change",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.customer_demo.on_asset_movement_change",
+    },
+    "Asset": {
+        "before_cancel": "connect_diagnostics_core.api.erpnext.customer_demo.guard_claimed_asset_cancel",
+    },
+    "Asset Capitalization": {
+        "before_cancel": "connect_diagnostics_core.api.erpnext.customer_demo.guard_demo_capitalization_cancel",
+    },
+    "Company": {
+        "validate": "connect_diagnostics_core.api.erpnext.company.validate_quotation_authorized_signatories",
     },
     "Quotation": {
         "before_submit": [
@@ -307,22 +330,6 @@ doc_events = {
         "on_submit": "connect_diagnostics_core.api.erpnext.supplier.on_submit_bank_change_request",
         "on_cancel": "connect_diagnostics_core.api.erpnext.supplier.on_cancel_bank_change_request",
     },
-    "Material Request": {
-        "validate": [
-            "connect_diagnostics_core.api.erpnext.procure_to_pay.validate_material_request",
-            "connect_diagnostics_core.api.erpnext.material_request.validate",
-        ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel",
-    },
-    "Asset Movement": {
-        "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_asset_movement",
-        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
-    },
-    "Quality Inspection": {
-        "validate": "connect_diagnostics_core.api.erpnext.material_request.validate_quality_inspection",
-        "before_submit": "connect_diagnostics_core.api.erpnext.material_request.before_submit_quality_inspection",
-        "on_submit": "connect_diagnostics_core.api.erpnext.material_request.on_submit_quality_inspection",
-    },
     "Purchase Order": {
         "validate": [
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_warning_transaction",
@@ -340,16 +347,19 @@ doc_events = {
     },
     "Stock Entry": {
         "validate": [
-            "connect_diagnostics_core.api.erpnext.material_request.validate_stock_entry",
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_workflow",
+            "connect_diagnostics_core.api.erpnext.customer_borrow.validate_stock_entry",
         ],
         "before_submit": [
+            "connect_diagnostics_core.api.erpnext.customer_borrow.before_submit_stock_entry",
             "connect_diagnostics_core.api.erpnext.stock_entry_workflow.validate_before_submit",
             "connect_diagnostics_core.api.erpnext.stock_reconciliation_freeze.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.validate_transaction",
             "connect_diagnostics_core.api.erpnext.regulatory_transactions.capture_transaction_snapshot",
         ],
-        "before_cancel": "connect_diagnostics_core.api.erpnext.material_request.before_cancel_movement",
+        "on_submit": "connect_diagnostics_core.api.erpnext.customer_borrow.on_submit_stock_entry",
+        "before_cancel": "connect_diagnostics_core.api.erpnext.customer_borrow.before_cancel_stock_entry",
+        "on_cancel": "connect_diagnostics_core.api.erpnext.customer_borrow.on_cancel_stock_entry",
     },
     "Delivery Note": {
         "before_submit": [
@@ -395,7 +405,7 @@ doc_events = {
     "Employee": {
         "validate": [
             "connect_diagnostics_core.api.erpnext.employee.normalize_national_id",
-            "connect_diagnostics_core.api.erpnext.employee.validate_borrow_warehouse",
+            "connect_diagnostics_core.api.erpnext.customer_borrow.validate_employee",
         ],
     },
     "File": {
@@ -451,7 +461,6 @@ override_whitelisted_methods = {
 override_doctype_dashboards = {
     "Item": "connect_diagnostics_core.api.erpnext.item.get_item_dashboard_data",
     "Customer": "connect_diagnostics_core.api.erpnext.customer.get_customer_dashboard_data",
-    "Material Request": "connect_diagnostics_core.api.erpnext.material_request.get_dashboard_data",
 }
 
 # exempt linked doctypes from being automatically cancelled
@@ -542,7 +551,6 @@ fixtures = [
                     "Connect Stock Reconciliation Blueprint",
                     "Connect Sales Order Blueprint",
                     "Connect Sales Invoice Credit Blueprint",
-                    "Connect Material Request Blueprint",
                     "Connect Purchase Order Blueprint",
                     "Connect Purchase Invoice Blueprint",
                     "Connect Payroll Entry Blueprint",
@@ -594,12 +602,6 @@ fixtures = [
                     "Sales Invoice Credit Rejected",
                     "Sales Invoice Credit Submitted",
                     "Sales Invoice Credit Cancelled",
-                    "Material Request Draft",
-                    "Material Request Pending Review",
-                    "Material Request Approved",
-                    "Material Request Rejected",
-                    "Material Request Submitted",
-                    "Material Request Cancelled",
                     "Purchase Order Draft",
                     "Purchase Order Pending Review",
                     "Purchase Order Approved",
@@ -671,11 +673,6 @@ fixtures = [
                     "Reject Sales Invoice Credit",
                     "Post Sales Invoice Credit",
                     "Cancel Sales Invoice Credit",
-                    "Submit Material Request for Review",
-                    "Approve Material Request",
-                    "Reject Material Request",
-                    "Post Material Request",
-                    "Cancel Material Request",
                     "Submit Purchase Order for Review",
                     "Approve Purchase Order",
                     "Reject Purchase Order",

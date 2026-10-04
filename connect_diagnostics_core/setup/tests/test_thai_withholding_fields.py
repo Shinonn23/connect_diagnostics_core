@@ -3,14 +3,26 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from frappe.tests import UnitTestCase
 
-from connect_diagnostics_core.setup import item, purchase_invoice_item, sales_invoice_item
+from connect_diagnostics_core.setup import purchase_invoice_item, sales_invoice_item
+
+_ITEM_FIELDS = {
+    field["fieldname"]: field
+    for field in json.loads(
+        (
+            Path(__file__).resolve().parents[2] / "connect_diagnostics_core" / "custom" / "item.json"
+        ).read_text()
+    )["custom_fields"]
+}
 
 
 class TestThaiWithholdingFields(UnitTestCase):
     def test_item_fields_match_erpnext_thailand_contract(self) -> None:
-        fields = {field["fieldname"]: field for field in item.CUSTOM_FIELDS["Item"]}
+        fields = _ITEM_FIELDS
 
         self.assertEqual(fields["withholding_tax_type"]["options"], "Withholding Tax Type")
         self.assertEqual(

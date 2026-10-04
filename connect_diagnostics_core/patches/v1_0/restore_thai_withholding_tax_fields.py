@@ -10,10 +10,13 @@ tax and while deriving withholding rows from invoice items.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
-from connect_diagnostics_core.setup import item, purchase_invoice_item, sales_invoice_item
+from connect_diagnostics_core.setup import purchase_invoice_item, sales_invoice_item
 
 THAI_WITHHOLDING_FIELDNAMES: dict[str, tuple[str, ...]] = {
     "Item": (
@@ -27,8 +30,17 @@ THAI_WITHHOLDING_FIELDNAMES: dict[str, tuple[str, ...]] = {
     "Sales Invoice Item": ("withholding_tax_type",),
 }
 
+_CUSTOM_FIELDS_PATH = Path(__file__).resolve().parents[2] / "connect_diagnostics_core" / "custom"
+
+
+def _load_exported_fields(doctype: str) -> list[dict[str, object]]:
+    """Read a DocType's code-managed Custom Fields from its export JSON."""
+    data = json.loads((_CUSTOM_FIELDS_PATH / f"{frappe.scrub(doctype)}.json").read_text())
+    return data["custom_fields"]
+
+
 _SETUP_FIELDS = {
-    "Item": item.CUSTOM_FIELDS["Item"],
+    "Item": _load_exported_fields("Item"),
     "Purchase Invoice Item": purchase_invoice_item.CUSTOM_FIELDS["Purchase Invoice Item"],
     "Sales Invoice Item": sales_invoice_item.CUSTOM_FIELDS["Sales Invoice Item"],
 }

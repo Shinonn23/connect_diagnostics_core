@@ -1,0 +1,29 @@
+{
+ "custom_fields": [
+  {
+   "doctype": "Custom Field",
+   "dt": "Employee",
+   "fieldname": "customer_borrow_warehouse",
+   "fieldtype": "Link",
+   "label": "Customer Borrow Warehouse",
+   "insert_after": "company",
+   "name": "Employee-customer_borrow_warehouse",
+   "owner": "Administrator",
+   "modified_by": "Administrator",
+   "creation": "2026-10-04 10:59:37.859564",
+   "modified": "2026-10-04 10:59:37.859564",
+   "docstatus": 0,
+   "idx": 0,
+   "is_system_generated": 0,
+   "options": "Warehouse",
+   "read_only": 1,
+   "no_copy": 1
+  }
+ ],
+ "custom_perms": [],
+ "doctype": "Employee",
+ "links": [],
+ "property_setters": [],
+ "sync_on_migrate": 1,
+ "modified": "2026-10-04 11:06:50.692807"
+}

@@ -29,7 +29,7 @@ FIELDNAMES = {
     "Quality Inspection": frozenset({"material_request"}),
 }
 NEW_FIELDS = {
-    doctype: [field for field in CUSTOM_FIELDS[doctype] if field["fieldname"] in fieldnames]
+    doctype: [field for field in CUSTOM_FIELDS.get(doctype, []) if field["fieldname"] in fieldnames]
     for doctype, fieldnames in FIELDNAMES.items()
 }
 

@@ -78,15 +78,3 @@ def normalize_national_id(doc: Document, method: str | None = None) -> None:
 
     doc.set("national_id", cleaned)
     doc.set("national_id_display", format_national_id_display(cleaned))
-
-
-def validate_borrow_warehouse(doc: Document, _method: str | None = None) -> None:
-    """Ensure an employee's borrowed-stock warehouse is an active leaf in its company."""
-    warehouse = doc.get("borrow_warehouse")
-    if not warehouse:
-        return
-    details = frappe.db.get_value("Warehouse", warehouse, ["company", "is_group", "disabled"], as_dict=True)
-    if not details or details.company != doc.get("company"):
-        frappe.throw(_("Borrow Warehouse must belong to the Employee's Company."))
-    if details.disabled or details.is_group:
-        frappe.throw(_("Borrow Warehouse must be an active leaf Warehouse."))

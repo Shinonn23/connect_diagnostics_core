@@ -97,6 +97,7 @@ def sidebar_documents() -> dict[str, FakeDocument]:
                 sidebar_link("Pick List"),
                 sidebar_section("Reports"),
                 sidebar_link("Stock Ledger", child=1, link_type="Report"),
+                sidebar_link("Stock Balance", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -239,13 +240,38 @@ class TestWorkspaceNavigation(UnitTestCase):
                 ("Back Orders", "Sales Order", 1),
                 ("Short Expiry Report", "Item", 1),
                 ("Goods Receipt Report", "Purchase Receipt", 1),
-                ("Outstanding Borrowed Items", "Material Request", 1),
+                ("Customer Borrow Tracking", "Material Request", 1),
             },
         )
         self.assertEqual(sum(row["link_to"] == "Back Orders" for row in reports), 2)
         self.assertEqual(sum(row["link_to"] == "Short Expiry Report" for row in reports), 1)
         self.assertEqual(sum(row["link_to"] == "Goods Receipt Report" for row in reports), 1)
-        self.assertEqual(sum(row["link_to"] == "Outstanding Borrowed Items" for row in reports), 1)
+        self.assertEqual(sum(row["link_to"] == "Customer Borrow Tracking" for row in reports), 1)
+
+    def test_customer_borrow_report_is_in_stock_reports_and_navigation_is_idempotent(self) -> None:
+        workspaces = workspace_documents()
+        sidebars = sidebar_documents()
+        sidebars["Stock"]["items"].append(sidebar_link("_Test Existing Stock Link"))
+        with (
+            patch.object(
+                workspace.frappe,
+                "get_doc",
+                side_effect=lambda doctype, name: get_document(workspaces, sidebars, doctype, name),
+            ),
+            patch.object(workspace.frappe.db, "exists", side_effect=existing_document),
+        ):
+            workspace.ensure_workspace_navigation()
+            workspace.ensure_workspace_navigation()
+        stock = sidebars["Stock"]
+        items = stock["items"]
+        balance_index = next(index for index, row in enumerate(items) if row.get("link_to") == "Stock Balance")
+        self.assertEqual(items[balance_index + 1]["link_to"], "Customer Borrow Tracking")
+        self.assertEqual(items[balance_index + 1]["child"], 1)
+        self.assertEqual(items[balance_index + 1]["report_ref_doctype"], "Material Request")
+        self.assertEqual(sum(row.get("link_to") == "Customer Borrow Tracking" for row in items), 1)
+        self.assertEqual(sum(row.get("link_to") == "_Test Existing Stock Link" for row in items), 1)
+        self.assertEqual(stock.save_count, 1)
+        self.assertEqual(workspaces["Stock"].save_count, 1)
 
     def test_tds_links_are_removed_from_the_taxes_sidebar(self) -> None:
         workspaces = workspace_documents()
@@ -1078,6 +1104,7 @@ class TestWorkspaceNavigation(UnitTestCase):
                 sidebar_link("Pick List"),
                 sidebar_section("Reports"),
                 sidebar_link("Stock Ledger", child=1, link_type="Report"),
+                sidebar_link("Stock Balance", child=1, link_type="Report"),
                 sidebar_section("Setup"),
                 sidebar_link("Item", child=1),
             ],
@@ -1096,16 +1123,6 @@ class TestWorkspaceNavigation(UnitTestCase):
         )
         self.assertEqual(sidebar["items"][pick_list_index + 1]["link_to"], "Back Orders")
         self.assertEqual(sidebar["items"][pick_list_index + 1]["child"], 0)
-        material_request_index = next(
-            index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Material Request"
-        )
-        self.assertEqual(
-            [
-                row["link_to"]
-                for row in sidebar["items"][material_request_index + 1 : material_request_index + 4]
-            ],
-            ["Dispatch", "Borrowed Asset Return Inspection", "Borrowed Item Resolution"],
-        )
         item_index = next(index for index, row in enumerate(sidebar["items"]) if row.get("link_to") == "Item")
         self.assertEqual(
             [row["link_to"] for row in sidebar["items"][item_index + 1 : item_index + 4]],

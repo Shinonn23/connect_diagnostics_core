@@ -266,25 +266,13 @@ NAVIGATION_GROUPS = (
     NavigationGroup(
         name="Stock",
         links=(
-            NavigationLink("Dispatch", "Dispatch", "DocType"),
-            NavigationLink(
-                "Borrowed Asset Return Inspection",
-                "Borrowed Asset Return Inspection",
-                "DocType",
-            ),
-            NavigationLink("Borrowed Item Resolution", "Borrowed Item Resolution", "DocType"),
             NavigationLink("DKSH Item", "DKSH Item", "DocType"),
             NavigationLink("Product Group", "Product Group", "DocType"),
             NavigationLink("Storage Condition", "Storage Condition", "DocType"),
-            NavigationLink(
-                "ของที่ยังไม่คืน",
-                "Outstanding Borrowed Items",
-                "Report",
-                "Material Request",
-            ),
             NavigationLink("Back Orders", "Back Orders", "Report", "Sales Order"),
             NavigationLink("Short Expiry Report", "Short Expiry Report", "Report", "Item"),
             NavigationLink("Goods Receipt Report", "Goods Receipt Report", "Report", "Purchase Receipt"),
+            NavigationLink("Customer Borrow Tracking", "Customer Borrow Tracking", "Report", "Material Request"),
         ),
     ),
     NavigationGroup(
@@ -312,15 +300,10 @@ SIDEBAR_PLACEMENTS = {
         SidebarPlacement("Print Log", section="Reports"),
     ),
     "Stock": (
-        SidebarPlacement("Dispatch", after_link_to="Material Request", icon="truck"),
-        SidebarPlacement(
-            "Borrowed Asset Return Inspection", after_link_to="Dispatch", icon="clipboard-check"
-        ),
-        SidebarPlacement("Borrowed Item Resolution", after_link_to="Borrowed Asset Return Inspection"),
         SidebarPlacement("Back Orders", after_link_to="Pick List", icon="list-todo"),
         SidebarPlacement("Short Expiry Report", after_link_to="Back Orders", icon="calendar-clock"),
         SidebarPlacement("Goods Receipt Report", after_link_to="Short Expiry Report", icon="package-check"),
-        SidebarPlacement("Outstanding Borrowed Items", section="Reports"),
+        SidebarPlacement("Customer Borrow Tracking", after_link_to="Stock Balance", section="Reports"),
         SidebarPlacement("DKSH Item", after_link_to="Item", section="Setup"),
         SidebarPlacement("Product Group", after_link_to="DKSH Item", section="Setup"),
         SidebarPlacement("Storage Condition", after_link_to="Product Group", section="Setup"),

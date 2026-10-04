@@ -10,7 +10,7 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from connect_diagnostics_core.setup.print_action_fields import CUSTOM_FIELDS
 
 NEW_PRINT_SIGNATURE_FIELDS = {
-    doctype: CUSTOM_FIELDS[doctype] for doctype in ("Material Request", "Stock Entry")
+    "Stock Entry": CUSTOM_FIELDS["Stock Entry"],
 }
 
 

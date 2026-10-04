@@ -83,15 +83,7 @@ PRINT_LAYOUTS: dict[str, PrintLayout] = {
         vertical_padding_mm=3.0,
         minimum_row_height_mm=8.50,
     ),
-    # The request and issue slips use a 141mm item body above their footer.
-    "material_request": PrintLayout(
-        usable_height_mm=141.0,
-        line_height_mm=4.25,
-        vertical_padding_mm=2.65,
-        minimum_row_height_mm=8.50,
-        description_width_mm=94.0,
-        description_padding_mm=3.0,
-    ),
+    # Stock Entry issue slips use a 141mm item body above their footer.
     "stock_entry": PrintLayout(
         usable_height_mm=141.0,
         line_height_mm=4.25,

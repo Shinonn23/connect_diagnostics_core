@@ -18,12 +18,8 @@ PRINT_FORMAT_FILES = (
     "ใบแจ้งหนี้เงินมัดจำ/ใบแจ้งหนี้เงินมัดจำ.json",
     "ใบเพิ่มหนี้/ใบเพิ่มหนี้.json",
     "ใบลดหนี้/ใบลดหนี้.json",
-    "demo_asset_label/demo_asset_label.json",
-    "borrowed_asset_return_inspection/borrowed_asset_return_inspection.json",
-    "dispatch/dispatch.json",
     "goods_receipt/goods_receipt.json",
     "material_issue/material_issue.json",
-    "material_request/material_request.json",
     "monthly_count_sheet/monthly_count_sheet.json",
     "purchase_order/purchase_order.json",
     "ใบเสนอราคา/ใบเสนอราคา.json",
@@ -75,7 +71,7 @@ class TestPrintFormats(UnitTestCase):
     def test_print_format_json_files_are_valid(self) -> None:
         print_formats = load_print_formats()
 
-        self.assertEqual(len(print_formats), 20)
+        self.assertEqual(len(print_formats), 16)
         self.assertTrue(all(print_format["html"] for print_format in print_formats))
         self.assertTrue(all(print_format["css"] for print_format in print_formats))
 
@@ -230,7 +226,6 @@ class TestPrintFormats(UnitTestCase):
             RECEIPT_FORMAT: ("received", "authorized", "checked"),
             CREDIT_NOTE_FORMAT: ("return_received", "warehouse_checked", "authorized"),
             "Goods Receipt": ("received", "checked", "authorized"),
-            "Material Request": ("authorized",),
             "Material Issue": ("submit", "checked", "authorized"),
             "Purchase Order": ("ordered", "authorized"),
             "Sales Order": ("prepared", "checked", "authorized"),
@@ -268,7 +263,6 @@ class TestPrintFormats(UnitTestCase):
             CREDIT_NOTE_FORMAT,
             "Purchase Order",
             QUOTATION_FORMAT,
-            "Material Request",
             "Material Issue",
             "Withholding Tax Cert CD",
         )
@@ -291,7 +285,6 @@ class TestPrintFormats(UnitTestCase):
             "Sales Order",
             QUOTATION_FORMAT,
             "Withholding Tax Cert CD",
-            "Material Request",
             "Material Issue",
         )
         formats = {print_format["name"]: print_format for print_format in load_print_formats()}
